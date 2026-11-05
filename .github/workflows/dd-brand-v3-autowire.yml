@@ -1,9 +1,6 @@
 name: Devil n Dove Brand V3 Automatic Image Placement Proof
+# Build 609: historical proof is manual-only; consolidated Quality gate retains tests.
 on:
-  push:
-    branches: [dev, main, dd-brand-v3-image-autowire-50, dd-brand-v3-image-production-candidate]
-  pull_request:
-    branches: [dev, main]
   workflow_dispatch:
 jobs:
   auto-image-map:

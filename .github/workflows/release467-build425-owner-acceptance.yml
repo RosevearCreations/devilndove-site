@@ -1,9 +1,6 @@
 name: Release 467 Build 425 Owner Acceptance Receipt and Manual Closure Readiness Proof
+# Build 609: historical proof is manual-only; consolidated Quality gate retains tests.
 on:
-  push:
-    branches: [dev, main, build425-owner-acceptance-receipt, build425-production-candidate]
-  pull_request:
-    branches: [dev, main]
   workflow_dispatch:
 jobs:
   owner-acceptance-receipt:

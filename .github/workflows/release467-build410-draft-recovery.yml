@@ -1,17 +1,6 @@
 name: Release 467 Build 410 Draft Recovery Evidence
+# Build 609: historical proof is manual-only; consolidated Quality gate retains tests.
 on:
-  push:
-    branches: [dev, main]
-    paths:
-      - 'functions/api/_lib/providerDraftRecovery410.mjs'
-      - 'functions/api/admin/provider-draft-recovery-410.js'
-      - 'public/js/admin-provider-draft-recovery-v410.js'
-      - 'admin/it-integrations/index.html'
-      - 'functions/api/_lib/appModuleRoutes.js'
-      - 'scripts/release467_build410_draft_recovery.test.mjs'
-      - '.github/workflows/release467-build410-draft-recovery.yml'
-  pull_request:
-    branches: [dev, main]
   workflow_dispatch:
 jobs:
   safe-manual-recovery:

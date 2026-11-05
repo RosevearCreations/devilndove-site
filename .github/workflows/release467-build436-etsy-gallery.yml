@@ -1,20 +1,8 @@
 name: Release 467 Build 436 Canonical Etsy Media Read Regression
 
+# Build 609: historical proof is manual-only; consolidated Quality gate retains tests.
 on:
-  push:
-    branches: [dev]
-    paths:
-      - 'functions/api/_lib/canonicalDistributionGallery436.mjs'
-      - 'functions/api/admin/product-distribution-406.js'
-      - 'functions/api/admin/listing-sync-408.js'
-      - 'scripts/release467_build436_channel_gallery_regression.mjs'
-      - 'admin/product-editor/index.html'
-      - 'css/admin-product-channel-review-436.css'
-      - '.github/workflows/release467-build436-etsy-gallery.yml'
-  pull_request:
-    branches: [main]
   workflow_dispatch:
-
 permissions:
   contents: read
 
