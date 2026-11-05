@@ -93,7 +93,6 @@ export function reconcileSource597(exact596,sourceArgs,local596=[],requests=[],a
   const reproduced=evidenceWorkboard596(...sourceArgs,local596,exact596.as_of);
   if(JSON.stringify(reproduced)!==JSON.stringify(exact596))
     throw Error('Forged or stale Build 596 source workboard.');
-  // Build 611: verified exact-time source is safe for this invocation only.
   const current=asOf===exact596.as_of?reproduced:evidenceWorkboard596(...sourceArgs,local596,asOf);
   const submitted=requests.map(dispositionCandidate597);
   const cases=current.cases.map(c=>{
