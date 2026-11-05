@@ -93,7 +93,7 @@ export function reconcileSource597(exact596,sourceArgs,local596=[],requests=[],a
   const reproduced=evidenceWorkboard596(...sourceArgs,local596,exact596.as_of);
   if(JSON.stringify(reproduced)!==JSON.stringify(exact596))
     throw Error('Forged or stale Build 596 source workboard.');
-  const current=evidenceWorkboard596(...sourceArgs,local596,asOf);
+  const current=asOf===exact596.as_of?reproduced:evidenceWorkboard596(...sourceArgs,local596,asOf);
   const submitted=requests.map(dispositionCandidate597);
   const cases=current.cases.map(c=>{
     const owner=c.owner_trial_decision_pending;

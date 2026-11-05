@@ -91,7 +91,7 @@ export function evidenceWorkboard596(exact595,sourceArgs,requests=[],asOf=new Da
   const reproduced=sourceVerification595(...sourceArgs,exact595.as_of);
   if(JSON.stringify(reproduced)!==JSON.stringify(exact595))
     throw Error('Changed, forged or stale Build 595 source packet.');
-  const current=sourceVerification595(...sourceArgs,asOf);
+  const current=asOf===exact595.as_of?reproduced:sourceVerification595(...sourceArgs,asOf);
   const candidates=requests.map(workboardCandidate596);
   const reused=new Set(current.cross_case_provider_document_digests.map(x=>x.sha256));
   const cases=current.cases.map(c=>{

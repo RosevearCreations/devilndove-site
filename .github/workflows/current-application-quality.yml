@@ -729,6 +729,14 @@ jobs:
           node --test scripts/release467_build610_ci_runtime.test.mjs
           node scripts/release467_build610_evidence_budget.mjs
 
+      - name: Build 611 evidence fixture reuse, distinct-clock and source-replay profiling
+        run: |
+          node --check scripts/release467_build611_fixture_reuse.test.mjs
+          node --check scripts/release467_build611_replay_profile.mjs
+          node --test scripts/release467_build611_fixture_reuse.test.mjs
+          node --test scripts/release467_build611_profile.test.mjs
+          node scripts/release467_build611_replay_profile.mjs
+
       - name: Build 609 consolidated historical proof and CI fan-out guard
         run: |
           node --check scripts/release467_build609_ci_bundle.mjs
@@ -750,6 +758,7 @@ jobs:
           path: |
             artifacts/build610-evidence-test-timings.json
             artifacts/build610-promotion-queue-sla.json
+            artifacts/build611-source-replay-profile.json
           if-no-files-found: warn
           retention-days: 30
 

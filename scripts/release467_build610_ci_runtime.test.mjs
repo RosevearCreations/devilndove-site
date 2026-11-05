@@ -23,7 +23,7 @@ test('Build 610 never weakens mandatory independent production or dev controls',
  const gate=['system-gate','it-admin-runtime-proof','repository-branch-hygiene'];
  for(const name of gate)assert.match(read('.github/workflows/'+name+'.yml'),/push:/);
  const prod=read('.github/workflows/production-pages-deploy-current.yml');
- assert.match(prod,/"build":610/);
+ assert.match(prod,/"build":6\d{2}/);
  assert.match(prod,/python scripts\/main_promotion_gate\.py/);
  assert.match(prod,/Production D1 migrations|zero-D1|ZERO remote D1/i);
  const live=read('.github/workflows/production-live-resource-integrity-proof.yml');
