@@ -773,6 +773,12 @@ jobs:
           node --check scripts/release467_build607_issuer_witness_owner_decision.test.mjs
           node --test scripts/release467_build607_issuer_witness_owner_decision.test.mjs
 
+      - name: Build 608 original issuer attestation, witness escalation aging and exact owner renewal decision HOLD
+        run: |
+          node --check public/js/admin-channel-issuer-response-598.mjs
+          node --check scripts/release467_build608_issuer_witness_owner_renewal.test.mjs
+          node --test scripts/release467_build608_issuer_witness_owner_renewal.test.mjs
+
       - name: JavaScript syntax
         run: |
           node --check functions/_middleware.js
