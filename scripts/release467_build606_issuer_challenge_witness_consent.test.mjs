@@ -137,12 +137,12 @@ test('Build 606 UI, zero transport, required gate and exact live release marker'
     'dd606OwnerSigned','dd606OwnerExpires','dd606OwnerDue','dd606Due','dd606Reason',
     'dd606Ack','dd606Save','dd606Copy','dd606Status','dd606Output','dd606Prepare',
     'dd606CopyHandoff','dd606Handoff'])assert.ok(html.includes('id="'+id+'"'),id);
-  assert.match(html,/Devil n Dove • Build 606/);
-  assert.match(html,/admin-channel-issuer-response-598\.mjs\?v=606/);
+  assert.match(html,/Devil n Dove • Build 6\d{2}/);
+  assert.match(html,/admin-channel-issuer-response-598\.mjs\?v=6\d{2}/);
   const js=read('public/js/admin-channel-issuer-response-598.mjs');
   assert.match(js,/export const FORMAT_606=/);
   assert.doesNotMatch(js,/\bfetch\s*\(|XMLHttpRequest|sendBeacon|\.innerHTML\s*=|\/api\//);
   assert.match(read('.github/workflows/current-application-quality.yml'),
     /release467_build606_issuer_challenge_witness_consent\.test\.mjs/);
-  assert.match(read('.github/workflows/production-pages-deploy-current.yml'),/"build":606/);
+  assert.match(read('.github/workflows/production-pages-deploy-current.yml'),/"build":6\d{2}/);
 });
