@@ -26,8 +26,8 @@ test('No forged child, alternate route or POST can reach Etsy, orders or media',
   assert.equal((await call(url,{headers:{'X-Rosevear-Shell-Envelope':'forged'}})).status,503);
   assert.equal((await call('https://preview.example/api/orders')).status,404);
 });
-test('canonical pending D1 tables cannot duplicate an order, Etsy listing or media claim across children',()=>{
-  const sql=readFileSync('migrations/canonical/0051_ql336_owned_child_shell_hold.sql','utf8');
+test('proposed pending D1 tables cannot duplicate an order, Etsy listing or media claim across children',()=>{
+  const sql=readFileSync('migrations/proposed/0051_ql336_owned_child_shell_hold.sql','utf8');
   const db=new DatabaseSync(':memory:');
   try {
     db.exec('PRAGMA foreign_keys=ON');db.exec(sql);

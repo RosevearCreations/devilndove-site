@@ -1,4 +1,5 @@
--- QL-336 additive registry only. D1/SQLite has no Postgres RLS: every future
+-- QL-336 UNAPPLIED PROPOSAL. Not in the immutable canonical migration stream.
+-- Additive registry only. D1/SQLite has no Postgres RLS: every future
 -- source API must independently enforce child scope in every SQL statement.
 -- No existing maker, Etsy, order, inventory, media or customer table changes.
 CREATE TABLE IF NOT EXISTS maker_shell_children_ql336 (
