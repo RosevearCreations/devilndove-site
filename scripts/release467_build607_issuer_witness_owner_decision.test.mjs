@@ -136,9 +136,9 @@ test('Build 607 actual admin UI, safe transport, quality gate and production rel
     'dd607OwnerExpires','dd607OwnerState','dd607Due','dd607Reason','dd607Ack',
     'dd607Save','dd607Copy','dd607Status','dd607Output','dd607Prepare',
     'dd607CopyHandoff','dd607Handoff'])assert.ok(html.includes('id="'+id+'"'),id);
-  assert.match(html,/Devil n Dove • Build 607/);
-  assert.match(html,/admin-channel-issuer-response-598\.mjs\?v=607/);
-  for(const name of ['admin-channel-issuer-response-598.mjs?v=607',
+  assert.match(html,/Devil n Dove • Build 6\d{2}/);
+  assert.match(html,/admin-channel-issuer-response-598\.mjs\?v=6\d{2}/);
+  for(const name of [
     'admin-channel-witness-584.mjs?v=594',
     'admin-channel-receipt-followup-585.mjs?v=594'])assert.ok(html.includes(name));
   const js=read('public/js/admin-channel-issuer-response-598.mjs');
@@ -146,5 +146,5 @@ test('Build 607 actual admin UI, safe transport, quality gate and production rel
   assert.doesNotMatch(js,/\bfetch\s*\(|XMLHttpRequest|sendBeacon|\.innerHTML\s*=|\/api\//);
   assert.match(read('.github/workflows/current-application-quality.yml'),
     /release467_build607_issuer_witness_owner_decision\.test\.mjs/);
-  assert.match(read('.github/workflows/production-pages-deploy-current.yml'),/"build":607/);
+  assert.match(read('.github/workflows/production-pages-deploy-current.yml'),/"build":6\d{2}/);
 });

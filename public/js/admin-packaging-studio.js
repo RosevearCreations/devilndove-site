@@ -1,483 +1,483 @@
 // Build 177 - Packaging starts bounded and Inventory search expands explicitly through the owner contract.
 // Build 277 renderer/content behavior remains otherwise unchanged.
 (() => {
-  const STORAGE_KEY = 'dd_packaging_studio_local_draft_v5';
-  const state = { projects: [], templates: [], products: [], inventory: [], printers: [], printersSchemaReady: true, referenceSources: [], formulaLibrary: [], contentLibrary: [], sourceMaterialLibrary: [], materialLibraryOpen: false, librarySchemaReady: true, sourceMaterialSchemaReady: true, sourceMaterialMetadataReady: true, detail: null, loading: false, activeTab: 'product', activeSourceMaterialId: 0, activeContentLibraryId: 0 };
-  const id = (name) => document.getElementById(name);
-  const cspNonce = () => String(document.currentScript?.nonce || document.querySelector('script[nonce]')?.nonce || '').trim();
-  const esc = (value) => String(value ?? '').replace(/[&<>"']/g, (char) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[char]));
-  const xml = (value) => String(value ?? '').replace(/[<>&"']/g, (char) => ({ '<': '&lt;', '>': '&gt;', '&': '&amp;', '"': '&quot;', "'": '&apos;' }[char]));
-  const num = (value, fallback = 0) => Number.isFinite(Number(value)) ? Number(value) : fallback;
-  const bool = (value) => value === true || value === 'true' || Number(value) === 1;
-  const LETTER_MM = { width: 215.9, height: 279.4 };
-  function normalizedPrinterProfiles(){
-    return (state.printers||[]).filter((row)=>Number(row.is_active)!==0&&String(row.name||'').trim()).map((row)=>({
-      ...row,
-      name:String(row.name||'').trim(),
-      paper:String(row.paper||'Letter 8.5 × 11 in'),
-      margin_mm:Math.max(0,num(row.margin_mm,0)),
-      gap_mm:Math.max(0,num(row.gap_mm,0)),
-      scale_percent:Math.max(1,num(row.scale_percent,100)),
-      auto_rotate:row.auto_rotate!==false&&Number(row.auto_rotate)!==0,
-      is_default_label:Number(row.is_default_label)===1
-    }));
-  }
-  function defaultPrinterProfile(){return normalizedPrinterProfiles().find((row)=>row.is_default_label)||normalizedPrinterProfiles()[0]||null;}
-  function printerProfileOptions(selected=''){
-    const rows=normalizedPrinterProfiles();const requested=String(selected||defaultPrinterProfile()?.name||'');
+const STORAGE_KEY = 'dd_packaging_studio_local_draft_v5';
+const state = { projects: [], templates: [], products: [], inventory: [], printers: [], printersSchemaReady: true, referenceSources: [], formulaLibrary: [], contentLibrary: [], sourceMaterialLibrary: [], materialLibraryOpen: false, librarySchemaReady: true, sourceMaterialSchemaReady: true, sourceMaterialMetadataReady: true, detail: null, loading: false, activeTab: 'product', activeSourceMaterialId: 0, activeContentLibraryId: 0 };
+const id = (name) => document.getElementById(name);
+const cspNonce = () => String(document.currentScript?.nonce || document.querySelector('script[nonce]')?.nonce || '').trim();
+const esc = (value) => String(value ?? '').replace(/[&<>"']/g, (char) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[char]));
+const xml = (value) => String(value ?? '').replace(/[<>&"']/g, (char) => ({ '<': '&lt;', '>': '&gt;', '&': '&amp;', '"': '&quot;', "'": '&apos;' }[char]));
+const num = (value, fallback = 0) => Number.isFinite(Number(value)) ? Number(value) : fallback;
+const bool = (value) => value === true || value === 'true' || Number(value) === 1;
+const LETTER_MM = { width: 215.9, height: 279.4 };
+function normalizedPrinterProfiles(){
+return (state.printers||[]).filter((row)=>Number(row.is_active)!==0&&String(row.name||'').trim()).map((row)=>({
+...row,
+name:String(row.name||'').trim(),
+paper:String(row.paper||'Letter 8.5 × 11 in'),
+margin_mm:Math.max(0,num(row.margin_mm,0)),
+gap_mm:Math.max(0,num(row.gap_mm,0)),
+scale_percent:Math.max(1,num(row.scale_percent,100)),
+auto_rotate:row.auto_rotate!==false&&Number(row.auto_rotate)!==0,
+is_default_label:Number(row.is_default_label)===1
+}));
+}
+function defaultPrinterProfile(){return normalizedPrinterProfiles().find((row)=>row.is_default_label)||normalizedPrinterProfiles()[0]||null;}
+function printerProfileOptions(selected=''){
+const rows=normalizedPrinterProfiles();const requested=String(selected||defaultPrinterProfile()?.name||'');
     return `<option value="">${rows.length?'Choose My Printer…':'No My Printers saved yet'}</option>${rows.map((row)=>`<option value="${esc(row.name)}" ${requested===row.name?'selected':''}>${esc(row.name)}${row.is_default_label?' · Default labels':''}</option>`).join('')}`;
-  }
-  function getPrinterProfile(name=''){return normalizedPrinterProfiles().find((row)=>String(row.name)===String(name))||null;}
-  function sheetPlan(template,profile={}){
-    const scale=Math.max(.5,Math.min(1.5,num(profile.scale_percent,100)/100));const lw=Math.max(1,num(template.page_width_mm,50.8))*scale;const lh=Math.max(1,num(template.page_height_mm,25.4))*scale;const margin=Math.max(0,num(profile.margin_mm,0));const gap=Math.max(0,num(profile.gap_mm,0));
-    const candidates=[];
-    for(const orientation of ['portrait','landscape']){const pageW=orientation==='portrait'?LETTER_MM.width:LETTER_MM.height;const pageH=orientation==='portrait'?LETTER_MM.height:LETTER_MM.width;for(const rotated of [false,true]){if(rotated&&profile.auto_rotate===false)continue;const w=rotated?lh:lw;const h=rotated?lw:lh;const usableW=Math.max(0,pageW-margin*2);const usableH=Math.max(0,pageH-margin*2);const cols=w>0?Math.floor((usableW+gap)/(w+gap)):0;const rows=h>0?Math.floor((usableH+gap)/(h+gap)):0;candidates.push({orientation,rotated,pageW,pageH,w,h,cols,rows,count:Math.max(0,cols*rows),margin,gap,scale});}}
-    candidates.sort((a,b)=>b.count-a.count||Number(a.rotated)-Number(b.rotated)||(a.orientation==='landscape'?-1:1));return candidates[0]||{orientation:'portrait',rotated:false,count:0,cols:0,rows:0,pageW:LETTER_MM.width,pageH:LETTER_MM.height,w:lw,h:lh,margin,gap,scale};
-  }
+}
+function getPrinterProfile(name=''){return normalizedPrinterProfiles().find((row)=>String(row.name)===String(name))||null;}
+function sheetPlan(template,profile={}){
+const scale=Math.max(.5,Math.min(1.5,num(profile.scale_percent,100)/100));const lw=Math.max(1,num(template.page_width_mm,50.8))*scale;const lh=Math.max(1,num(template.page_height_mm,25.4))*scale;const margin=Math.max(0,num(profile.margin_mm,0));const gap=Math.max(0,num(profile.gap_mm,0));
+const candidates=[];
+for(const orientation of ['portrait','landscape']){const pageW=orientation==='portrait'?LETTER_MM.width:LETTER_MM.height;const pageH=orientation==='portrait'?LETTER_MM.height:LETTER_MM.width;for(const rotated of [false,true]){if(rotated&&profile.auto_rotate===false)continue;const w=rotated?lh:lw;const h=rotated?lw:lh;const usableW=Math.max(0,pageW-margin*2);const usableH=Math.max(0,pageH-margin*2);const cols=w>0?Math.floor((usableW+gap)/(w+gap)):0;const rows=h>0?Math.floor((usableH+gap)/(h+gap)):0;candidates.push({orientation,rotated,pageW,pageH,w,h,cols,rows,count:Math.max(0,cols*rows),margin,gap,scale});}}
+candidates.sort((a,b)=>b.count-a.count||Number(a.rotated)-Number(b.rotated)||(a.orientation==='landscape'?-1:1));return candidates[0]||{orientation:'portrait',rotated:false,count:0,cols:0,rows:0,pageW:LETTER_MM.width,pageH:LETTER_MM.height,w:lw,h:lh,margin,gap,scale};
+}
 
-  const ROSE_PRESETS = [
-    ['rose-purple-v1','Purple','Purple botanical rose','#8E61AA','purple'],
-    ['rose-lavender-v1','Lavender','Lavender botanical rose','#A57BCB','lavender'],
-    ['rose-red-v1','Red','Natural red botanical rose','#B23A48','red'],
-    ['rose-pink-v1','Pink','Natural pink botanical rose','#D77CA8','pink'],
-    ['rose-white-v1','White','White botanical rose','#F7F4EC','white'],
-    ['rose-off-white-v1','Off-white','Off-white botanical rose','#E8DDC8','off-white'],
-    ['rose-yellow-v1','Yellow','Yellow botanical rose','#D9BD43','yellow'],
-    ['rose-coral-v1','Coral','Coral botanical rose','#E2766A','coral'],
-    ['rose-orange-v1','Orange','Orange botanical rose','#D97932','orange'],
-    ['rose-peach-v1','Peach','Peach botanical rose','#E9AB83','peach'],
-    ['rose-green-v1','Green','Earthy green botanical rose','#6D8757','green'],
-    ['rose-blue-v1','Blue','Ocean-blue botanical rose','#4E82B5','blue'],
-    ['rose-blue-green-v1','Blue-green','Sea-breeze blue-green botanical rose','#4F9599','blue-green'],
-    ['rose-brown-v1','Brown','Brown botanical rose','#76513E','brown'],
-    ['rose-black-v1','Black','Black botanical rose','#252525','black'],
-    ['rose-grey-v1','Grey','Grey botanical rose','#777777','grey'],
-    ['rose-charcoal-v1','Charcoal','Charcoal-grey botanical rose','#4A4A4A','charcoal'],
-    ['rose-silver-v1','Silver','Silver botanical rose','#BFC3C8','silver'],
-    ['rose-gold-v1','Gold','Gold botanical rose','#B58B38','gold'],
-    ['rose-honey-v1','Honey gold','Warm amber / honey-gold botanical rose','#C28A2E','honey'],
-    ['rose-copper-v1','Copper','Copper botanical rose','#A86142','copper'],
-    ['rose-bronze-v1','Bronze','Bronze botanical rose','#8B6B3E','bronze'],
-    ['rose-oatmeal-v1','Oatmeal / cream','Oatmeal, cream and beige botanical rose','#C9B18A','oatmeal'],
-    ['rose-custom-v1','Custom colour','Custom colour generated rose',null,null]
+const ROSE_PRESETS = [
+['rose-purple-v1','Purple','Purple botanical rose','#8E61AA','purple'],
+['rose-lavender-v1','Lavender','Lavender botanical rose','#A57BCB','lavender'],
+['rose-red-v1','Red','Natural red botanical rose','#B23A48','red'],
+['rose-pink-v1','Pink','Natural pink botanical rose','#D77CA8','pink'],
+['rose-white-v1','White','White botanical rose','#F7F4EC','white'],
+['rose-off-white-v1','Off-white','Off-white botanical rose','#E8DDC8','off-white'],
+['rose-yellow-v1','Yellow','Yellow botanical rose','#D9BD43','yellow'],
+['rose-coral-v1','Coral','Coral botanical rose','#E2766A','coral'],
+['rose-orange-v1','Orange','Orange botanical rose','#D97932','orange'],
+['rose-peach-v1','Peach','Peach botanical rose','#E9AB83','peach'],
+['rose-green-v1','Green','Earthy green botanical rose','#6D8757','green'],
+['rose-blue-v1','Blue','Ocean-blue botanical rose','#4E82B5','blue'],
+['rose-blue-green-v1','Blue-green','Sea-breeze blue-green botanical rose','#4F9599','blue-green'],
+['rose-brown-v1','Brown','Brown botanical rose','#76513E','brown'],
+['rose-black-v1','Black','Black botanical rose','#252525','black'],
+['rose-grey-v1','Grey','Grey botanical rose','#777777','grey'],
+['rose-charcoal-v1','Charcoal','Charcoal-grey botanical rose','#4A4A4A','charcoal'],
+['rose-silver-v1','Silver','Silver botanical rose','#BFC3C8','silver'],
+['rose-gold-v1','Gold','Gold botanical rose','#B58B38','gold'],
+['rose-honey-v1','Honey gold','Warm amber / honey-gold botanical rose','#C28A2E','honey'],
+['rose-copper-v1','Copper','Copper botanical rose','#A86142','copper'],
+['rose-bronze-v1','Bronze','Bronze botanical rose','#8B6B3E','bronze'],
+['rose-oatmeal-v1','Oatmeal / cream','Oatmeal, cream and beige botanical rose','#C9B18A','oatmeal'],
+['rose-custom-v1','Custom colour','Custom colour generated rose',null,null]
   ].map(([id,key,label,colour,file]) => ({ id,key,label,colour,path:file ? `/assets/packaging/soap/roses/botanical/${file}-rose-v1.webp` : '' }));
-  const PRODUCT_ROSE_PRESETS = [
-    ['glacial-purple','Glacial Purple','rose-lavender-v1'],
-    ['earth-shea-pumice','Earth Shea & Pumice','rose-green-v1'],
-    ['health-oatmeal-goat-milk','Health Oatmeal & Goat Milk','rose-oatmeal-v1'],
-    ['sea-breeze','Sea Breeze','rose-blue-green-v1'],
-    ['charcoal','Charcoal','rose-charcoal-v1'],
-    ['honey','Honey','rose-honey-v1'],
-    ['rose','Classic Rose','rose-red-v1'],
-    ['generic-white','Generic / White rose','rose-white-v1'],
-    ['soft-pink','Soft Pink rose','rose-pink-v1'],
-    ['warm-cream','Warm Cream / Off-white rose','rose-off-white-v1'],
-    ['sunshine-yellow','Sunshine Yellow rose','rose-yellow-v1'],
-    ['coral','Coral rose','rose-coral-v1'],
-    ['orange','Orange rose','rose-orange-v1'],
-    ['peach','Peach rose','rose-peach-v1'],
-    ['botanical-green','Botanical Green rose','rose-green-v1'],
-    ['ocean-blue','Ocean Blue rose','rose-blue-v1'],
-    ['cocoa-brown','Cocoa Brown rose','rose-brown-v1'],
-    ['midnight-black','Midnight Black rose','rose-black-v1'],
-    ['soft-grey','Soft Grey rose','rose-grey-v1'],
-    ['metallic-silver','Silver rose','rose-silver-v1'],
-    ['metallic-gold','Gold rose','rose-gold-v1'],
-    ['copper','Copper rose','rose-copper-v1'],
-    ['bronze','Bronze rose','rose-bronze-v1']
-  ];
-  const CUPCAKE_LABEL_PRESETS = Object.freeze([
-    { id:'sweet-orange', template_key:'soap-cupcake-sweet-orange-2in-v1', label:'Sweet Orange', purpose:'uplifting hand & body soap', theme:{theme_colour:'#FFF5E8',border_colour:'#7A210D',accent_gold:'#E99418',secondary_colour:'#F06A2E',rose_colour:'#F28A2D'} },
-    { id:'charcoal', template_key:'soap-cupcake-charcoal-2in-v1', label:'Charcoal', purpose:'deep-cleansing hand & body soap', theme:{theme_colour:'#F4F1EC',border_colour:'#171717',accent_gold:'#8B8B8B',secondary_colour:'#2C2C2C',rose_colour:'#555555'} },
-    { id:'oatmeal-goat-milk', template_key:'soap-cupcake-oatmeal-goat-milk-2in-v1', label:'Oatmeal & Goat Milk', purpose:'gentle hand & body soap', theme:{theme_colour:'#FFF7E8',border_colour:'#5B2C0F',accent_gold:'#C99B55',secondary_colour:'#B77B3D',rose_colour:'#D3B47B'} },
-    { id:'sea-breeze', template_key:'soap-cupcake-sea-breeze-2in-v1', label:'Sea Breeze', purpose:'refreshing hand & body soap', theme:{theme_colour:'#F1FCFA',border_colour:'#063E5A',accent_gold:'#B69A55',secondary_colour:'#1499A2',rose_colour:'#59C9C4'} },
-    { id:'lavender-dream', template_key:'soap-cupcake-lavender-dream-2in-v1', label:'Lavender Dream', purpose:'calming hand & body soap', theme:{theme_colour:'#FFF7F5',border_colour:'#45205F',accent_gold:'#C99B55',secondary_colour:'#8452A6',rose_colour:'#A985CF'} }
-  ]);
-  const CUPCAKE_COLOUR_PRESETS = Object.freeze([
-    ['berry-pink','Berry Pink','#FFF2F7','#6D1747','#D89AB3','#C84D82','#E98CB5'],
-    ['mint-cream','Mint Cream','#F2FFF8','#174C3A','#B2A469','#4FAE88','#89D9B8'],
-    ['lemon-cream','Lemon Cream','#FFFCEB','#604C08','#D5B74B','#E4C436','#F2D766'],
-    ['honey-amber','Honey Amber','#FFF8E8','#613A10','#C28A2E','#D19A3D','#E6B85E'],
-    ['rose-cream','Rose Cream','#FFF4F3','#672B35','#C89A65','#C75F71','#E496A3'],
-    ['peach-cream','Peach Cream','#FFF5ED','#6A321C','#C88B55','#E17B51','#F0AD83'],
-    ['blueberry-cream','Blueberry Cream','#F4F4FF','#29245D','#A59A68','#625CB1','#8982D3'],
-    ['vanilla-gold','Vanilla Gold','#FFF9ED','#5B431F','#B58B38','#C9A354','#E5CC94'],
-    ['teal-cream','Teal Cream','#F0FFFD','#073E42','#B89A58','#148D8B','#67C8C2'],
-    ['copper-cream','Copper Cream','#FFF4EA','#5D2D1B','#A86142','#B66545','#D89372']
-  ].map(([id,label,theme_colour,border_colour,accent_gold,secondary_colour,rose_colour])=>({id,label,theme:{theme_colour,border_colour,accent_gold,secondary_colour,rose_colour}})));
-  function cupcakePresetById(value){return CUPCAKE_LABEL_PRESETS.find((row)=>row.id===String(value||''))||CUPCAKE_LABEL_PRESETS[0];}
-  function cupcakeColourById(value){return CUPCAKE_COLOUR_PRESETS.find((row)=>row.id===String(value||''))||null;}
-  function cupcakePresetCardsMarkup(selected=''){
+const PRODUCT_ROSE_PRESETS = [
+['glacial-purple','Glacial Purple','rose-lavender-v1'],
+['earth-shea-pumice','Earth Shea & Pumice','rose-green-v1'],
+['health-oatmeal-goat-milk','Health Oatmeal & Goat Milk','rose-oatmeal-v1'],
+['sea-breeze','Sea Breeze','rose-blue-green-v1'],
+['charcoal','Charcoal','rose-charcoal-v1'],
+['honey','Honey','rose-honey-v1'],
+['rose','Classic Rose','rose-red-v1'],
+['generic-white','Generic / White rose','rose-white-v1'],
+['soft-pink','Soft Pink rose','rose-pink-v1'],
+['warm-cream','Warm Cream / Off-white rose','rose-off-white-v1'],
+['sunshine-yellow','Sunshine Yellow rose','rose-yellow-v1'],
+['coral','Coral rose','rose-coral-v1'],
+['orange','Orange rose','rose-orange-v1'],
+['peach','Peach rose','rose-peach-v1'],
+['botanical-green','Botanical Green rose','rose-green-v1'],
+['ocean-blue','Ocean Blue rose','rose-blue-v1'],
+['cocoa-brown','Cocoa Brown rose','rose-brown-v1'],
+['midnight-black','Midnight Black rose','rose-black-v1'],
+['soft-grey','Soft Grey rose','rose-grey-v1'],
+['metallic-silver','Silver rose','rose-silver-v1'],
+['metallic-gold','Gold rose','rose-gold-v1'],
+['copper','Copper rose','rose-copper-v1'],
+['bronze','Bronze rose','rose-bronze-v1']
+];
+const CUPCAKE_LABEL_PRESETS = Object.freeze([
+{ id:'sweet-orange', template_key:'soap-cupcake-sweet-orange-2in-v1', label:'Sweet Orange', purpose:'uplifting hand & body soap', theme:{theme_colour:'#FFF5E8',border_colour:'#7A210D',accent_gold:'#E99418',secondary_colour:'#F06A2E',rose_colour:'#F28A2D'} },
+{ id:'charcoal', template_key:'soap-cupcake-charcoal-2in-v1', label:'Charcoal', purpose:'deep-cleansing hand & body soap', theme:{theme_colour:'#F4F1EC',border_colour:'#171717',accent_gold:'#8B8B8B',secondary_colour:'#2C2C2C',rose_colour:'#555555'} },
+{ id:'oatmeal-goat-milk', template_key:'soap-cupcake-oatmeal-goat-milk-2in-v1', label:'Oatmeal & Goat Milk', purpose:'gentle hand & body soap', theme:{theme_colour:'#FFF7E8',border_colour:'#5B2C0F',accent_gold:'#C99B55',secondary_colour:'#B77B3D',rose_colour:'#D3B47B'} },
+{ id:'sea-breeze', template_key:'soap-cupcake-sea-breeze-2in-v1', label:'Sea Breeze', purpose:'refreshing hand & body soap', theme:{theme_colour:'#F1FCFA',border_colour:'#063E5A',accent_gold:'#B69A55',secondary_colour:'#1499A2',rose_colour:'#59C9C4'} },
+{ id:'lavender-dream', template_key:'soap-cupcake-lavender-dream-2in-v1', label:'Lavender Dream', purpose:'calming hand & body soap', theme:{theme_colour:'#FFF7F5',border_colour:'#45205F',accent_gold:'#C99B55',secondary_colour:'#8452A6',rose_colour:'#A985CF'} }
+]);
+const CUPCAKE_COLOUR_PRESETS = Object.freeze([
+['berry-pink','Berry Pink','#FFF2F7','#6D1747','#D89AB3','#C84D82','#E98CB5'],
+['mint-cream','Mint Cream','#F2FFF8','#174C3A','#B2A469','#4FAE88','#89D9B8'],
+['lemon-cream','Lemon Cream','#FFFCEB','#604C08','#D5B74B','#E4C436','#F2D766'],
+['honey-amber','Honey Amber','#FFF8E8','#613A10','#C28A2E','#D19A3D','#E6B85E'],
+['rose-cream','Rose Cream','#FFF4F3','#672B35','#C89A65','#C75F71','#E496A3'],
+['peach-cream','Peach Cream','#FFF5ED','#6A321C','#C88B55','#E17B51','#F0AD83'],
+['blueberry-cream','Blueberry Cream','#F4F4FF','#29245D','#A59A68','#625CB1','#8982D3'],
+['vanilla-gold','Vanilla Gold','#FFF9ED','#5B431F','#B58B38','#C9A354','#E5CC94'],
+['teal-cream','Teal Cream','#F0FFFD','#073E42','#B89A58','#148D8B','#67C8C2'],
+['copper-cream','Copper Cream','#FFF4EA','#5D2D1B','#A86142','#B66545','#D89372']
+].map(([id,label,theme_colour,border_colour,accent_gold,secondary_colour,rose_colour])=>({id,label,theme:{theme_colour,border_colour,accent_gold,secondary_colour,rose_colour}})));
+function cupcakePresetById(value){return CUPCAKE_LABEL_PRESETS.find((row)=>row.id===String(value||''))||CUPCAKE_LABEL_PRESETS[0];}
+function cupcakeColourById(value){return CUPCAKE_COLOUR_PRESETS.find((row)=>row.id===String(value||''))||null;}
+function cupcakePresetCardsMarkup(selected=''){
     return CUPCAKE_LABEL_PRESETS.map((row)=>`<button class="packaging-cupcake-preset ${String(selected)===row.id?'is-active':''}" type="button" data-cupcake-preset="${esc(row.id)}"><span class="packaging-cupcake-swatch" style="--cupcake-bg:${esc(row.theme.theme_colour)};--cupcake-accent:${esc(row.theme.secondary_colour)};--cupcake-ink:${esc(row.theme.border_colour)}"></span><strong>${esc(row.label)}</strong><small>2 × 2 in</small></button>`).join('');
-  }
-  function cupcakeColourMarkup(selected=''){
+}
+function cupcakeColourMarkup(selected=''){
     return CUPCAKE_COLOUR_PRESETS.map((row)=>`<button class="packaging-cupcake-colour ${String(selected)===row.id?'is-active':''}" type="button" data-cupcake-colour="${esc(row.id)}" title="${esc(row.label)}"><span style="background:${esc(row.theme.secondary_colour)}"></span><small>${esc(row.label)}</small></button>`).join('');
-  }
+}
 
-  function rosePresetById(value) { return ROSE_PRESETS.find((row) => row.id === String(value || '')) || ROSE_PRESETS[0]; }
+function rosePresetById(value) { return ROSE_PRESETS.find((row) => row.id === String(value || '')) || ROSE_PRESETS[0]; }
   function roseOptions(value) { const selected=String(value||'rose-purple-v1'); return ROSE_PRESETS.map((row)=>`<option value="${esc(row.id)}" ${selected===row.id?'selected':''}>${esc(row.label)}</option>`).join(''); }
-  function roseAssetPath(value) { return rosePresetById(value)?.path || ''; }
+function roseAssetPath(value) { return rosePresetById(value)?.path || ''; }
   function productRoseOptions(value='') { return `<option value="">Choose product rose direction…</option>${PRODUCT_ROSE_PRESETS.map(([key,label])=>`<option value="${esc(key)}" ${String(value)===key?'selected':''}>${esc(label)}</option>`).join('')}`; }
-  function productRosePaletteMarkup(selectedKey='') {
-    const colourKeys=new Set(['generic-white','soft-pink','warm-cream','sunshine-yellow','coral','orange','peach','botanical-green','ocean-blue','cocoa-brown','midnight-black','soft-grey','metallic-silver','metallic-gold','copper','bronze']);
+function productRosePaletteMarkup(selectedKey='') {
+const colourKeys=new Set(['generic-white','soft-pink','warm-cream','sunshine-yellow','coral','orange','peach','botanical-green','ocean-blue','cocoa-brown','midnight-black','soft-grey','metallic-silver','metallic-gold','copper','bronze']);
     return `<div class="packaging-rose-direction-palette" aria-label="Product rose direction quick palette">${PRODUCT_ROSE_PRESETS.filter(([key])=>colourKeys.has(key)).map(([key,label,assetId])=>{const preset=rosePresetById(assetId);return `<button class="packaging-rose-direction ${String(selectedKey)===key?'is-active':''}" type="button" data-product-rose-direction="${esc(key)}" title="${esc(label)}"><img src="${esc(preset.path)}" alt="${esc(label)} actual botanical rose preset"/><span>${esc(label.replace(' rose',''))}</span></button>`;}).join('')}</div>`;
-  }
+}
 
-  function message(text = '', kind = '') {
-    const node = id('packagingStudioMessage');
-    if (!node) return;
-    node.hidden = !text;
-    node.textContent = text;
+function message(text = '', kind = '') {
+const node = id('packagingStudioMessage');
+if (!node) return;
+node.hidden = !text;
+node.textContent = text;
     node.className = `card small ${kind === 'error' ? 'is-error' : kind === 'success' ? 'is-success' : ''}`;
-  }
+}
 
-  async function api(body = null, projectId = 0) {
-    const client = globalThis.DDPackagingClient;
-    if (!client || typeof client.request !== 'function') throw new Error('Packaging native client is unavailable.');
-    const response = await client.request(body, projectId);
-    const data = await response.json().catch(() => null);
-    if (!response.ok || !data?.ok) throw new Error(data?.error || 'Packaging Studio request failed.');
-    return data;
-  }
+async function api(body = null, projectId = 0) {
+const client = globalThis.DDPackagingClient;
+if (!client || typeof client.request !== 'function') throw new Error('Packaging native client is unavailable.');
+const response = await client.request(body, projectId);
+const data = await response.json().catch(() => null);
+if (!response.ok || !data?.ok) throw new Error(data?.error || 'Packaging Studio request failed.');
+return data;
+}
 
-  function options(rows, value, label) {
-    return rows.map((row) => {
-      const optionId = Number(row.packaging_template_id || row.product_id || 0);
+function options(rows, value, label) {
+return rows.map((row) => {
+const optionId = Number(row.packaging_template_id || row.product_id || 0);
       return `<option value="${optionId}" ${Number(value) === optionId ? 'selected' : ''}>${esc(label(row))}</option>`;
-    }).join('');
-  }
+}).join('');
+}
 
-  function currentTemplate() {
-    const selectedId = Number(id('packagingTemplateId')?.value || state.detail?.project?.packaging_template_id || 0);
-    const selected = state.templates.find((row) => Number(row.packaging_template_id) === selectedId) || state.detail?.template || state.templates[0] || {};
-    const readDimension = (field, fallback) => {
-      const node = id(field);
-      if (!node) return num(fallback);
-      return Math.max(0, num(node.value, fallback));
-    };
-    const layout = { ...(selected.layout || {}) };
-    if (id('packagingTemplateShape')) layout.shape = id('packagingTemplateShape').value || layout.shape || 'rectangle';
-    if (id('packagingDesignProfile')) layout.design_profile = id('packagingDesignProfile').value || layout.design_profile || 'general_rectangle';
-    if (String(selected.package_type || '') === 'soap_ribbon') layout.design_profile = 'soap_reference_v3';
-    if (String(selected.package_type || '') === 'soap_cupcake_label') { layout.design_profile = 'cupcake_soap_square'; layout.shape = 'square'; }
-    if (id('packagingBleedMm')) layout.bleed_mm = Math.max(0, num(id('packagingBleedMm').value, layout.bleed_mm));
-    if (id('packagingSafeMarginMm')) layout.safe_margin_mm = Math.max(0, num(id('packagingSafeMarginMm').value, layout.safe_margin_mm));
-    return {
-      ...selected,
-      package_type: String(selected.package_type || 'product_label'),
-      page_width_mm: readDimension('packagingTemplateWidth', selected.page_width_mm),
-      page_height_mm: readDimension('packagingTemplateHeight', selected.page_height_mm),
-      front_width_mm: readDimension('packagingTemplateFrontWidth', selected.front_width_mm),
-      front_height_mm: readDimension('packagingTemplateFrontHeight', selected.front_height_mm),
-      rear_width_mm: readDimension('packagingTemplateRearWidth', selected.rear_width_mm),
-      rear_height_mm: readDimension('packagingTemplateRearHeight', selected.rear_height_mm),
-      layout
-    };
-  }
+function currentTemplate() {
+const selectedId = Number(id('packagingTemplateId')?.value || state.detail?.project?.packaging_template_id || 0);
+const selected = state.templates.find((row) => Number(row.packaging_template_id) === selectedId) || state.detail?.template || state.templates[0] || {};
+const readDimension = (field, fallback) => {
+const node = id(field);
+if (!node) return num(fallback);
+return Math.max(0, num(node.value, fallback));
+};
+const layout = { ...(selected.layout || {}) };
+if (id('packagingTemplateShape')) layout.shape = id('packagingTemplateShape').value || layout.shape || 'rectangle';
+if (id('packagingDesignProfile')) layout.design_profile = id('packagingDesignProfile').value || layout.design_profile || 'general_rectangle';
+if (String(selected.package_type || '') === 'soap_ribbon') layout.design_profile = 'soap_reference_v3';
+if (String(selected.package_type || '') === 'soap_cupcake_label') { layout.design_profile = 'cupcake_soap_square'; layout.shape = 'square'; }
+if (id('packagingBleedMm')) layout.bleed_mm = Math.max(0, num(id('packagingBleedMm').value, layout.bleed_mm));
+if (id('packagingSafeMarginMm')) layout.safe_margin_mm = Math.max(0, num(id('packagingSafeMarginMm').value, layout.safe_margin_mm));
+return {
+...selected,
+package_type: String(selected.package_type || 'product_label'),
+page_width_mm: readDimension('packagingTemplateWidth', selected.page_width_mm),
+page_height_mm: readDimension('packagingTemplateHeight', selected.page_height_mm),
+front_width_mm: readDimension('packagingTemplateFrontWidth', selected.front_width_mm),
+front_height_mm: readDimension('packagingTemplateFrontHeight', selected.front_height_mm),
+rear_width_mm: readDimension('packagingTemplateRearWidth', selected.rear_width_mm),
+rear_height_mm: readDimension('packagingTemplateRearHeight', selected.rear_height_mm),
+layout
+};
+}
 
-  function projectMatches(row) {
-    const query = String(id('packagingProjectSearch')?.value || '').trim().toLowerCase();
-    if (!query) return true;
-    return [row.project_key, row.project_name, row.product_name, row.collection_name, row.project_status, row.sku]
-      .map((value) => String(value || '').toLowerCase()).join(' ').includes(query);
-  }
+function projectMatches(row) {
+const query = String(id('packagingProjectSearch')?.value || '').trim().toLowerCase();
+if (!query) return true;
+return [row.project_key, row.project_name, row.product_name, row.collection_name, row.project_status, row.sku]
+.map((value) => String(value || '').toLowerCase()).join(' ').includes(query);
+}
 
-  function renderProjects() {
-    const mount = id('packagingProjectList');
-    if (!mount) return;
-    const rows = state.projects.filter(projectMatches);
+function renderProjects() {
+const mount = id('packagingProjectList');
+if (!mount) return;
+const rows = state.projects.filter(projectMatches);
     mount.innerHTML = rows.length ? rows.map((row) => `
       <button class="packaging-project-row ${Number(state.detail?.project?.packaging_project_id || 0) === Number(row.packaging_project_id) ? 'is-active' : ''}" type="button" data-open-packaging="${Number(row.packaging_project_id || 0)}">
         <span><strong>${esc(row.project_name || row.product_name || 'Untitled packaging')}</strong><small>${esc(row.project_key || '')} · ${esc(row.project_status || 'draft')} · ${esc(row.compliance_status || 'needs_review')}</small></span>
         <span class="status-pill">${esc(row.soap_print_status || row.package_type || 'packaging')}</span>
       </button>`).join('') : '<p class="small">No matching packaging projects.</p>';
-  }
+}
 
-  function ingredientRowsFromDom() {
-    return [...document.querySelectorAll('[data-soap-ingredient-row]')].map((row, index) => ({
-      sort_order: index + 1,
-      site_item_inventory_id: Number(row.querySelector('[data-field="site_item_inventory_id"]')?.value || 0) || null,
-      inci_name: row.querySelector('[data-field="inci_name"]')?.value || '',
-      display_name_en: row.querySelector('[data-field="display_name_en"]')?.value || '',
-      display_name_fr: row.querySelector('[data-field="display_name_fr"]')?.value || '',
-      organic_flag: row.querySelector('[data-field="organic_flag"]')?.checked ? 1 : 0,
-      allergen_note: row.querySelector('[data-field="allergen_note"]')?.value || '',
-      required_on_label: row.querySelector('[data-field="required_on_label"]')?.checked ? 1 : 0
-    })).filter((row) => row.inci_name || row.display_name_en || row.display_name_fr || row.site_item_inventory_id);
-  }
+function ingredientRowsFromDom() {
+return [...document.querySelectorAll('[data-soap-ingredient-row]')].map((row, index) => ({
+sort_order: index + 1,
+site_item_inventory_id: Number(row.querySelector('[data-field="site_item_inventory_id"]')?.value || 0) || null,
+inci_name: row.querySelector('[data-field="inci_name"]')?.value || '',
+display_name_en: row.querySelector('[data-field="display_name_en"]')?.value || '',
+display_name_fr: row.querySelector('[data-field="display_name_fr"]')?.value || '',
+organic_flag: row.querySelector('[data-field="organic_flag"]')?.checked ? 1 : 0,
+allergen_note: row.querySelector('[data-field="allergen_note"]')?.value || '',
+required_on_label: row.querySelector('[data-field="required_on_label"]')?.checked ? 1 : 0
+})).filter((row) => row.inci_name || row.display_name_en || row.display_name_fr || row.site_item_inventory_id);
+}
 
-  function claimRowsFromDom() {
-    return [...document.querySelectorAll('[data-soap-claim-row]')].map((row, index) => ({
-      sort_order: index + 1,
-      claim_en: row.querySelector('[data-field="claim_en"]')?.value || '',
-      claim_fr: row.querySelector('[data-field="claim_fr"]')?.value || '',
-      icon_name: row.querySelector('[data-field="icon_name"]')?.value || '',
-      is_approved: row.querySelector('[data-field="is_approved"]')?.checked ? 1 : 0,
-      compliance_note: row.querySelector('[data-field="compliance_note"]')?.value || ''
-    })).filter((row) => row.claim_en || row.claim_fr);
-  }
+function claimRowsFromDom() {
+return [...document.querySelectorAll('[data-soap-claim-row]')].map((row, index) => ({
+sort_order: index + 1,
+claim_en: row.querySelector('[data-field="claim_en"]')?.value || '',
+claim_fr: row.querySelector('[data-field="claim_fr"]')?.value || '',
+icon_name: row.querySelector('[data-field="icon_name"]')?.value || '',
+is_approved: row.querySelector('[data-field="is_approved"]')?.checked ? 1 : 0,
+compliance_note: row.querySelector('[data-field="compliance_note"]')?.value || ''
+})).filter((row) => row.claim_en || row.claim_fr);
+}
 
-  function componentRowsFromDom() {
-    return [...document.querySelectorAll('[data-packaging-component-row]')].map((row) => ({
-      site_item_inventory_id: Number(row.querySelector('[data-field="site_item_inventory_id"]')?.value || 0) || null,
-      component_type: row.querySelector('[data-field="component_type"]')?.value || 'label',
-      component_name: row.querySelector('[data-field="component_name"]')?.value || '',
-      sku_reference: row.querySelector('[data-field="sku_reference"]')?.value || '',
-      quantity_per_finished_unit: Number(row.querySelector('[data-field="quantity_per_finished_unit"]')?.value || 1),
-      wastage_percent: Number(row.querySelector('[data-field="wastage_percent"]')?.value || 0),
-      unit_cost_cents: Number(row.querySelector('[data-field="unit_cost_cents"]')?.value || 0),
-      lot_tracking_required: row.querySelector('[data-field="lot_tracking_required"]')?.checked ? 1 : 0,
-      supplier_name: row.querySelector('[data-field="supplier_name"]')?.value || '',
-      notes: row.querySelector('[data-field="notes"]')?.value || ''
-    })).filter((row) => row.component_name);
-  }
+function componentRowsFromDom() {
+return [...document.querySelectorAll('[data-packaging-component-row]')].map((row) => ({
+site_item_inventory_id: Number(row.querySelector('[data-field="site_item_inventory_id"]')?.value || 0) || null,
+component_type: row.querySelector('[data-field="component_type"]')?.value || 'label',
+component_name: row.querySelector('[data-field="component_name"]')?.value || '',
+sku_reference: row.querySelector('[data-field="sku_reference"]')?.value || '',
+quantity_per_finished_unit: Number(row.querySelector('[data-field="quantity_per_finished_unit"]')?.value || 1),
+wastage_percent: Number(row.querySelector('[data-field="wastage_percent"]')?.value || 0),
+unit_cost_cents: Number(row.querySelector('[data-field="unit_cost_cents"]')?.value || 0),
+lot_tracking_required: row.querySelector('[data-field="lot_tracking_required"]')?.checked ? 1 : 0,
+supplier_name: row.querySelector('[data-field="supplier_name"]')?.value || '',
+notes: row.querySelector('[data-field="notes"]')?.value || ''
+})).filter((row) => row.component_name);
+}
 
-  function snapshot() {
-    const value = (name) => id(name)?.value ?? '';
-    const theme = {
-      rose_colour: value('packagingRoseColour') || '#7B4DA6',
-      theme_colour: value('packagingThemeColour') || '#FBF5E8',
-      border_colour: value('packagingBorderColour') || '#32105E',
-      accent_gold: value('packagingAccentGold') || '#B88A2F',
-      secondary_colour: value('packagingSecondaryColour') || '#5A2A86'
-    };
-    const artwork = {
-      rose_asset_id: value('packagingRoseAsset') || 'rose-purple-v1',
-      rose_style: value('packagingRoseStyle') || 'full_rose',
-      badge_shape: value('packagingBadgeShape') || 'oval',
-      top_arc_text: value('packagingTopArcText'),
-      bottom_arc_text: value('packagingBottomArcText'),
-      centre_mark: value('packagingCentreMark') || '♥',
-      candle_primary_text: value('packagingCandlePrimaryText'),
-      candle_date_line_1: value('packagingCandleDateLine1'),
-      candle_event_line: value('packagingCandleEventLine'),
-      candle_date_line_2: value('packagingCandleDateLine2'),
-      cupcake_reference_id: value('packagingCupcakeReference') || state.detail?.project?.artwork?.cupcake_reference_id || currentTemplate().layout?.cupcake_reference_id || '',
-      cupcake_label_title: value('packagingCupcakeLabelTitle') || state.detail?.project?.artwork?.cupcake_label_title || currentTemplate().layout?.default_label_title || 'Cupcake Soap',
-      cupcake_purpose_text: value('packagingCupcakePurpose') || state.detail?.project?.artwork?.cupcake_purpose_text || currentTemplate().layout?.default_purpose || 'hand & body soap',
-      cupcake_palette_id: value('packagingCupcakePalette') || state.detail?.project?.artwork?.cupcake_palette_id || '',
-      artwork_asset: value('packagingArtworkAsset'),
-      show_guides: id('packagingShowGuides')?.checked ? 1 : 0,
-      show_bleed: id('packagingShowBleed')?.checked ? 1 : 0,
-      show_safe_area: id('packagingShowSafeArea')?.checked ? 1 : 0,
-      show_fold_guides: id('packagingShowFoldGuides')?.checked ? 1 : 0,
-      show_glue_zone: id('packagingShowGlueZone')?.checked ? 1 : 0
-    };
-    return {
-      packagingProjectId: value('packagingProjectId'), packagingTemplateId: value('packagingTemplateId'), packagingProductId: value('packagingProductId'),
-      packagingProjectName: value('packagingProjectName'), packagingType: value('packagingType'), packagingStatus: value('packagingStatus'), packagingCompliance: value('packagingCompliance'),
-      packagingCollection: value('packagingCollection'), packagingProductName: value('packagingProductName'), packagingSubtitle: value('packagingSubtitle'),
-      packagingIdentityEn: value('packagingIdentityEn'), packagingIdentityFr: value('packagingIdentityFr'), packagingInci: value('packagingInci'),
-      packagingIngredientsEn: value('packagingIngredientsEn'), packagingIngredientsFr: value('packagingIngredientsFr'), packagingNetQuantity: value('packagingNetQuantity'),
-      packagingNetWeightOz: value('packagingNetWeightOz'), packagingNetWeightG: value('packagingNetWeightG'), packagingWebsite: value('packagingWebsite'),
-      packagingDealerName: value('packagingDealerName'), packagingDealerAddress: value('packagingDealerAddress'), packagingContact: value('packagingContact'),
-      packagingMadeInCanada: value('packagingMadeInCanada'), packagingWarningsEn: value('packagingWarningsEn'), packagingWarningsFr: value('packagingWarningsFr'),
-      packagingPrintNotes: value('packagingPrintNotes'), claims: claimRowsFromDom().map((row) => row.claim_en), icons: claimRowsFromDom().map((row) => row.icon_name).filter(Boolean),
-      structured_ingredients: ingredientRowsFromDom(), structured_claims: claimRowsFromDom(), theme, artwork, saved_at: new Date().toISOString()
-    };
-  }
+function snapshot() {
+const value = (name) => id(name)?.value ?? '';
+const theme = {
+rose_colour: value('packagingRoseColour') || '#7B4DA6',
+theme_colour: value('packagingThemeColour') || '#FBF5E8',
+border_colour: value('packagingBorderColour') || '#32105E',
+accent_gold: value('packagingAccentGold') || '#B88A2F',
+secondary_colour: value('packagingSecondaryColour') || '#5A2A86'
+};
+const artwork = {
+rose_asset_id: value('packagingRoseAsset') || 'rose-purple-v1',
+rose_style: value('packagingRoseStyle') || 'full_rose',
+badge_shape: value('packagingBadgeShape') || 'oval',
+top_arc_text: value('packagingTopArcText'),
+bottom_arc_text: value('packagingBottomArcText'),
+centre_mark: value('packagingCentreMark') || '♥',
+candle_primary_text: value('packagingCandlePrimaryText'),
+candle_date_line_1: value('packagingCandleDateLine1'),
+candle_event_line: value('packagingCandleEventLine'),
+candle_date_line_2: value('packagingCandleDateLine2'),
+cupcake_reference_id: value('packagingCupcakeReference') || state.detail?.project?.artwork?.cupcake_reference_id || currentTemplate().layout?.cupcake_reference_id || '',
+cupcake_label_title: value('packagingCupcakeLabelTitle') || state.detail?.project?.artwork?.cupcake_label_title || currentTemplate().layout?.default_label_title || 'Cupcake Soap',
+cupcake_purpose_text: value('packagingCupcakePurpose') || state.detail?.project?.artwork?.cupcake_purpose_text || currentTemplate().layout?.default_purpose || 'hand & body soap',
+cupcake_palette_id: value('packagingCupcakePalette') || state.detail?.project?.artwork?.cupcake_palette_id || '',
+artwork_asset: value('packagingArtworkAsset'),
+show_guides: id('packagingShowGuides')?.checked ? 1 : 0,
+show_bleed: id('packagingShowBleed')?.checked ? 1 : 0,
+show_safe_area: id('packagingShowSafeArea')?.checked ? 1 : 0,
+show_fold_guides: id('packagingShowFoldGuides')?.checked ? 1 : 0,
+show_glue_zone: id('packagingShowGlueZone')?.checked ? 1 : 0
+};
+return {
+packagingProjectId: value('packagingProjectId'), packagingTemplateId: value('packagingTemplateId'), packagingProductId: value('packagingProductId'),
+packagingProjectName: value('packagingProjectName'), packagingType: value('packagingType'), packagingStatus: value('packagingStatus'), packagingCompliance: value('packagingCompliance'),
+packagingCollection: value('packagingCollection'), packagingProductName: value('packagingProductName'), packagingSubtitle: value('packagingSubtitle'),
+packagingIdentityEn: value('packagingIdentityEn'), packagingIdentityFr: value('packagingIdentityFr'), packagingInci: value('packagingInci'),
+packagingIngredientsEn: value('packagingIngredientsEn'), packagingIngredientsFr: value('packagingIngredientsFr'), packagingNetQuantity: value('packagingNetQuantity'),
+packagingNetWeightOz: value('packagingNetWeightOz'), packagingNetWeightG: value('packagingNetWeightG'), packagingWebsite: value('packagingWebsite'),
+packagingDealerName: value('packagingDealerName'), packagingDealerAddress: value('packagingDealerAddress'), packagingContact: value('packagingContact'),
+packagingMadeInCanada: value('packagingMadeInCanada'), packagingWarningsEn: value('packagingWarningsEn'), packagingWarningsFr: value('packagingWarningsFr'),
+packagingPrintNotes: value('packagingPrintNotes'), claims: claimRowsFromDom().map((row) => row.claim_en), icons: claimRowsFromDom().map((row) => row.icon_name).filter(Boolean),
+structured_ingredients: ingredientRowsFromDom(), structured_claims: claimRowsFromDom(), theme, artwork, saved_at: new Date().toISOString()
+};
+}
 
-  function projectPayload() {
-    const data = snapshot(); const template = currentTemplate();
-    return {
-      action: 'save_project', packaging_project_id: Number(data.packagingProjectId || 0), packaging_template_id: Number(data.packagingTemplateId || 0),
-      product_id: Number(data.packagingProductId || 0) || null, project_name: data.packagingProjectName, package_type: template.package_type,
-      project_status: data.packagingStatus, compliance_status: data.packagingCompliance, collection_name: data.packagingCollection, product_name: data.packagingProductName,
-      product_subtitle: data.packagingSubtitle, product_identity_en: data.packagingIdentityEn, product_identity_fr: data.packagingIdentityFr,
-      ingredients_inci: data.packagingInci, ingredients_en: data.packagingIngredientsEn, ingredients_fr: data.packagingIngredientsFr,
-      net_quantity_text: data.packagingNetQuantity, net_weight_oz: Number(data.packagingNetWeightOz || 0) || null, net_weight_g: Number(data.packagingNetWeightG || 0) || null,
-      website_text: data.packagingWebsite, dealer_name: data.packagingDealerName, dealer_address: data.packagingDealerAddress, contact_text: data.packagingContact,
-      made_in_canada_text: data.packagingMadeInCanada, claims: data.claims, warnings_en: data.packagingWarningsEn, warnings_fr: data.packagingWarningsFr,
-      icons: data.icons, theme: data.theme, artwork: data.artwork, rose_asset_id: data.artwork.rose_asset_id, print_notes: data.packagingPrintNotes,
-      structured_ingredients: data.structured_ingredients, structured_claims: data.structured_claims
-    };
-  }
+function projectPayload() {
+const data = snapshot(); const template = currentTemplate();
+return {
+action: 'save_project', packaging_project_id: Number(data.packagingProjectId || 0), packaging_template_id: Number(data.packagingTemplateId || 0),
+product_id: Number(data.packagingProductId || 0) || null, project_name: data.packagingProjectName, package_type: template.package_type,
+project_status: data.packagingStatus, compliance_status: data.packagingCompliance, collection_name: data.packagingCollection, product_name: data.packagingProductName,
+product_subtitle: data.packagingSubtitle, product_identity_en: data.packagingIdentityEn, product_identity_fr: data.packagingIdentityFr,
+ingredients_inci: data.packagingInci, ingredients_en: data.packagingIngredientsEn, ingredients_fr: data.packagingIngredientsFr,
+net_quantity_text: data.packagingNetQuantity, net_weight_oz: Number(data.packagingNetWeightOz || 0) || null, net_weight_g: Number(data.packagingNetWeightG || 0) || null,
+website_text: data.packagingWebsite, dealer_name: data.packagingDealerName, dealer_address: data.packagingDealerAddress, contact_text: data.packagingContact,
+made_in_canada_text: data.packagingMadeInCanada, claims: data.claims, warnings_en: data.packagingWarningsEn, warnings_fr: data.packagingWarningsFr,
+icons: data.icons, theme: data.theme, artwork: data.artwork, rose_asset_id: data.artwork.rose_asset_id, print_notes: data.packagingPrintNotes,
+structured_ingredients: data.structured_ingredients, structured_claims: data.structured_claims
+};
+}
 
-  function fontSize(textValue, maxLength, base, min) {
-    const length = String(textValue || '').length;
-    return length <= maxLength ? base : Math.max(min, Math.round((base * maxLength / length) * 10) / 10);
-  }
+function fontSize(textValue, maxLength, base, min) {
+const length = String(textValue || '').length;
+return length <= maxLength ? base : Math.max(min, Math.round((base * maxLength / length) * 10) / 10);
+}
 
-  function wrapLines(value, maxChars = 32, maxLines = 6) {
-    const segments = String(value || '').split(/(?:\r?\n|•)+/).map((part) => part.trim()).filter(Boolean);
-    const output = [];
-    for (const segment of segments) {
-      const words = segment.split(/\s+/).filter(Boolean); let current = ''; let first = true;
-      for (const word of words) {
-        const prefix = first ? '• ' : '  ';
+function wrapLines(value, maxChars = 32, maxLines = 6) {
+const segments = String(value || '').split(/(?:\r?\n|•)+/).map((part) => part.trim()).filter(Boolean);
+const output = [];
+for (const segment of segments) {
+const words = segment.split(/\s+/).filter(Boolean); let current = ''; let first = true;
+for (const word of words) {
+const prefix = first ? '• ' : '  ';
         const next = current ? `${current} ${word}` : `${prefix}${word}`;
         if (next.length > maxChars && current) { output.push(current); current = `  ${word}`; first = false; }
-        else current = next;
-        if (output.length >= maxLines) break;
-      }
-      if (output.length < maxLines && current) output.push(current);
-      if (output.length >= maxLines) break;
-    }
-    if (segments.length && output.length >= maxLines) {
-      const last = output[maxLines - 1] || '';
+else current = next;
+if (output.length >= maxLines) break;
+}
+if (output.length < maxLines && current) output.push(current);
+if (output.length >= maxLines) break;
+}
+if (segments.length && output.length >= maxLines) {
+const last = output[maxLines - 1] || '';
       output[maxLines - 1] = `${last.slice(0, Math.max(1, maxChars - 1)).trimEnd()}…`;
-    }
-    return output.slice(0, maxLines);
-  }
+}
+return output.slice(0, maxLines);
+}
 
-  function textBlock(value, x, y, lineHeight, maxChars, maxLines, size, anchor = 'start', className = 'pkg-copy') {
+function textBlock(value, x, y, lineHeight, maxChars, maxLines, size, anchor = 'start', className = 'pkg-copy') {
     return wrapLines(value, maxChars, maxLines).map((line, index) => `<text x="${x}" y="${y + index * lineHeight}" text-anchor="${anchor}" font-size="${size}" class="${className}">${xml(line)}</text>`).join('');
-  }
+}
 
-  function wrapIngredientDeclaration(items = [], maxChars = 34) {
-    const clean = items.map((item) => String(item || '').replace(/\s+/g, ' ').trim()).filter(Boolean);
-    const lines = []; let current = '';
-    clean.forEach((item, itemIndex) => {
+function wrapIngredientDeclaration(items = [], maxChars = 34) {
+const clean = items.map((item) => String(item || '').replace(/\s+/g, ' ').trim()).filter(Boolean);
+const lines = []; let current = '';
+clean.forEach((item, itemIndex) => {
       const token = `${item}${itemIndex < clean.length - 1 ? ',' : ''}`;
-      const words = token.split(/\s+/).filter(Boolean);
-      for (const word of words) {
+const words = token.split(/\s+/).filter(Boolean);
+for (const word of words) {
         const next = current ? `${current} ${word}` : word;
-        if (current && next.length > maxChars) { lines.push(current); current = word; } else current = next;
-      }
-    });
-    if (current) lines.push(current);
-    return lines;
-  }
+if (current && next.length > maxChars) { lines.push(current); current = word; } else current = next;
+}
+});
+if (current) lines.push(current);
+return lines;
+}
 
-  function ribbonIngredientLayout(items = []) {
-    // Build 277: each language owns one ingredient panel. Keep the adaptive font/line
-    // strategy from Build 276, but never use the second language panel as overflow.
-    const attempts = [
-      {maxChars:30, maxLines:9, fontSize:4.25, lineHeight:4.35},
-      {maxChars:34, maxLines:10, fontSize:3.85, lineHeight:4.0},
-      {maxChars:38, maxLines:11, fontSize:3.55, lineHeight:3.7}
-    ];
-    for (const option of attempts) {
-      const lines = wrapIngredientDeclaration(items, option.maxChars);
-      if (lines.length <= option.maxLines) return {...option, lines, overflow:false};
-    }
-    const option = attempts[attempts.length - 1];
-    const lines = wrapIngredientDeclaration(items, option.maxChars);
-    return {...option, lines, overflow:lines.length > option.maxLines};
-  }
+function ribbonIngredientLayout(items = []) {
+// Build 277: each language owns one ingredient panel. Keep the adaptive font/line
+// strategy from Build 276, but never use the second language panel as overflow.
+const attempts = [
+{maxChars:30, maxLines:9, fontSize:4.25, lineHeight:4.35},
+{maxChars:34, maxLines:10, fontSize:3.85, lineHeight:4.0},
+{maxChars:38, maxLines:11, fontSize:3.55, lineHeight:3.7}
+];
+for (const option of attempts) {
+const lines = wrapIngredientDeclaration(items, option.maxChars);
+if (lines.length <= option.maxLines) return {...option, lines, overflow:false};
+}
+const option = attempts[attempts.length - 1];
+const lines = wrapIngredientDeclaration(items, option.maxChars);
+return {...option, lines, overflow:lines.length > option.maxLines};
+}
 
-  function ingredientItemsFromText(value = '') {
-    return String(value || '')
-      .split(/(?:\r?\n|•|,|;)+/)
-      .map((item) => item.trim())
-      .filter(Boolean);
-  }
+function ingredientItemsFromText(value = '') {
+return String(value || '')
+.split(/(?:\r?\n|•|,|;)+/)
+.map((item) => item.trim())
+.filter(Boolean);
+}
 
-  function ingredientLineMarkup(lines = [], x, y, lineHeight, size) {
+function ingredientLineMarkup(lines = [], x, y, lineHeight, size) {
     return lines.map((line,index)=>`<text x="${x}" y="${y + index * lineHeight}" font-size="${size}" class="pkg-copy">${xml(line)}</text>`).join('');
-  }
+}
 
-  function wrapPlainLines(value, maxChars = 24, maxLines = 2) {
-    const words=String(value||'').trim().split(/\s+/).filter(Boolean);const lines=[];let current='';
+function wrapPlainLines(value, maxChars = 24, maxLines = 2) {
+const words=String(value||'').trim().split(/\s+/).filter(Boolean);const lines=[];let current='';
     for(const word of words){const next=current?`${current} ${word}`:word;if(next.length>maxChars&&current){lines.push(current);current=word;}else current=next;if(lines.length>=maxLines)break;}
     if(lines.length<maxLines&&current)lines.push(current);if(words.length&&lines.length>=maxLines){const consumed=lines.join(' ').split(/\s+/).length;if(consumed<words.length)lines[maxLines-1]=`${lines[maxLines-1].slice(0,Math.max(1,maxChars-1)).trimEnd()}…`;}
-    return lines.slice(0,maxLines);
-  }
+return lines.slice(0,maxLines);
+}
 
-  function ingredientDisplay(language) {
-    const rows = ingredientRowsFromDom();
-    if (rows.length) return rows.filter((row) => row.required_on_label !== 0).map((row) => {
-      const display = language === 'fr' ? row.display_name_fr : row.display_name_en;
-      return display || row.inci_name || '';
+function ingredientDisplay(language) {
+const rows = ingredientRowsFromDom();
+if (rows.length) return rows.filter((row) => row.required_on_label !== 0).map((row) => {
+const display = language === 'fr' ? row.display_name_fr : row.display_name_en;
+return display || row.inci_name || '';
     }).filter(Boolean).map((row) => `• ${row}`).join('\n');
-    return language === 'fr' ? (id('packagingIngredientsFr')?.value || id('packagingInci')?.value || '') : (id('packagingIngredientsEn')?.value || id('packagingInci')?.value || '');
-  }
+return language === 'fr' ? (id('packagingIngredientsFr')?.value || id('packagingInci')?.value || '') : (id('packagingIngredientsEn')?.value || id('packagingInci')?.value || '');
+}
 
-  function curatedFrenchDraft(value = '') {
-    const source = String(value || '').trim();
-    if (!source) return '';
-    const exact = new Map([
-      ['made in canada','Fabriqué au Canada'],['hand made in canada','Fait à la main au Canada'],['handmade in canada','Fait à la main au Canada'],
-      ['natural ingredients','Ingrédients naturels'],['handmade with care','Fait à la main avec soin'],['gentle & moisturizing','Doux et hydratant'],
-      ['gentle and moisturizing','Doux et hydratant'],['please recycle','Veuillez recycler'],['for external use only','Pour usage externe seulement'],
-      ['avoid contact with eyes','Éviter tout contact avec les yeux'],['keep out of reach of children','Garder hors de la portée des enfants'],
-      ["goat's milk",'Lait de chèvre'],['goat milk','Lait de chèvre'],['goats milk','Lait de chèvre'],['goat’s milk','Lait de chèvre'],
-      ['olive oil',"Huile d’olive"],['coconut oil','Huile de noix de coco'],['shea butter','Beurre de karité'],['water','Eau'],
-      ['glycerin','Glycérine'],['sodium chloride','Chlorure de sodium'],['oat extract',"Extrait d’avoine"],['oatmeal extract',"Extrait d’avoine"]
-    ]);
-    const matched = exact.get(source.toLowerCase());
-    if (matched) return matched;
-    const replacements = [
-      [/\bGoat(?:'|’)?s? Milk\b/gi,'Lait de chèvre'],[/\bVegetable Glycerin\b/gi,'Glycérine végétale'],[/\bGlycerin\b/gi,'Glycérine'],
-      [/\bPropylene Glycol\b/gi,'Propylène glycol'],[/\bStearic Acid\b/gi,'Acide stéarique'],[/\bSodium Hydroxide\b/gi,'Hydroxyde de sodium'],
-      [/\bTitanium Dioxide\b/gi,'Dioxyde de titane'],[/\bSodium Chloride\b/gi,'Chlorure de sodium'],[/\bOlive Oil\b/gi,"Huile d’olive"],
-      [/\bCoconut Oil\b/gi,'Huile de noix de coco'],[/\bShea Butter\b/gi,'Beurre de karité'],[/\bPeppermint\b/gi,'Menthe poivrée'],[/\bUnscented\b/gi,'Sans parfum'],
-      [/\bLavender\b/gi,'Lavande'],[/\bOatmeal\b/gi,'Avoine'],[/\bCharcoal\b/gi,'Charbon'],[/\bCoconut\b/gi,'Noix de coco'],
-      [/\bVanilla\b/gi,'Vanille'],[/\bLemon\b/gi,'Citron'],[/\bHoney\b/gi,'Miel'],[/\bAloe\b/gi,'Aloès'],[/\bSoap\b/gi,'Savon']
-    ];
-    return replacements.reduce((text, [pattern, replacement]) => text.replace(pattern, replacement), source);
-  }
+function curatedFrenchDraft(value = '') {
+const source = String(value || '').trim();
+if (!source) return '';
+const exact = new Map([
+['made in canada','Fabriqué au Canada'],['hand made in canada','Fait à la main au Canada'],['handmade in canada','Fait à la main au Canada'],
+['natural ingredients','Ingrédients naturels'],['handmade with care','Fait à la main avec soin'],['gentle & moisturizing','Doux et hydratant'],
+['gentle and moisturizing','Doux et hydratant'],['please recycle','Veuillez recycler'],['for external use only','Pour usage externe seulement'],
+['avoid contact with eyes','Éviter tout contact avec les yeux'],['keep out of reach of children','Garder hors de la portée des enfants'],
+["goat's milk",'Lait de chèvre'],['goat milk','Lait de chèvre'],['goats milk','Lait de chèvre'],['goat’s milk','Lait de chèvre'],
+['olive oil',"Huile d’olive"],['coconut oil','Huile de noix de coco'],['shea butter','Beurre de karité'],['water','Eau'],
+['glycerin','Glycérine'],['sodium chloride','Chlorure de sodium'],['oat extract',"Extrait d’avoine"],['oatmeal extract',"Extrait d’avoine"]
+]);
+const matched = exact.get(source.toLowerCase());
+if (matched) return matched;
+const replacements = [
+[/\bGoat(?:'|’)?s? Milk\b/gi,'Lait de chèvre'],[/\bVegetable Glycerin\b/gi,'Glycérine végétale'],[/\bGlycerin\b/gi,'Glycérine'],
+[/\bPropylene Glycol\b/gi,'Propylène glycol'],[/\bStearic Acid\b/gi,'Acide stéarique'],[/\bSodium Hydroxide\b/gi,'Hydroxyde de sodium'],
+[/\bTitanium Dioxide\b/gi,'Dioxyde de titane'],[/\bSodium Chloride\b/gi,'Chlorure de sodium'],[/\bOlive Oil\b/gi,"Huile d’olive"],
+[/\bCoconut Oil\b/gi,'Huile de noix de coco'],[/\bShea Butter\b/gi,'Beurre de karité'],[/\bPeppermint\b/gi,'Menthe poivrée'],[/\bUnscented\b/gi,'Sans parfum'],
+[/\bLavender\b/gi,'Lavande'],[/\bOatmeal\b/gi,'Avoine'],[/\bCharcoal\b/gi,'Charbon'],[/\bCoconut\b/gi,'Noix de coco'],
+[/\bVanilla\b/gi,'Vanille'],[/\bLemon\b/gi,'Citron'],[/\bHoney\b/gi,'Miel'],[/\bAloe\b/gi,'Aloès'],[/\bSoap\b/gi,'Savon']
+];
+return replacements.reduce((text, [pattern, replacement]) => text.replace(pattern, replacement), source);
+}
 
-  function ensureStructuredIngredientsForFrenchDraft() {
-    if (ingredientRowsFromDom().length) return ingredientRowsFromDom();
-    const attachedBase = (state.detail?.source_materials || []).find((row) => String(row.material_role || '') === 'base');
-    const sourceRows = Array.isArray(attachedBase?.master_inci) ? attachedBase.master_inci.filter((row) => row?.inci_name || row?.display_name_en || row?.display_name_fr) : [];
-    if (sourceRows.length && id('soapIngredientRows')) {
-      id('soapIngredientRows').innerHTML = sourceRows.map(ingredientRow).join('');
-      bindDynamicRows();
-      return ingredientRowsFromDom();
-    }
-    const inciText = String(id('packagingInci')?.value || '').trim();
-    if (inciText && id('soapIngredientRows')) {
-      const parsed = inciText.split(/[,;\n]+/).map((name) => name.trim()).filter(Boolean).map((inci_name) => ({ inci_name, display_name_en: inci_name, display_name_fr: inci_name, required_on_label: 1 }));
-      if (parsed.length) {
-        id('soapIngredientRows').innerHTML = parsed.map(ingredientRow).join('');
-        bindDynamicRows();
-        return ingredientRowsFromDom();
-      }
-    }
-    return [];
-  }
+function ensureStructuredIngredientsForFrenchDraft() {
+if (ingredientRowsFromDom().length) return ingredientRowsFromDom();
+const attachedBase = (state.detail?.source_materials || []).find((row) => String(row.material_role || '') === 'base');
+const sourceRows = Array.isArray(attachedBase?.master_inci) ? attachedBase.master_inci.filter((row) => row?.inci_name || row?.display_name_en || row?.display_name_fr) : [];
+if (sourceRows.length && id('soapIngredientRows')) {
+id('soapIngredientRows').innerHTML = sourceRows.map(ingredientRow).join('');
+bindDynamicRows();
+return ingredientRowsFromDom();
+}
+const inciText = String(id('packagingInci')?.value || '').trim();
+if (inciText && id('soapIngredientRows')) {
+const parsed = inciText.split(/[,;\n]+/).map((name) => name.trim()).filter(Boolean).map((inci_name) => ({ inci_name, display_name_en: inci_name, display_name_fr: inci_name, required_on_label: 1 }));
+if (parsed.length) {
+id('soapIngredientRows').innerHTML = parsed.map(ingredientRow).join('');
+bindDynamicRows();
+return ingredientRowsFromDom();
+}
+}
+return [];
+}
 
-  async function generateFrenchDraft() {
-    const projectId = Number(id('packagingProjectId')?.value || state.detail?.project?.packaging_project_id || 0);
-    const drafts = [];
-    ensureStructuredIngredientsForFrenchDraft();
-    const identityEn = String(id('packagingIdentityEn')?.value || '').trim();
-    const identityFr = curatedFrenchDraft(identityEn);
-    if (identityEn && identityFr) { id('packagingIdentityFr').value = identityFr; drafts.push({ field_key: 'product_identity_fr', source_text: identityEn, generated_text: identityFr }); }
-    const warningEn = String(id('packagingWarningsEn')?.value || '').trim();
-    const warningFr = curatedFrenchDraft(warningEn);
-    if (warningEn && warningFr) { id('packagingWarningsFr').value = warningFr; drafts.push({ field_key: 'warnings_fr', source_text: warningEn, generated_text: warningFr }); }
-    document.querySelectorAll('[data-soap-ingredient-row]').forEach((row, index) => {
-      const inci = String(row.querySelector('[data-field="inci_name"]')?.value || '').trim();
-      const en = String(row.querySelector('[data-field="display_name_en"]')?.value || '').trim();
-      const frField = row.querySelector('[data-field="display_name_fr"]');
-      const fr = en ? curatedFrenchDraft(en) : inci;
+async function generateFrenchDraft() {
+const projectId = Number(id('packagingProjectId')?.value || state.detail?.project?.packaging_project_id || 0);
+const drafts = [];
+ensureStructuredIngredientsForFrenchDraft();
+const identityEn = String(id('packagingIdentityEn')?.value || '').trim();
+const identityFr = curatedFrenchDraft(identityEn);
+if (identityEn && identityFr) { id('packagingIdentityFr').value = identityFr; drafts.push({ field_key: 'product_identity_fr', source_text: identityEn, generated_text: identityFr }); }
+const warningEn = String(id('packagingWarningsEn')?.value || '').trim();
+const warningFr = curatedFrenchDraft(warningEn);
+if (warningEn && warningFr) { id('packagingWarningsFr').value = warningFr; drafts.push({ field_key: 'warnings_fr', source_text: warningEn, generated_text: warningFr }); }
+document.querySelectorAll('[data-soap-ingredient-row]').forEach((row, index) => {
+const inci = String(row.querySelector('[data-field="inci_name"]')?.value || '').trim();
+const en = String(row.querySelector('[data-field="display_name_en"]')?.value || '').trim();
+const frField = row.querySelector('[data-field="display_name_fr"]');
+const fr = en ? curatedFrenchDraft(en) : inci;
       if (frField && fr) { frField.value = fr; drafts.push({ field_key: `ingredient_${index + 1}_fr`, source_text: en || inci, generated_text: fr }); }
-    });
-    document.querySelectorAll('[data-soap-claim-row]').forEach((row, index) => {
-      const en = String(row.querySelector('[data-field="claim_en"]')?.value || '').trim();
-      const frField = row.querySelector('[data-field="claim_fr"]');
-      const fr = curatedFrenchDraft(en);
+});
+document.querySelectorAll('[data-soap-claim-row]').forEach((row, index) => {
+const en = String(row.querySelector('[data-field="claim_en"]')?.value || '').trim();
+const frField = row.querySelector('[data-field="claim_fr"]');
+const fr = curatedFrenchDraft(en);
       if (frField && en && fr) { frField.value = fr; drafts.push({ field_key: `claim_${index + 1}_fr`, source_text: en, generated_text: fr }); }
-    });
-    const ingredientFr = ingredientDisplay('fr');
-    if (id('packagingIngredientsFr') && ingredientFr) id('packagingIngredientsFr').value = ingredientFr;
-    renderPreview();
-    if (projectId && drafts.length) {
+});
+const ingredientFr = ingredientDisplay('fr');
+if (id('packagingIngredientsFr') && ingredientFr) id('packagingIngredientsFr').value = ingredientFr;
+renderPreview();
+if (projectId && drafts.length) {
       try { await api({ action: 'record_translation_draft', packaging_project_id: projectId, drafts }); } catch (error) { message(`French draft generated, but its review provenance could not be recorded: ${error.message}`, 'error'); return; }
-    }
-    message('French draft generated from the curated packaging vocabulary. Review all French wording before approval; INCI ingredient names remain the ingredient-list authority.', 'success');
-  }
+}
+message('French draft generated from the curated packaging vocabulary. Review all French wording before approval; INCI ingredient names remain the ingredient-list authority.', 'success');
+}
 
-  function mixHex(base, target = '#FFFFFF', amount = .5) {
-    const parse = (value) => { const clean = String(value || '').replace('#',''); const full = clean.length === 3 ? clean.split('').map((c) => c + c).join('') : clean.padEnd(6,'0').slice(0,6); return [0,2,4].map((offset) => parseInt(full.slice(offset,offset + 2),16) || 0); };
-    const a = parse(base), b = parse(target), ratio = Math.max(0,Math.min(1,Number(amount) || 0));
+function mixHex(base, target = '#FFFFFF', amount = .5) {
+const parse = (value) => { const clean = String(value || '').replace('#',''); const full = clean.length === 3 ? clean.split('').map((c) => c + c).join('') : clean.padEnd(6,'0').slice(0,6); return [0,2,4].map((offset) => parseInt(full.slice(offset,offset + 2),16) || 0); };
+const a = parse(base), b = parse(target), ratio = Math.max(0,Math.min(1,Number(amount) || 0));
     return `#${a.map((value,index) => Math.round(value + (b[index] - value) * ratio).toString(16).padStart(2,'0')).join('')}`;
-  }
+}
 
-  function scallopedOvalPath(cx, cy, rx, ry, points = 44) {
-    const coords = [];
-    for (let index = 0; index < points * 2; index += 1) {
-      const angle = Math.PI * 2 * index / (points * 2); const wave = index % 2 === 0 ? 1 : .965;
+function scallopedOvalPath(cx, cy, rx, ry, points = 44) {
+const coords = [];
+for (let index = 0; index < points * 2; index += 1) {
+const angle = Math.PI * 2 * index / (points * 2); const wave = index % 2 === 0 ? 1 : .965;
       coords.push(`${index ? 'L' : 'M'}${(cx + Math.cos(angle) * rx * wave).toFixed(2)} ${(cy + Math.sin(angle) * ry * wave).toFixed(2)}`);
-    }
+}
     return `${coords.join(' ')} Z`;
-  }
+}
 
-  function roseVector(cx, cy, scale, colour) {
-    const dark = id('packagingBorderColour')?.value || '#32105E'; const mid = mixHex(colour,'#FFFFFF',.34); const light = mixHex(colour,'#FFFFFF',.58);
+function roseVector(cx, cy, scale, colour) {
+const dark = id('packagingBorderColour')?.value || '#32105E'; const mid = mixHex(colour,'#FFFFFF',.34); const light = mixHex(colour,'#FFFFFF',.58);
     return `<g transform="translate(${cx} ${cy}) scale(${scale})" stroke="${dark}" stroke-width="2.2" stroke-linejoin="round">
       <path fill="#536B35" d="M-14 35C-50 36-66 64-60 88c29 2 53-10 70-37z"/><path fill="#657C3C" d="M66 37c35 4 53 27 49 50-29 3-53-8-72-34z"/>
       <path fill="${colour}" d="M26-79C1-66-17-46-18-21c-1 31 17 65 44 86 27-21 45-55 44-86-1-25-19-45-44-58z" opacity=".86"/>
@@ -485,60 +485,60 @@
       <path fill="${colour}" d="M78-35c14 26 12 55-6 77-17 20-43 29-46 28 6-19 14-39 22-58 8-18 18-34 30-47z" opacity=".72"/>
       <path fill="${mid}" d="M-3-45c-9 31 1 61 29 87 28-26 38-56 29-87-11 5-21 15-29 28-8-13-18-23-29-28z"/><path fill="${light}" d="M12-31c-7 23-2 43 14 60 16-17 21-37 14-60-5 4-10 10-14 18-4-8-9-14-14-18z"/>
     </g>`;
-  }
+}
 
-  function iconSvg(icon, x, y, colour) {
-    const key = String(icon || 'leaf').toLowerCase();
-    if(key==='none')return'';
+function iconSvg(icon, x, y, colour) {
+const key = String(icon || 'leaf').toLowerCase();
+if(key==='none')return'';
     if (key.includes('recycle')) return `<g transform="translate(${x} ${y}) scale(.42)" fill="none" stroke="${colour}" stroke-width="2.4"><circle r="13"/><path d="M-7 4l5-9 4 7M7-4l-5 9-4-7"/></g>`;
     if (key.includes('hand') || key.includes('care')) return `<g transform="translate(${x} ${y}) scale(.42)" fill="none" stroke="${colour}" stroke-width="2.4"><circle r="13"/><path d="M-7 2c5-8 8-8 12 0M-8 4c4 7 12 7 16 0M0-5v11"/></g>`;
     if(key.includes('heart'))return `<g transform="translate(${x} ${y}) scale(.42)" fill="none" stroke="${colour}" stroke-width="2.4"><circle r="13"/><path d="M0 8C-10 1-9-7-3-8 0-8 2-6 3-4 4-6 6-8 9-8 15-7 16 1 6 8L3 10Z" transform="translate(-3 0) scale(.82)"/></g>`;
     return `<g transform="translate(${x} ${y}) scale(.42)" fill="none" stroke="${colour}" stroke-width="2.4"><circle r="13"/><path d="M-6 6C-8-3-1-9 7-9 8-1 3 7-6 6ZM-5 5 5-6"/></g>`;
-  }
+}
 
-  function guideSvg(height, artwork = {}) {
-    let output = '';
+function guideSvg(height, artwork = {}) {
+let output = '';
     if (artwork.show_bleed) output += `<rect x="12.5" y="12.5" width="1075" height="${height - 25}" fill="none" stroke="#d12424" stroke-width="1" stroke-dasharray="5 4"/>`;
     if (artwork.show_safe_area) output += `<rect x="6.25" y="${height / 2 - 31.25}" width="1087.5" height="62.5" fill="none" stroke="#14843a" stroke-width="1" stroke-dasharray="4 4"/>`;
     if (artwork.show_fold_guides || artwork.show_guides) output += `<g stroke="#2680c2" stroke-width="1" stroke-dasharray="3 3"><line x1="210" y1="0" x2="210" y2="${height}"/><line x1="490" y1="0" x2="490" y2="${height}"/><line x1="720" y1="0" x2="720" y2="${height}"/><line x1="900" y1="0" x2="900" y2="${height}"/></g>`;
     if (artwork.show_glue_zone || artwork.show_guides) output += `<rect x="1050" y="${height / 2 - 37.5}" width="50" height="75" fill="rgba(239,185,43,.18)" stroke="#b58000" stroke-width="1"/><text x="1075" y="${height / 2}" text-anchor="middle" font-size="7" transform="rotate(-90 1075 ${height / 2})" class="pkg-copy">OVERLAP / GLUE</text>`;
-    return output;
-  }
+return output;
+}
 
-  function glacialRibbonSvg(data, template) {
-    const theme=data.theme||{};const artwork=data.artwork||{};const layout=template.layout||{};
-    const widthMm=num(template.page_width_mm,279.4);const heightMm=num(template.page_height_mm,38.1);const height=Math.round(heightMm/25.4*100);
-    const centreY=height/2;const bandHeight=Math.min(75,Math.max(58,height-16));const bandY=centreY-bandHeight/2;
-    const rose=theme.rose_colour||'#7B4DA6';const border=theme.border_colour||'#32105E';const gold=theme.accent_gold||'#B88A2F';const background=theme.theme_colour||'#FBF5E8';const secondary=theme.secondary_colour||'#5A2A86';
-    const family=data.packagingCollection||'Glacial Purple';const typeEn=data.packagingIdentityEn||data.packagingProductName||'PRODUCT IDENTITY REQUIRED';
-    const structuredIngredients=Array.isArray(data.structured_ingredients)?data.structured_ingredients:[];
-    const requiredIngredients=structuredIngredients.filter((row)=>Number(row.required_on_label)!==0);
-    const missingIngredientDraft='INGREDIENTS REQUIRED — DRAFT NOT FOR PRINT';
-    const englishFromRows=requiredIngredients.map((row)=>String(row.display_name_en||row.inci_name||'').trim()).filter(Boolean);
-    const frenchFromRows=requiredIngredients.map((row)=>{
-      const explicit=String(row.display_name_fr||'').trim();
-      if(explicit)return explicit;
-      const source=String(row.display_name_en||row.inci_name||'').trim();
-      return source?curatedFrenchDraft(source):'';
-    }).filter(Boolean);
-    const englishFallback=ingredientItemsFromText(data.packagingIngredientsEn||data.packagingInci);
-    const frenchFallback=ingredientItemsFromText(data.packagingIngredientsFr||data.packagingInci).map((item)=>curatedFrenchDraft(item));
-    const englishItems=englishFromRows.length?englishFromRows:(englishFallback.length?englishFallback:[missingIngredientDraft]);
-    const frenchItems=frenchFromRows.length?frenchFromRows:(frenchFallback.length?frenchFallback:[missingIngredientDraft]);
-    const englishLayout=ribbonIngredientLayout(englishItems);
-    const frenchLayout=ribbonIngredientLayout(frenchItems);
-    const claims=Array.isArray(data.structured_claims)&&data.structured_claims.length?data.structured_claims:(claimRowsFromDom().length?claimRowsFromDom():[]);
-    const topLabel=artwork.top_arc_text||'Rosevear Creations';const bottomLabel=artwork.bottom_arc_text||'MADE IN CANADA';const centreMark=artwork.centre_mark||'♥';
-    const rosePreset=rosePresetById(artwork.rose_asset_id);const roseAsset=rosePreset?.path||'';
-    // Fixed reference zones keep ingredients, front badge, French panel, rear seal and claims from drifting into one another.
-    const zones={fr:{x:18,w:150},front:{cx:365,rx:190},en:{x:566,w:148},rear:{cx:792,r:61},claims:{x:875,w:205}};
-    const frontRy=Math.min(72,centreY-3);
+function glacialRibbonSvg(data, template) {
+const theme=data.theme||{};const artwork=data.artwork||{};const layout=template.layout||{};
+const widthMm=num(template.page_width_mm,279.4);const heightMm=num(template.page_height_mm,38.1);const height=Math.round(heightMm/25.4*100);
+const centreY=height/2;const bandHeight=Math.min(75,Math.max(58,height-16));const bandY=centreY-bandHeight/2;
+const rose=theme.rose_colour||'#7B4DA6';const border=theme.border_colour||'#32105E';const gold=theme.accent_gold||'#B88A2F';const background=theme.theme_colour||'#FBF5E8';const secondary=theme.secondary_colour||'#5A2A86';
+const family=data.packagingCollection||'Glacial Purple';const typeEn=data.packagingIdentityEn||data.packagingProductName||'PRODUCT IDENTITY REQUIRED';
+const structuredIngredients=Array.isArray(data.structured_ingredients)?data.structured_ingredients:[];
+const requiredIngredients=structuredIngredients.filter((row)=>Number(row.required_on_label)!==0);
+const missingIngredientDraft='INGREDIENTS REQUIRED — DRAFT NOT FOR PRINT';
+const englishFromRows=requiredIngredients.map((row)=>String(row.display_name_en||row.inci_name||'').trim()).filter(Boolean);
+const frenchFromRows=requiredIngredients.map((row)=>{
+const explicit=String(row.display_name_fr||'').trim();
+if(explicit)return explicit;
+const source=String(row.display_name_en||row.inci_name||'').trim();
+return source?curatedFrenchDraft(source):'';
+}).filter(Boolean);
+const englishFallback=ingredientItemsFromText(data.packagingIngredientsEn||data.packagingInci);
+const frenchFallback=ingredientItemsFromText(data.packagingIngredientsFr||data.packagingInci).map((item)=>curatedFrenchDraft(item));
+const englishItems=englishFromRows.length?englishFromRows:(englishFallback.length?englishFallback:[missingIngredientDraft]);
+const frenchItems=frenchFromRows.length?frenchFromRows:(frenchFallback.length?frenchFallback:[missingIngredientDraft]);
+const englishLayout=ribbonIngredientLayout(englishItems);
+const frenchLayout=ribbonIngredientLayout(frenchItems);
+const claims=Array.isArray(data.structured_claims)&&data.structured_claims.length?data.structured_claims:(claimRowsFromDom().length?claimRowsFromDom():[]);
+const topLabel=artwork.top_arc_text||'Rosevear Creations';const bottomLabel=artwork.bottom_arc_text||'MADE IN CANADA';const centreMark=artwork.centre_mark||'♥';
+const rosePreset=rosePresetById(artwork.rose_asset_id);const roseAsset=rosePreset?.path||'';
+// Fixed reference zones keep ingredients, front badge, French panel, rear seal and claims from drifting into one another.
+const zones={fr:{x:18,w:150},front:{cx:365,rx:190},en:{x:566,w:148},rear:{cx:792,r:61},claims:{x:875,w:205}};
+const frontRy=Math.min(72,centreY-3);
     const roseArtwork=roseAsset?`<image href="${xml(roseAsset)}" x="205" y="${centreY-62}" width="126" height="124" preserveAspectRatio="xMidYMid meet"/>`:roseVector(268,centreY,.62,rose);
     const frontOuter=artwork.badge_shape==='scalloped'?`<path d="${scallopedOvalPath(zones.front.cx,centreY,zones.front.rx,frontRy)}" fill="${background}" stroke="${gold}" stroke-width="4"/>`:`<ellipse cx="${zones.front.cx}" cy="${centreY}" rx="${zones.front.rx}" ry="${frontRy}" fill="${background}" stroke="${gold}" stroke-width="4"/>`;
-    const damaskId='soap-reference-damask-v3';
+const damaskId='soap-reference-damask-v3';
     const claimMarkup=claims.slice(0,4).map((claim,index)=>{const y=bandY+14+index*12.0;const enText=String(claim.claim_en||'');const frText=String(claim.claim_fr||'');const enSize=fontSize(enText,21,4.0,2.95);const frSize=fontSize(frText,24,3.5,2.7);const iconX=zones.claims.x+12;const textX=zones.claims.x+44;return `${iconSvg(claim.icon_name,iconX,y+1.2,secondary)}<text x="${textX}" y="${y}" font-size="${enSize}" font-weight="700" class="pkg-copy">${xml(enText)}</text><text x="${textX}" y="${y+4.35}" font-size="${frSize}" class="pkg-copy">${xml(frText)}</text>`;}).join('');
     const frontTextX=340;const familyLines=wrapPlainLines(family,17,2);const familyStart=centreY+(familyLines.length>1?-8:-3);const familyMarkup=familyLines.map((line,index)=>`<text x="${frontTextX}" y="${familyStart+index*8.4}" text-anchor="start" font-size="${fontSize(line,17,9.8,7.5)}" class="pkg-script">${xml(line)}</text>`).join('');const typeLines=wrapPlainLines(typeEn,20,2);const typeStart=centreY+17-(typeLines.length-1)*4;const typeMarkup=typeLines.map((line,index)=>`<text x="${frontTextX}" y="${typeStart+index*8.5}" text-anchor="start" font-size="${fontSize(line,20,9.7,6.9)}" font-weight="700" class="pkg-brand-title">${xml(line)}</text>`).join('');
-    const website=String(data.packagingWebsite||'devilndove.com');
+const website=String(data.packagingWebsite||'devilndove.com');
     return `<svg xmlns="http://www.w3.org/2000/svg" width="${widthMm}mm" height="${heightMm}mm" viewBox="0 0 1100 ${height}" role="img" aria-label="${xml(family)} ${xml(typeEn)} continuous soap ribbon label" data-soap-layout="reference-v3">
       <defs>
         <pattern id="${damaskId}" width="30" height="30" patternUnits="userSpaceOnUse"><path d="M15 2C10 8 10 12 15 15C20 12 20 8 15 2ZM15 28C10 22 10 18 15 15C20 18 20 22 15 28ZM2 15C8 10 12 10 15 15C12 20 8 20 2 15ZM28 15C22 10 18 10 15 15C18 20 22 20 28 15Z" fill="none" stroke="${gold}" stroke-width=".65" opacity=".13"/></pattern>
@@ -579,23 +579,23 @@
       <text x="${zones.claims.x+5}" y="${bandY+65}" font-size="${fontSize(data.packagingNetQuantity||'',45,4.6,3.6)}" font-weight="700" class="pkg-copy">${xml(data.packagingNetQuantity||'VERIFIED NET QUANTITY REQUIRED — DRAFT NOT FOR PRINT')}</text>
       ${guideSvg(height,artwork)}
     </svg>`;
-  }
+}
 
-  function cupcakeSoapLabelSvg(data, template) {
-    const widthMm = 50.8; const heightMm = 50.8; const width = 1000; const height = 1000;
-    const theme=data.theme||{}; const artwork=data.artwork||{}; const reference=cupcakePresetById(artwork.cupcake_reference_id||template.layout?.cupcake_reference_id||'sweet-orange');
-    const bg=theme.theme_colour||reference.theme.theme_colour; const ink=theme.border_colour||reference.theme.border_colour; const gold=theme.accent_gold||reference.theme.accent_gold; const accent=theme.secondary_colour||reference.theme.secondary_colour; const soft=theme.rose_colour||reference.theme.rose_colour;
-    const title=artwork.cupcake_label_title||template.layout?.default_label_title||'Cupcake Soap'; const variant=data.packagingProductName||reference.label; const purpose=artwork.cupcake_purpose_text||template.layout?.default_purpose||reference.purpose;
-    const ingredientSource=String(data.packagingIngredientsEn||data.packagingInci||'Ingredients required').replace(/\s+/g,' ').trim();
-    const ingredientLines=wrapPlainLines(ingredientSource,42,3); const variantLines=wrapPlainLines(variant,22,2); const website=data.packagingWebsite||'devilndove.com'; const made=(data.packagingMadeInCanada||'Made in Canada').split('/')[0].trim();
-    const net=String(data.packagingNetQuantity||'').trim(); const refId=String(reference.id||'sweet-orange');
-    const decor = refId==='charcoal'
+function cupcakeSoapLabelSvg(data, template) {
+const widthMm = 50.8; const heightMm = 50.8; const width = 1000; const height = 1000;
+const theme=data.theme||{}; const artwork=data.artwork||{}; const reference=cupcakePresetById(artwork.cupcake_reference_id||template.layout?.cupcake_reference_id||'sweet-orange');
+const bg=theme.theme_colour||reference.theme.theme_colour; const ink=theme.border_colour||reference.theme.border_colour; const gold=theme.accent_gold||reference.theme.accent_gold; const accent=theme.secondary_colour||reference.theme.secondary_colour; const soft=theme.rose_colour||reference.theme.rose_colour;
+const title=artwork.cupcake_label_title||template.layout?.default_label_title||'Cupcake Soap'; const variant=data.packagingProductName||reference.label; const purpose=artwork.cupcake_purpose_text||template.layout?.default_purpose||reference.purpose;
+const ingredientSource=String(data.packagingIngredientsEn||data.packagingInci||'Ingredients required').replace(/\s+/g,' ').trim();
+const ingredientLines=wrapPlainLines(ingredientSource,42,3); const variantLines=wrapPlainLines(variant,22,2); const website=data.packagingWebsite||'devilndove.com'; const made=(data.packagingMadeInCanada||'Made in Canada').split('/')[0].trim();
+const net=String(data.packagingNetQuantity||'').trim(); const refId=String(reference.id||'sweet-orange');
+const decor = refId==='charcoal'
       ? `<g fill="${ink}" opacity=".9"><circle cx="400" cy="188" r="25"/><circle cx="566" cy="155" r="20"/><path d="M663 140c-38-38-99 15-42 65l42 34 42-34c57-50-4-103-42-65z"/></g><g fill="#fff" opacity=".7"><circle cx="431" cy="156" r="8"/><circle cx="590" cy="201" r="7"/></g>`
-      : refId==='oatmeal-goat-milk'
+: refId==='oatmeal-goat-milk'
       ? `<g fill="${gold}" opacity=".85"><ellipse cx="390" cy="178" rx="38" ry="12" transform="rotate(-22 390 178)"/><ellipse cx="470" cy="139" rx="36" ry="11" transform="rotate(18 470 139)"/><ellipse cx="570" cy="182" rx="38" ry="12" transform="rotate(-8 570 182)"/><ellipse cx="637" cy="136" rx="34" ry="10" transform="rotate(27 637 136)"/></g><path d="M682 130c-32-32-85 14-36 57l36 30 36-30c49-43-4-89-36-57z" fill="${soft}" opacity=".7"/>`
-      : refId==='sea-breeze'
+: refId==='sea-breeze'
       ? `<path d="M330 212q58-48 116 0t116 0t116 0" fill="none" stroke="${accent}" stroke-width="22" stroke-linecap="round"/><path d="M436 122l18 36 40 6-29 28 7 40-36-19-36 19 7-40-29-28 40-6z" fill="${accent}"/><path d="M620 124q42-36 84 0q-42 36-84 0z" fill="${bg}" stroke="${gold}" stroke-width="8"/>`
-      : refId==='lavender-dream'
+: refId==='lavender-dream'
       ? `<g stroke="${accent}" stroke-width="9" stroke-linecap="round"><path d="M390 230q0-86 16-150"/><path d="M455 225q12-88 36-150"/><path d="M530 226q20-82 48-139"/></g><g fill="${soft}"><ellipse cx="407" cy="100" rx="13" ry="27"/><ellipse cx="395" cy="133" rx="13" ry="27"/><ellipse cx="486" cy="97" rx="13" ry="27"/><ellipse cx="474" cy="132" rx="13" ry="27"/><ellipse cx="577" cy="103" rx="13" ry="27"/><ellipse cx="561" cy="139" rx="13" ry="27"/></g>`
       : `<g><circle cx="430" cy="150" r="54" fill="#F6921E"/><path d="M430 99v102M379 150h102M394 114l72 72M466 114l-72 72" stroke="#FFF2D8" stroke-width="9"/><ellipse cx="626" cy="148" rx="26" ry="55" fill="${accent}" transform="rotate(35 626 148)"/><ellipse cx="666" cy="123" rx="24" ry="48" fill="${soft}" transform="rotate(55 666 123)"/></g>`;
     const variantMarkup=variantLines.map((line,index)=>`<text x="500" y="${548+index*52}" text-anchor="middle" font-size="${fontSize(line,22,54,39)}" font-weight="800" class="cup-serif">${xml(line)}</text>`).join('');
@@ -619,13 +619,13 @@
       ${artwork.show_bleed?'<rect x="3" y="3" width="994" height="994" rx="72" fill="none" stroke="#d12424" stroke-width="3" stroke-dasharray="9 7"/>':''}
       ${artwork.show_safe_area?'<rect x="40" y="40" width="920" height="920" rx="48" fill="none" stroke="#14843a" stroke-width="3" stroke-dasharray="8 7"/>':''}
     </svg>`;
-  }
+}
 
-  function genericPackageSvg(data, template) {
-    const widthMm = Math.max(25, num(template.page_width_mm, 88.9)); const heightMm = Math.max(25, num(template.page_height_mm, 50.8));
-    const ratio = widthMm / heightMm; const width = 1000; const height = Math.max(400, Math.round(width / ratio));
-    const theme = data.theme || {}; const background = theme.theme_colour || '#FBF5E8'; const border = theme.border_colour || '#32105E'; const gold = theme.accent_gold || '#B88A2F'; const accent = theme.secondary_colour || '#5A2A86';
-    const identityEn = data.packagingIdentityEn || data.packagingProductName || 'Product identity'; const identityFr = data.packagingIdentityFr || 'Identité du produit';
+function genericPackageSvg(data, template) {
+const widthMm = Math.max(25, num(template.page_width_mm, 88.9)); const heightMm = Math.max(25, num(template.page_height_mm, 50.8));
+const ratio = widthMm / heightMm; const width = 1000; const height = Math.max(400, Math.round(width / ratio));
+const theme = data.theme || {}; const background = theme.theme_colour || '#FBF5E8'; const border = theme.border_colour || '#32105E'; const gold = theme.accent_gold || '#B88A2F'; const accent = theme.secondary_colour || '#5A2A86';
+const identityEn = data.packagingIdentityEn || data.packagingProductName || 'Product identity'; const identityFr = data.packagingIdentityFr || 'Identité du produit';
     return `<svg xmlns="http://www.w3.org/2000/svg" width="${widthMm}mm" height="${heightMm}mm" viewBox="0 0 ${width} ${height}" role="img" aria-label="${xml(data.packagingCollection || data.packagingProductName || 'Devil n Dove')} ${xml(identityEn)} packaging layout">
       <style>.copy{font-family:Arial,Helvetica,sans-serif;fill:${border}}.serif{font-family:Georgia,'Times New Roman',serif;fill:${border}}</style>
       <rect width="${width}" height="${height}" fill="${background}"/><rect x="18" y="18" width="${width-36}" height="${height-36}" rx="22" fill="none" stroke="${border}" stroke-width="8"/><rect x="32" y="32" width="${width-64}" height="${height-64}" rx="16" fill="none" stroke="${gold}" stroke-width="3"/>
@@ -638,18 +638,18 @@
       <text x="${width/2}" y="${height*.86}" text-anchor="middle" font-size="${Math.max(16,height*.03)}" class="copy">${xml(data.packagingWebsite || 'devilndove.com')} · ${xml(data.packagingContact || 'devilndove.com/contact')}</text>
       <rect x="${width-130}" y="${height-130}" width="82" height="82" fill="#fff" stroke="${border}" stroke-width="3"/><path d="M${width-118} ${height-118}h22v22h-22zm48 0h22v22h-22zm-48 48h22v22h-22zm32-12h10v10h-10zm16 16h10v10h-10z" fill="${border}"/><text x="${width-89}" y="${height-32}" text-anchor="middle" font-size="12" class="copy">QR PLACEHOLDER</text>
     </svg>`;
-  }
+}
 
-  function candleTopSvg(data, template) {
-    const widthMm = Math.max(20, num(template.page_width_mm, 101.6)); const heightMm = Math.max(20, num(template.page_height_mm, widthMm));
-    const layout = template.layout || {}; const artwork = data.artwork || {}; const theme = data.theme || {};
-    const background = theme.theme_colour || '#FFFFFF'; const ink = theme.border_colour || '#000000'; const profile = String(layout.design_profile || 'candle_top_centered');
-    const topArc = artwork.top_arc_text || layout.default_top_arc_text || 'devilndove.com'; const bottomArc = artwork.bottom_arc_text || layout.default_bottom_arc_text || 'Hand Made in Canada';
-    const primary = artwork.candle_primary_text || layout.default_primary_text || data.packagingCollection || data.packagingProductName || 'Special Occasion';
-    const date1 = artwork.candle_date_line_1 || layout.default_date_line_1 || ''; const eventLine = artwork.candle_event_line || layout.default_event_line || '';
-    const date2 = artwork.candle_date_line_2 || layout.default_date_line_2 || ''; const asset = artwork.artwork_asset || layout.artwork_asset || '';
-    const isWedding = profile === 'candle_top_wedding'; const primaryY = isWedding ? 590 : 455; const primarySize = fontSize(primary, 22, isWedding ? 62 : 78, 38);
-    const safe = Math.max(0, num(layout.safe_margin_mm, 5)); const safeRadius = 470 - (safe / Math.max(widthMm, heightMm) * 1000);
+function candleTopSvg(data, template) {
+const widthMm = Math.max(20, num(template.page_width_mm, 101.6)); const heightMm = Math.max(20, num(template.page_height_mm, widthMm));
+const layout = template.layout || {}; const artwork = data.artwork || {}; const theme = data.theme || {};
+const background = theme.theme_colour || '#FFFFFF'; const ink = theme.border_colour || '#000000'; const profile = String(layout.design_profile || 'candle_top_centered');
+const topArc = artwork.top_arc_text || layout.default_top_arc_text || 'devilndove.com'; const bottomArc = artwork.bottom_arc_text || layout.default_bottom_arc_text || 'Hand Made in Canada';
+const primary = artwork.candle_primary_text || layout.default_primary_text || data.packagingCollection || data.packagingProductName || 'Special Occasion';
+const date1 = artwork.candle_date_line_1 || layout.default_date_line_1 || ''; const eventLine = artwork.candle_event_line || layout.default_event_line || '';
+const date2 = artwork.candle_date_line_2 || layout.default_date_line_2 || ''; const asset = artwork.artwork_asset || layout.artwork_asset || '';
+const isWedding = profile === 'candle_top_wedding'; const primaryY = isWedding ? 590 : 455; const primarySize = fontSize(primary, 22, isWedding ? 62 : 78, 38);
+const safe = Math.max(0, num(layout.safe_margin_mm, 5)); const safeRadius = 470 - (safe / Math.max(widthMm, heightMm) * 1000);
     return `<svg xmlns="http://www.w3.org/2000/svg" width="${widthMm}mm" height="${heightMm}mm" viewBox="0 0 1000 1000" role="img" aria-label="${xml(primary)} round candle-top layout">
       <defs><path id="candle-top-upper-arc" d="M135 320 A385 385 0 0 1 865 320"/><path id="candle-top-lower-arc" d="M135 725 A385 385 0 0 0 865 725"/></defs>
       <style>.round-copy{font-family:Georgia,'Times New Roman',serif;fill:${ink}}.round-script{font-family:'Brush Script MT','Segoe Script',cursive;fill:${ink}}</style>
@@ -664,200 +664,200 @@
       ${artwork.show_bleed ? '<circle cx="500" cy="500" r="495" fill="none" stroke="#d12424" stroke-width="2" stroke-dasharray="9 7"/>' : ''}
       ${artwork.show_safe_area ? `<circle cx="500" cy="500" r="${safeRadius.toFixed(1)}" fill="none" stroke="#14843a" stroke-width="2" stroke-dasharray="8 7"/>` : ''}
     </svg>`;
-  }
+}
 
-  function svgMarkup() {
-    const data = snapshot(); const template = currentTemplate(); const packageType = String(template.package_type || 'product_label'); const profile = String(template.layout?.design_profile || '');
-    if (packageType === 'soap_ribbon' || profile === 'soap_reference_v2' || profile === 'soap_reference_v3') return glacialRibbonSvg(data, template);
-    if (packageType === 'soap_cupcake_label' || profile === 'cupcake_soap_square') return cupcakeSoapLabelSvg(data, template);
-    if (packageType === 'candle_top' || packageType === 'engraved_round' || profile.startsWith('candle_top') || profile === 'round_maker_mark') return candleTopSvg(data, template);
-    return genericPackageSvg(data, template);
-  }
+function svgMarkup() {
+const data = snapshot(); const template = currentTemplate(); const packageType = String(template.package_type || 'product_label'); const profile = String(template.layout?.design_profile || '');
+if (packageType === 'soap_ribbon' || profile === 'soap_reference_v2' || profile === 'soap_reference_v3') return glacialRibbonSvg(data, template);
+if (packageType === 'soap_cupcake_label' || profile === 'cupcake_soap_square') return cupcakeSoapLabelSvg(data, template);
+if (packageType === 'candle_top' || packageType === 'engraved_round' || profile.startsWith('candle_top') || profile === 'round_maker_mark') return candleTopSvg(data, template);
+return genericPackageSvg(data, template);
+}
 
-  function compliance(payload) {
-    const ingredients = payload.structured_ingredients || []; const claims = payload.structured_claims || []; const template = currentTemplate(); const layout = template.layout || {};
-    const packageType = String(template.package_type || payload.package_type || ''); const isRibbon = packageType === 'soap_ribbon'; const isCupcake = packageType === 'soap_cupcake_label'; const isSoap = isRibbon || isCupcake; const isRound = packageType === 'candle_top' || packageType === 'engraved_round';
-    const checks = isRound ? [
-      ['Reusable template', template.packaging_template_id], ['Physical width', num(template.page_width_mm) >= 20], ['Physical height', num(template.page_height_mm) >= 20],
-      ['Centred primary wording', payload.artwork?.candle_primary_text || template.layout?.default_primary_text], ['Upper brand arc', payload.artwork?.top_arc_text || template.layout?.default_top_arc_text], ['Lower origin arc', payload.artwork?.bottom_arc_text || template.layout?.default_bottom_arc_text]
-    ] : [
-      ['English identity', payload.product_identity_en], ['French identity', payload.product_identity_fr], ['Metric net quantity', payload.net_quantity_text],
-      ['Dealer / business', payload.dealer_name], ['Principal address', payload.dealer_address], ['Consumer contact', payload.contact_text], ['Website', payload.website_text],
-      ['Bilingual claims', claims.length > 0 && claims.every((row) => row.claim_en && row.claim_fr)]
-    ];
-    if (isSoap) checks.push(['INCI list', payload.ingredients_inci], ['Made in Canada', payload.made_in_canada_text], ['Structured ingredients', ingredients.length], ['INCI on each required ingredient', ingredients.length && ingredients.filter((row)=>Number(row.required_on_label)!==0).every((row) => row.inci_name)]);
-    if (isRibbon) checks.push(['Rose asset', payload.rose_asset_id]);
-    if (isCupcake) checks.push(['2 × 2 inch canvas', Math.abs(num(template.page_width_mm)-50.8)<.15 && Math.abs(num(template.page_height_mm)-50.8)<.15], ['Cupcake renderer', String(layout.design_profile||'')==='cupcake_soap_square'], ['Purpose text', payload.artwork?.cupcake_purpose_text], ['Cupcake label title', payload.artwork?.cupcake_label_title]);
-    const missing = checks.filter(([, value]) => !value); const warnings = [];
-    if (isRibbon && Math.abs(num(template.page_width_mm) - 279.4) > .2) missing.push(['11-inch artboard', false]);
-    if (isRibbon && Math.abs(num(layout.band_height_mm) - 19.05) > .1) missing.push(['0.75-inch band', false]);
-    if (isRibbon && (Math.abs(num(template.front_width_mm) - 50.8) > .1 || Math.abs(num(template.front_height_mm) - 38.1) > .1)) missing.push(['2 × 1.5-inch front oval', false]);
-    if (isRibbon && Math.abs(num(template.page_height_mm) - 38.1) > .1) warnings.push('This 50 mm rear-seal profile expands the artboard beyond 1.50 inches.');
-    if (isRibbon && Math.abs(num(template.rear_width_mm) - 50) > .1) warnings.push('Photo-fit profile uses a 38.1 mm rear seal because 50 mm cannot fit inside a 38.1 mm-high artboard.');
-    if (isSoap && ingredients.some((row) => row.allergen_note)) warnings.push('At least one ingredient includes an allergen note; verify current Health Canada fragrance-allergen requirements.');
-    if (claims.some((row) => !row.is_approved)) warnings.push('One or more claims are not marked approved.');
-    if (isRibbon) {
-      const requiredRows=ingredients.filter((row)=>Number(row.required_on_label)!==0);
-      const enLayout=ribbonIngredientLayout(requiredRows.map((row)=>row.display_name_en||row.inci_name).filter(Boolean));
-      const frLayout=ribbonIngredientLayout(requiredRows.map((row)=>row.display_name_fr||curatedFrenchDraft(row.display_name_en||row.inci_name)||row.inci_name).filter(Boolean));
-      if(enLayout.overflow||frLayout.overflow) missing.push(['Extended bilingual ingredient label required for complete English and French lists', false]);
-      if(requiredRows.some((row)=>!String(row.display_name_fr||'').trim())) warnings.push('One or more French ingredient names are using a generated/fallback preview. Review and save the French ingredient wording before print approval.');
-    }
-    if (isRibbon && claims.length > 4) warnings.push('Only the first four claim rows fit the standard claims panel; remove, combine or move additional claims after review.');
-    if (isCupcake) warnings.push('The 2 × 2 inch cupcake sticker is intentionally compact. Verify required bilingual identity, full ingredients, net quantity, dealer/address, warnings and any other cosmetic information on this label or a reviewed companion/back/extended label before sale.');
-    if (isRound) warnings.push('Round laser/print preview: confirm the measured lid or blank diameter, safe margin, material settings and a physical proof before production.');
-    else if (!isSoap) warnings.push('General packaging preview: verify category-specific legal fields, physical dieline, barcode/QR destination and material fit before approval.');
-    return { checks, missing, warnings, ready: missing.length === 0 };
-  }
+function compliance(payload) {
+const ingredients = payload.structured_ingredients || []; const claims = payload.structured_claims || []; const template = currentTemplate(); const layout = template.layout || {};
+const packageType = String(template.package_type || payload.package_type || ''); const isRibbon = packageType === 'soap_ribbon'; const isCupcake = packageType === 'soap_cupcake_label'; const isSoap = isRibbon || isCupcake; const isRound = packageType === 'candle_top' || packageType === 'engraved_round';
+const checks = isRound ? [
+['Reusable template', template.packaging_template_id], ['Physical width', num(template.page_width_mm) >= 20], ['Physical height', num(template.page_height_mm) >= 20],
+['Centred primary wording', payload.artwork?.candle_primary_text || template.layout?.default_primary_text], ['Upper brand arc', payload.artwork?.top_arc_text || template.layout?.default_top_arc_text], ['Lower origin arc', payload.artwork?.bottom_arc_text || template.layout?.default_bottom_arc_text]
+] : [
+['English identity', payload.product_identity_en], ['French identity', payload.product_identity_fr], ['Metric net quantity', payload.net_quantity_text],
+['Dealer / business', payload.dealer_name], ['Principal address', payload.dealer_address], ['Consumer contact', payload.contact_text], ['Website', payload.website_text],
+['Bilingual claims', claims.length > 0 && claims.every((row) => row.claim_en && row.claim_fr)]
+];
+if (isSoap) checks.push(['INCI list', payload.ingredients_inci], ['Made in Canada', payload.made_in_canada_text], ['Structured ingredients', ingredients.length], ['INCI on each required ingredient', ingredients.length && ingredients.filter((row)=>Number(row.required_on_label)!==0).every((row) => row.inci_name)]);
+if (isRibbon) checks.push(['Rose asset', payload.rose_asset_id]);
+if (isCupcake) checks.push(['2 × 2 inch canvas', Math.abs(num(template.page_width_mm)-50.8)<.15 && Math.abs(num(template.page_height_mm)-50.8)<.15], ['Cupcake renderer', String(layout.design_profile||'')==='cupcake_soap_square'], ['Purpose text', payload.artwork?.cupcake_purpose_text], ['Cupcake label title', payload.artwork?.cupcake_label_title]);
+const missing = checks.filter(([, value]) => !value); const warnings = [];
+if (isRibbon && Math.abs(num(template.page_width_mm) - 279.4) > .2) missing.push(['11-inch artboard', false]);
+if (isRibbon && Math.abs(num(layout.band_height_mm) - 19.05) > .1) missing.push(['0.75-inch band', false]);
+if (isRibbon && (Math.abs(num(template.front_width_mm) - 50.8) > .1 || Math.abs(num(template.front_height_mm) - 38.1) > .1)) missing.push(['2 × 1.5-inch front oval', false]);
+if (isRibbon && Math.abs(num(template.page_height_mm) - 38.1) > .1) warnings.push('This 50 mm rear-seal profile expands the artboard beyond 1.50 inches.');
+if (isRibbon && Math.abs(num(template.rear_width_mm) - 50) > .1) warnings.push('Photo-fit profile uses a 38.1 mm rear seal because 50 mm cannot fit inside a 38.1 mm-high artboard.');
+if (isSoap && ingredients.some((row) => row.allergen_note)) warnings.push('At least one ingredient includes an allergen note; verify current Health Canada fragrance-allergen requirements.');
+if (claims.some((row) => !row.is_approved)) warnings.push('One or more claims are not marked approved.');
+if (isRibbon) {
+const requiredRows=ingredients.filter((row)=>Number(row.required_on_label)!==0);
+const enLayout=ribbonIngredientLayout(requiredRows.map((row)=>row.display_name_en||row.inci_name).filter(Boolean));
+const frLayout=ribbonIngredientLayout(requiredRows.map((row)=>row.display_name_fr||curatedFrenchDraft(row.display_name_en||row.inci_name)||row.inci_name).filter(Boolean));
+if(enLayout.overflow||frLayout.overflow) missing.push(['Extended bilingual ingredient label required for complete English and French lists', false]);
+if(requiredRows.some((row)=>!String(row.display_name_fr||'').trim())) warnings.push('One or more French ingredient names are using a generated/fallback preview. Review and save the French ingredient wording before print approval.');
+}
+if (isRibbon && claims.length > 4) warnings.push('Only the first four claim rows fit the standard claims panel; remove, combine or move additional claims after review.');
+if (isCupcake) warnings.push('The 2 × 2 inch cupcake sticker is intentionally compact. Verify required bilingual identity, full ingredients, net quantity, dealer/address, warnings and any other cosmetic information on this label or a reviewed companion/back/extended label before sale.');
+if (isRound) warnings.push('Round laser/print preview: confirm the measured lid or blank diameter, safe margin, material settings and a physical proof before production.');
+else if (!isSoap) warnings.push('General packaging preview: verify category-specific legal fields, physical dieline, barcode/QR destination and material fit before approval.');
+return { checks, missing, warnings, ready: missing.length === 0 };
+}
 
-  function renderPreview() {
-    const mount = id('packagingSvgPreview'); const template = currentTemplate(); if (mount) { mount.innerHTML = svgMarkup(); mount.dataset.previewShape = String(template.layout?.shape || 'rectangle'); }
-    const payload = projectPayload(); const result = compliance(payload); const target = id('packagingComplianceResults');
-    const isRound = ['candle_top','engraved_round'].includes(String(template.package_type));
-    const readyNote = isRound ? 'Text and primary dimensions are ready for a review version. A measured blank, safe-area check, material settings and physical laser/print proof still apply.' : 'Data and primary dimensions are ready for a review version. Final formula, bilingual, claim and physical print review still apply.';
+function renderPreview() {
+const mount = id('packagingSvgPreview'); const template = currentTemplate(); if (mount) { mount.innerHTML = svgMarkup(); mount.dataset.previewShape = String(template.layout?.shape || 'rectangle'); }
+const payload = projectPayload(); const result = compliance(payload); const target = id('packagingComplianceResults');
+const isRound = ['candle_top','engraved_round'].includes(String(template.package_type));
+const readyNote = isRound ? 'Text and primary dimensions are ready for a review version. A measured blank, safe-area check, material settings and physical laser/print proof still apply.' : 'Data and primary dimensions are ready for a review version. Final formula, bilingual, claim and physical print review still apply.';
     if (target) target.innerHTML = `<div class="packaging-compliance-grid">${result.checks.map(([label, value]) => `<span class="${value ? 'ok' : 'missing'}">${value ? '✓' : '!'} ${esc(label)}</span>`).join('')}</div>
       ${result.warnings.length ? `<div class="packaging-warning-list"><strong>Physical/design decisions:</strong><ul>${result.warnings.map((warning) => `<li>${esc(warning)}</li>`).join('')}</ul></div>` : ''}
       <p class="small">${result.ready ? readyNote : `${result.missing.length} required check(s) remain incomplete.`}</p>`;
-    const size = id('packagingPreviewSize');
+const size = id('packagingPreviewSize');
     if (size) size.textContent = `Canvas ${num(template.page_width_mm,279.4)} × ${num(template.page_height_mm,38.1)} mm • band ${num(template.layout?.band_height_mm,19.05)} mm • front ${num(template.front_width_mm,50.8)} × ${num(template.front_height_mm,38.1)} mm • rear ${['candle_top','engraved_round'].includes(String(template.package_type))?Math.min(num(template.page_width_mm),num(template.page_height_mm)):num(template.rear_width_mm,38.1)} mm.`;
-    try { localStorage.setItem(STORAGE_KEY, JSON.stringify(snapshot())); } catch {}
-  }
+try { localStorage.setItem(STORAGE_KEY, JSON.stringify(snapshot())); } catch {}
+}
 
-  function ingredientRow(row = {}, index = 0) {
-    const inventory=state.inventory.find((item)=>Number(item.site_item_inventory_id)===Number(row.site_item_inventory_id||0));
+function ingredientRow(row = {}, index = 0) {
+const inventory=state.inventory.find((item)=>Number(item.site_item_inventory_id)===Number(row.site_item_inventory_id||0));
     const inventoryValue=inventory?inventoryChoiceLabel(inventory):(row.site_item_inventory_id?`Inventory #${Number(row.site_item_inventory_id)}`:'');
     return `<tr data-soap-ingredient-row><td class="row-order">${index + 1}</td><td class="packaging-ingredient-inventory-cell"><input class="input" type="search" list="packagingIngredientInventoryOptions" data-field="inventory_search" value="${esc(inventoryValue)}" placeholder="Type inventory item…" autocomplete="off"/><input type="hidden" data-field="site_item_inventory_id" value="${Number(row.site_item_inventory_id||0)||''}"/><small data-ingredient-inventory-note>${inventory?'Inventory reference only — no stock change.':'Optional source/traceability link.'}</small></td><td><input class="input" data-field="inci_name" value="${esc(row.inci_name || '')}" placeholder="INCI name"/></td><td><input class="input" data-field="display_name_en" value="${esc(row.display_name_en || '')}" placeholder="English/common"/></td><td><input class="input" data-field="display_name_fr" value="${esc(row.display_name_fr || '')}" placeholder="French/common"/></td><td><label class="compact-check"><input type="checkbox" data-field="organic_flag" ${Number(row.organic_flag) === 1 ? 'checked' : ''}/> Organic</label></td><td><input class="input" data-field="allergen_note" value="${esc(row.allergen_note || '')}" placeholder="Allergen / review note"/></td><td><label class="compact-check"><input type="checkbox" data-field="required_on_label" ${Number(row.required_on_label) !== 0 ? 'checked' : ''}/> Required</label></td><td><div class="packaging-ingredient-row-actions"><button class="btn" type="button" data-move-ingredient-up aria-label="Move ingredient up" title="Move up">↑</button><button class="btn" type="button" data-move-ingredient-down aria-label="Move ingredient down" title="Move down">↓</button><button class="btn danger" type="button" data-remove-ingredient>Remove</button></div></td></tr>`;
-  }
+}
 
-  function inventoryChoiceLabel(item = {}) {
+function inventoryChoiceLabel(item = {}) {
     const idValue=Number(item.site_item_inventory_id||0);const stock=`${Number(item.on_hand_quantity||0)} ${item.stock_unit_label||'unit'}`;const sku=item.supplier_sku?` · ${item.supplier_sku}`:'';
     return `${item.item_name||'Inventory item'}${sku} · ${stock} · #${idValue}`;
-  }
-  function inventoryByChoice(value='') {
-    const clean=String(value||'').trim();if(!clean)return null;
-    const idMatch=clean.match(/#(\d+)\s*$/);if(idMatch){const match=state.inventory.find((item)=>Number(item.site_item_inventory_id)===Number(idMatch[1]));if(match)return match;}
-    return state.inventory.find((item)=>inventoryChoiceLabel(item)===clean)||state.inventory.find((item)=>String(item.item_name||'').toLowerCase()===clean.toLowerCase())||null;
-  }
-  const inventorySearchTimers = new WeakMap();
-  function inventoryDatalist(idValue) {
+}
+function inventoryByChoice(value='') {
+const clean=String(value||'').trim();if(!clean)return null;
+const idMatch=clean.match(/#(\d+)\s*$/);if(idMatch){const match=state.inventory.find((item)=>Number(item.site_item_inventory_id)===Number(idMatch[1]));if(match)return match;}
+return state.inventory.find((item)=>inventoryChoiceLabel(item)===clean)||state.inventory.find((item)=>String(item.item_name||'').toLowerCase()===clean.toLowerCase())||null;
+}
+const inventorySearchTimers = new WeakMap();
+function inventoryDatalist(idValue) {
     return `<datalist id="${esc(idValue)}">${state.inventory.map((item)=>`<option value="${esc(inventoryChoiceLabel(item))}"></option>`).join('')}</datalist>`;
-  }
-  function mergeInventoryRows(rows = []) {
-    const merged = []; const seen = new Set();
-    for (const item of [...(Array.isArray(rows)?rows:[]), ...state.inventory]) {
-      const key = Number(item?.site_item_inventory_id || 0);
-      if (!key || seen.has(key)) continue;
-      seen.add(key); merged.push(item);
-      if (merged.length >= 240) break;
-    }
-    state.inventory = merged;
-  }
-  function refreshInventoryDatalists() {
-    document.querySelectorAll('datalist[id*="Inventory"]').forEach((list) => {
+}
+function mergeInventoryRows(rows = []) {
+const merged = []; const seen = new Set();
+for (const item of [...(Array.isArray(rows)?rows:[]), ...state.inventory]) {
+const key = Number(item?.site_item_inventory_id || 0);
+if (!key || seen.has(key)) continue;
+seen.add(key); merged.push(item);
+if (merged.length >= 240) break;
+}
+state.inventory = merged;
+}
+function refreshInventoryDatalists() {
+document.querySelectorAll('datalist[id*="Inventory"]').forEach((list) => {
       list.innerHTML = state.inventory.map((item)=>`<option value="${esc(inventoryChoiceLabel(item))}"></option>`).join('');
-    });
-  }
-  async function searchInventoryForInput(input) {
-    const q = String(input?.value || '').trim();
-    if (q.length < 2) return;
-    const facade = globalThis.DDPackagingContracts;
-    if (!facade || typeof facade.readInventory !== 'function') return;
-    try {
-      const result = await facade.readInventory({ q, limit: 40 });
-      mergeInventoryRows(result?.rows || []);
-      refreshInventoryDatalists();
-      const row = input.closest('[data-packaging-component-row],[data-soap-ingredient-row]');
-      const stock = row?.querySelector('[data-inventory-stock]');
+});
+}
+async function searchInventoryForInput(input) {
+const q = String(input?.value || '').trim();
+if (q.length < 2) return;
+const facade = globalThis.DDPackagingContracts;
+if (!facade || typeof facade.readInventory !== 'function') return;
+try {
+const result = await facade.readInventory({ q, limit: 40 });
+mergeInventoryRows(result?.rows || []);
+refreshInventoryDatalists();
+const row = input.closest('[data-packaging-component-row],[data-soap-ingredient-row]');
+const stock = row?.querySelector('[data-inventory-stock]');
       if (stock && Array.isArray(result?.rows)) stock.textContent = `${result.rows.length} matching Inventory item${result.rows.length===1?'':'s'} loaded. Choose a suggestion to link it.`;
-    } catch (error) {
-      console.warn('[DD Packaging Build 177] bounded Inventory search unavailable', error);
-    }
-  }
-  function bindInventorySearchInput(input) {
-    if (!input || input.dataset.ddPackagingInventorySearchBound === '1') return;
-    input.dataset.ddPackagingInventorySearchBound = '1';
-    input.addEventListener('input', () => {
-      const existing = inventorySearchTimers.get(input);
-      if (existing) clearTimeout(existing);
-      const timer = setTimeout(() => {
-        inventorySearchTimers.delete(input);
-        void searchInventoryForInput(input);
-      }, 320);
-      inventorySearchTimers.set(input, timer);
-    });
-  }
-  function claimIconUi(icon='leaf') {
+} catch (error) {
+console.warn('[DD Packaging Build 177] bounded Inventory search unavailable', error);
+}
+}
+function bindInventorySearchInput(input) {
+if (!input || input.dataset.ddPackagingInventorySearchBound === '1') return;
+input.dataset.ddPackagingInventorySearchBound = '1';
+input.addEventListener('input', () => {
+const existing = inventorySearchTimers.get(input);
+if (existing) clearTimeout(existing);
+const timer = setTimeout(() => {
+inventorySearchTimers.delete(input);
+void searchInventoryForInput(input);
+}, 320);
+inventorySearchTimers.set(input, timer);
+});
+}
+function claimIconUi(icon='leaf') {
     return `<span class="packaging-claim-icon" title="${esc(icon)}"><svg viewBox="0 0 36 36" aria-hidden="true">${iconSvg(icon,18,18,'currentColor')}</svg></span>`;
-  }
+}
 
-  function claimRow(row = {}, index = 0) {
-    const icon=row.icon_name||'leaf';
+function claimRow(row = {}, index = 0) {
+const icon=row.icon_name||'leaf';
     return `<article data-soap-claim-row class="packaging-claim-editor-row"><div class="row-order">${index + 1}</div><div class="packaging-claim-editor-icon">${claimIconUi(icon)}</div><div class="packaging-claim-editor-grid"><label><span class="small">English claim</span><input class="input" data-field="claim_en" value="${esc(row.claim_en || '')}" placeholder="English claim"/></label><label><span class="small">French claim</span><input class="input" data-field="claim_fr" value="${esc(row.claim_fr || '')}" placeholder="French claim"/></label><label><span class="small">Icon</span><select class="input" data-field="icon_name">${['leaf','hands','recycle','heart','none'].map((name) => `<option value="${name}" ${String(icon) === name ? 'selected' : ''}>${name}</option>`).join('')}</select></label><label class="packaging-claim-approved"><span class="small">Review</span><span class="compact-check"><input type="checkbox" data-field="is_approved" ${Number(row.is_approved) === 1 ? 'checked' : ''}/> Approved internally</span></label><label class="packaging-claim-note"><span class="small">Review note</span><input class="input" data-field="compliance_note" value="${esc(row.compliance_note || '')}" placeholder="Compliance / review note"/></label></div><button class="btn danger" type="button" data-remove-claim>Remove</button></article>`;
-  }
+}
 
-  function componentRow(row = {}, index = 0) {
-    const selected=state.inventory.find((item)=>Number(item.site_item_inventory_id)===Number(row.site_item_inventory_id||0));
+function componentRow(row = {}, index = 0) {
+const selected=state.inventory.find((item)=>Number(item.site_item_inventory_id)===Number(row.site_item_inventory_id||0));
     const searchValue=selected?inventoryChoiceLabel(selected):(row.inventory_item_name?`${row.inventory_item_name} · #${Number(row.site_item_inventory_id||0)}`:'');
     const stock=selected?`${Number(selected.on_hand_quantity||0)} ${selected.stock_unit_label||'unit'} on hand${Number(selected.reserved_quantity||0)?` · ${Number(selected.reserved_quantity)} reserved`:''}`:(row.site_item_inventory_id?'Linked inventory item':'Choose an inventory item first; fields below can still be entered manually.');
     return `<article data-packaging-component-row class="packaging-component-card"><div class="packaging-component-card-top"><span class="row-order">${index + 1}</span><strong>${esc(row.component_name||selected?.item_name||'Packaging component')}</strong><button class="btn danger" type="button" data-remove-component>Remove</button></div><div class="packaging-component-card-grid"><label class="packaging-component-inventory"><span class="small">Inventory item — type to search</span><input class="input" type="search" list="packagingComponentInventoryOptions" data-field="inventory_search" value="${esc(searchValue)}" placeholder="Start typing an inventory item name…" autocomplete="off"/><input type="hidden" data-field="site_item_inventory_id" value="${Number(row.site_item_inventory_id||0)||''}"/><small data-inventory-stock>${esc(stock)}</small></label><label><span class="small">Component type</span><select class="input" data-field="component_type">${['label','container','closure','box','wrap','tissue','insert','seal','barcode','shipping','other'].map((value) => `<option value="${value}" ${String(row.component_type || 'label') === value ? 'selected' : ''}>${value}</option>`).join('')}</select></label><label><span class="small">Component name</span><input class="input" data-field="component_name" value="${esc(row.component_name || selected?.item_name || '')}" placeholder="Bottle, label stock, insert…"/></label><label><span class="small">SKU / supplier ref</span><input class="input" data-field="sku_reference" value="${esc(row.sku_reference || selected?.supplier_sku || '')}" placeholder="SKU / supplier ref"/></label><label><span class="small">Quantity per finished unit</span><input class="input" data-field="quantity_per_finished_unit" type="number" min="0.0001" step="0.0001" value="${esc(row.quantity_per_finished_unit ?? 1)}"/></label><label><span class="small">Waste %</span><input class="input" data-field="wastage_percent" type="number" min="0" step="0.1" value="${esc(row.wastage_percent || 0)}"/></label><label><span class="small">Unit cost ¢</span><input class="input" data-field="unit_cost_cents" type="number" min="0" step="1" value="${esc(row.unit_cost_cents || selected?.unit_cost_cents || 0)}"/></label><label><span class="small">Supplier</span><input class="input" data-field="supplier_name" value="${esc(row.supplier_name || selected?.supplier_name || '')}" placeholder="Supplier"/></label><label class="packaging-component-lot"><span class="small">Traceability</span><span class="compact-check"><input type="checkbox" data-field="lot_tracking_required" ${Number(row.lot_tracking_required) === 1 ? 'checked' : ''}/> Lot tracking</span></label><label class="packaging-component-notes"><span class="small">Notes</span><input class="input" data-field="notes" value="${esc(row.notes || '')}" placeholder="Finish, size, reorder note"/></label></div></article>`;
-  }
+}
 
 
-  function sourceInciRow(row = {}, index = 0) {
+function sourceInciRow(row = {}, index = 0) {
     return `<tr data-source-inci-row><td class="row-order">${index + 1}</td><td><input class="input" data-field="inci_name" value="${esc(row.inci_name || '')}" placeholder="Supplier INCI / ingredient"/></td><td><input class="input" data-field="display_name_en" value="${esc(row.display_name_en || '')}" placeholder="English/common name"/></td><td><input class="input" data-field="display_name_fr" value="${esc(row.display_name_fr || '')}" placeholder="French/common name"/></td><td><label class="compact-check"><input type="checkbox" data-field="organic_flag" ${Number(row.organic_flag) === 1 ? 'checked' : ''}/> Organic</label></td><td><input class="input" data-field="allergen_note" value="${esc(row.allergen_note || '')}" placeholder="Supplier / allergen note"/></td><td><label class="compact-check"><input type="checkbox" data-field="required_on_label" ${Number(row.required_on_label) !== 0 ? 'checked' : ''}/> Label</label></td><td><button class="btn danger" type="button" data-remove-source-inci>Remove</button></td></tr>`;
-  }
+}
 
-  function sourceInciRowsFromDom() {
-    return [...document.querySelectorAll('[data-source-inci-row]')].map((row,index)=>({
-      sort_order:index+1,
-      inci_name:row.querySelector('[data-field="inci_name"]')?.value||'',
-      display_name_en:row.querySelector('[data-field="display_name_en"]')?.value||'',
-      display_name_fr:row.querySelector('[data-field="display_name_fr"]')?.value||'',
-      organic_flag:row.querySelector('[data-field="organic_flag"]')?.checked?1:0,
-      allergen_note:row.querySelector('[data-field="allergen_note"]')?.value||'',
-      required_on_label:row.querySelector('[data-field="required_on_label"]')?.checked?1:0
-    })).filter((row)=>row.inci_name||row.display_name_en||row.display_name_fr);
-  }
+function sourceInciRowsFromDom() {
+return [...document.querySelectorAll('[data-source-inci-row]')].map((row,index)=>({
+sort_order:index+1,
+inci_name:row.querySelector('[data-field="inci_name"]')?.value||'',
+display_name_en:row.querySelector('[data-field="display_name_en"]')?.value||'',
+display_name_fr:row.querySelector('[data-field="display_name_fr"]')?.value||'',
+organic_flag:row.querySelector('[data-field="organic_flag"]')?.checked?1:0,
+allergen_note:row.querySelector('[data-field="allergen_note"]')?.value||'',
+required_on_label:row.querySelector('[data-field="required_on_label"]')?.checked?1:0
+})).filter((row)=>row.inci_name||row.display_name_en||row.display_name_fr);
+}
 
-  function setSourceInciRows(rows = []) {
-    const mount=id('packagingSourceInciRows');if(!mount)return;
-    const safeRows=Array.isArray(rows)&&rows.length?rows:[{}];mount.innerHTML=safeRows.map(sourceInciRow).join('');bindSourceInciRows();
-  }
-  function bindSourceInciRows(){document.querySelectorAll('[data-remove-source-inci]').forEach((button)=>{button.onclick=()=>{button.closest('[data-source-inci-row]')?.remove();updateRowNumbers('[data-source-inci-row]');if(!document.querySelector('[data-source-inci-row]'))setSourceInciRows([{}]);};});}
-  function addSourceInciRow(row={}){id('packagingSourceInciRows')?.insertAdjacentHTML('beforeend',sourceInciRow(row,document.querySelectorAll('[data-source-inci-row]').length));bindSourceInciRows();}
-  function importSourceIngredientText(){
-    const raw=String(id('packagingSourceIngredientRaw')?.value||'').replace(/^ingredients?\s*:\s*/i,'').trim();if(!raw){message('Paste the supplier ingredient declaration first.','error');return;}
-    const parts=raw.split(/[,;\n]+/).map((value)=>value.replace(/^[-•\d.)\s]+/,'').trim()).filter(Boolean);
-    if(!parts.length){message('No ingredient names could be found in the supplier text.','error');return;}
-    setSourceInciRows(parts.map((name,index)=>({sort_order:index+1,inci_name:name,display_name_en:name,display_name_fr:name,required_on_label:1,verification_status:'needs_review'})));
+function setSourceInciRows(rows = []) {
+const mount=id('packagingSourceInciRows');if(!mount)return;
+const safeRows=Array.isArray(rows)&&rows.length?rows:[{}];mount.innerHTML=safeRows.map(sourceInciRow).join('');bindSourceInciRows();
+}
+function bindSourceInciRows(){document.querySelectorAll('[data-remove-source-inci]').forEach((button)=>{button.onclick=()=>{button.closest('[data-source-inci-row]')?.remove();updateRowNumbers('[data-source-inci-row]');if(!document.querySelector('[data-source-inci-row]'))setSourceInciRows([{}]);};});}
+function addSourceInciRow(row={}){id('packagingSourceInciRows')?.insertAdjacentHTML('beforeend',sourceInciRow(row,document.querySelectorAll('[data-source-inci-row]').length));bindSourceInciRows();}
+function importSourceIngredientText(){
+const raw=String(id('packagingSourceIngredientRaw')?.value||'').replace(/^ingredients?\s*:\s*/i,'').trim();if(!raw){message('Paste the supplier ingredient declaration first.','error');return;}
+const parts=raw.split(/[,;\n]+/).map((value)=>value.replace(/^[-•\d.)\s]+/,'').trim()).filter(Boolean);
+if(!parts.length){message('No ingredient names could be found in the supplier text.','error');return;}
+setSourceInciRows(parts.map((name,index)=>({sort_order:index+1,inci_name:name,display_name_en:name,display_name_fr:name,required_on_label:1,verification_status:'needs_review'})));
     message(`${parts.length} draft source ingredient row${parts.length===1?'':'s'} created. Verify the supplier INCI names before marking the source verified.`,'success');
-  }
+}
 
-  function materialSubtypeLabel(row={}){return String(row.material_subtype||row.material_type||'material').replaceAll('_',' ');}
-  function sourceFamilyLabel(value='general'){const labels={soap:'Soap',candle:'Candles',bath_body:'Bath & body',home_fragrance:'Home fragrance',cosmetic:'Cosmetic / body',general:'General',other:'Other'};return labels[String(value||'general')]||String(value||'general').replaceAll('_',' ');}
-  function sourceMaterialCoreType(subtype='other'){const value=String(subtype||'other');if(value==='soap_base')return'soap_base';if(['fragrance_oil','essential_oil_blend'].includes(value))return'fragrance_oil';if(['colourant','dye','mica','pigment'].includes(value))return'colourant';return'additive';}
-  function sourceMaterialDefaultRole(subtype='other'){const value=String(subtype||'other');if(['soap_base','candle_wax','cosmetic_base','carrier_base'].includes(value))return'base';if(['fragrance_oil','essential_oil_blend'].includes(value))return'fragrance';if(['colourant','dye','mica','pigment'].includes(value))return'colourant';return'additive';}
+function materialSubtypeLabel(row={}){return String(row.material_subtype||row.material_type||'material').replaceAll('_',' ');}
+function sourceFamilyLabel(value='general'){const labels={soap:'Soap',candle:'Candles',bath_body:'Bath & body',home_fragrance:'Home fragrance',cosmetic:'Cosmetic / body',general:'General',other:'Other'};return labels[String(value||'general')]||String(value||'general').replaceAll('_',' ');}
+function sourceMaterialCoreType(subtype='other'){const value=String(subtype||'other');if(value==='soap_base')return'soap_base';if(['fragrance_oil','essential_oil_blend'].includes(value))return'fragrance_oil';if(['colourant','dye','mica','pigment'].includes(value))return'colourant';return'additive';}
+function sourceMaterialDefaultRole(subtype='other'){const value=String(subtype||'other');if(['soap_base','candle_wax','cosmetic_base','carrier_base'].includes(value))return'base';if(['fragrance_oil','essential_oil_blend'].includes(value))return'fragrance';if(['colourant','dye','mica','pigment'].includes(value))return'colourant';return'additive';}
 
-  function formulaLibraryOptions(value = '') {
+function formulaLibraryOptions(value = '') {
     return `<option value="">Choose a saved finished formula…</option>${state.formulaLibrary.map((row)=>`<option value="${Number(row.packaging_formula_library_id||0)}" ${Number(value)===Number(row.packaging_formula_library_id)?'selected':''}>${esc(row.formula_name)}${Number(row.is_system)===1?' · built-in':' · custom'}</option>`).join('')}`;
-  }
+}
 
-  function sourceMaterialOptions(value = '') {
+function sourceMaterialOptions(value = '') {
     return `<option value="">Choose a purchased/source material…</option>${state.sourceMaterialLibrary.map((row)=>`<option value="${Number(row.packaging_source_material_template_id||0)}" ${Number(value)===Number(row.packaging_source_material_template_id)?'selected':''}>${esc(row.material_name)} · ${esc(sourceFamilyLabel(row.product_family))} / ${esc(materialSubtypeLabel(row))}${row.supplier_name?` · ${esc(row.supplier_name)}`:''}</option>`).join('')}`;
-  }
+}
 
-  function sourceMaterialCard(row, attachedIds = new Set(), allowAttach = true) {
-    const sourceId=Number(row.packaging_source_material_template_id||0);const attached=attachedIds.has(sourceId);const ingredientCount=Array.isArray(row.master_inci)?row.master_inci.length:0;const benefitCount=Array.isArray(row.benefits)?row.benefits.length:0;
+function sourceMaterialCard(row, attachedIds = new Set(), allowAttach = true) {
+const sourceId=Number(row.packaging_source_material_template_id||0);const attached=attachedIds.has(sourceId);const ingredientCount=Array.isArray(row.master_inci)?row.master_inci.length:0;const benefitCount=Array.isArray(row.benefits)?row.benefits.length:0;
     const fragrance=String(row.material_type)==='fragrance_oil'?` · allergen review ${row.fragrance_allergen_review_status||'needs_supplier_data'}`:'';const swatch=row.colour_hex?`<span class="packaging-colour-swatch" style="--swatch:${esc(row.colour_hex)}" title="${esc(row.colour_hex)}"></span>`:'';
     return `<article class="packaging-library-card packaging-source-card ${attached?'is-attached':''}"><img class="packaging-source-thumb" src="${esc(row.source_image_url||'/assets/packaging/placeholders/soap-base-source-template.svg')}" alt="${esc(row.material_name||'Source material')} source material"/><div class="packaging-source-card-body"><div class="packaging-card-badges"><span class="status-pill">${esc(sourceFamilyLabel(row.product_family))}</span><span class="status-pill">${esc(materialSubtypeLabel(row))}</span><span class="status-pill">${esc(row.verification_status||'needs_review')}</span>${swatch}${attached?'<span class="status-pill">attached</span>':''}</div><strong>${esc(row.material_name||'Source material')}</strong><small>${esc(row.supplier_name||'Supplier not recorded')}${row.supplier_sku?` · ${esc(row.supplier_sku)}`:''} · ${ingredientCount} source ingredient row(s) · ${benefitCount} benefit(s)${esc(fragrance)}</small>${row.allergen_statement?`<p class="small"><strong>${['supplier_verified','owner_verified'].includes(String(row.verification_status||''))?'Reviewed supplier allergen statement':'Unverified supplier allergen statement'}:</strong> ${esc(row.allergen_statement)}</p>`:''}${row.compliance_notes?`<p class="small"><strong>Review note:</strong> ${esc(row.compliance_notes)}</p>`:''}</div><div class="packaging-library-card-actions">${allowAttach?`<button class="btn primary" type="button" data-use-source-material="${sourceId}">${attached?'Reapply':'Use template'}</button>`:''}<button class="btn" type="button" data-load-source-material="${sourceId}">Edit/view</button>${attached?`<button class="btn" type="button" data-detach-source-material="${sourceId}">Detach</button>`:''}${Number(row.is_system)===1?'':`<button class="btn danger" type="button" data-delete-source-material="${sourceId}">Delete</button>`}</div></article>`;
-  }
+}
 
-  function sourceMaterialManagerMarkup({attachedIds=new Set(),sourceMaterials=[],allowAttach=true,standalone=false}={}) {
-    const rows=state.sourceMaterialLibrary;
-    const attachedBase=sourceMaterials.find((row)=>String(row.material_role)==='base');
-    const selectedId=Number(state.activeSourceMaterialId||attachedBase?.packaging_source_material_template_id||rows[0]?.packaging_source_material_template_id||0);
-    const activeRow=sourceMaterialById(selectedId)||rows[0]||null;
-    if(activeRow)state.activeSourceMaterialId=Number(activeRow.packaging_source_material_template_id||0);
+function sourceMaterialManagerMarkup({attachedIds=new Set(),sourceMaterials=[],allowAttach=true,standalone=false}={}) {
+const rows=state.sourceMaterialLibrary;
+const attachedBase=sourceMaterials.find((row)=>String(row.material_role)==='base');
+const selectedId=Number(state.activeSourceMaterialId||attachedBase?.packaging_source_material_template_id||rows[0]?.packaging_source_material_template_id||0);
+const activeRow=sourceMaterialById(selectedId)||rows[0]||null;
+if(activeRow)state.activeSourceMaterialId=Number(activeRow.packaging_source_material_template_id||0);
     return `<section class="packaging-library-section packaging-material-library-hub"><div class="section-heading-row packaging-library-heading"><div><p class="eyebrow">Material Library</p><h4>${standalone?'Manage purchased materials before creating a label':'Purchased/source material templates'}</h4><p class="small">Choose one template from the dropdown. Only that active template is shown and edited below. Soap bases, waxes, fragrance/essential-oil blends, colours and additives keep their supplier ingredient/INCI evidence here.</p></div><span class="status-pill">${rows.length} template${rows.length===1?'':'s'}</span></div>
       ${!state.sourceMaterialMetadataReady?`<div class="packaging-warning-list"><strong>Build 255 database migration required</strong><p class="small">The product-family/source-category metadata needs <code>database_build255_packaging_material_library_hub.sql</code>.</p></div>`:''}
       <div class="grid cols-2 packaging-source-picker"><label><span class="small">Active source-material template</span><select class="input" id="packagingSourceMaterialTemplateId">${sourceMaterialOptions(activeRow?.packaging_source_material_template_id||'')}</select></label><label><span class="small">Attached sources on this label</span><input class="input" readonly value="${esc(sourceMaterials.length?sourceMaterials.map((row)=>`${row.material_role}: ${row.material_name}`).join(' · '):'None yet')}"/></label></div>
@@ -875,111 +875,111 @@
         <label><span class="small">Supplier allergen statement / characteristics</span><textarea class="input" id="packagingSourceAllergenStatement" rows="3"></textarea></label><label><span class="small">Supplier benefits / characteristics — separate entries with a blank line; use “Title: details”</span><textarea class="input" id="packagingSourceBenefits" rows="7"></textarea></label><label><span class="small">Supplier claim suggestions — one per line; never auto-approved</span><textarea class="input" id="packagingSourceClaims" rows="4"></textarea></label><label><span class="small">Fragrance allergens — one per line as INCI | concentration % | required | notes</span><textarea class="input" id="packagingSourceFragranceAllergens" rows="4"></textarea></label><div class="grid cols-2"><label><span class="small">Usage / process notes</span><textarea class="input" id="packagingSourceUsageNotes" rows="3"></textarea></label><label><span class="small">Compliance / review notes</span><textarea class="input" id="packagingSourceComplianceNotes" rows="3"></textarea></label></div>
         <div class="grid cols-2"><label><span class="small">Fragrance-allergen review</span><select class="input" id="packagingSourceFragranceReview"><option value="not_applicable">Not applicable</option><option value="needs_supplier_data">Needs supplier data</option><option value="needs_review">Needs review</option><option value="reviewed">Reviewed</option></select></label></div><div class="packaging-save-actions"><button class="btn primary" id="savePackagingSourceMaterial" type="button">Save material template</button><button class="btn" id="clearPackagingSourceMaterialEditor" type="button">Clear editor for new template</button></div>
       </div></details></section>`;
-  }
+}
 
-  function sourceBenefitMarkup(row) {
-    const benefits=Array.isArray(row?.benefits)?row.benefits:[];if(!benefits.length)return '<p class="small">No supplier benefits/characteristics stored for this source.</p>';
+function sourceBenefitMarkup(row) {
+const benefits=Array.isArray(row?.benefits)?row.benefits:[];if(!benefits.length)return '<p class="small">No supplier benefits/characteristics stored for this source.</p>';
     return `<div class="packaging-source-benefits">${benefits.map((benefit,index)=>`<article><strong>${esc(benefit.title||`Benefit ${index+1}`)}</strong><p class="small">${esc(benefit.body||'')}</p><button class="btn" type="button" data-add-source-benefit-claim="${Number(row.packaging_source_material_template_id||0)}" data-benefit-index="${index}">Add title as draft claim</button></article>`).join('')}</div>`;
-  }
+}
 
-  function parseBenefitsText(value='') {
-    return String(value||'').split(/\n\s*\n/).map((block)=>block.trim()).filter(Boolean).map((block)=>{const lines=block.split(/\r?\n/).map((line)=>line.trim()).filter(Boolean);const first=lines.shift()||'';const split=first.match(/^([^:]{2,100}):\s*(.*)$/);return split?{title:split[1],body:[split[2],...lines].filter(Boolean).join(' '),label_candidate:0}:{title:first,body:lines.join(' '),label_candidate:0};});
-  }
-  function parseClaimLines(value='') {return String(value||'').split(/\r?\n/).map((line)=>line.trim()).filter(Boolean).map((claim_en)=>({claim_en,claim_fr:'',icon_name:'leaf',label_candidate:0,compliance_note:'Supplier/source claim. Human compliance and French review required before label approval.'}));}
-  function parseFragranceAllergenLines(value='') {return String(value||'').split(/\r?\n/).map((line)=>line.trim()).filter(Boolean).map((line)=>{const parts=line.split('|').map((v)=>v.trim());const concentration=Number(parts[1]);return{inci_name:parts[0],concentration_percent:Number.isFinite(concentration)?concentration:null,disclosure_required:String(parts[2]||'').toLowerCase()==='required'?1:0,notes:parts.slice(3).join(' | ')};});}
+function parseBenefitsText(value='') {
+return String(value||'').split(/\n\s*\n/).map((block)=>block.trim()).filter(Boolean).map((block)=>{const lines=block.split(/\r?\n/).map((line)=>line.trim()).filter(Boolean);const first=lines.shift()||'';const split=first.match(/^([^:]{2,100}):\s*(.*)$/);return split?{title:split[1],body:[split[2],...lines].filter(Boolean).join(' '),label_candidate:0}:{title:first,body:lines.join(' '),label_candidate:0};});
+}
+function parseClaimLines(value='') {return String(value||'').split(/\r?\n/).map((line)=>line.trim()).filter(Boolean).map((claim_en)=>({claim_en,claim_fr:'',icon_name:'leaf',label_candidate:0,compliance_note:'Supplier/source claim. Human compliance and French review required before label approval.'}));}
+function parseFragranceAllergenLines(value='') {return String(value||'').split(/\r?\n/).map((line)=>line.trim()).filter(Boolean).map((line)=>{const parts=line.split('|').map((v)=>v.trim());const concentration=Number(parts[1]);return{inci_name:parts[0],concentration_percent:Number.isFinite(concentration)?concentration:null,disclosure_required:String(parts[2]||'').toLowerCase()==='required'?1:0,notes:parts.slice(3).join(' | ')};});}
 
-  function libraryContentCard(row) {
-    const type=String(row.content_type||'ingredient'); const addLabel=type==='claim'?'Add to label':'Add ingredient row';
+function libraryContentCard(row) {
+const type=String(row.content_type||'ingredient'); const addLabel=type==='claim'?'Add to label':'Add ingredient row';
     const detail=type==='claim'?`${row.text_en||''}${row.text_fr?` / ${row.text_fr}`:''}`:`${row.inci_name||row.text_en||''}${row.text_fr&&row.text_fr!==row.inci_name?` / ${row.text_fr}`:''}`;
     return `<article class="packaging-library-card ${type==='claim'?'packaging-claim-library-card':''}">${type==='claim'?claimIconUi(row.icon_name||'leaf'):''}<div><span class="status-pill">${esc(type.replaceAll('_',' '))}</span><strong>${esc(row.item_name||'Library item')}</strong><small>${esc(detail)}</small></div><div class="packaging-library-card-actions"><button class="btn" type="button" data-add-library-content="${Number(row.packaging_content_library_id||0)}">${addLabel}</button>${Number(row.is_system)===1?'':`<button class="btn danger" type="button" data-delete-library-content="${Number(row.packaging_content_library_id||0)}">Delete</button>`}</div></article>`;
-  }
+}
 
-  function reusableContentOptions(selectedId=0){
-    const rows=state.contentLibrary.filter((row)=>['ingredient','fragrance_oil','colourant'].includes(String(row.content_type||'')));
-    const groups=[['ingredient','Individual ingredients'],['fragrance_oil','Fragrance / essential-oil blends'],['colourant','Colourants / micas / pigments']];
+function reusableContentOptions(selectedId=0){
+const rows=state.contentLibrary.filter((row)=>['ingredient','fragrance_oil','colourant'].includes(String(row.content_type||'')));
+const groups=[['ingredient','Individual ingredients'],['fragrance_oil','Fragrance / essential-oil blends'],['colourant','Colourants / micas / pigments']];
     return `<option value="">Choose a reusable ingredient / blend / colourant…</option>${groups.map(([type,label])=>{const items=rows.filter((row)=>row.content_type===type);return items.length?`<optgroup label="${esc(label)}">${items.map((row)=>`<option value="${Number(row.packaging_content_library_id||0)}" ${Number(selectedId)===Number(row.packaging_content_library_id)?'selected':''}>${esc(row.item_name||'Library item')}${row.inci_name?` · ${esc(row.inci_name)}`:''}</option>`).join('')}</optgroup>`:'';}).join('')}`;
-  }
-  function activeReusableContentMarkup(contentId=0){
-    const row=state.contentLibrary.find((item)=>Number(item.packaging_content_library_id)===Number(contentId));
-    if(!row)return '<p class="small">Choose an ingredient, fragrance/essential-oil blend or colourant from the dropdown to see it here.</p>';
-    const notes=row.metadata?.notes||row.metadata?.source_material_name||'';
+}
+function activeReusableContentMarkup(contentId=0){
+const row=state.contentLibrary.find((item)=>Number(item.packaging_content_library_id)===Number(contentId));
+if(!row)return '<p class="small">Choose an ingredient, fragrance/essential-oil blend or colourant from the dropdown to see it here.</p>';
+const notes=row.metadata?.notes||row.metadata?.source_material_name||'';
     return `<article class="packaging-library-card packaging-active-library-card"><div><span class="status-pill">${esc(String(row.content_type||'ingredient').replaceAll('_',' '))}</span><strong>${esc(row.item_name||'Library item')}</strong><small>${esc(row.inci_name||row.text_en||'')}${row.text_fr?` / ${esc(row.text_fr)}`:''}</small>${notes?`<p class="small">${esc(notes)}</p>`:''}</div><div class="packaging-library-card-actions"><button class="btn primary" type="button" data-add-library-content="${Number(row.packaging_content_library_id||0)}">Add to current label</button>${Number(row.is_system)===1||Number(row.metadata?.auto_generated)===1?'':`<button class="btn danger" type="button" data-delete-library-content="${Number(row.packaging_content_library_id||0)}">Delete</button>`}</div></article>`;
-  }
+}
 
-  function cupcakeControlsMarkup(project = {}, template = {}, artwork = {}) {
-    if (String(template.package_type || project.package_type || '') !== 'soap_cupcake_label') return '';
-    const selected = String(artwork.cupcake_reference_id || template.layout?.cupcake_reference_id || 'sweet-orange');
-    const palette = String(artwork.cupcake_palette_id || '');
-    const labelTitle = String(artwork.cupcake_label_title || template.layout?.default_label_title || 'Cupcake Soap');
-    const purpose = String(artwork.cupcake_purpose_text || template.layout?.default_purpose || cupcakePresetById(selected).purpose);
-    return '<section class="packaging-cupcake-editor" data-cupcake-label-controls>' +
-      '<div class="section-heading-row"><div><p class="eyebrow">Soap Cupcake label</p><h4>Editable 2 × 2 inch front-label family</h4><p class="small">The five owner-supplied concepts set the visual direction. Text, ingredients, purpose, origin wording, website and colours stay editable in Packaging Studio.</p></div><span class="status-pill">50.8 × 50.8 mm</span></div>' +
-      '<input type="hidden" id="packagingCupcakeReference" value="' + esc(selected) + '"/><input type="hidden" id="packagingCupcakePalette" value="' + esc(palette) + '"/>' +
-      '<div class="packaging-cupcake-presets">' + cupcakePresetCardsMarkup(selected) + '</div>' +
-      '<div class="grid cols-2"><label><span class="small">Main label title</span><input class="input" id="packagingCupcakeLabelTitle" value="' + esc(labelTitle) + '" placeholder="Cupcake Soap"/></label><label><span class="small">Purpose wording</span><input class="input" id="packagingCupcakePurpose" value="' + esc(purpose) + '" placeholder="gentle hand & body soap"/></label></div>' +
-      '<div class="packaging-cupcake-colour-section"><strong>Additional colour directions</strong><span class="small">These change the palette only; your product name, ingredients and purpose stay intact.</span><div class="packaging-cupcake-colours">' + cupcakeColourMarkup(palette) + '</div></div>' +
-      '<div class="packaging-compliance-callout"><strong>Compact-label boundary</strong><p class="small">This front sticker is exactly 2 × 2 inches. Keep the front readable. If complete bilingual cosmetic identity, full INCI, metric quantity, dealer/address, warnings or other required information cannot fit legibly, use a reviewed companion/back/extended label rather than shrinking required text.</p></div>' +
-      '</section>';
-  }
+function cupcakeControlsMarkup(project = {}, template = {}, artwork = {}) {
+if (String(template.package_type || project.package_type || '') !== 'soap_cupcake_label') return '';
+const selected = String(artwork.cupcake_reference_id || template.layout?.cupcake_reference_id || 'sweet-orange');
+const palette = String(artwork.cupcake_palette_id || '');
+const labelTitle = String(artwork.cupcake_label_title || template.layout?.default_label_title || 'Cupcake Soap');
+const purpose = String(artwork.cupcake_purpose_text || template.layout?.default_purpose || cupcakePresetById(selected).purpose);
+return '<section class="packaging-cupcake-editor" data-cupcake-label-controls>' +
+'<div class="section-heading-row"><div><p class="eyebrow">Soap Cupcake label</p><h4>Editable 2 × 2 inch front-label family</h4><p class="small">The five owner-supplied concepts set the visual direction. Text, ingredients, purpose, origin wording, website and colours stay editable in Packaging Studio.</p></div><span class="status-pill">50.8 × 50.8 mm</span></div>' +
+'<input type="hidden" id="packagingCupcakeReference" value="' + esc(selected) + '"/><input type="hidden" id="packagingCupcakePalette" value="' + esc(palette) + '"/>' +
+'<div class="packaging-cupcake-presets">' + cupcakePresetCardsMarkup(selected) + '</div>' +
+'<div class="grid cols-2"><label><span class="small">Main label title</span><input class="input" id="packagingCupcakeLabelTitle" value="' + esc(labelTitle) + '" placeholder="Cupcake Soap"/></label><label><span class="small">Purpose wording</span><input class="input" id="packagingCupcakePurpose" value="' + esc(purpose) + '" placeholder="gentle hand & body soap"/></label></div>' +
+'<div class="packaging-cupcake-colour-section"><strong>Additional colour directions</strong><span class="small">These change the palette only; your product name, ingredients and purpose stay intact.</span><div class="packaging-cupcake-colours">' + cupcakeColourMarkup(palette) + '</div></div>' +
+'<div class="packaging-compliance-callout"><strong>Compact-label boundary</strong><p class="small">This front sticker is exactly 2 × 2 inches. Keep the front readable. If complete bilingual cosmetic identity, full INCI, metric quantity, dealer/address, warnings or other required information cannot fit legibly, use a reviewed companion/back/extended label rather than shrinking required text.</p></div>' +
+'</section>';
+}
 
-  function templateCard(row, selectedId = 0) {
-    const layout=row.layout||{}; const active=Number(selectedId)===Number(row.packaging_template_id);
+function templateCard(row, selectedId = 0) {
+const layout=row.layout||{}; const active=Number(selectedId)===Number(row.packaging_template_id);
     return `<article class="packaging-template-card ${active?'is-active':''}"><div><span class="status-pill">${Number(row.is_system)===1?'Built-in':'Custom'}</span><strong>${esc(row.template_name||'Template')}</strong><small>${esc(row.package_type||'packaging')} · ${num(row.page_width_mm)} × ${num(row.page_height_mm)} mm · ${esc(layout.shape||'rectangle')}</small><p class="small">${esc(row.description||'')}</p></div><button class="btn ${active?'primary':''}" type="button" data-use-packaging-template="${Number(row.packaging_template_id||0)}">${active?'Current template':'Use template'}</button></article>`;
-  }
+}
 
-  function inferProductRoseKey(value='') {
-    const source=String(value||'').toLowerCase();
-    if(source.includes('glacial'))return'glacial-purple';if(source.includes('shea')||source.includes('pumice'))return'earth-shea-pumice';if(source.includes('oatmeal')||source.includes('goat'))return'health-oatmeal-goat-milk';if(source.includes('sea breeze'))return'sea-breeze';if(source.includes('charcoal'))return'charcoal';if(source.includes('honey'))return'honey';if(source.includes('rose'))return'rose';return'';
-  }
-  function selectedProductRoseKey(productName='', roseId='') {
-    const inferred=inferProductRoseKey(productName); const match=PRODUCT_ROSE_PRESETS.find((row)=>row[0]===inferred);
-    if (match && match[2] === String(roseId || '')) return inferred;
-    return PRODUCT_ROSE_PRESETS.find((row) => row[2] === String(roseId || ''))?.[0] || '';
-  }
+function inferProductRoseKey(value='') {
+const source=String(value||'').toLowerCase();
+if(source.includes('glacial'))return'glacial-purple';if(source.includes('shea')||source.includes('pumice'))return'earth-shea-pumice';if(source.includes('oatmeal')||source.includes('goat'))return'health-oatmeal-goat-milk';if(source.includes('sea breeze'))return'sea-breeze';if(source.includes('charcoal'))return'charcoal';if(source.includes('honey'))return'honey';if(source.includes('rose'))return'rose';return'';
+}
+function selectedProductRoseKey(productName='', roseId='') {
+const inferred=inferProductRoseKey(productName); const match=PRODUCT_ROSE_PRESETS.find((row)=>row[0]===inferred);
+if (match && match[2] === String(roseId || '')) return inferred;
+return PRODUCT_ROSE_PRESETS.find((row) => row[2] === String(roseId || ''))?.[0] || '';
+}
 
-  function updateRoseAssetPath() {
-    const field=id('packagingRoseAssetPath'); if(!field)return;
-    field.value=roseAssetPath(id('packagingRoseAsset')?.value||'');
-    field.placeholder=field.value?'':'Generated from custom rose colour';
-  }
+function updateRoseAssetPath() {
+const field=id('packagingRoseAssetPath'); if(!field)return;
+field.value=roseAssetPath(id('packagingRoseAsset')?.value||'');
+field.placeholder=field.value?'':'Generated from custom rose colour';
+}
 
-  function applyRoseAssetPreset(assetId, render=true) {
-    const preset=rosePresetById(assetId); const select=id('packagingRoseAsset'); if(select)select.value=preset.id;
-    if(preset.colour){if(id('packagingRoseColour'))id('packagingRoseColour').value=preset.colour;if(id('packagingSecondaryColour'))id('packagingSecondaryColour').value=mixHex(preset.colour,'#000000',.28);}
-    updateRoseAssetPath(); if(render)renderPreview();
-  }
+function applyRoseAssetPreset(assetId, render=true) {
+const preset=rosePresetById(assetId); const select=id('packagingRoseAsset'); if(select)select.value=preset.id;
+if(preset.colour){if(id('packagingRoseColour'))id('packagingRoseColour').value=preset.colour;if(id('packagingSecondaryColour'))id('packagingSecondaryColour').value=mixHex(preset.colour,'#000000',.28);}
+updateRoseAssetPath(); if(render)renderPreview();
+}
 
-  function applyProductRosePreset(key) {
-    const match=PRODUCT_ROSE_PRESETS.find((row)=>row[0]===String(key||'')); if(!match)return;
-    applyRoseAssetPreset(match[2]);
-  }
+function applyProductRosePreset(key) {
+const match=PRODUCT_ROSE_PRESETS.find((row)=>row[0]===String(key||'')); if(!match)return;
+applyRoseAssetPreset(match[2]);
+}
 
   function tabButton(key, label) { return `<button class="packaging-tab ${state.activeTab === key ? 'is-active' : ''}" type="button" data-packaging-tab="${key}">${label}</button>`; }
   function tabPanel(key, content) { return `<section class="packaging-tab-panel ${state.activeTab === key ? 'is-active' : ''}" data-packaging-panel="${key}">${content}</section>`; }
 
-  function detailMarkup() {
-    const project = state.detail?.project || {}; const template = state.detail?.template || {}; const theme = project.theme || template.theme || {};
-    const artwork = project.artwork || {}; const ingredients = state.detail?.ingredients || []; const claims = state.detail?.structured_claims || []; const sourceMaterials = state.detail?.source_materials || []; const components = state.detail?.components || []; const componentSummary = state.detail?.component_summary || {};
-    const versions = state.detail?.versions || []; const exports = state.detail?.soap_exports?.length ? state.detail.soap_exports : (state.detail?.exports || []); const printTests = state.detail?.print_tests || [];
-    const newestVersion = versions[0]?.packaging_project_version_id || ''; const attachedSourceIds=new Set(sourceMaterials.map((row)=>Number(row.packaging_source_material_template_id||0))); const attachedBase=sourceMaterials.find((row)=>String(row.material_role)==='base')||null;
+function detailMarkup() {
+const project = state.detail?.project || {}; const template = state.detail?.template || {}; const theme = project.theme || template.theme || {};
+const artwork = project.artwork || {}; const ingredients = state.detail?.ingredients || []; const claims = state.detail?.structured_claims || []; const sourceMaterials = state.detail?.source_materials || []; const components = state.detail?.components || []; const componentSummary = state.detail?.component_summary || {};
+const versions = state.detail?.versions || []; const exports = state.detail?.soap_exports?.length ? state.detail.soap_exports : (state.detail?.exports || []); const printTests = state.detail?.print_tests || [];
+const newestVersion = versions[0]?.packaging_project_version_id || ''; const attachedSourceIds=new Set(sourceMaterials.map((row)=>Number(row.packaging_source_material_template_id||0))); const attachedBase=sourceMaterials.find((row)=>String(row.material_role)==='base')||null;
     return `<section class="card packaging-editor-card"><div class="section-heading-row"><div><p class="eyebrow">${esc(project.project_key || 'New packaging system')}</p><h2 style="margin:0">${esc(project.project_name || project.product_name || 'Labeling and packaging project')}</h2></div><div class="packaging-project-actions"><button class="btn" id="duplicatePackagingProject" type="button">Duplicate</button><button class="btn" id="archivePackagingProject" type="button">Archive</button><button class="btn danger" id="deletePackagingProject" type="button">Delete label</button></div></div>
       <input type="hidden" id="packagingProjectId" value="${Number(project.packaging_project_id || 0)}"/>
       <div class="packaging-tab-list" role="tablist" aria-label="Labeling and packaging editor sections">${tabButton('product','1. Product')}${tabButton('components','2. Components & Cost')}${tabButton('library','3. Material Library')}${tabButton('ingredients','4. Ingredients')}${tabButton('french','5. French')}${tabButton('rose','6. Artwork & Colours')}${tabButton('claims','7. Claims')}${tabButton('layout','8. Layouts & Templates')}${tabButton('preview','9. Preview')}${tabButton('print','10. Print Test')}${tabButton('versions','11. Versions')}</div>
       ${tabPanel('product',`<h3>Product and project</h3><div class="grid cols-3"><label><span class="small">Project name</span><input class="input" id="packagingProjectName" value="${esc(project.project_name || '')}"/></label><label><span class="small">Template — controls the renderer and saved package type</span><select class="input" id="packagingTemplateId">${options(state.templates,project.packaging_template_id,(row)=>`${row.template_name} · ${num(row.page_width_mm)}×${num(row.page_height_mm)} mm${Number(row.is_system)===1?'':' · custom'}`)}</select></label><label><span class="small">Linked store product</span><select class="input" id="packagingProductId"><option value="">No product link</option>${options(state.products,project.product_id,(row)=>`${row.name} · ${row.sku || `#${row.product_id}`}`)}</select></label></div>
         <div class="grid cols-3"><label><span class="small">Package type (set by template)</span><select class="input" id="packagingType" disabled>${[['soap_ribbon','Soap ribbon'],['soap_cupcake_label','Soap Cupcake — 2 × 2 label'],['candle_top','Candle top / lid'],['engraved_round','Engraved round / coaster'],['product_label','General product label'],['candle_label','Candle label'],['jewelry_card','Jewelry card'],['package_insert','Package insert / care card'],['shipping_label','Shipping label'],['gift_set','Gift set packaging']].map(([value,label])=>`<option value="${value}" ${String(template.package_type||project.package_type||'soap_ribbon')===value?'selected':''}>${label}</option>`).join('')}</select></label><label><span class="small">Project status</span><select class="input" id="packagingStatus">${['draft','review','approved','archived'].map((value)=>`<option ${project.project_status===value?'selected':''}>${value}</option>`).join('')}</select></label><label><span class="small">Compliance status</span><select class="input" id="packagingCompliance">${['needs_review','ready_for_review','approved','blocked'].map((value)=>`<option ${project.compliance_status===value?'selected':''}>${value}</option>`).join('')}</select></label></div>
-        <div class="grid cols-3"><label><span class="small">Product family / main name</span><input class="input" id="packagingCollection" value="${esc(project.collection_name || '')}" placeholder="Glacial Purple"/></label><label><span class="small">Product / variant</span><input class="input" id="packagingProductName" value="${esc(project.product_name || '')}" placeholder="Aloe Soap, candle, jewelry…"/></label><label><span class="small">Front tagline</span><input class="input" id="packagingSubtitle" value="${esc(project.product_subtitle || '')}"/></label></div>
-        <div class="grid cols-2"><label><span class="small">Product identity — English</span><input class="input" id="packagingIdentityEn" value="${esc(project.product_identity_en || project.product_name || '')}"/></label><label><span class="small">Product identity — French</span><input class="input" id="packagingIdentityFr" value="${esc(project.product_identity_fr || '')}"/></label></div>
-        <label><span class="small">Master INCI list</span><textarea class="input" id="packagingInci" rows="4">${esc(project.ingredients_inci || '')}</textarea></label>
-        <div class="grid cols-4"><label><span class="small">Net weight wording</span><input class="input" id="packagingNetQuantity" value="${esc(project.net_quantity_text || '')}" placeholder="NET WT. APPROX. 4.5 OZ / 127 G"/></label><label><span class="small">Ounces</span><input class="input" id="packagingNetWeightOz" type="number" step="0.01" value="${esc(project.net_weight_oz || '')}"/></label><label><span class="small">Grams</span><input class="input" id="packagingNetWeightG" type="number" step="0.1" value="${esc(project.net_weight_g || project.weight_grams || '')}"/></label><label><span class="small">Website</span><input class="input" id="packagingWebsite" value="${esc(project.website_text || 'devilndove.com')}"/></label></div>
+<div class="grid cols-3"><label><span class="small">Product family / main name</span><input class="input" id="packagingCollection" value="${esc(project.collection_name || '')}" placeholder="Glacial Purple"/></label><label><span class="small">Product / variant</span><input class="input" id="packagingProductName" value="${esc(project.product_name || '')}" placeholder="Aloe Soap, candle, jewelry…"/></label><label><span class="small">Front tagline</span><input class="input" id="packagingSubtitle" value="${esc(project.product_subtitle || '')}"/></label></div>
+<div class="grid cols-2"><label><span class="small">Product identity — English</span><input class="input" id="packagingIdentityEn" value="${esc(project.product_identity_en || project.product_name || '')}"/></label><label><span class="small">Product identity — French</span><input class="input" id="packagingIdentityFr" value="${esc(project.product_identity_fr || '')}"/></label></div>
+<label><span class="small">Master INCI list</span><textarea class="input" id="packagingInci" rows="4">${esc(project.ingredients_inci || '')}</textarea></label>
+<div class="grid cols-4"><label><span class="small">Net weight wording</span><input class="input" id="packagingNetQuantity" value="${esc(project.net_quantity_text || '')}" placeholder="NET WT. APPROX. 4.5 OZ / 127 G"/></label><label><span class="small">Ounces</span><input class="input" id="packagingNetWeightOz" type="number" step="0.01" value="${esc(project.net_weight_oz || '')}"/></label><label><span class="small">Grams</span><input class="input" id="packagingNetWeightG" type="number" step="0.1" value="${esc(project.net_weight_g || project.weight_grams || '')}"/></label><label><span class="small">Website</span><input class="input" id="packagingWebsite" value="${esc(project.website_text || 'devilndove.com')}"/></label></div>
         <div class="grid cols-3"><label><span class="small">Dealer / business</span><input class="input" id="packagingDealerName" value="${esc(project.dealer_name || 'Rosevear Creations - Devil n Dove')}"/></label><label><span class="small">Principal business address</span><input class="input" id="packagingDealerAddress" value="${esc(project.dealer_address || '')}"/></label><label><span class="small">Consumer contact</span><input class="input" id="packagingContact" value="${esc(project.contact_text || 'devilndove.com/contact')}"/></label></div><label><span class="small">Made in Canada wording</span><input class="input" id="packagingMadeInCanada" value="${esc(project.made_in_canada_text || 'Made in Canada / Fabriqué au Canada')}"/></label>`)}
       ${tabPanel('components',`<div class="section-heading-row"><div><h3>Packaging components, inventory and cost</h3><p class="small"><strong>Choose the actual inventory item first.</strong> Start typing its name; supplier, SKU and unit cost are reused from Inventory when available. Add only packaging consumed by the finished item—labels, jars, lids, boxes, inserts, seals and similar materials. Saving this BOM does not consume stock.</p></div><button class="btn" id="addPackagingComponent" type="button">Add component</button></div><div class="packaging-cost-summary"><strong>${Number(componentSummary.active_count||0)} component(s)</strong><span>Estimated packaging cost per finished unit: ${new Intl.NumberFormat('en-CA',{style:'currency',currency:'CAD'}).format(Number(componentSummary.estimated_unit_cost_cents||0)/100)}</span><span>${Number(componentSummary.lot_tracked_count||0)} lot-tracked</span></div>${inventoryDatalist('packagingComponentInventoryOptions')}<div id="packagingComponentRows" class="packaging-component-list">${(components.length?components:[{}]).map(componentRow).join('')}</div><div class="packaging-save-actions"><button class="btn primary" id="savePackagingComponents" type="button">Save packaging BOM</button><a class="btn" href="/admin/inventory-operations/">Open inventory operations</a></div><p class="small">Cost estimate = component unit cost × quantity per finished unit × (1 + waste %). The value is an estimate; confirmed lot/purchase cost remains the accounting authority.</p>`)}
       ${tabPanel('library',`<h3>Material Library — purchased sources, finished formulas and reusable label content</h3>
         ${state.librarySchemaReady?'':`<div class="packaging-warning-list"><strong>Build 247 database migration required</strong><p class="small">Core formula/content library controls require <code>database_build247_packaging_library_truth_layout_rose_palette.sql</code>.</p></div>`}
         ${state.sourceMaterialSchemaReady?'':`<div class="packaging-warning-list"><strong>Build 248 database migration required</strong><p class="small">Purchased soap-base/fragrance/colourant templates require <code>database_build248_packaging_source_material_templates_compliance.sql</code>.</p></div>`}
-        <div class="packaging-compliance-callout"><strong>Canada fragrance-allergen review</strong><p class="small">For new cosmetics sold in Canada from August 1, 2026, the expanded fragrance-allergen list applies above 0.01% in rinse-off products and 0.001% in leave-on products. Store supplier fragrance-allergen evidence with each fragrance oil; an unreviewed attached fragrance source blocks print-ready status.</p><a href="https://www.canada.ca/en/health-canada/services/consumer-product-safety/reports-publications/industry-professionals/labelling-cosmetics.html" target="_blank" rel="noopener">Health Canada cosmetic labelling guide</a></div>
-        ${sourceMaterialManagerMarkup({attachedIds:attachedSourceIds,sourceMaterials,allowAttach:true,standalone:false})}
-        <section class="packaging-library-section"><div class="section-heading-row"><div><h4>Finished formula / recipe library</h4><p class="small">A finished formula is what we actually make. Soap can inherit a soap base; candles can inherit a wax/base source; then fragrance, colourant and other additions remain separate. Saving a formula records the currently selected base source when one is selected.</p></div></div><div class="grid cols-3"><label><span class="small">Saved formula</span><select class="input" id="packagingFormulaLibraryId">${formulaLibraryOptions()}</select></label><label><span class="small">New/custom formula name</span><input class="input" id="packagingFormulaLibraryName" placeholder="Example: Honey Goat Milk Soap or Sea Breeze Soy Candle"/></label><label><span class="small">Formula notes</span><input class="input" id="packagingFormulaLibraryNotes" placeholder="Finished-formula/source/lot/review notes…"/></label></div><div class="packaging-save-actions"><button class="btn primary" id="applyPackagingFormulaLibrary" type="button">Apply selected finished formula</button><button class="btn" id="savePackagingFormulaLibrary" type="button">Save current ingredients as finished formula</button><button class="btn danger" id="deletePackagingFormulaLibrary" type="button">Delete selected custom formula</button></div></section>
-        <section class="packaging-library-section"><h4>Reusable claims</h4><div class="packaging-library-grid">${state.contentLibrary.filter((row)=>row.content_type==='claim').map(libraryContentCard).join('')||'<p class="small">No claim presets are available yet.</p>'}</div></section>
+<div class="packaging-compliance-callout"><strong>Canada fragrance-allergen review</strong><p class="small">For new cosmetics sold in Canada from August 1, 2026, the expanded fragrance-allergen list applies above 0.01% in rinse-off products and 0.001% in leave-on products. Store supplier fragrance-allergen evidence with each fragrance oil; an unreviewed attached fragrance source blocks print-ready status.</p><a href="https://www.canada.ca/en/health-canada/services/consumer-product-safety/reports-publications/industry-professionals/labelling-cosmetics.html" target="_blank" rel="noopener">Health Canada cosmetic labelling guide</a></div>
+${sourceMaterialManagerMarkup({attachedIds:attachedSourceIds,sourceMaterials,allowAttach:true,standalone:false})}
+<section class="packaging-library-section"><div class="section-heading-row"><div><h4>Finished formula / recipe library</h4><p class="small">A finished formula is what we actually make. Soap can inherit a soap base; candles can inherit a wax/base source; then fragrance, colourant and other additions remain separate. Saving a formula records the currently selected base source when one is selected.</p></div></div><div class="grid cols-3"><label><span class="small">Saved formula</span><select class="input" id="packagingFormulaLibraryId">${formulaLibraryOptions()}</select></label><label><span class="small">New/custom formula name</span><input class="input" id="packagingFormulaLibraryName" placeholder="Example: Honey Goat Milk Soap or Sea Breeze Soy Candle"/></label><label><span class="small">Formula notes</span><input class="input" id="packagingFormulaLibraryNotes" placeholder="Finished-formula/source/lot/review notes…"/></label></div><div class="packaging-save-actions"><button class="btn primary" id="applyPackagingFormulaLibrary" type="button">Apply selected finished formula</button><button class="btn" id="savePackagingFormulaLibrary" type="button">Save current ingredients as finished formula</button><button class="btn danger" id="deletePackagingFormulaLibrary" type="button">Delete selected custom formula</button></div></section>
+<section class="packaging-library-section"><h4>Reusable claims</h4><div class="packaging-library-grid">${state.contentLibrary.filter((row)=>row.content_type==='claim').map(libraryContentCard).join('')||'<p class="small">No claim presets are available yet.</p>'}</div></section>
         <section class="packaging-library-section"><div class="section-heading-row"><div><h4>Individual ingredients, fragrance / essential-oil blends and colourants</h4><p class="small">Choose from the dropdown rather than scrolling through every record. Saving a source-material template automatically adds its Master INCI ingredients here; saved fragrance/essential-oil blends and colourants are also added as reusable choices.</p></div><span class="status-pill">${state.contentLibrary.filter((row)=>['ingredient','fragrance_oil','colourant'].includes(row.content_type)).length} reusable item(s)</span></div><label><span class="small">Reusable ingredient / blend / colourant</span><select class="input" id="packagingReusableContentSelect">${reusableContentOptions(state.activeContentLibraryId)}</select></label><div id="packagingReusableContentActive" class="packaging-source-active-card">${activeReusableContentMarkup(state.activeContentLibraryId)}</div><details class="packaging-library-entry-form"><summary>Add a manual reusable ingredient, blend or colourant</summary><div class="grid cols-3"><label><span class="small">Library type</span><select class="input" id="packagingLibraryContentType"><option value="ingredient">Ingredient</option><option value="fragrance_oil">Fragrance / essential-oil blend</option><option value="colourant">Colourant</option></select></label><label><span class="small">Library name</span><input class="input" id="packagingLibraryItemName" placeholder="Supplier/product or ingredient name"/></label><label><span class="small">INCI (ingredient/additive)</span><input class="input" id="packagingLibraryInci" placeholder="Supplier-verified INCI"/></label></div><div class="grid cols-2"><label><span class="small">English/common name</span><input class="input" id="packagingLibraryTextEn"/></label><label><span class="small">French/common name</span><input class="input" id="packagingLibraryTextFr"/></label></div><label><span class="small">Supplier / allergen / usage notes</span><input class="input" id="packagingLibraryNotes"/></label><button class="btn" id="savePackagingLibraryContent" type="button">Save library item</button></details></section>`)}
       ${tabPanel('ingredients',`<div class="section-heading-row"><div><h3>Structured ingredient rows</h3><p class="small">One D1 row per ingredient preserves order, INCI, bilingual supporting wording, source/Inventory traceability, organic status and allergen review evidence. Inventory links here are reference-only: Packaging Studio never reserves, consumes or changes stock.</p></div><div class="packaging-save-actions"><button class="btn" id="reloadAttachedBaseIngredients" type="button">Reload from attached base</button><button class="btn" id="generatePackagingFrenchDraftIngredients" type="button">Draft French</button><button class="btn" id="addSoapIngredient" type="button">Add blank ingredient</button></div></div><div class="packaging-ingredient-inventory-add"><div><strong>Add ingredient/source from Devil n Dove Inventory</strong><span class="small">Use this for mica, colourants, oils and other real purchased materials. If the Inventory item is linked to a Material Library template, its reviewed Master INCI rows are imported automatically. No quantity is requested and no Inventory movement is created. Use the row arrows to set the reviewed printed INCI order.</span></div><div class="packaging-ingredient-inventory-add-row"><input class="input" id="packagingIngredientInventorySearch" type="search" list="packagingIngredientInventoryOptions" placeholder="Type mica, essential oil, soap base…" autocomplete="off"/><button class="btn primary" id="addPackagingInventoryIngredient" type="button">Add Inventory ingredient</button></div>${inventoryDatalist('packagingIngredientInventoryOptions')}</div><div class="packaging-compliance-callout"><strong>Long cosmetic ingredient declarations</strong><p class="small">The soap ribbon now prints one ordered INCI declaration across both side panels instead of duplicating the same ingredient list in English and French. If the full verified INCI still cannot fit legibly, print approval is blocked and an extended/peel-back label or attached compliant panel should be used rather than hiding ingredients.</p><p class="small">A fragrance mixture may be declared as <strong>Parfum</strong> where appropriate, but fragrance allergens above the applicable Canadian disclosure threshold still need individual disclosure. Do not replace a verified fragrance mixture with the marketing phrase “Essential Oil scent.”</p></div><div class="admin-table-wrap packaging-row-editor packaging-ingredient-row-editor"><table><thead><tr><th>#</th><th>Inventory/source</th><th>INCI</th><th>English/common</th><th>French/common</th><th>Organic</th><th>Allergen/source note</th><th>Label</th><th></th></tr></thead><tbody id="soapIngredientRows">${(ingredients.length?ingredients:[{}]).map(ingredientRow).join('')}</tbody></table></div><label><span class="small">English panel fallback / supporting copy</span><textarea class="input" id="packagingIngredientsEn" rows="5">${esc(project.ingredients_en || '')}</textarea></label>`)}
       ${tabPanel('french',`<h3>French content review</h3><p class="small">Use the curated draft helper for common Devil n Dove packaging wording, then review it before approval. Cosmetic ingredient declarations use INCI names; they are not replaced by invented marketing copy.</p><div class="packaging-translation-actions"><button class="btn primary" id="generatePackagingFrenchDraft" type="button">Translate to French / generate draft</button><span class="small">Draft only — human review required.</span></div><label><span class="small">French supporting copy</span><textarea class="input" id="packagingIngredientsFr" rows="6">${esc(project.ingredients_fr || '')}</textarea></label><div class="grid cols-2"><label><span class="small">Warnings — English</span><textarea class="input" id="packagingWarningsEn" rows="4">${esc(project.warnings_en || '')}</textarea></label><label><span class="small">Warnings — French</span><textarea class="input" id="packagingWarningsFr" rows="4">${esc(project.warnings_fr || '')}</textarea></label></div>`)}
@@ -990,493 +990,493 @@
       ${tabPanel('print',`<div class="section-heading-row"><div><h3>100% physical print test & Letter sheet planner</h3><p class="small">Choose a Devil n Dove printer profile, then let the sheet planner place the maximum number of exact-size labels on 8.5 × 11 inch paper. The browser still opens the normal system print dialog; choose the same physical printer there.</p></div><span class="status-pill">8.5 × 11 Letter</span></div><div class="packaging-printer-callout"><strong>My Printers</strong><span class="small">Only printers deliberately saved in My Printers appear here. Inventory, tools, supplies and old print-test names are excluded. Mark one printer as the default for labels and its saved paper, margin, gap and scale settings will load automatically.</span></div>${state.printersSchemaReady?'':'<div class="packaging-warning-list"><strong>Build 263 printer-profile migration required</strong><p class="small">Apply the Build 263 D1 migration to enable persistent My Printers profiles and the default label printer.</p></div>'}<div class="grid cols-3"><label><span class="small">Version tested</span><select class="input" id="printTestVersion"><option value="">Project draft</option>${versions.map((version)=>`<option value="${version.packaging_project_version_id}" ${Number(newestVersion)===Number(version.packaging_project_version_id)?'selected':''}>Version ${version.version_number} — ${esc(version.version_label||'')}</option>`).join('')}</select></label><label><span class="small">Result</span><select class="input" id="printTestStatus"><option value="needs_test">Needs test</option><option value="passed">Passed</option><option value="failed">Failed</option></select></label><label><span class="small">Printed date/time</span><input class="input" id="printTestDate" type="datetime-local"/></label></div><div class="grid cols-2"><label><span class="small">My Printers</span><select class="input" id="printTestPrinterProfile">${printerProfileOptions('')}</select></label><label><span class="small">My Printer name</span><input class="input" id="printTestPrinterName" placeholder="Example: Epson ET-2800 — labels"/></label></div><div class="grid cols-5"><label><span class="small">Paper / stock</span><input class="input" id="printTestPaper" value="Letter 8.5 × 11 in"/></label><label><span class="small">Scale %</span><input class="input" id="printTestScale" type="number" value="100" step="0.1" min="1" max="150"/></label><label><span class="small">Printer margin mm</span><input class="input" id="printProfileMargin" type="number" value="0" min="0" step="0.1"/></label><label><span class="small">Gap between labels mm</span><input class="input" id="printProfileGap" type="number" value="0" min="0" step="0.1"/></label><label class="compact-check"><span class="small">Packing</span><span><input type="checkbox" id="printProfileAutoRotate" checked/> Allow 90° rotation for best yield</span></label></div><div class="grid cols-2"><label><span class="small">Saved driver/settings note</span><input class="input" id="printProfileSettingsNote" placeholder="Example: Actual Size, High Quality, borderless/none margins, rear tray"/></label><label class="compact-check"><span class="small">Label default</span><span><input type="checkbox" id="printProfileDefaultLabel"/> Use this as my default label printer</span></label></div><div class="packaging-save-actions"><button class="btn" id="savePrinterProfile" type="button">Save to My Printers</button><button class="btn danger" id="deletePrinterProfile" type="button">Remove from My Printers</button><button class="btn primary" id="printOptimizedSheet" type="button">Print optimized 8.5 × 11 sheet</button></div><div id="printSheetPlan" class="packaging-sheet-plan"></div><div class="grid cols-5"><label><span class="small">Strip width in</span><input class="input" id="printTestStripWidth" type="number" step="0.001" value="11"/></label><label><span class="small">Band height in</span><input class="input" id="printTestBandHeight" type="number" step="0.001" value="0.75"/></label><label><span class="small">Front width in</span><input class="input" id="printTestFrontWidth" type="number" step="0.001" value="2"/></label><label><span class="small">Front height in</span><input class="input" id="printTestFrontHeight" type="number" step="0.001" value="1.5"/></label><label><span class="small">Round / rear diameter mm</span><input class="input" id="printTestRearCircle" type="number" step="0.1" value="${['candle_top','engraved_round'].includes(String(template.package_type))?Math.min(num(template.page_width_mm),num(template.page_height_mm)):num(template.rear_width_mm,38.1)}"/></label></div><div class="grid cols-3"><label><span class="small">Wrap fit</span><select class="input" id="printTestWrap"><option>not_checked</option><option>passed</option><option>failed</option></select></label><label><span class="small">Legibility</span><select class="input" id="printTestLegibility"><option>not_checked</option><option>passed</option><option>failed</option></select></label><label><span class="small">Overlap / folds</span><select class="input" id="printTestOverlap"><option>not_checked</option><option>passed</option><option>failed</option></select></label></div><label><span class="small">Proof image URL</span><input class="input" id="printTestProofUrl" type="url" placeholder="R2 or approved media URL"/></label><label><span class="small">Print-test notes</span><textarea class="input" id="printTestNotes" rows="4"></textarea></label><button class="btn primary" id="savePrintTest" type="button">Save print-test evidence</button><h4>Print-test history</h4><div class="admin-table-wrap"><table><thead><tr><th>Status</th><th>Version</th><th>Printer</th><th>Scale</th><th>Measurements</th><th>Physical checks</th><th>Date</th></tr></thead><tbody>${printTests.length?printTests.map((test)=>`<tr><td>${esc(test.test_status)}</td><td>${esc(test.packaging_project_version_id||'draft')}</td><td>${esc(test.printer_name||'—')}</td><td>${esc(test.scale_percent)}%</td><td>${esc(test.measured_strip_width_in||'—')} in × ${esc(test.measured_band_height_in||'—')} in; front ${esc(test.measured_front_width_in||'—')} × ${esc(test.measured_front_height_in||'—')}</td><td>${esc(test.wrap_fit_status)} / ${esc(test.legibility_status)} / ${esc(test.overlap_status)}</td><td>${esc(test.created_at||'')}</td></tr>`).join(''):'<tr><td colspan="7">No physical print tests recorded.</td></tr>'}</tbody></table></div>`)}
       ${tabPanel('versions',`<h3>Review versions and exports</h3><div class="admin-table-wrap"><table><thead><tr><th>Version</th><th>Label</th><th>Review</th><th>Created</th><th>Action</th></tr></thead><tbody>${versions.length?versions.map((version)=>`<tr><td>${version.version_number}</td><td>${esc(version.version_label||'')}</td><td><select class="input" data-version-status="${version.packaging_project_version_id}">${['needs_review','approved','changes_requested','blocked'].map((status)=>`<option ${version.review_status===status?'selected':''}>${status}</option>`).join('')}</select></td><td>${esc(version.created_at||'')}</td><td><button class="btn" data-review-version="${version.packaging_project_version_id}">Save review</button></td></tr>`).join(''):'<tr><td colspan="5">No review versions saved.</td></tr>'}</tbody></table></div><h4>Export history</h4><div class="packaging-export-history">${exports.length?exports.map((entry)=>`<span>${esc(entry.export_format)} · ${esc(entry.file_name||'prepared file')} · ${esc(entry.checksum?String(entry.checksum).slice(0,12):'no checksum')} · ${esc(entry.generated_at||entry.created_at||'')}</span>`).join(''):'<span class="small">No exports recorded.</span>'}</div>`)}
       <div class="packaging-save-actions packaging-sticky-actions"><button class="btn primary" id="savePackagingProject" type="button">Save project</button><button class="btn" id="savePackagingVersion" type="button">Save review version</button></div></section>`;
-  }
+}
 
-  function activateTab(key) {
-    state.activeTab = key;
-    document.querySelectorAll('[data-packaging-tab]').forEach((node) => node.classList.toggle('is-active', node.dataset.packagingTab === key));
-    document.querySelectorAll('[data-packaging-panel]').forEach((node) => node.classList.toggle('is-active', node.dataset.packagingPanel === key));
-    if (key === 'preview') renderPreview(); if (key === 'print') updatePrintSheetPlan();
-  }
+function activateTab(key) {
+state.activeTab = key;
+document.querySelectorAll('[data-packaging-tab]').forEach((node) => node.classList.toggle('is-active', node.dataset.packagingTab === key));
+document.querySelectorAll('[data-packaging-panel]').forEach((node) => node.classList.toggle('is-active', node.dataset.packagingPanel === key));
+if (key === 'preview') renderPreview(); if (key === 'print') updatePrintSheetPlan();
+}
 
-  function updateRowNumbers(selector) { document.querySelectorAll(selector).forEach((row, index) => { const cell = row.querySelector('.row-order'); if (cell) cell.textContent = String(index + 1); }); }
-  function addIngredient(row = {}) { id('soapIngredientRows')?.insertAdjacentHTML('beforeend', ingredientRow(row, document.querySelectorAll('[data-soap-ingredient-row]').length)); bindDynamicRows(); renderPreview(); }
-  function addClaim(row = {}) { id('soapClaimRows')?.insertAdjacentHTML('beforeend', claimRow(row, document.querySelectorAll('[data-soap-claim-row]').length)); bindDynamicRows(); renderPreview(); }
-  function addComponent(row = {}) { id('packagingComponentRows')?.insertAdjacentHTML('beforeend', componentRow(row, document.querySelectorAll('[data-packaging-component-row]').length)); bindDynamicRows(); }
+function updateRowNumbers(selector) { document.querySelectorAll(selector).forEach((row, index) => { const cell = row.querySelector('.row-order'); if (cell) cell.textContent = String(index + 1); }); }
+function addIngredient(row = {}) { id('soapIngredientRows')?.insertAdjacentHTML('beforeend', ingredientRow(row, document.querySelectorAll('[data-soap-ingredient-row]').length)); bindDynamicRows(); renderPreview(); }
+function addClaim(row = {}) { id('soapClaimRows')?.insertAdjacentHTML('beforeend', claimRow(row, document.querySelectorAll('[data-soap-claim-row]').length)); bindDynamicRows(); renderPreview(); }
+function addComponent(row = {}) { id('packagingComponentRows')?.insertAdjacentHTML('beforeend', componentRow(row, document.querySelectorAll('[data-packaging-component-row]').length)); bindDynamicRows(); }
 
-  function sourceMaterialForInventory(inventory = {}) {
-    const sourceId=Number(inventory.packaging_source_material_template_id||0);
-    return sourceId?state.sourceMaterialLibrary.find((row)=>Number(row.packaging_source_material_template_id)===sourceId)||null:null;
-  }
+function sourceMaterialForInventory(inventory = {}) {
+const sourceId=Number(inventory.packaging_source_material_template_id||0);
+return sourceId?state.sourceMaterialLibrary.find((row)=>Number(row.packaging_source_material_template_id)===sourceId)||null:null;
+}
 
-  function applyInventoryToIngredientRow(row, inventory) {
-    if(!row)return;const hidden=row.querySelector('[data-field="site_item_inventory_id"]');const search=row.querySelector('[data-field="inventory_search"]');const note=row.querySelector('[data-ingredient-inventory-note]');
-    if(!inventory){if(hidden)hidden.value='';if(note)note.textContent='No exact Inventory match selected. This row remains manually sourced.';return;}
-    if(hidden)hidden.value=String(Number(inventory.site_item_inventory_id||0));if(search)search.value=inventoryChoiceLabel(inventory);
-    const source=sourceMaterialForInventory(inventory);
+function applyInventoryToIngredientRow(row, inventory) {
+if(!row)return;const hidden=row.querySelector('[data-field="site_item_inventory_id"]');const search=row.querySelector('[data-field="inventory_search"]');const note=row.querySelector('[data-ingredient-inventory-note]');
+if(!inventory){if(hidden)hidden.value='';if(note)note.textContent='No exact Inventory match selected. This row remains manually sourced.';return;}
+if(hidden)hidden.value=String(Number(inventory.site_item_inventory_id||0));if(search)search.value=inventoryChoiceLabel(inventory);
+const source=sourceMaterialForInventory(inventory);
     if(note)note.textContent=source?`Linked to Inventory and Material Library: ${source.material_name||inventory.item_name}. No stock change.`:'Linked to Inventory for identity/traceability only. No stock change.';
-    const inci=row.querySelector('[data-field="inci_name"]');const en=row.querySelector('[data-field="display_name_en"]');
-    const sourceRows=Array.isArray(source?.master_inci)?source.master_inci.filter((item)=>item?.inci_name||item?.display_name_en):[];
-    if(sourceRows.length===1){if(inci&&!inci.value)inci.value=sourceRows[0].inci_name||'';if(en&&!en.value)en.value=sourceRows[0].display_name_en||sourceRows[0].inci_name||inventory.item_name||'';}
-    else if(en&&!en.value)en.value=inventory.item_name||'';
-  }
+const inci=row.querySelector('[data-field="inci_name"]');const en=row.querySelector('[data-field="display_name_en"]');
+const sourceRows=Array.isArray(source?.master_inci)?source.master_inci.filter((item)=>item?.inci_name||item?.display_name_en):[];
+if(sourceRows.length===1){if(inci&&!inci.value)inci.value=sourceRows[0].inci_name||'';if(en&&!en.value)en.value=sourceRows[0].display_name_en||sourceRows[0].inci_name||inventory.item_name||'';}
+else if(en&&!en.value)en.value=inventory.item_name||'';
+}
 
-  function addIngredientFromInventory() {
-    const input=id('packagingIngredientInventorySearch');const inventory=inventoryByChoice(input?.value||'');
-    if(!inventory){message('Choose an exact Devil n Dove Inventory item from the ingredient search suggestions first.','error');return;}
-    const source=sourceMaterialForInventory(inventory);const sourceRows=Array.isArray(source?.master_inci)?source.master_inci.filter((row)=>row?.inci_name||row?.display_name_en||row?.display_name_fr):[];
-    const existingKeys=new Set(ingredientRowsFromDom().map((row)=>String(row.inci_name||row.display_name_en||'').trim().toLowerCase()).filter(Boolean));
-    let added=0;
-    if(sourceRows.length){for(const sourceRow of sourceRows){const key=String(sourceRow.inci_name||sourceRow.display_name_en||'').trim().toLowerCase();if(key&&existingKeys.has(key))continue;existingKeys.add(key);addIngredient({...sourceRow,site_item_inventory_id:Number(inventory.site_item_inventory_id),required_on_label:Number(sourceRow.required_on_label)!==0?1:0});added+=1;}}
-    else{addIngredient({site_item_inventory_id:Number(inventory.site_item_inventory_id),display_name_en:inventory.item_name||'',allergen_note:'Inventory-linked ingredient. Enter and verify the supplier INCI before print approval.',required_on_label:1});added=1;}
-    if(input)input.value='';
+function addIngredientFromInventory() {
+const input=id('packagingIngredientInventorySearch');const inventory=inventoryByChoice(input?.value||'');
+if(!inventory){message('Choose an exact Devil n Dove Inventory item from the ingredient search suggestions first.','error');return;}
+const source=sourceMaterialForInventory(inventory);const sourceRows=Array.isArray(source?.master_inci)?source.master_inci.filter((row)=>row?.inci_name||row?.display_name_en||row?.display_name_fr):[];
+const existingKeys=new Set(ingredientRowsFromDom().map((row)=>String(row.inci_name||row.display_name_en||'').trim().toLowerCase()).filter(Boolean));
+let added=0;
+if(sourceRows.length){for(const sourceRow of sourceRows){const key=String(sourceRow.inci_name||sourceRow.display_name_en||'').trim().toLowerCase();if(key&&existingKeys.has(key))continue;existingKeys.add(key);addIngredient({...sourceRow,site_item_inventory_id:Number(inventory.site_item_inventory_id),required_on_label:Number(sourceRow.required_on_label)!==0?1:0});added+=1;}}
+else{addIngredient({site_item_inventory_id:Number(inventory.site_item_inventory_id),display_name_en:inventory.item_name||'',allergen_note:'Inventory-linked ingredient. Enter and verify the supplier INCI before print approval.',required_on_label:1});added=1;}
+if(input)input.value='';
     message(sourceRows.length?`${added} reviewed INCI row${added===1?'':'s'} added from ${inventory.item_name}; Inventory was referenced only and stock was not changed.`:`${inventory.item_name} linked as a draft ingredient. Verify its INCI before approval; Inventory was not changed.`,added?'success':'error');
-  }
+}
 
-  function applyInventoryToComponentRow(row, inventory) {
-    if(!row)return;const hidden=row.querySelector('[data-field="site_item_inventory_id"]');const search=row.querySelector('[data-field="inventory_search"]');const stock=row.querySelector('[data-inventory-stock]');
-    if(!inventory){if(hidden)hidden.value='';if(stock)stock.textContent='No exact inventory match selected. Keep typing or choose a suggestion.';return;}
+function applyInventoryToComponentRow(row, inventory) {
+if(!row)return;const hidden=row.querySelector('[data-field="site_item_inventory_id"]');const search=row.querySelector('[data-field="inventory_search"]');const stock=row.querySelector('[data-inventory-stock]');
+if(!inventory){if(hidden)hidden.value='';if(stock)stock.textContent='No exact inventory match selected. Keep typing or choose a suggestion.';return;}
     if(hidden)hidden.value=String(Number(inventory.site_item_inventory_id||0));if(search)search.value=inventoryChoiceLabel(inventory);if(stock)stock.textContent=`${Number(inventory.on_hand_quantity||0)} ${inventory.stock_unit_label||'unit'} on hand${Number(inventory.reserved_quantity||0)?` · ${Number(inventory.reserved_quantity)} reserved`:''}`;
-    const name=row.querySelector('[data-field="component_name"]');const sku=row.querySelector('[data-field="sku_reference"]');const cost=row.querySelector('[data-field="unit_cost_cents"]');const supplier=row.querySelector('[data-field="supplier_name"]');
-    if(name&&!name.value)name.value=inventory.item_name||'';if(sku&&!sku.value)sku.value=inventory.supplier_sku||inventory.external_key||'';if(cost&&!Number(cost.value||0))cost.value=Number(inventory.unit_cost_cents||0);if(supplier&&!supplier.value)supplier.value=inventory.supplier_name||'';
-    const title=row.querySelector('.packaging-component-card-top strong');if(title)title.textContent=name?.value||inventory.item_name||'Packaging component';
-  }
+const name=row.querySelector('[data-field="component_name"]');const sku=row.querySelector('[data-field="sku_reference"]');const cost=row.querySelector('[data-field="unit_cost_cents"]');const supplier=row.querySelector('[data-field="supplier_name"]');
+if(name&&!name.value)name.value=inventory.item_name||'';if(sku&&!sku.value)sku.value=inventory.supplier_sku||inventory.external_key||'';if(cost&&!Number(cost.value||0))cost.value=Number(inventory.unit_cost_cents||0);if(supplier&&!supplier.value)supplier.value=inventory.supplier_name||'';
+const title=row.querySelector('.packaging-component-card-top strong');if(title)title.textContent=name?.value||inventory.item_name||'Packaging component';
+}
 
-  function bindDynamicRows() {
-    document.querySelectorAll('[data-remove-ingredient]').forEach((button) => { button.onclick = () => { button.closest('[data-soap-ingredient-row]')?.remove(); updateRowNumbers('[data-soap-ingredient-row]'); renderPreview(); }; });
-    document.querySelectorAll('[data-move-ingredient-up]').forEach((button) => { button.onclick = () => { const row=button.closest('[data-soap-ingredient-row]'); const previous=row?.previousElementSibling; if(row&&previous){row.parentElement.insertBefore(row,previous);updateRowNumbers('[data-soap-ingredient-row]');renderPreview();} }; });
-    document.querySelectorAll('[data-move-ingredient-down]').forEach((button) => { button.onclick = () => { const row=button.closest('[data-soap-ingredient-row]'); const next=row?.nextElementSibling; if(row&&next){row.parentElement.insertBefore(next,row);updateRowNumbers('[data-soap-ingredient-row]');renderPreview();} }; });
-    document.querySelectorAll('[data-remove-claim]').forEach((button) => { button.onclick = () => { button.closest('[data-soap-claim-row]')?.remove(); updateRowNumbers('[data-soap-claim-row]'); renderPreview(); }; });
-    document.querySelectorAll('[data-remove-component]').forEach((button) => { button.onclick = () => { button.closest('[data-packaging-component-row]')?.remove(); updateRowNumbers('[data-packaging-component-row]'); }; });
-    document.querySelectorAll('[data-packaging-component-row] [data-field="inventory_search"]').forEach((input) => {
-      bindInventorySearchInput(input);
-      const resolve=()=>applyInventoryToComponentRow(input.closest('[data-packaging-component-row]'),inventoryByChoice(input.value));input.onchange=resolve;input.onblur=resolve;
-    });
-    document.querySelectorAll('[data-soap-ingredient-row] [data-field="inventory_search"]').forEach((input) => {
-      bindInventorySearchInput(input);
-      const resolve=()=>{applyInventoryToIngredientRow(input.closest('[data-soap-ingredient-row]'),inventoryByChoice(input.value));renderPreview();};input.onchange=resolve;input.onblur=resolve;
-    });
-    document.querySelectorAll('[data-soap-ingredient-row] input:not([data-field="inventory_search"]),[data-soap-claim-row] input,[data-soap-claim-row] select').forEach((node) => { node.oninput = renderPreview; node.onchange = () => { if(node.matches('[data-field="icon_name"]')){const row=node.closest('[data-soap-claim-row]');const mount=row?.querySelector('.packaging-claim-editor-icon');if(mount)mount.innerHTML=claimIconUi(node.value);} renderPreview(); }; });
-  }
+function bindDynamicRows() {
+document.querySelectorAll('[data-remove-ingredient]').forEach((button) => { button.onclick = () => { button.closest('[data-soap-ingredient-row]')?.remove(); updateRowNumbers('[data-soap-ingredient-row]'); renderPreview(); }; });
+document.querySelectorAll('[data-move-ingredient-up]').forEach((button) => { button.onclick = () => { const row=button.closest('[data-soap-ingredient-row]'); const previous=row?.previousElementSibling; if(row&&previous){row.parentElement.insertBefore(row,previous);updateRowNumbers('[data-soap-ingredient-row]');renderPreview();} }; });
+document.querySelectorAll('[data-move-ingredient-down]').forEach((button) => { button.onclick = () => { const row=button.closest('[data-soap-ingredient-row]'); const next=row?.nextElementSibling; if(row&&next){row.parentElement.insertBefore(next,row);updateRowNumbers('[data-soap-ingredient-row]');renderPreview();} }; });
+document.querySelectorAll('[data-remove-claim]').forEach((button) => { button.onclick = () => { button.closest('[data-soap-claim-row]')?.remove(); updateRowNumbers('[data-soap-claim-row]'); renderPreview(); }; });
+document.querySelectorAll('[data-remove-component]').forEach((button) => { button.onclick = () => { button.closest('[data-packaging-component-row]')?.remove(); updateRowNumbers('[data-packaging-component-row]'); }; });
+document.querySelectorAll('[data-packaging-component-row] [data-field="inventory_search"]').forEach((input) => {
+bindInventorySearchInput(input);
+const resolve=()=>applyInventoryToComponentRow(input.closest('[data-packaging-component-row]'),inventoryByChoice(input.value));input.onchange=resolve;input.onblur=resolve;
+});
+document.querySelectorAll('[data-soap-ingredient-row] [data-field="inventory_search"]').forEach((input) => {
+bindInventorySearchInput(input);
+const resolve=()=>{applyInventoryToIngredientRow(input.closest('[data-soap-ingredient-row]'),inventoryByChoice(input.value));renderPreview();};input.onchange=resolve;input.onblur=resolve;
+});
+document.querySelectorAll('[data-soap-ingredient-row] input:not([data-field="inventory_search"]),[data-soap-claim-row] input,[data-soap-claim-row] select').forEach((node) => { node.oninput = renderPreview; node.onchange = () => { if(node.matches('[data-field="icon_name"]')){const row=node.closest('[data-soap-claim-row]');const mount=row?.querySelector('.packaging-claim-editor-icon');if(mount)mount.innerHTML=claimIconUi(node.value);} renderPreview(); }; });
+}
 
 
-  function notifyEditorRendered(reason='render-main') {
-    if (typeof document==='undefined' || typeof CustomEvent==='undefined') return;
-    document.dispatchEvent(new CustomEvent('dd:packaging-editor-rendered',{detail:Object.freeze({
-      build:177,
-      reason,
-      project_id:Number(state.detail?.project?.packaging_project_id||0),
-      has_project:Boolean(state.detail?.project)
-    })}));
-  }
+function notifyEditorRendered(reason='render-main') {
+if (typeof document==='undefined' || typeof CustomEvent==='undefined') return;
+document.dispatchEvent(new CustomEvent('dd:packaging-editor-rendered',{detail:Object.freeze({
+build:177,
+reason,
+project_id:Number(state.detail?.project?.packaging_project_id||0),
+has_project:Boolean(state.detail?.project)
+})}));
+}
 
-  function renderMain() {
-    const main = id('packagingStudioMain'); if (!main) return;
-    if (!state.detail?.project) {
-      const library = state.materialLibraryOpen
-        ? sourceMaterialManagerMarkup({allowAttach:false,standalone:true})
+function renderMain() {
+const main = id('packagingStudioMain'); if (!main) return;
+if (!state.detail?.project) {
+const library = state.materialLibraryOpen
+? sourceMaterialManagerMarkup({allowAttach:false,standalone:true})
         : `<section class="card" data-packaging-material-library-closed><h2>Material Library</h2><p class="small">Soap bases, candle waxes, fragrance oils, colours, supplier ingredients and INCI records are available on demand. Keeping this editor closed makes normal Packaging startup much lighter.</p><button class="btn" id="openPackagingMaterialLibrary" type="button">Open Material Library</button></section>`;
       main.innerHTML = `<section class="card packaging-studio-welcome"><h2>Choose or create a labeling and packaging project</h2><p>Use one project for the editable label, packaging component bill of materials, cost estimate, versions, print tests and approval evidence.</p><p><strong>You do not need a project to build the Material Library.</strong> Open it only when you need to enter or review purchased materials and supplier ingredients.</p></section>${library}`;
-      if (state.materialLibraryOpen) {
-        bindSourceLibraryControls();
-      } else {
-        id('openPackagingMaterialLibrary')?.addEventListener('click',()=>{
-          state.materialLibraryOpen=true;
-          renderMain();
-        },{once:true});
-      }
-      notifyEditorRendered(state.materialLibraryOpen?'material-library-render':'welcome-render');
-      return;
-    }
-    main.innerHTML = detailMarkup();
-    bindDetail();
-    notifyEditorRendered('project-render');
-  }
+if (state.materialLibraryOpen) {
+bindSourceLibraryControls();
+} else {
+id('openPackagingMaterialLibrary')?.addEventListener('click',()=>{
+state.materialLibraryOpen=true;
+renderMain();
+},{once:true});
+}
+notifyEditorRendered(state.materialLibraryOpen?'material-library-render':'welcome-render');
+return;
+}
+main.innerHTML = detailMarkup();
+bindDetail();
+notifyEditorRendered('project-render');
+}
 
-  async function load(projectId = 0) {
+async function load(projectId = 0) {
     try { state.loading = true; message('Loading Labeling & Packaging System…'); const data = await api(null, projectId); state.projects = data.projects || []; state.templates = data.templates || []; state.products = data.products || []; state.inventory = data.inventory || []; state.printers = data.printers || []; state.printersSchemaReady = data.printers_schema_ready !== false; state.referenceSources = data.reference_sources || []; state.formulaLibrary = data.formula_library || []; state.contentLibrary = data.content_library || []; state.sourceMaterialLibrary = data.source_material_library || []; state.librarySchemaReady = data.library_schema_ready !== false; state.sourceMaterialSchemaReady = data.source_material_schema_ready !== false; state.sourceMaterialMetadataReady = data.source_material_metadata_ready !== false; state.detail = data.detail || null; renderProjects(); renderMain(); message(`Labeling & Packaging System loaded with ${state.referenceSources.length} adopted source reference${state.referenceSources.length===1?'':'s'}.`, 'success'); }
-    catch (error) { message(error.message, 'error'); restoreLocal(false); }
-    finally { state.loading = false; }
-  }
+catch (error) { message(error.message, 'error'); restoreLocal(false); }
+finally { state.loading = false; }
+}
 
-  function applySelectedTemplate() {
-    const selectedId = Number(id('packagingTemplateId')?.value || 0); const template = state.templates.find((row) => Number(row.packaging_template_id) === selectedId);
-    if (!template) return;
-    const layout = template.layout || {}; const theme = template.theme || {};
-    const values = {
-      packagingType: template.package_type || 'product_label', packagingTemplateWidth: template.page_width_mm, packagingTemplateHeight: template.page_height_mm,
-      packagingTemplateFrontWidth: template.front_width_mm, packagingTemplateFrontHeight: template.front_height_mm, packagingTemplateRearWidth: template.rear_width_mm,
-      packagingTemplateRearHeight: template.rear_height_mm, packagingTemplateShape: layout.shape || 'rectangle', packagingDesignProfile: String(template.package_type) === 'soap_ribbon' ? 'soap_reference_v3' : String(template.package_type) === 'soap_cupcake_label' ? 'cupcake_soap_square' : (layout.design_profile || 'general_rectangle'),
-      packagingBleedMm: layout.bleed_mm ?? (num(layout.bleed_in) * 25.4), packagingSafeMarginMm: layout.safe_margin_mm ?? (num(layout.safe_margin_in) * 25.4),
-      packagingTopArcText: layout.default_top_arc_text || (template.package_type === 'soap_ribbon' ? 'Rosevear Creations' : ''), packagingBottomArcText: layout.default_bottom_arc_text || (template.package_type === 'soap_ribbon' ? 'MADE IN CANADA' : ''),
-      packagingCandlePrimaryText: layout.default_primary_text || '', packagingCandleDateLine1: layout.default_date_line_1 || '', packagingCandleEventLine: layout.default_event_line || '',
-      packagingCandleDateLine2: layout.default_date_line_2 || '', packagingCupcakeReference: layout.cupcake_reference_id || '', packagingCupcakeLabelTitle: layout.default_label_title || 'Cupcake Soap', packagingCupcakePurpose: layout.default_purpose || '', packagingCupcakePalette: '', packagingArtworkAsset: String(template.package_type)==='soap_ribbon' ? '' : (layout.artwork_asset || '')
-    };
-    Object.entries(values).forEach(([field, value]) => { const node = id(field); if (node) node.value = value ?? ''; });
-    Object.entries({ rose_colour: 'packagingRoseColour', theme_colour: 'packagingThemeColour', border_colour: 'packagingBorderColour', accent_gold: 'packagingAccentGold', secondary_colour: 'packagingSecondaryColour' }).forEach(([key, field]) => { if (id(field) && theme[key]) id(field).value = theme[key]; });
+function applySelectedTemplate() {
+const selectedId = Number(id('packagingTemplateId')?.value || 0); const template = state.templates.find((row) => Number(row.packaging_template_id) === selectedId);
+if (!template) return;
+const layout = template.layout || {}; const theme = template.theme || {};
+const values = {
+packagingType: template.package_type || 'product_label', packagingTemplateWidth: template.page_width_mm, packagingTemplateHeight: template.page_height_mm,
+packagingTemplateFrontWidth: template.front_width_mm, packagingTemplateFrontHeight: template.front_height_mm, packagingTemplateRearWidth: template.rear_width_mm,
+packagingTemplateRearHeight: template.rear_height_mm, packagingTemplateShape: layout.shape || 'rectangle', packagingDesignProfile: String(template.package_type) === 'soap_ribbon' ? 'soap_reference_v3' : String(template.package_type) === 'soap_cupcake_label' ? 'cupcake_soap_square' : (layout.design_profile || 'general_rectangle'),
+packagingBleedMm: layout.bleed_mm ?? (num(layout.bleed_in) * 25.4), packagingSafeMarginMm: layout.safe_margin_mm ?? (num(layout.safe_margin_in) * 25.4),
+packagingTopArcText: layout.default_top_arc_text || (template.package_type === 'soap_ribbon' ? 'Rosevear Creations' : ''), packagingBottomArcText: layout.default_bottom_arc_text || (template.package_type === 'soap_ribbon' ? 'MADE IN CANADA' : ''),
+packagingCandlePrimaryText: layout.default_primary_text || '', packagingCandleDateLine1: layout.default_date_line_1 || '', packagingCandleEventLine: layout.default_event_line || '',
+packagingCandleDateLine2: layout.default_date_line_2 || '', packagingCupcakeReference: layout.cupcake_reference_id || '', packagingCupcakeLabelTitle: layout.default_label_title || 'Cupcake Soap', packagingCupcakePurpose: layout.default_purpose || '', packagingCupcakePalette: '', packagingArtworkAsset: String(template.package_type)==='soap_ribbon' ? '' : (layout.artwork_asset || '')
+};
+Object.entries(values).forEach(([field, value]) => { const node = id(field); if (node) node.value = value ?? ''; });
+Object.entries({ rose_colour: 'packagingRoseColour', theme_colour: 'packagingThemeColour', border_colour: 'packagingBorderColour', accent_gold: 'packagingAccentGold', secondary_colour: 'packagingSecondaryColour' }).forEach(([key, field]) => { if (id(field) && theme[key]) id(field).value = theme[key]; });
     renderPreview(); message(`Template “${template.template_name}” applied to this draft. Save the project to make it authoritative.`, 'success');
-  }
+}
 
-  async function saveAsTemplate() {
-    const name = String(id('packagingCustomTemplateName')?.value || '').trim(); if (!name) { message('Enter a reusable template name first.', 'error'); id('packagingCustomTemplateName')?.focus(); return; }
-    const data = snapshot(); const template = currentTemplate();
-    try {
-      message('Saving reusable dimensions, renderer profile, artwork defaults and colours…');
-      const result = await api({
-        action: 'save_as_template', packaging_project_id: Number(data.packagingProjectId || 0), template_name: name,
-        description: id('packagingCustomTemplateDescription')?.value || '', package_type: template.package_type,
-        page_width_mm: template.page_width_mm, page_height_mm: template.page_height_mm, front_width_mm: template.front_width_mm,
-        front_height_mm: template.front_height_mm, rear_width_mm: template.rear_width_mm, rear_height_mm: template.rear_height_mm,
-        shape: template.layout?.shape, design_profile: template.layout?.design_profile, bleed_mm: template.layout?.bleed_mm, safe_margin_mm: template.layout?.safe_margin_mm,
-        layout: { ...template.layout, default_top_arc_text: data.artwork.top_arc_text, default_bottom_arc_text: data.artwork.bottom_arc_text, default_primary_text: data.artwork.candle_primary_text, default_date_line_1: data.artwork.candle_date_line_1, default_event_line: data.artwork.candle_event_line, default_date_line_2: data.artwork.candle_date_line_2, cupcake_reference_id: data.artwork.cupcake_reference_id, default_label_title: data.artwork.cupcake_label_title, default_purpose: data.artwork.cupcake_purpose_text, artwork_asset: String(template.package_type)==='soap_ribbon' ? '' : data.artwork.artwork_asset }, theme: data.theme
-      });
-      state.templates = result.templates || state.templates; state.projects = result.projects || state.projects; state.detail = result.detail; state.activeTab = 'layout'; renderProjects(); renderMain(); message(result.message, 'success');
-    } catch (error) { message(error.message || 'Reusable template could not be saved.', 'error'); }
-  }
+async function saveAsTemplate() {
+const name = String(id('packagingCustomTemplateName')?.value || '').trim(); if (!name) { message('Enter a reusable template name first.', 'error'); id('packagingCustomTemplateName')?.focus(); return; }
+const data = snapshot(); const template = currentTemplate();
+try {
+message('Saving reusable dimensions, renderer profile, artwork defaults and colours…');
+const result = await api({
+action: 'save_as_template', packaging_project_id: Number(data.packagingProjectId || 0), template_name: name,
+description: id('packagingCustomTemplateDescription')?.value || '', package_type: template.package_type,
+page_width_mm: template.page_width_mm, page_height_mm: template.page_height_mm, front_width_mm: template.front_width_mm,
+front_height_mm: template.front_height_mm, rear_width_mm: template.rear_width_mm, rear_height_mm: template.rear_height_mm,
+shape: template.layout?.shape, design_profile: template.layout?.design_profile, bleed_mm: template.layout?.bleed_mm, safe_margin_mm: template.layout?.safe_margin_mm,
+layout: { ...template.layout, default_top_arc_text: data.artwork.top_arc_text, default_bottom_arc_text: data.artwork.bottom_arc_text, default_primary_text: data.artwork.candle_primary_text, default_date_line_1: data.artwork.candle_date_line_1, default_event_line: data.artwork.candle_event_line, default_date_line_2: data.artwork.candle_date_line_2, cupcake_reference_id: data.artwork.cupcake_reference_id, default_label_title: data.artwork.cupcake_label_title, default_purpose: data.artwork.cupcake_purpose_text, artwork_asset: String(template.package_type)==='soap_ribbon' ? '' : data.artwork.artwork_asset }, theme: data.theme
+});
+state.templates = result.templates || state.templates; state.projects = result.projects || state.projects; state.detail = result.detail; state.activeTab = 'layout'; renderProjects(); renderMain(); message(result.message, 'success');
+} catch (error) { message(error.message || 'Reusable template could not be saved.', 'error'); }
+}
 
-  async function createProject() {
+async function createProject() {
     const productOptions = state.products.slice(0, 100).map((product) => `${product.product_id}: ${product.name}`).join('\n');
     const productId = Number(prompt(`Optional store-product row ID. Leave blank for packaging not yet linked to a product.\n\nExamples:\n${productOptions.slice(0,1000)}`) || 0) || null;
-    const product = state.products.find((row) => Number(row.product_id) === productId); const productName = product?.name || prompt('Product, collection or packaging project name:'); if (!productName) return;
-    const requestedType = String(prompt('Packaging type: soap_ribbon, soap_cupcake_label, candle_top, engraved_round, product_label, candle_label, jewelry_card, or package_insert', product?.product_category?.toLowerCase().includes('soap') ? 'soap_ribbon' : product?.product_category?.toLowerCase().includes('candle') ? 'candle_top' : 'product_label') || 'product_label').trim().toLowerCase();
+const product = state.products.find((row) => Number(row.product_id) === productId); const productName = product?.name || prompt('Product, collection or packaging project name:'); if (!productName) return;
+const requestedType = String(prompt('Packaging type: soap_ribbon, soap_cupcake_label, candle_top, engraved_round, product_label, candle_label, jewelry_card, or package_insert', product?.product_category?.toLowerCase().includes('soap') ? 'soap_ribbon' : product?.product_category?.toLowerCase().includes('candle') ? 'candle_top' : 'product_label') || 'product_label').trim().toLowerCase();
     try { const preferred = state.templates.find((row) => row.package_type === requestedType) || state.templates.find((row) => row.template_key === 'product-label-rectangle-v1') || state.templates[0]; const data = await api({ action: 'create_project', product_id: productId, packaging_template_id: Number(preferred?.packaging_template_id || 0), project_name: `${productName} labeling and packaging`, product_name: productName, collection_name: productName }); state.projects = data.projects || []; state.inventory = data.inventory || state.inventory; state.detail = data.detail; state.activeTab = 'product'; renderProjects(); renderMain(); message(data.message, 'success'); }
-    catch (error) { message(error.message, 'error'); }
-  }
+catch (error) { message(error.message, 'error'); }
+}
 
-  function applyCupcakeColour(paletteId = '') {
-    const preset = cupcakeColourById(paletteId); if (!preset) return;
-    const mapping = { theme_colour:'packagingThemeColour', border_colour:'packagingBorderColour', accent_gold:'packagingAccentGold', secondary_colour:'packagingSecondaryColour', rose_colour:'packagingRoseColour' };
-    Object.entries(mapping).forEach(([key, field]) => { if (id(field) && preset.theme[key]) id(field).value = preset.theme[key]; });
-    if (id('packagingCupcakePalette')) id('packagingCupcakePalette').value = preset.id;
-    document.querySelectorAll('[data-cupcake-colour]').forEach((node) => node.classList.toggle('is-active', node.dataset.cupcakeColour === preset.id));
-    renderPreview(); message('Cupcake palette applied. Wording and ingredient data were preserved.', 'success');
-  }
-  function applyCupcakePreset(referenceId = '') {
-    const preset = cupcakePresetById(referenceId); const template = state.templates.find((row) => String(row.template_key || '') === preset.template_key);
-    if (!template) { message('The selected Soap Cupcake system template is not available yet. Apply canonical migration 0023, then refresh Packaging Studio.', 'error'); return; }
-    if (id('packagingTemplateId')) id('packagingTemplateId').value = String(template.packaging_template_id);
-    applySelectedTemplate();
-    if (id('packagingCupcakeReference')) id('packagingCupcakeReference').value = preset.id;
-    if (id('packagingCupcakePurpose')) id('packagingCupcakePurpose').value = preset.purpose;
-    const mapping = { theme_colour:'packagingThemeColour', border_colour:'packagingBorderColour', accent_gold:'packagingAccentGold', secondary_colour:'packagingSecondaryColour', rose_colour:'packagingRoseColour' };
-    Object.entries(mapping).forEach(([key, field]) => { if (id(field) && preset.theme[key]) id(field).value = preset.theme[key]; });
-    renderPreview(); message('Soap Cupcake style applied. Save the project when the editable wording is correct.', 'success');
-  }
-  async function createCupcakeProject() {
-    const template = state.templates.find((row) => String(row.package_type || '') === 'soap_cupcake_label');
-    if (!template) { message('Soap Cupcake templates are not available yet. Apply canonical migration 0023, then refresh Packaging Studio.', 'error'); return; }
-    const productName = prompt('Soap Cupcake product / variant name:', 'Sweet Orange'); if (!productName) return;
-    try { const data = await api({ action:'create_project', product_id:null, packaging_template_id:Number(template.packaging_template_id), project_name:productName + ' 2 × 2 Soap Cupcake label', product_name:productName, collection_name:'Cupcake Soap' }); state.projects=data.projects||[]; state.detail=data.detail; state.activeTab='rose'; renderProjects(); renderMain(); message(data.message,'success'); }
-    catch (error) { message(error.message, 'error'); }
-  }
+function applyCupcakeColour(paletteId = '') {
+const preset = cupcakeColourById(paletteId); if (!preset) return;
+const mapping = { theme_colour:'packagingThemeColour', border_colour:'packagingBorderColour', accent_gold:'packagingAccentGold', secondary_colour:'packagingSecondaryColour', rose_colour:'packagingRoseColour' };
+Object.entries(mapping).forEach(([key, field]) => { if (id(field) && preset.theme[key]) id(field).value = preset.theme[key]; });
+if (id('packagingCupcakePalette')) id('packagingCupcakePalette').value = preset.id;
+document.querySelectorAll('[data-cupcake-colour]').forEach((node) => node.classList.toggle('is-active', node.dataset.cupcakeColour === preset.id));
+renderPreview(); message('Cupcake palette applied. Wording and ingredient data were preserved.', 'success');
+}
+function applyCupcakePreset(referenceId = '') {
+const preset = cupcakePresetById(referenceId); const template = state.templates.find((row) => String(row.template_key || '') === preset.template_key);
+if (!template) { message('The selected Soap Cupcake system template is not available yet. Apply canonical migration 0023, then refresh Packaging Studio.', 'error'); return; }
+if (id('packagingTemplateId')) id('packagingTemplateId').value = String(template.packaging_template_id);
+applySelectedTemplate();
+if (id('packagingCupcakeReference')) id('packagingCupcakeReference').value = preset.id;
+if (id('packagingCupcakePurpose')) id('packagingCupcakePurpose').value = preset.purpose;
+const mapping = { theme_colour:'packagingThemeColour', border_colour:'packagingBorderColour', accent_gold:'packagingAccentGold', secondary_colour:'packagingSecondaryColour', rose_colour:'packagingRoseColour' };
+Object.entries(mapping).forEach(([key, field]) => { if (id(field) && preset.theme[key]) id(field).value = preset.theme[key]; });
+renderPreview(); message('Soap Cupcake style applied. Save the project when the editable wording is correct.', 'success');
+}
+async function createCupcakeProject() {
+const template = state.templates.find((row) => String(row.package_type || '') === 'soap_cupcake_label');
+if (!template) { message('Soap Cupcake templates are not available yet. Apply canonical migration 0023, then refresh Packaging Studio.', 'error'); return; }
+const productName = prompt('Soap Cupcake product / variant name:', 'Sweet Orange'); if (!productName) return;
+try { const data = await api({ action:'create_project', product_id:null, packaging_template_id:Number(template.packaging_template_id), project_name:productName + ' 2 × 2 Soap Cupcake label', product_name:productName, collection_name:'Cupcake Soap' }); state.projects=data.projects||[]; state.detail=data.detail; state.activeTab='rose'; renderProjects(); renderMain(); message(data.message,'success'); }
+catch (error) { message(error.message, 'error'); }
+}
 
-  async function saveProject() {
-    try { localStorage.setItem(STORAGE_KEY, JSON.stringify(snapshot())); message('Saving template-controlled packaging data…'); const data = await api(projectPayload()); state.projects = data.projects || []; state.templates = data.templates || state.templates; state.detail = data.detail; renderProjects(); renderMain(); message(data.message, 'success'); return true; }
+async function saveProject() {
+try { localStorage.setItem(STORAGE_KEY, JSON.stringify(snapshot())); message('Saving template-controlled packaging data…'); const data = await api(projectPayload()); state.projects = data.projects || []; state.templates = data.templates || state.templates; state.detail = data.detail; renderProjects(); renderMain(); message(data.message, 'success'); return true; }
     catch (error) { message(`${error.message} Browser draft retained locally.`, 'error'); return false; }
-  }
+}
 
-  async function saveComponents() {
-    try { message('Saving packaging components and costs…'); const data = await api({ action: 'save_components', packaging_project_id: Number(id('packagingProjectId')?.value || 0), components: componentRowsFromDom() }); state.projects = data.projects || []; state.inventory = data.inventory || state.inventory; state.detail = data.detail; state.activeTab = 'components'; renderProjects(); renderMain(); message(data.message, 'success'); }
-    catch (error) { message(error.message || 'Could not save packaging components.', 'error'); }
-  }
+async function saveComponents() {
+try { message('Saving packaging components and costs…'); const data = await api({ action: 'save_components', packaging_project_id: Number(id('packagingProjectId')?.value || 0), components: componentRowsFromDom() }); state.projects = data.projects || []; state.inventory = data.inventory || state.inventory; state.detail = data.detail; state.activeTab = 'components'; renderProjects(); renderMain(); message(data.message, 'success'); }
+catch (error) { message(error.message || 'Could not save packaging components.', 'error'); }
+}
 
-  async function sha256(value) {
-    if (!crypto?.subtle) return '';
-    const hash = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(value));
-    return [...new Uint8Array(hash)].map((byte) => byte.toString(16).padStart(2, '0')).join('');
-  }
+async function sha256(value) {
+if (!crypto?.subtle) return '';
+const hash = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(value));
+return [...new Uint8Array(hash)].map((byte) => byte.toString(16).padStart(2, '0')).join('');
+}
 
-  async function saveVersion() {
+async function saveVersion() {
     try { if (!(await saveProject())) return; const svg = svgMarkup(); const checksum = await sha256(svg); const data = await api({ action: 'save_version', packaging_project_id: Number(id('packagingProjectId')?.value || 0), version_label: prompt('Version label:', `Review ${new Date().toLocaleDateString('en-CA')}`) || '', snapshot: projectPayload(), svg_markup: svg, checksum }); state.projects = data.projects || []; state.detail = data.detail; state.activeTab = 'versions'; renderProjects(); renderMain(); message(data.message, 'success'); }
-    catch (error) { message(error.message, 'error'); }
-  }
+catch (error) { message(error.message, 'error'); }
+}
 
-  async function duplicateProject() { if (!confirm('Duplicate this packaging project as a new draft?')) return; try { const data = await api({ action: 'duplicate_project', packaging_project_id: Number(id('packagingProjectId')?.value || 0) }); state.projects = data.projects || []; state.detail = data.detail; renderProjects(); renderMain(); message(data.message, 'success'); } catch (error) { message(error.message, 'error'); } }
-  async function archiveProject() { if (!confirm('Archive this packaging project? Versions, exports and print evidence will remain.')) return; try { const data = await api({ action: 'archive_project', packaging_project_id: Number(id('packagingProjectId')?.value || 0) }); state.projects = data.projects || []; state.detail = data.detail; renderProjects(); renderMain(); message(data.message, 'success'); } catch (error) { message(error.message, 'error'); } }
+async function duplicateProject() { if (!confirm('Duplicate this packaging project as a new draft?')) return; try { const data = await api({ action: 'duplicate_project', packaging_project_id: Number(id('packagingProjectId')?.value || 0) }); state.projects = data.projects || []; state.detail = data.detail; renderProjects(); renderMain(); message(data.message, 'success'); } catch (error) { message(error.message, 'error'); } }
+async function archiveProject() { if (!confirm('Archive this packaging project? Versions, exports and print evidence will remain.')) return; try { const data = await api({ action: 'archive_project', packaging_project_id: Number(id('packagingProjectId')?.value || 0) }); state.projects = data.projects || []; state.detail = data.detail; renderProjects(); renderMain(); message(data.message, 'success'); } catch (error) { message(error.message, 'error'); } }
 
 
-  async function deleteProject() {
-    const project=state.detail?.project||{}; const projectId=Number(project.packaging_project_id||id('packagingProjectId')?.value||0); const key=String(project.project_key||'').trim();
-    if(!projectId||!key){message('This packaging project cannot be deleted because its project key is unavailable.','error');return;}
+async function deleteProject() {
+const project=state.detail?.project||{}; const projectId=Number(project.packaging_project_id||id('packagingProjectId')?.value||0); const key=String(project.project_key||'').trim();
+if(!projectId||!key){message('This packaging project cannot be deleted because its project key is unavailable.','error');return;}
     const typed=prompt(`Permanently delete this label/project and its packaging-specific versions, exports, print tests and soap rows?\n\nThis cannot be undone. Type the project key exactly:\n${key}`,'');
-    if(typed===null)return; if(String(typed).trim()!==key){message('Deletion cancelled: the project key did not match.','error');return;}
-    try{message('Deleting the selected label/project…');const data=await api({action:'delete_project',packaging_project_id:projectId,confirm_project_key:key});state.projects=data.projects||[];state.templates=data.templates||state.templates;state.formulaLibrary=data.formula_library||state.formulaLibrary;state.contentLibrary=data.content_library||state.contentLibrary;state.sourceMaterialLibrary=data.source_material_library||state.sourceMaterialLibrary;state.detail=null;state.activeTab='product';try{localStorage.removeItem(STORAGE_KEY);}catch{}renderProjects();renderMain();message(data.message,'success');}
-    catch(error){message(error.message||'The packaging project could not be deleted.','error');}
-  }
+if(typed===null)return; if(String(typed).trim()!==key){message('Deletion cancelled: the project key did not match.','error');return;}
+try{message('Deleting the selected label/project…');const data=await api({action:'delete_project',packaging_project_id:projectId,confirm_project_key:key});state.projects=data.projects||[];state.templates=data.templates||state.templates;state.formulaLibrary=data.formula_library||state.formulaLibrary;state.contentLibrary=data.content_library||state.contentLibrary;state.sourceMaterialLibrary=data.source_material_library||state.sourceMaterialLibrary;state.detail=null;state.activeTab='product';try{localStorage.removeItem(STORAGE_KEY);}catch{}renderProjects();renderMain();message(data.message,'success');}
+catch(error){message(error.message||'The packaging project could not be deleted.','error');}
+}
 
-  function refreshLibraryState(data) {
-    state.projects=data.projects||state.projects; state.templates=data.templates||state.templates; state.printers=data.printers||state.printers; state.printersSchemaReady=data.printers_schema_ready!==false; state.formulaLibrary=data.formula_library||[]; state.contentLibrary=data.content_library||[]; state.sourceMaterialLibrary=data.source_material_library||[]; state.librarySchemaReady=data.library_schema_ready!==false; state.sourceMaterialSchemaReady=data.source_material_schema_ready!==false; state.sourceMaterialMetadataReady=data.source_material_metadata_ready!==false; if(data.detail!==undefined)state.detail=data.detail;
-  }
+function refreshLibraryState(data) {
+state.projects=data.projects||state.projects; state.templates=data.templates||state.templates; state.printers=data.printers||state.printers; state.printersSchemaReady=data.printers_schema_ready!==false; state.formulaLibrary=data.formula_library||[]; state.contentLibrary=data.content_library||[]; state.sourceMaterialLibrary=data.source_material_library||[]; state.librarySchemaReady=data.library_schema_ready!==false; state.sourceMaterialSchemaReady=data.source_material_schema_ready!==false; state.sourceMaterialMetadataReady=data.source_material_metadata_ready!==false; if(data.detail!==undefined)state.detail=data.detail;
+}
 
-  function sourceMaterialById(value){return state.sourceMaterialLibrary.find((row)=>Number(row.packaging_source_material_template_id)===Number(value||0));}
+function sourceMaterialById(value){return state.sourceMaterialLibrary.find((row)=>Number(row.packaging_source_material_template_id)===Number(value||0));}
 
-  async function previewAmazonSourceMaterial(){
-    const amazonUrl=String(id('packagingSourceAmazonUrl')?.value||'').trim();
-    if(!amazonUrl){message('Paste the exact Amazon product link first.','error');id('packagingSourceAmazonUrl')?.focus();return;}
-    const status=id('packagingSourceAmazonStatus');
-    try{
-      if(status)status.textContent='Reading Amazon product metadata…';
-      message('Creating a review-first source-material draft from the Amazon link…');
-      const response=await DDAuth.apiFetch('/api/admin/amazon-link-preview',{method:'POST',body:JSON.stringify({amazon_url:amazonUrl,preview_context:'packaging_source_material'})});
-      const data=await response.json().catch(()=>null);
-      if(!response.ok||!data?.ok)throw new Error(data?.error||'Amazon preview failed.');
-      const row=data.packaging_source_draft||{};
-      const set=(field,value)=>{const node=id(field);if(node&&value!==undefined&&value!==null)node.value=String(value);};
-      set('packagingSourceMaterialName',row.material_name||data.draft?.item_name||'');
-      set('packagingSourceSupplierProductName',row.supplier_product_name||data.draft?.item_name||'');
-      set('packagingSourceSupplierName',row.supplier_name||data.draft?.supplier_name||'Amazon.ca');
-      set('packagingSourceSupplierSku',row.supplier_sku||data.draft?.supplier_sku||data.asin||'');
-      set('packagingSourceUrl',row.source_url||data.canonical_url||amazonUrl);
-      set('packagingSourceImageUrl',row.source_image_url||data.draft?.image_url||'');
-      set('packagingSourceProductFamily',row.product_family||'general');
-      set('packagingSourceMaterialSubtype',row.material_subtype||'other');
-      set('packagingSourceIntendedUse',row.intended_use||'not_applicable');
-      set('packagingSourceColourHex',row.colour_hex||'#C9B18A');
-      set('packagingSourceIngredientRaw',row.ingredient_declaration_raw||'');
-      set('packagingSourceAllergenStatement',row.allergen_statement||'');
+async function previewAmazonSourceMaterial(){
+const amazonUrl=String(id('packagingSourceAmazonUrl')?.value||'').trim();
+if(!amazonUrl){message('Paste the exact Amazon product link first.','error');id('packagingSourceAmazonUrl')?.focus();return;}
+const status=id('packagingSourceAmazonStatus');
+try{
+if(status)status.textContent='Reading Amazon product metadata…';
+message('Creating a review-first source-material draft from the Amazon link…');
+const response=await DDAuth.apiFetch('/api/admin/amazon-link-preview',{method:'POST',body:JSON.stringify({amazon_url:amazonUrl,preview_context:'packaging_source_material'})});
+const data=await response.json().catch(()=>null);
+if(!response.ok||!data?.ok)throw new Error(data?.error||'Amazon preview failed.');
+const row=data.packaging_source_draft||{};
+const set=(field,value)=>{const node=id(field);if(node&&value!==undefined&&value!==null)node.value=String(value);};
+set('packagingSourceMaterialName',row.material_name||data.draft?.item_name||'');
+set('packagingSourceSupplierProductName',row.supplier_product_name||data.draft?.item_name||'');
+set('packagingSourceSupplierName',row.supplier_name||data.draft?.supplier_name||'Amazon.ca');
+set('packagingSourceSupplierSku',row.supplier_sku||data.draft?.supplier_sku||data.asin||'');
+set('packagingSourceUrl',row.source_url||data.canonical_url||amazonUrl);
+set('packagingSourceImageUrl',row.source_image_url||data.draft?.image_url||'');
+set('packagingSourceProductFamily',row.product_family||'general');
+set('packagingSourceMaterialSubtype',row.material_subtype||'other');
+set('packagingSourceIntendedUse',row.intended_use||'not_applicable');
+set('packagingSourceColourHex',row.colour_hex||'#C9B18A');
+set('packagingSourceIngredientRaw',row.ingredient_declaration_raw||'');
+set('packagingSourceAllergenStatement',row.allergen_statement||'');
       set('packagingSourceBenefits',(Array.isArray(row.benefits)?row.benefits:[]).map((b)=>`${b.title||'Supplier detail'}: ${b.body||''}`).join('\n\n'));
-      set('packagingSourceClaims',(Array.isArray(row.supplier_claims)?row.supplier_claims:[]).map((c)=>c.claim_en||'').filter(Boolean).join('\n'));
-      set('packagingSourceUsageNotes',row.usage_notes||data.draft?.item_description||'');
-      set('packagingSourceComplianceNotes',row.compliance_notes||'Amazon-assisted draft. Verify supplier/manufacturer documentation before label approval.');
-      set('packagingSourceVerification','needs_review');
-      set('packagingSourceFragranceReview',row.fragrance_allergen_review_status||(['fragrance_oil','essential_oil_blend'].includes(row.material_subtype)?'needs_supplier_data':'not_applicable'));
-      if(Array.isArray(row.master_inci)&&row.master_inci.length)setSourceInciRows(row.master_inci);else setSourceInciRows([{}]);
-      const warnings=Array.isArray(data.warnings)?data.warnings:[];
+set('packagingSourceClaims',(Array.isArray(row.supplier_claims)?row.supplier_claims:[]).map((c)=>c.claim_en||'').filter(Boolean).join('\n'));
+set('packagingSourceUsageNotes',row.usage_notes||data.draft?.item_description||'');
+set('packagingSourceComplianceNotes',row.compliance_notes||'Amazon-assisted draft. Verify supplier/manufacturer documentation before label approval.');
+set('packagingSourceVerification','needs_review');
+set('packagingSourceFragranceReview',row.fragrance_allergen_review_status||(['fragrance_oil','essential_oil_blend'].includes(row.material_subtype)?'needs_supplier_data':'not_applicable'));
+if(Array.isArray(row.master_inci)&&row.master_inci.length)setSourceInciRows(row.master_inci);else setSourceInciRows([{}]);
+const warnings=Array.isArray(data.warnings)?data.warnings:[];
       if(status)status.innerHTML=`<strong>Amazon draft loaded.</strong> ${esc(warnings.join(' '))} Review every field below, especially ingredient/INCI rows, then save the material template.`;
-      bindSourceInciRows();
+bindSourceInciRows();
       message(`Amazon draft loaded for “${row.material_name||data.draft?.item_name||'source material'}”. Nothing has been saved yet; review supplier data and press Save material template.`,'success');
-    }catch(error){
-      if(status)status.textContent=error.message||'Amazon preview failed.';
+}catch(error){
+if(status)status.textContent=error.message||'Amazon preview failed.';
       message(`${error.message||'Amazon preview failed.'} The material can still be entered manually below.`,'error');
-    }
-  }
-  function inferSourceCategoryFromInventory(item={}){
+}
+}
+function inferSourceCategoryFromInventory(item={}){
     const value=`${item.item_name||''} ${item.category||''} ${item.item_description||''}`.toLowerCase();
-    if(value.includes('soap base')||value.includes('melt and pour')||value.includes('melt & pour'))return{family:'soap',subtype:'soap_base'};
-    if(value.includes('wax'))return{family:'candle',subtype:'candle_wax'};
-    if(value.includes('essential oil'))return{family:'general',subtype:'essential_oil_blend'};
-    if(value.includes('fragrance')||value.includes('scent oil'))return{family:'general',subtype:'fragrance_oil'};
-    if(value.includes('mica')||value.includes('pigment'))return{family:'general',subtype:'mica'};
-    if(value.includes('colour')||value.includes('color')||value.includes('dye'))return{family:'general',subtype:'colourant'};
-    if(value.includes('butter')||value.includes('carrier oil'))return{family:'bath_body',subtype:'carrier_oil_butter'};
-    return{family:'general',subtype:'additive'};
-  }
+if(value.includes('soap base')||value.includes('melt and pour')||value.includes('melt & pour'))return{family:'soap',subtype:'soap_base'};
+if(value.includes('wax'))return{family:'candle',subtype:'candle_wax'};
+if(value.includes('essential oil'))return{family:'general',subtype:'essential_oil_blend'};
+if(value.includes('fragrance')||value.includes('scent oil'))return{family:'general',subtype:'fragrance_oil'};
+if(value.includes('mica')||value.includes('pigment'))return{family:'general',subtype:'mica'};
+if(value.includes('colour')||value.includes('color')||value.includes('dye'))return{family:'general',subtype:'colourant'};
+if(value.includes('butter')||value.includes('carrier oil'))return{family:'bath_body',subtype:'carrier_oil_butter'};
+return{family:'general',subtype:'additive'};
+}
 
-  function useInventoryForSourceMaterial(){
-    const input=id('packagingSourceInventorySearch');const item=inventoryByChoice(input?.value||'');const status=id('packagingSourceInventoryStatus');
-    if(!item){if(status)status.textContent='Choose an exact inventory suggestion first.';message('Choose an existing inventory item from the search suggestions.','error');return;}
-    if(id('packagingSourceInventoryId'))id('packagingSourceInventoryId').value=String(item.site_item_inventory_id||'');if(input)input.value=inventoryChoiceLabel(item);
-    const linkedId=Number(item.packaging_source_material_template_id||0);const linked=linkedId?sourceMaterialById(linkedId):null;
+function useInventoryForSourceMaterial(){
+const input=id('packagingSourceInventorySearch');const item=inventoryByChoice(input?.value||'');const status=id('packagingSourceInventoryStatus');
+if(!item){if(status)status.textContent='Choose an exact inventory suggestion first.';message('Choose an existing inventory item from the search suggestions.','error');return;}
+if(id('packagingSourceInventoryId'))id('packagingSourceInventoryId').value=String(item.site_item_inventory_id||'');if(input)input.value=inventoryChoiceLabel(item);
+const linkedId=Number(item.packaging_source_material_template_id||0);const linked=linkedId?sourceMaterialById(linkedId):null;
     if(linked){loadSourceMaterialEditor(linkedId);if(id('packagingSourceInventoryId'))id('packagingSourceInventoryId').value=String(item.site_item_inventory_id||'');if(input)input.value=inventoryChoiceLabel(item);if(status)status.textContent=`Inventory already links to “${linked.material_name}”. That existing source template has been loaded; no Amazon re-import is needed.`;message(`Loaded the existing source template linked to ${item.item_name}.`,'success');return;}
-    const inferred=inferSourceCategoryFromInventory(item);const set=(field,value)=>{if(id(field)&&value!==undefined&&value!==null)id(field).value=String(value);};
-    set('packagingSourceProductFamily',inferred.family);set('packagingSourceMaterialSubtype',inferred.subtype);set('packagingSourceMaterialName',item.item_name||'');set('packagingSourceSupplierProductName',item.item_name||'');set('packagingSourceSupplierName',item.supplier_name||'');set('packagingSourceSupplierSku',item.supplier_sku||item.external_key||'');set('packagingSourceUrl',item.source_url||item.amazon_url||'');set('packagingSourceAmazonUrl',item.amazon_url||'');set('packagingSourceImageUrl',item.image_url||'');
-    if(item.captured_ingredients)set('packagingSourceIngredientRaw',item.captured_ingredients);if(item.captured_allergens)set('packagingSourceAllergenStatement',item.captured_allergens);if(item.captured_benefits)set('packagingSourceBenefits',item.captured_benefits);if(item.captured_claims)set('packagingSourceClaims',item.captured_claims);
-    if(item.captured_ingredients)importSourceIngredientText();else setSourceInciRows([{}]);
-    if(id('packagingSourceFragranceReview'))id('packagingSourceFragranceReview').value=['fragrance_oil','essential_oil_blend'].includes(inferred.subtype)?'needs_supplier_data':'not_applicable';
+const inferred=inferSourceCategoryFromInventory(item);const set=(field,value)=>{if(id(field)&&value!==undefined&&value!==null)id(field).value=String(value);};
+set('packagingSourceProductFamily',inferred.family);set('packagingSourceMaterialSubtype',inferred.subtype);set('packagingSourceMaterialName',item.item_name||'');set('packagingSourceSupplierProductName',item.item_name||'');set('packagingSourceSupplierName',item.supplier_name||'');set('packagingSourceSupplierSku',item.supplier_sku||item.external_key||'');set('packagingSourceUrl',item.source_url||item.amazon_url||'');set('packagingSourceAmazonUrl',item.amazon_url||'');set('packagingSourceImageUrl',item.image_url||'');
+if(item.captured_ingredients)set('packagingSourceIngredientRaw',item.captured_ingredients);if(item.captured_allergens)set('packagingSourceAllergenStatement',item.captured_allergens);if(item.captured_benefits)set('packagingSourceBenefits',item.captured_benefits);if(item.captured_claims)set('packagingSourceClaims',item.captured_claims);
+if(item.captured_ingredients)importSourceIngredientText();else setSourceInciRows([{}]);
+if(id('packagingSourceFragranceReview'))id('packagingSourceFragranceReview').value=['fragrance_oil','essential_oil_blend'].includes(inferred.subtype)?'needs_supplier_data':'not_applicable';
     if(status)status.textContent=`Reused Inventory #${item.site_item_inventory_id}: name, supplier/SKU, existing source/Amazon URL, image and any captured source composition were copied. Review missing INCI/allergen evidence before saving.`;
     message(`Inventory information for ${item.item_name} loaded. Amazon is only a fallback for fields Inventory does not already contain.`,'success');
-  }
+}
 
-  function clearSourceMaterialEditor(){['packagingSourceAmazonUrl','packagingSourceInventorySearch','packagingSourceInventoryId','packagingSourceMaterialEditId','packagingSourceMaterialName','packagingSourceSupplierProductName','packagingSourceSupplierName','packagingSourceSupplierSku','packagingSourceUrl','packagingSourceImageUrl','packagingSourceDocumentUrl','packagingSourceIngredientRaw','packagingSourceAllergenStatement','packagingSourceBenefits','packagingSourceClaims','packagingSourceFragranceAllergens','packagingSourceUsageNotes','packagingSourceComplianceNotes'].forEach((field)=>{if(id(field))id(field).value='';});if(id('packagingSourceProductFamily'))id('packagingSourceProductFamily').value='soap';if(id('packagingSourceMaterialSubtype'))id('packagingSourceMaterialSubtype').value='soap_base';if(id('packagingSourceColourHex'))id('packagingSourceColourHex').value='#C9B18A';if(id('packagingSourceIntendedUse'))id('packagingSourceIntendedUse').value='rinse_off';if(id('packagingSourceVerification'))id('packagingSourceVerification').value='needs_review';if(id('packagingSourceFragranceReview'))id('packagingSourceFragranceReview').value='not_applicable';setSourceInciRows([{}]);}
+function clearSourceMaterialEditor(){['packagingSourceAmazonUrl','packagingSourceInventorySearch','packagingSourceInventoryId','packagingSourceMaterialEditId','packagingSourceMaterialName','packagingSourceSupplierProductName','packagingSourceSupplierName','packagingSourceSupplierSku','packagingSourceUrl','packagingSourceImageUrl','packagingSourceDocumentUrl','packagingSourceIngredientRaw','packagingSourceAllergenStatement','packagingSourceBenefits','packagingSourceClaims','packagingSourceFragranceAllergens','packagingSourceUsageNotes','packagingSourceComplianceNotes'].forEach((field)=>{if(id(field))id(field).value='';});if(id('packagingSourceProductFamily'))id('packagingSourceProductFamily').value='soap';if(id('packagingSourceMaterialSubtype'))id('packagingSourceMaterialSubtype').value='soap_base';if(id('packagingSourceColourHex'))id('packagingSourceColourHex').value='#C9B18A';if(id('packagingSourceIntendedUse'))id('packagingSourceIntendedUse').value='rinse_off';if(id('packagingSourceVerification'))id('packagingSourceVerification').value='needs_review';if(id('packagingSourceFragranceReview'))id('packagingSourceFragranceReview').value='not_applicable';setSourceInciRows([{}]);}
   function loadSourceMaterialEditor(sourceId){const row=sourceMaterialById(sourceId);if(!row)return;if(Number(row.is_system)===1)message('Built-in source templates are protected. You can review/apply them or save your own custom copy.','');if(id('packagingSourceMaterialTemplateId'))id('packagingSourceMaterialTemplateId').value=String(sourceId);if(id('packagingSourceMaterialEditId'))id('packagingSourceMaterialEditId').value=Number(row.is_system)===1?'':String(sourceId);if(id('packagingSourceProductFamily'))id('packagingSourceProductFamily').value=row.product_family||'general';if(id('packagingSourceMaterialSubtype'))id('packagingSourceMaterialSubtype').value=row.material_subtype||row.material_type||'other';if(id('packagingSourceColourHex'))id('packagingSourceColourHex').value=row.colour_hex||'#C9B18A';if(id('packagingSourceMaterialName'))id('packagingSourceMaterialName').value=Number(row.is_system)===1?`${row.material_name} copy`:row.material_name||'';if(id('packagingSourceSupplierProductName'))id('packagingSourceSupplierProductName').value=row.supplier_product_name||'';if(id('packagingSourceSupplierName'))id('packagingSourceSupplierName').value=row.supplier_name||'';if(id('packagingSourceSupplierSku'))id('packagingSourceSupplierSku').value=row.supplier_sku||'';if(id('packagingSourceUrl'))id('packagingSourceUrl').value=row.source_url||'';if(id('packagingSourceImageUrl'))id('packagingSourceImageUrl').value=row.source_image_url||'';if(id('packagingSourceDocumentUrl'))id('packagingSourceDocumentUrl').value=row.supplier_document_url||'';if(id('packagingSourceIntendedUse'))id('packagingSourceIntendedUse').value=row.intended_use||'not_applicable';if(id('packagingSourceVerification'))id('packagingSourceVerification').value=Number(row.is_system)===1?'needs_review':(row.verification_status||'needs_review');if(id('packagingSourceFragranceReview'))id('packagingSourceFragranceReview').value=row.fragrance_allergen_review_status||'not_applicable';if(id('packagingSourceIngredientRaw'))id('packagingSourceIngredientRaw').value=row.ingredient_declaration_raw||'';setSourceInciRows(row.master_inci||[]);if(id('packagingSourceAllergenStatement'))id('packagingSourceAllergenStatement').value=row.allergen_statement||'';if(id('packagingSourceBenefits'))id('packagingSourceBenefits').value=(row.benefits||[]).map((b)=>`${b.title||'Benefit'}: ${b.body||''}`).join('\n\n');if(id('packagingSourceClaims'))id('packagingSourceClaims').value=(row.supplier_claims||[]).map((c)=>c.claim_en||'').filter(Boolean).join('\n');if(id('packagingSourceFragranceAllergens'))id('packagingSourceFragranceAllergens').value=(row.fragrance_allergens||[]).map((a)=>`${a.inci_name||''} | ${a.concentration_percent??''} | ${Number(a.disclosure_required)===1?'required':''} | ${a.notes||''}`.trim()).join('\n');if(id('packagingSourceUsageNotes'))id('packagingSourceUsageNotes').value=row.usage_notes||'';if(id('packagingSourceComplianceNotes'))id('packagingSourceComplianceNotes').value=row.compliance_notes||'';const linkedInventory=(state.inventory||[]).find((item)=>Number(item.packaging_source_material_template_id||0)===Number(sourceId));if(id('packagingSourceInventoryId'))id('packagingSourceInventoryId').value=linkedInventory?String(linkedInventory.site_item_inventory_id):'';if(id('packagingSourceInventorySearch'))id('packagingSourceInventorySearch').value=linkedInventory?inventoryChoiceLabel(linkedInventory):'';const details=id('packagingSourceMaterialName')?.closest('details');if(details)details.open=true;}
 
   function applySourceMaterialRows(row){const rows=Array.isArray(row.master_inci)?row.master_inci:[];if(sourceMaterialDefaultRole(row.material_subtype||row.material_type)==='base'){if(id('soapIngredientRows'))id('soapIngredientRows').innerHTML=rows.map(ingredientRow).join('');}else{for(const item of rows)addIngredient(item);}if(id('packagingInci'))id('packagingInci').value=ingredientRowsFromDom().map((item)=>item.inci_name).filter(Boolean).join(', ');for(const claim of (row.supplier_claims||[])){if(!claim.claim_en&&!claim.claim_fr)continue;addClaim({claim_en:claim.claim_en||'',claim_fr:claim.claim_fr||'',icon_name:claim.icon_name||'leaf',is_approved:0,compliance_note:claim.compliance_note||`Inherited from supplier/source template “${row.material_name}”; review before approval.`});}bindDynamicRows();renderPreview();}
-  async function reloadAttachedBaseIngredients(){
-    const projectId=Number(id('packagingProjectId')?.value||0);const base=(state.detail?.source_materials||[]).find((row)=>String(row.material_role||'')==='base');
-    if(!projectId||!base){message('Attach a base source-material template to this label first.','error');return;}
+async function reloadAttachedBaseIngredients(){
+const projectId=Number(id('packagingProjectId')?.value||0);const base=(state.detail?.source_materials||[]).find((row)=>String(row.material_role||'')==='base');
+if(!projectId||!base){message('Attach a base source-material template to this label first.','error');return;}
     if(!confirm(`Reload structured ingredient rows from “${base.material_name}”? This replaces the current structured rows with the reviewed source-base composition.`))return;
-    await applySourceMaterialTemplate(Number(base.packaging_source_material_template_id||0));
-  }
+await applySourceMaterialTemplate(Number(base.packaging_source_material_template_id||0));
+}
   async function applySourceMaterialTemplate(sourceIdValue=0){const sourceId=Number(sourceIdValue||id('packagingSourceMaterialTemplateId')?.value||0);const row=sourceMaterialById(sourceId);if(!row){message('Choose a purchased/source material template first.','error');return;}const projectId=Number(id('packagingProjectId')?.value||0);try{if(projectId){message(`Attaching ${row.material_name} and synchronizing its structured ingredient rows…`);const data=await api({action:'apply_source_material_template',packaging_project_id:projectId,packaging_source_material_template_id:sourceId});refreshLibraryState(data);state.activeTab='ingredients';renderProjects();renderMain();message(`${row.material_name} applied and saved to this label. ${sourceMaterialDefaultRole(row.material_subtype||row.material_type)==='base'?'Its reviewed source composition now replaces the project structured ingredient rows.':'Its source ingredient rows were added without duplicate INCI rows.'} Review English/French display wording before approval; supplier claim suggestions were added only as unapproved drafts.`,'success');return;}if(id('packagingSourceMaterialTemplateId'))id('packagingSourceMaterialTemplateId').value=String(sourceId);applySourceMaterialRows(row);message(`${row.material_name} loaded into the unsaved draft. Save/open a packaging project to persist these structured rows.`,'success');}catch(error){message(error.message||'Source-material template could not be applied.','error');}}
   async function saveSourceMaterialTemplate(){const materialName=String(id('packagingSourceMaterialName')?.value||'').trim();if(!materialName){message('Enter a source-material template name first.','error');return;}const masterInci=sourceInciRowsFromDom();if(!masterInci.length){message('Add at least one supplier ingredient / Master INCI row to this purchased material first.','error');return;}const subtype=id('packagingSourceMaterialSubtype')?.value||'other';const materialType=sourceMaterialCoreType(subtype);const defaultRole=sourceMaterialDefaultRole(subtype);try{const data=await api({action:'save_source_material_template',packaging_project_id:Number(id('packagingProjectId')?.value||0),packaging_source_material_template_id:Number(id('packagingSourceMaterialEditId')?.value||0)||null,site_item_inventory_id:Number(id('packagingSourceInventoryId')?.value||0)||null,material_type:materialType,product_family:id('packagingSourceProductFamily')?.value||'general',material_subtype:subtype,default_role:defaultRole,colour_hex:id('packagingSourceColourHex')?.value||'',material_name:materialName,supplier_product_name:id('packagingSourceSupplierProductName')?.value||'',supplier_name:id('packagingSourceSupplierName')?.value||'',supplier_sku:id('packagingSourceSupplierSku')?.value||'',source_url:id('packagingSourceUrl')?.value||'',source_image_url:id('packagingSourceImageUrl')?.value||'',supplier_document_url:id('packagingSourceDocumentUrl')?.value||'',source_reference:'Packaging Studio Material Library',intended_use:id('packagingSourceIntendedUse')?.value||'not_applicable',ingredient_declaration_raw:id('packagingSourceIngredientRaw')?.value||'',master_inci:masterInci.map((row)=>({...row,verification_status:['supplier_verified','owner_verified'].includes(id('packagingSourceVerification')?.value)?id('packagingSourceVerification').value:'needs_review'})),allergen_statement:id('packagingSourceAllergenStatement')?.value||'',fragrance_allergens:parseFragranceAllergenLines(id('packagingSourceFragranceAllergens')?.value||''),fragrance_allergen_review_status:id('packagingSourceFragranceReview')?.value||'not_applicable',benefits:parseBenefitsText(id('packagingSourceBenefits')?.value||''),supplier_claims:parseClaimLines(id('packagingSourceClaims')?.value||''),usage_notes:id('packagingSourceUsageNotes')?.value||'',compliance_notes:id('packagingSourceComplianceNotes')?.value||'',verification_status:id('packagingSourceVerification')?.value||'needs_review'});refreshLibraryState(data);const saved=state.sourceMaterialLibrary.find((row)=>String(row.material_name||'')===materialName);if(saved)state.activeSourceMaterialId=Number(saved.packaging_source_material_template_id||0);state.activeTab='library';renderProjects();renderMain();message(`${data.message} Reusable ingredient/blend/colourant dropdowns were refreshed from this template.`,'success');}catch(error){message(error.message||'Source-material template could not be saved.','error');}}
 
   async function deleteSourceMaterialTemplate(sourceId){const row=sourceMaterialById(sourceId);if(!row)return;if(Number(row.is_system)===1){message('Built-in source-material templates are protected.','error');return;}if(!confirm(`Remove “${row.material_name}” from the active source-material library? Existing project/formula evidence will be preserved.`))return;try{const data=await api({action:'delete_source_material_template',packaging_project_id:Number(id('packagingProjectId')?.value||0),packaging_source_material_template_id:Number(sourceId)});refreshLibraryState(data);state.activeTab='library';renderProjects();renderMain();message(data.message,'success');}catch(error){message(error.message,'error');}}
-  async function detachSourceMaterialTemplate(sourceId){try{const current=snapshot();const data=await api({action:'detach_source_material_template',packaging_project_id:Number(id('packagingProjectId')?.value||0),packaging_source_material_template_id:Number(sourceId)});refreshLibraryState(data);state.activeTab='library';renderProjects();renderMain();if(Array.isArray(current.structured_ingredients)&&id('soapIngredientRows'))id('soapIngredientRows').innerHTML=current.structured_ingredients.map(ingredientRow).join('');if(Array.isArray(current.structured_claims)&&id('soapClaimRows'))id('soapClaimRows').innerHTML=current.structured_claims.map(claimRow).join('');bindDynamicRows();renderPreview();message(data.message,'success');}catch(error){message(error.message,'error');}}
+async function detachSourceMaterialTemplate(sourceId){try{const current=snapshot();const data=await api({action:'detach_source_material_template',packaging_project_id:Number(id('packagingProjectId')?.value||0),packaging_source_material_template_id:Number(sourceId)});refreshLibraryState(data);state.activeTab='library';renderProjects();renderMain();if(Array.isArray(current.structured_ingredients)&&id('soapIngredientRows'))id('soapIngredientRows').innerHTML=current.structured_ingredients.map(ingredientRow).join('');if(Array.isArray(current.structured_claims)&&id('soapClaimRows'))id('soapClaimRows').innerHTML=current.structured_claims.map(claimRow).join('');bindDynamicRows();renderPreview();message(data.message,'success');}catch(error){message(error.message,'error');}}
   function addSourceBenefitAsClaim(sourceId,index){const row=sourceMaterialById(sourceId);const benefit=row?.benefits?.[Number(index)];if(!benefit)return;addClaim({claim_en:benefit.title||'',claim_fr:'',icon_name:'leaf',is_approved:0,compliance_note:`Supplier benefit from ${row.material_name}: ${benefit.body||''} Review claim classification and French wording before approval.`});state.activeTab='claims';activateTab('claims');message('Supplier benefit title added as an unapproved draft claim.','success');}
 
-  async function applyFormulaLibrary() {
-    const formulaId=Number(id('packagingFormulaLibraryId')?.value||0); const formula=state.formulaLibrary.find((row)=>Number(row.packaging_formula_library_id)===formulaId);
-    if(!formula){message('Choose a saved finished formula first.','error');return;}
+async function applyFormulaLibrary() {
+const formulaId=Number(id('packagingFormulaLibraryId')?.value||0); const formula=state.formulaLibrary.find((row)=>Number(row.packaging_formula_library_id)===formulaId);
+if(!formula){message('Choose a saved finished formula first.','error');return;}
     if(!confirm(`Replace the current structured ingredient rows with “${formula.formula_name}”?`))return;
-    try {
-      const projectId=Number(id('packagingProjectId')?.value||0);
-      if(formula.source_material_template_id&&projectId){
-        const data=await api({action:'apply_source_material_template',packaging_project_id:projectId,packaging_source_material_template_id:Number(formula.source_material_template_id)});
-        refreshLibraryState(data); state.activeTab='library'; renderProjects(); renderMain();
-      }
-      if(id('packagingCollection')&&formula.product_family)id('packagingCollection').value=formula.product_family;
-      if(id('packagingIdentityEn')&&formula.product_identity_en)id('packagingIdentityEn').value=formula.product_identity_en;
-      if(id('packagingIdentityFr')&&formula.product_identity_fr)id('packagingIdentityFr').value=formula.product_identity_fr;
-      if(formula.source_material_template_id&&id('packagingSourceMaterialTemplateId'))id('packagingSourceMaterialTemplateId').value=String(formula.source_material_template_id);
-      const rows=Array.isArray(formula.ingredients)?formula.ingredients:[]; if(id('soapIngredientRows'))id('soapIngredientRows').innerHTML=rows.map(ingredientRow).join('');
-      const inci=rows.map((row)=>row.inci_name).filter(Boolean).join(', '); if(id('packagingInci'))id('packagingInci').value=inci;
-      if(formula.default_rose_asset_id)applyRoseAssetPreset(formula.default_rose_asset_id,false); else if(formula.default_rose_colour&&id('packagingRoseColour')){id('packagingRoseColour').value=formula.default_rose_colour;if(id('packagingRoseAsset'))id('packagingRoseAsset').value='rose-custom-v1';updateRoseAssetPath();}
+try {
+const projectId=Number(id('packagingProjectId')?.value||0);
+if(formula.source_material_template_id&&projectId){
+const data=await api({action:'apply_source_material_template',packaging_project_id:projectId,packaging_source_material_template_id:Number(formula.source_material_template_id)});
+refreshLibraryState(data); state.activeTab='library'; renderProjects(); renderMain();
+}
+if(id('packagingCollection')&&formula.product_family)id('packagingCollection').value=formula.product_family;
+if(id('packagingIdentityEn')&&formula.product_identity_en)id('packagingIdentityEn').value=formula.product_identity_en;
+if(id('packagingIdentityFr')&&formula.product_identity_fr)id('packagingIdentityFr').value=formula.product_identity_fr;
+if(formula.source_material_template_id&&id('packagingSourceMaterialTemplateId'))id('packagingSourceMaterialTemplateId').value=String(formula.source_material_template_id);
+const rows=Array.isArray(formula.ingredients)?formula.ingredients:[]; if(id('soapIngredientRows'))id('soapIngredientRows').innerHTML=rows.map(ingredientRow).join('');
+const inci=rows.map((row)=>row.inci_name).filter(Boolean).join(', '); if(id('packagingInci'))id('packagingInci').value=inci;
+if(formula.default_rose_asset_id)applyRoseAssetPreset(formula.default_rose_asset_id,false); else if(formula.default_rose_colour&&id('packagingRoseColour')){id('packagingRoseColour').value=formula.default_rose_colour;if(id('packagingRoseAsset'))id('packagingRoseAsset').value='rose-custom-v1';updateRoseAssetPath();}
       bindDynamicRows(); renderPreview(); message(`Formula “${formula.formula_name}” applied. ${formula.source_material_template_id?'Its purchased base dependency is attached for source review. ':''}Review the finished ingredients and save the project.`,'success');
-    } catch(error) { message(error.message||'The saved formula could not be applied.','error'); }
-  }
+} catch(error) { message(error.message||'The saved formula could not be applied.','error'); }
+}
 
-  async function saveFormulaLibrary() {
-    const ingredients=ingredientRowsFromDom(); if(!ingredients.length){message('Add at least one structured ingredient before saving a formula.','error');return;}
-    const selectedId=Number(id('packagingFormulaLibraryId')?.value||0); const selected=state.formulaLibrary.find((row)=>Number(row.packaging_formula_library_id)===selectedId);
-    const requestedName=String(id('packagingFormulaLibraryName')?.value||'').trim(); const formulaName=requestedName||((selected&&Number(selected.is_system)!==1)?selected.formula_name:'');
-    if(!formulaName){message('Enter a new/custom formula name first.','error');id('packagingFormulaLibraryName')?.focus();return;}
-    const attachedBase=state.detail?.source_materials?.find((row)=>String(row.material_role)==='base');const selectedSource=sourceMaterialById(Number(id('packagingSourceMaterialTemplateId')?.value||0));const formulaBaseId=Number(attachedBase?.packaging_source_material_template_id||((selectedSource&&sourceMaterialDefaultRole(selectedSource.material_subtype||selectedSource.material_type)==='base')?selectedSource.packaging_source_material_template_id:0))||null;
-    try{message('Saving reusable finished formula…');const data=await api({action:'save_formula_library',packaging_project_id:Number(id('packagingProjectId')?.value||0),packaging_formula_library_id:selected&&Number(selected.is_system)!==1&&!requestedName?selectedId:null,formula_name:formulaName,product_family:id('packagingCollection')?.value||'',product_identity_en:id('packagingIdentityEn')?.value||'',product_identity_fr:id('packagingIdentityFr')?.value||'',default_rose_asset_id:id('packagingRoseAsset')?.value||'',default_rose_colour:id('packagingRoseColour')?.value||'',structured_ingredients:ingredients,source_material_template_id:formulaBaseId,notes:id('packagingFormulaLibraryNotes')?.value||''});refreshLibraryState(data);state.activeTab='library';renderProjects();renderMain();message(data.message,'success');}
-    catch(error){message(error.message||'Formula library entry could not be saved.','error');}
-  }
+async function saveFormulaLibrary() {
+const ingredients=ingredientRowsFromDom(); if(!ingredients.length){message('Add at least one structured ingredient before saving a formula.','error');return;}
+const selectedId=Number(id('packagingFormulaLibraryId')?.value||0); const selected=state.formulaLibrary.find((row)=>Number(row.packaging_formula_library_id)===selectedId);
+const requestedName=String(id('packagingFormulaLibraryName')?.value||'').trim(); const formulaName=requestedName||((selected&&Number(selected.is_system)!==1)?selected.formula_name:'');
+if(!formulaName){message('Enter a new/custom formula name first.','error');id('packagingFormulaLibraryName')?.focus();return;}
+const attachedBase=state.detail?.source_materials?.find((row)=>String(row.material_role)==='base');const selectedSource=sourceMaterialById(Number(id('packagingSourceMaterialTemplateId')?.value||0));const formulaBaseId=Number(attachedBase?.packaging_source_material_template_id||((selectedSource&&sourceMaterialDefaultRole(selectedSource.material_subtype||selectedSource.material_type)==='base')?selectedSource.packaging_source_material_template_id:0))||null;
+try{message('Saving reusable finished formula…');const data=await api({action:'save_formula_library',packaging_project_id:Number(id('packagingProjectId')?.value||0),packaging_formula_library_id:selected&&Number(selected.is_system)!==1&&!requestedName?selectedId:null,formula_name:formulaName,product_family:id('packagingCollection')?.value||'',product_identity_en:id('packagingIdentityEn')?.value||'',product_identity_fr:id('packagingIdentityFr')?.value||'',default_rose_asset_id:id('packagingRoseAsset')?.value||'',default_rose_colour:id('packagingRoseColour')?.value||'',structured_ingredients:ingredients,source_material_template_id:formulaBaseId,notes:id('packagingFormulaLibraryNotes')?.value||''});refreshLibraryState(data);state.activeTab='library';renderProjects();renderMain();message(data.message,'success');}
+catch(error){message(error.message||'Formula library entry could not be saved.','error');}
+}
 
-  async function deleteFormulaLibrary() {
-    const formulaId=Number(id('packagingFormulaLibraryId')?.value||0); const formula=state.formulaLibrary.find((row)=>Number(row.packaging_formula_library_id)===formulaId);
-    if(!formula){message('Choose a custom formula to delete.','error');return;} if(Number(formula.is_system)===1){message('Built-in formula presets are protected. Save or delete only custom formulas.','error');return;}
+async function deleteFormulaLibrary() {
+const formulaId=Number(id('packagingFormulaLibraryId')?.value||0); const formula=state.formulaLibrary.find((row)=>Number(row.packaging_formula_library_id)===formulaId);
+if(!formula){message('Choose a custom formula to delete.','error');return;} if(Number(formula.is_system)===1){message('Built-in formula presets are protected. Save or delete only custom formulas.','error');return;}
     if(!confirm(`Remove “${formula.formula_name}” from the active formula library?`))return;
-    try{const data=await api({action:'delete_formula_library',packaging_project_id:Number(id('packagingProjectId')?.value||0),packaging_formula_library_id:formulaId});refreshLibraryState(data);state.activeTab='library';renderProjects();renderMain();message(data.message,'success');}catch(error){message(error.message,'error');}
-  }
+try{const data=await api({action:'delete_formula_library',packaging_project_id:Number(id('packagingProjectId')?.value||0),packaging_formula_library_id:formulaId});refreshLibraryState(data);state.activeTab='library';renderProjects();renderMain();message(data.message,'success');}catch(error){message(error.message,'error');}
+}
 
-  function addLibraryContentToProject(contentId) {
-    const row=state.contentLibrary.find((item)=>Number(item.packaging_content_library_id)===Number(contentId)); if(!row)return;
+function addLibraryContentToProject(contentId) {
+const row=state.contentLibrary.find((item)=>Number(item.packaging_content_library_id)===Number(contentId)); if(!row)return;
     if(row.content_type==='claim'){addClaim({claim_en:row.text_en||row.item_name,claim_fr:row.text_fr||'',icon_name:row.icon_name||'leaf',is_approved:0,compliance_note:'Added from reusable claim library; review before approval.'});state.activeTab='claims';activateTab('claims');message(`Claim “${row.item_name}” added for review.`,'success');return;}
     addIngredient({inci_name:row.inci_name||row.item_name,display_name_en:row.text_en||row.item_name,display_name_fr:row.text_fr||row.inci_name||row.item_name,organic_flag:Number(row.metadata?.organic_flag||0),allergen_note:row.metadata?.allergen_note||row.metadata?.notes||'',required_on_label:1});state.activeTab='ingredients';activateTab('ingredients');message(`${row.item_name} added as a structured ingredient/additive row. Review supplier INCI and label requirements.`,'success');
-  }
+}
 
-  async function saveLibraryContent() {
-    const contentType=id('packagingLibraryContentType')?.value||'ingredient'; const itemName=String(id('packagingLibraryItemName')?.value||'').trim(); if(!itemName){message('Enter a library item name first.','error');return;}
-    try{const data=await api({action:'save_content_library',packaging_project_id:Number(id('packagingProjectId')?.value||0),content_type:contentType,item_name:itemName,inci_name:id('packagingLibraryInci')?.value||'',text_en:id('packagingLibraryTextEn')?.value||'',text_fr:id('packagingLibraryTextFr')?.value||'',icon_name:id('packagingLibraryIcon')?.value||'',metadata:{notes:id('packagingLibraryNotes')?.value||''}});refreshLibraryState(data);state.activeTab='library';renderProjects();renderMain();message(data.message,'success');}
-    catch(error){message(error.message||'Library item could not be saved.','error');}
-  }
+async function saveLibraryContent() {
+const contentType=id('packagingLibraryContentType')?.value||'ingredient'; const itemName=String(id('packagingLibraryItemName')?.value||'').trim(); if(!itemName){message('Enter a library item name first.','error');return;}
+try{const data=await api({action:'save_content_library',packaging_project_id:Number(id('packagingProjectId')?.value||0),content_type:contentType,item_name:itemName,inci_name:id('packagingLibraryInci')?.value||'',text_en:id('packagingLibraryTextEn')?.value||'',text_fr:id('packagingLibraryTextFr')?.value||'',icon_name:id('packagingLibraryIcon')?.value||'',metadata:{notes:id('packagingLibraryNotes')?.value||''}});refreshLibraryState(data);state.activeTab='library';renderProjects();renderMain();message(data.message,'success');}
+catch(error){message(error.message||'Library item could not be saved.','error');}
+}
 
-  async function saveReusableClaim(){
-    const textEn=String(id('claimLibraryTextEn')?.value||'').trim();const textFr=String(id('claimLibraryTextFr')?.value||'').trim();const name=String(id('claimLibraryName')?.value||textEn).trim();
-    if(!name||!textEn){message('Enter at least a library name and English claim text.','error');return;}
+async function saveReusableClaim(){
+const textEn=String(id('claimLibraryTextEn')?.value||'').trim();const textFr=String(id('claimLibraryTextFr')?.value||'').trim();const name=String(id('claimLibraryName')?.value||textEn).trim();
+if(!name||!textEn){message('Enter at least a library name and English claim text.','error');return;}
     try{const data=await api({action:'save_content_library',packaging_project_id:Number(id('packagingProjectId')?.value||0),content_type:'claim',item_name:name,text_en:textEn,text_fr:textFr,icon_name:id('claimLibraryIcon')?.value||'leaf',metadata:{notes:id('claimLibraryNotes')?.value||''}});refreshLibraryState(data);state.activeTab='claims';renderProjects();renderMain();message(`${data.message} It is now available in the Claims database with its icon.`,'success');}
-    catch(error){message(error.message||'Reusable claim could not be saved.','error');}
-  }
+catch(error){message(error.message||'Reusable claim could not be saved.','error');}
+}
 
-  async function deleteLibraryContent(contentId) {
-    const row=state.contentLibrary.find((item)=>Number(item.packaging_content_library_id)===Number(contentId)); if(!row)return; if(Number(row.is_system)===1){message('Built-in library presets are protected.','error');return;}
+async function deleteLibraryContent(contentId) {
+const row=state.contentLibrary.find((item)=>Number(item.packaging_content_library_id)===Number(contentId)); if(!row)return; if(Number(row.is_system)===1){message('Built-in library presets are protected.','error');return;}
     if(!confirm(`Remove “${row.item_name}” from the active reusable library?`))return;
-    try{const data=await api({action:'delete_content_library',packaging_project_id:Number(id('packagingProjectId')?.value||0),packaging_content_library_id:Number(contentId)});refreshLibraryState(data);state.activeTab='library';renderProjects();renderMain();message(data.message,'success');}catch(error){message(error.message,'error');}
-  }
+try{const data=await api({action:'delete_content_library',packaging_project_id:Number(id('packagingProjectId')?.value||0),packaging_content_library_id:Number(contentId)});refreshLibraryState(data);state.activeTab='library';renderProjects();renderMain();message(data.message,'success');}catch(error){message(error.message,'error');}
+}
 
-  async function reviewVersion(versionId) {
+async function reviewVersion(versionId) {
     try { const status = document.querySelector(`[data-version-status="${versionId}"]`)?.value || 'needs_review'; const data = await api({ action: 'review_version', packaging_project_id: Number(id('packagingProjectId')?.value || 0), packaging_project_version_id: versionId, review_status: status }); state.projects = data.projects || []; state.detail = data.detail; renderProjects(); renderMain(); message(data.message, 'success'); }
-    catch (error) { message(error.message, 'error'); }
-  }
+catch (error) { message(error.message, 'error'); }
+}
 
-  function printerProfileFromDom(){
-    const selected=String(id('printTestPrinterProfile')?.value||'');const existing=getPrinterProfile(selected)||defaultPrinterProfile();
-    return {...(existing||{}),name:String(id('printTestPrinterName')?.value||existing?.name||'').trim(),paper:String(id('printTestPaper')?.value||existing?.paper||'Letter 8.5 × 11 in'),margin_mm:Math.max(0,num(id('printProfileMargin')?.value,existing?.margin_mm??0)),gap_mm:Math.max(0,num(id('printProfileGap')?.value,existing?.gap_mm??0)),scale_percent:Math.max(1,num(id('printTestScale')?.value,existing?.scale_percent??100)),auto_rotate:id('printProfileAutoRotate')?.checked!==false,settings_note:String(id('printProfileSettingsNote')?.value||existing?.settings_note||''),is_default_label:id('printProfileDefaultLabel')?.checked===true};
-  }
-  function applyPrinterProfile(name=''){
-    const profile=getPrinterProfile(name)||(!name?defaultPrinterProfile():null);if(!profile){if(id('printTestPrinterName'))id('printTestPrinterName').value='';if(id('printProfileDefaultLabel'))id('printProfileDefaultLabel').checked=false;updatePrintSheetPlan();return;}
-    if(id('printTestPrinterProfile'))id('printTestPrinterProfile').value=profile.name||'';if(id('printTestPrinterName'))id('printTestPrinterName').value=profile.name||'';if(id('printTestPaper'))id('printTestPaper').value=profile.paper||'Letter 8.5 × 11 in';if(id('printProfileMargin'))id('printProfileMargin').value=num(profile.margin_mm,0);if(id('printProfileGap'))id('printProfileGap').value=num(profile.gap_mm,0);if(id('printTestScale'))id('printTestScale').value=num(profile.scale_percent,100);if(id('printProfileAutoRotate'))id('printProfileAutoRotate').checked=profile.auto_rotate!==false;if(id('printProfileSettingsNote'))id('printProfileSettingsNote').value=profile.settings_note||'';if(id('printProfileDefaultLabel'))id('printProfileDefaultLabel').checked=profile.is_default_label===true;updatePrintSheetPlan();
-  }
-  async function saveCurrentPrinterProfile(){
-    const profile=printerProfileFromDom();if(!profile.name){message('Enter a printer name before saving it to My Printers.','error');return;}
+function printerProfileFromDom(){
+const selected=String(id('printTestPrinterProfile')?.value||'');const existing=getPrinterProfile(selected)||defaultPrinterProfile();
+return {...(existing||{}),name:String(id('printTestPrinterName')?.value||existing?.name||'').trim(),paper:String(id('printTestPaper')?.value||existing?.paper||'Letter 8.5 × 11 in'),margin_mm:Math.max(0,num(id('printProfileMargin')?.value,existing?.margin_mm??0)),gap_mm:Math.max(0,num(id('printProfileGap')?.value,existing?.gap_mm??0)),scale_percent:Math.max(1,num(id('printTestScale')?.value,existing?.scale_percent??100)),auto_rotate:id('printProfileAutoRotate')?.checked!==false,settings_note:String(id('printProfileSettingsNote')?.value||existing?.settings_note||''),is_default_label:id('printProfileDefaultLabel')?.checked===true};
+}
+function applyPrinterProfile(name=''){
+const profile=getPrinterProfile(name)||(!name?defaultPrinterProfile():null);if(!profile){if(id('printTestPrinterName'))id('printTestPrinterName').value='';if(id('printProfileDefaultLabel'))id('printProfileDefaultLabel').checked=false;updatePrintSheetPlan();return;}
+if(id('printTestPrinterProfile'))id('printTestPrinterProfile').value=profile.name||'';if(id('printTestPrinterName'))id('printTestPrinterName').value=profile.name||'';if(id('printTestPaper'))id('printTestPaper').value=profile.paper||'Letter 8.5 × 11 in';if(id('printProfileMargin'))id('printProfileMargin').value=num(profile.margin_mm,0);if(id('printProfileGap'))id('printProfileGap').value=num(profile.gap_mm,0);if(id('printTestScale'))id('printTestScale').value=num(profile.scale_percent,100);if(id('printProfileAutoRotate'))id('printProfileAutoRotate').checked=profile.auto_rotate!==false;if(id('printProfileSettingsNote'))id('printProfileSettingsNote').value=profile.settings_note||'';if(id('printProfileDefaultLabel'))id('printProfileDefaultLabel').checked=profile.is_default_label===true;updatePrintSheetPlan();
+}
+async function saveCurrentPrinterProfile(){
+const profile=printerProfileFromDom();if(!profile.name){message('Enter a printer name before saving it to My Printers.','error');return;}
     try{const data=await api({action:'save_printer_profile',profile_name:profile.name,paper_stock:profile.paper,margin_mm:profile.margin_mm,gap_mm:profile.gap_mm,scale_percent:profile.scale_percent,auto_rotate:profile.auto_rotate?1:0,settings_note:profile.settings_note,is_default_label:profile.is_default_label?1:0});state.printers=data.printers||[];state.printersSchemaReady=data.printers_schema_ready!==false;if(id('printTestPrinterProfile'))id('printTestPrinterProfile').innerHTML=printerProfileOptions(profile.name);applyPrinterProfile(profile.name);message(data.message||`Printer “${profile.name}” saved in My Printers.`,'success');}catch(error){message(error.message,'error');}
-  }
-  async function deleteCurrentPrinterProfile(){
+}
+async function deleteCurrentPrinterProfile(){
     const selected=String(id('printTestPrinterProfile')?.value||'');const profile=getPrinterProfile(selected);if(!profile){message('Choose a My Printers entry to remove.','error');return;}if(!confirm(`Remove “${profile.name}” from My Printers?`))return;
     try{const data=await api({action:'delete_printer_profile',packaging_printer_profile_id:Number(profile.packaging_printer_profile_id||0),profile_name:profile.name});state.printers=data.printers||[];state.printersSchemaReady=data.printers_schema_ready!==false;if(id('printTestPrinterProfile'))id('printTestPrinterProfile').innerHTML=printerProfileOptions('');applyPrinterProfile('');message(data.message||`Printer “${profile.name}” removed from My Printers.`,'success');}catch(error){message(error.message,'error');}
-  }
-  function updatePrintSheetPlan(){
+}
+function updatePrintSheetPlan(){
     const mount=id('printSheetPlan');if(!mount)return;const plan=sheetPlan(currentTemplate(),printerProfileFromDom());const rotation=plan.rotated?' · label rotated 90°':'';mount.innerHTML=plan.count?`<strong>${plan.count} label${plan.count===1?'':'s'} per Letter sheet</strong><span>${plan.orientation} paper · ${plan.cols} across × ${plan.rows} down${rotation} · ${Math.round(plan.scale*1000)/10}% scale · ${num(plan.margin).toFixed(1)} mm margins · ${num(plan.gap).toFixed(1)} mm gap</span>`:`<strong>No label fits at the current physical size/settings.</strong><span>Reduce printer margins only if the printer supports it, or use a larger sheet. Do not shrink a required exact-size label merely to force it onto the page.</span>`;
-  }
-  async function printOptimizedSheet(){
+}
+async function printOptimizedSheet(){
     const profile=printerProfileFromDom();const plan=sheetPlan(currentTemplate(),profile);if(!plan.count){message('No label fits on 8.5 × 11 paper at the selected exact-size profile. Review margins/paper before printing.','error');return;}let svg;try{svg=await inlineSvgAssets(svgMarkup());}catch(error){message(error.message,'error');return;}const win=open('','_blank','noopener,noreferrer');if(!win){message('Pop-up blocked. Allow pop-ups for the optimized label sheet.','error');return;}const template=currentTemplate();const lw=num(template.page_width_mm,50.8)*plan.scale;const lh=num(template.page_height_mm,25.4)*plan.scale;const packedW=plan.rotated?lh:lw;const packedH=plan.rotated?lw:lh;const labelHtml=Array.from({length:plan.count},()=>`<div class="label-cell ${plan.rotated?'rotated':''}"><div class="label-art">${svg}</div></div>`).join('');
     win.document.write(`<!doctype html><html><head><title>${esc(fileBase())} — ${plan.count} up Letter sheet</title><style>@page{size:letter ${plan.orientation};margin:0}*{box-sizing:border-box}html,body{margin:0;padding:0;background:#fff}.sheet{width:${plan.pageW}mm;height:${plan.pageH}mm;padding:${plan.margin}mm;display:grid;grid-template-columns:repeat(${plan.cols},${packedW}mm);grid-auto-rows:${packedH}mm;gap:${plan.gap}mm;align-content:start;justify-content:start;overflow:hidden}.label-cell{position:relative;width:${packedW}mm;height:${packedH}mm;overflow:hidden}.label-art{position:absolute;left:0;top:0;width:${lw}mm;height:${lh}mm}.label-art>svg{display:block;width:${lw}mm!important;height:${lh}mm!important}.rotated .label-art{transform:rotate(90deg) translateY(-100%);transform-origin:top left}@media screen{body{background:#ddd}.sheet{margin:8px auto;background:#fff;box-shadow:0 1px 10px #777}}</style></head><body><main class="sheet">${labelHtml}</main><script>onload=()=>setTimeout(()=>print(),350)<\/script></body></html>`);win.document.close();message(`Prepared ${plan.count} labels on one 8.5 × 11 sheet. In the system dialog choose “${profile.name||'the intended printer'}”, Actual Size / 100%, and matching margins.`, 'success');
-  }
+}
 
-  async function savePrintTest() {
-    try {
-      const data = await api({ action: 'save_print_test', packaging_project_id: Number(id('packagingProjectId')?.value || 0), packaging_project_version_id: Number(id('printTestVersion')?.value || 0) || null, test_status: id('printTestStatus')?.value, printed_at: id('printTestDate')?.value, printer_name: id('printTestPrinterName')?.value, paper_stock: id('printTestPaper')?.value, scale_percent: Number(id('printTestScale')?.value || 100), measured_strip_width_in: Number(id('printTestStripWidth')?.value || 0), measured_band_height_in: Number(id('printTestBandHeight')?.value || 0), measured_front_width_in: Number(id('printTestFrontWidth')?.value || 0), measured_front_height_in: Number(id('printTestFrontHeight')?.value || 0), measured_rear_circle_mm: Number(id('printTestRearCircle')?.value || 0), wrap_fit_status: id('printTestWrap')?.value, legibility_status: id('printTestLegibility')?.value, overlap_status: id('printTestOverlap')?.value, proof_image_url: id('printTestProofUrl')?.value, notes: id('printTestNotes')?.value });
-      state.projects = data.projects || []; state.detail = data.detail; state.activeTab = 'print'; renderProjects(); renderMain(); message(data.message, 'success');
-    } catch (error) { message(error.message, 'error'); }
-  }
+async function savePrintTest() {
+try {
+const data = await api({ action: 'save_print_test', packaging_project_id: Number(id('packagingProjectId')?.value || 0), packaging_project_version_id: Number(id('printTestVersion')?.value || 0) || null, test_status: id('printTestStatus')?.value, printed_at: id('printTestDate')?.value, printer_name: id('printTestPrinterName')?.value, paper_stock: id('printTestPaper')?.value, scale_percent: Number(id('printTestScale')?.value || 100), measured_strip_width_in: Number(id('printTestStripWidth')?.value || 0), measured_band_height_in: Number(id('printTestBandHeight')?.value || 0), measured_front_width_in: Number(id('printTestFrontWidth')?.value || 0), measured_front_height_in: Number(id('printTestFrontHeight')?.value || 0), measured_rear_circle_mm: Number(id('printTestRearCircle')?.value || 0), wrap_fit_status: id('printTestWrap')?.value, legibility_status: id('printTestLegibility')?.value, overlap_status: id('printTestOverlap')?.value, proof_image_url: id('printTestProofUrl')?.value, notes: id('printTestNotes')?.value });
+state.projects = data.projects || []; state.detail = data.detail; state.activeTab = 'print'; renderProjects(); renderMain(); message(data.message, 'success');
+} catch (error) { message(error.message, 'error'); }
+}
 
-  function fileBase() {
-    const template = currentTemplate(); const prefix = String(template.package_type || 'packaging').replace(/_/g, '-');
-    const family = String(id('packagingCollection')?.value || id('packagingProjectName')?.value || prefix).toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '').slice(0,80) || prefix;
+function fileBase() {
+const template = currentTemplate(); const prefix = String(template.package_type || 'packaging').replace(/_/g, '-');
+const family = String(id('packagingCollection')?.value || id('packagingProjectName')?.value || prefix).toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '').slice(0,80) || prefix;
     const version = (state.detail?.versions?.[0]?.version_number || 1).toString(); return `${prefix}-${family}-v${version}.0`;
-  }
-  function download(blob, name) { const link = document.createElement('a'); link.href = URL.createObjectURL(blob); link.download = name; document.body.appendChild(link); link.click(); setTimeout(() => { URL.revokeObjectURL(link.href); link.remove(); }, 1200); }
+}
+function download(blob, name) { const link = document.createElement('a'); link.href = URL.createObjectURL(blob); link.download = name; document.body.appendChild(link); link.click(); setTimeout(() => { URL.revokeObjectURL(link.href); link.remove(); }, 1200); }
   async function recordExport(format, name, checksum) { try { await api({ action: 'record_export', packaging_project_id: Number(id('packagingProjectId')?.value || 0), packaging_project_version_id: Number(state.detail?.versions?.[0]?.packaging_project_version_id || 0) || null, export_format: format, file_name: name, version: String(state.detail?.versions?.[0]?.version_number || 1), checksum, snapshot: projectPayload() }); } catch (error) { message(`File prepared, but export history could not be recorded: ${error.message}`, 'error'); } }
 
-  async function inlineSvgAssets(markup) {
-    const sources = [...new Set([...String(markup).matchAll(/<image\b[^>]*\bhref="(\/assets\/[^"]+)"/g)].map((match) => match[1]))];
-    let output = markup;
-    for (const source of sources) {
-      try {
+async function inlineSvgAssets(markup) {
+const sources = [...new Set([...String(markup).matchAll(/<image\b[^>]*\bhref="(\/assets\/[^"]+)"/g)].map((match) => match[1]))];
+let output = markup;
+for (const source of sources) {
+try {
         const response = await fetch(source, { credentials: 'same-origin' }); if (!response.ok) throw new Error(`HTTP ${response.status}`);
-        const blob = await response.blob(); const dataUrl = await new Promise((resolve, reject) => { const reader = new FileReader(); reader.onload = () => resolve(String(reader.result || '')); reader.onerror = () => reject(reader.error || new Error('Asset conversion failed.')); reader.readAsDataURL(blob); });
+const blob = await response.blob(); const dataUrl = await new Promise((resolve, reject) => { const reader = new FileReader(); reader.onload = () => resolve(String(reader.result || '')); reader.onerror = () => reject(reader.error || new Error('Asset conversion failed.')); reader.readAsDataURL(blob); });
         output = output.split(`href="${source}"`).join(`href="${dataUrl}"`);
       } catch (error) { throw new Error(`Artwork asset ${source} could not be embedded in the export: ${error.message}`); }
-    }
-    return output;
-  }
+}
+return output;
+}
 
-  async function exportFile(format) {
-    let svg; try { svg = await inlineSvgAssets(svgMarkup()); } catch (error) { message(error.message, 'error'); return; } const base = fileBase(); const template = currentTemplate(); const widthMm = num(template.page_width_mm,279.4); const heightMm = num(template.page_height_mm,38.1); const checksum = await sha256(svg);
+async function exportFile(format) {
+let svg; try { svg = await inlineSvgAssets(svgMarkup()); } catch (error) { message(error.message, 'error'); return; } const base = fileBase(); const template = currentTemplate(); const widthMm = num(template.page_width_mm,279.4); const heightMm = num(template.page_height_mm,38.1); const checksum = await sha256(svg);
     if (format === 'svg') { const name = `${base}.svg`; download(new Blob([svg], { type: 'image/svg+xml;charset=utf-8' }), name); await recordExport(format,name,checksum); return; }
     if (format === 'pdf_print') { const win = open('', '_blank', 'noopener,noreferrer'); if (!win) { message('Pop-up blocked. Allow pop-ups for Print / Save PDF.', 'error'); return; } win.document.write(`<!doctype html><html><head><title>${esc(base)}</title><style>@page{size:${widthMm}mm ${heightMm}mm;margin:0}html,body{margin:0;padding:0;width:${widthMm}mm;height:${heightMm}mm}svg{display:block;width:${widthMm}mm;height:${heightMm}mm}</style></head><body>${svg}<script>onload=()=>setTimeout(()=>print(),350)<\/script></body></html>`); win.document.close(); await recordExport(format,`${base}-print.pdf`,checksum); return; }
-    const source = URL.createObjectURL(new Blob([svg], { type: 'image/svg+xml' })); const image = new Image();
+const source = URL.createObjectURL(new Blob([svg], { type: 'image/svg+xml' })); const image = new Image();
     image.onload = () => { const canvas = document.createElement('canvas'); canvas.width = Math.round(widthMm / 25.4 * 300); canvas.height = Math.round(heightMm / 25.4 * 300); const context = canvas.getContext('2d'); if (!context) { message('Canvas rendering is unavailable. Use SVG.', 'error'); return; } if (format === 'jpg') { context.fillStyle = '#fff'; context.fillRect(0,0,canvas.width,canvas.height); } context.drawImage(image,0,0,canvas.width,canvas.height); URL.revokeObjectURL(source); const mime = format === 'jpg' ? 'image/jpeg' : format === 'webp' ? 'image/webp' : 'image/png'; canvas.toBlob(async (blob) => { if (!blob) { message('Raster export failed. Use SVG.', 'error'); return; } const name = `${base}-preview.${format === 'jpg' ? 'jpg' : format}`; download(blob,name); await recordExport(format,name,checksum); }, mime, .95); };
-    image.onerror = () => { URL.revokeObjectURL(source); message('Raster preview could not be rendered. Use SVG.', 'error'); }; image.src = source;
-  }
+image.onerror = () => { URL.revokeObjectURL(source); message('Raster preview could not be rendered. Use SVG.', 'error'); }; image.src = source;
+}
 
-  function applyGlacialPurpleReference() {
-    if (!confirm('Apply the approved Glacial Purple visual reference to this draft? Product identity, formula/INCI rows, claims, warnings and verified net quantity will be preserved.')) return;
-    // Build 246: the approved reference controls visual treatment only. It must never invent
-    // formula, ingredient, claim or compliance facts. Those come from the linked product/
-    // production release and remain reviewable independently of the artwork.
-    const values = { packagingCollection:'Glacial Purple', packagingRoseColour:'#A57BCB', packagingThemeColour:'#FBF5E8', packagingBorderColour:'#32105E', packagingAccentGold:'#B88A2F', packagingSecondaryColour:'#5A2A86', packagingRoseAsset:'rose-lavender-v1', packagingArtworkAsset:'', packagingDesignProfile:'soap_reference_v3' };
-    Object.entries(values).forEach(([key,value]) => { const node = id(key); if (node) node.value = value; });
-    updateRoseAssetPath(); renderPreview();
-    message('Approved Glacial Purple visual treatment applied. Existing product identity, verified INCI ingredients, claims, warnings and quantity were preserved.', 'success');
-  }
+function applyGlacialPurpleReference() {
+if (!confirm('Apply the approved Glacial Purple visual reference to this draft? Product identity, formula/INCI rows, claims, warnings and verified net quantity will be preserved.')) return;
+// Build 246: the approved reference controls visual treatment only. It must never invent
+// formula, ingredient, claim or compliance facts. Those come from the linked product/
+// production release and remain reviewable independently of the artwork.
+const values = { packagingCollection:'Glacial Purple', packagingRoseColour:'#A57BCB', packagingThemeColour:'#FBF5E8', packagingBorderColour:'#32105E', packagingAccentGold:'#B88A2F', packagingSecondaryColour:'#5A2A86', packagingRoseAsset:'rose-lavender-v1', packagingArtworkAsset:'', packagingDesignProfile:'soap_reference_v3' };
+Object.entries(values).forEach(([key,value]) => { const node = id(key); if (node) node.value = value; });
+updateRoseAssetPath(); renderPreview();
+message('Approved Glacial Purple visual treatment applied. Existing product identity, verified INCI ingredients, claims, warnings and quantity were preserved.', 'success');
+}
 
-  function bindSourceCardActions(){
-    document.querySelectorAll('[data-use-source-material]').forEach((button)=>button.onclick=()=>applySourceMaterialTemplate(Number(button.dataset.useSourceMaterial||0)));document.querySelectorAll('[data-load-source-material]').forEach((button)=>button.onclick=()=>loadSourceMaterialEditor(Number(button.dataset.loadSourceMaterial||0)));document.querySelectorAll('[data-delete-source-material]').forEach((button)=>button.onclick=()=>deleteSourceMaterialTemplate(Number(button.dataset.deleteSourceMaterial||0)));document.querySelectorAll('[data-detach-source-material]').forEach((button)=>button.onclick=()=>detachSourceMaterialTemplate(Number(button.dataset.detachSourceMaterial||0)));document.querySelectorAll('[data-add-source-benefit-claim]').forEach((button)=>button.onclick=()=>addSourceBenefitAsClaim(Number(button.dataset.addSourceBenefitClaim||0),Number(button.dataset.benefitIndex||0)));
-  }
-  function bindSourceLibraryControls(){
-    id('loadPackagingSourceInventory')?.addEventListener('click',useInventoryForSourceMaterial);id('previewPackagingSourceAmazon')?.addEventListener('click',previewAmazonSourceMaterial);id('savePackagingSourceMaterial')?.addEventListener('click',saveSourceMaterialTemplate);id('clearPackagingSourceMaterialEditor')?.addEventListener('click',clearSourceMaterialEditor);id('importPackagingSourceIngredients')?.addEventListener('click',importSourceIngredientText);id('addPackagingSourceInci')?.addEventListener('click',()=>addSourceInciRow({required_on_label:1}));bindSourceInciRows();bindSourceCardActions();
-    id('packagingSourceMaterialTemplateId')?.addEventListener('change',(event)=>{const sourceId=Number(event.target.value||0);state.activeSourceMaterialId=sourceId;const row=sourceMaterialById(sourceId);const mount=id('packagingSourceActiveCard');if(mount)mount.innerHTML=row?sourceMaterialCard(row,new Set((state.detail?.source_materials||[]).map((item)=>Number(item.packaging_source_material_template_id||0))),!!state.detail?.project):'<p class="small">Choose a source-material template.</p>';bindSourceCardActions();if(row)loadSourceMaterialEditor(sourceId);});
-    id('packagingSourceMaterialSubtype')?.addEventListener('change',(event)=>{const subtype=event.target.value;if(id('packagingSourceProductFamily')&&subtype==='soap_base')id('packagingSourceProductFamily').value='soap';if(id('packagingSourceProductFamily')&&subtype==='candle_wax')id('packagingSourceProductFamily').value='candle';if(id('packagingSourceFragranceReview'))id('packagingSourceFragranceReview').value=['fragrance_oil','essential_oil_blend'].includes(subtype)?'needs_supplier_data':'not_applicable';});
-    const active=Number(id('packagingSourceMaterialTemplateId')?.value||0);if(active&&!id('packagingSourceMaterialEditId')?.value)loadSourceMaterialEditor(active);
-  }
+function bindSourceCardActions(){
+document.querySelectorAll('[data-use-source-material]').forEach((button)=>button.onclick=()=>applySourceMaterialTemplate(Number(button.dataset.useSourceMaterial||0)));document.querySelectorAll('[data-load-source-material]').forEach((button)=>button.onclick=()=>loadSourceMaterialEditor(Number(button.dataset.loadSourceMaterial||0)));document.querySelectorAll('[data-delete-source-material]').forEach((button)=>button.onclick=()=>deleteSourceMaterialTemplate(Number(button.dataset.deleteSourceMaterial||0)));document.querySelectorAll('[data-detach-source-material]').forEach((button)=>button.onclick=()=>detachSourceMaterialTemplate(Number(button.dataset.detachSourceMaterial||0)));document.querySelectorAll('[data-add-source-benefit-claim]').forEach((button)=>button.onclick=()=>addSourceBenefitAsClaim(Number(button.dataset.addSourceBenefitClaim||0),Number(button.dataset.benefitIndex||0)));
+}
+function bindSourceLibraryControls(){
+id('loadPackagingSourceInventory')?.addEventListener('click',useInventoryForSourceMaterial);id('previewPackagingSourceAmazon')?.addEventListener('click',previewAmazonSourceMaterial);id('savePackagingSourceMaterial')?.addEventListener('click',saveSourceMaterialTemplate);id('clearPackagingSourceMaterialEditor')?.addEventListener('click',clearSourceMaterialEditor);id('importPackagingSourceIngredients')?.addEventListener('click',importSourceIngredientText);id('addPackagingSourceInci')?.addEventListener('click',()=>addSourceInciRow({required_on_label:1}));bindSourceInciRows();bindSourceCardActions();
+id('packagingSourceMaterialTemplateId')?.addEventListener('change',(event)=>{const sourceId=Number(event.target.value||0);state.activeSourceMaterialId=sourceId;const row=sourceMaterialById(sourceId);const mount=id('packagingSourceActiveCard');if(mount)mount.innerHTML=row?sourceMaterialCard(row,new Set((state.detail?.source_materials||[]).map((item)=>Number(item.packaging_source_material_template_id||0))),!!state.detail?.project):'<p class="small">Choose a source-material template.</p>';bindSourceCardActions();if(row)loadSourceMaterialEditor(sourceId);});
+id('packagingSourceMaterialSubtype')?.addEventListener('change',(event)=>{const subtype=event.target.value;if(id('packagingSourceProductFamily')&&subtype==='soap_base')id('packagingSourceProductFamily').value='soap';if(id('packagingSourceProductFamily')&&subtype==='candle_wax')id('packagingSourceProductFamily').value='candle';if(id('packagingSourceFragranceReview'))id('packagingSourceFragranceReview').value=['fragrance_oil','essential_oil_blend'].includes(subtype)?'needs_supplier_data':'not_applicable';});
+const active=Number(id('packagingSourceMaterialTemplateId')?.value||0);if(active&&!id('packagingSourceMaterialEditId')?.value)loadSourceMaterialEditor(active);
+}
 
-  function bindReusableContentPicker(){
-    const select=id('packagingReusableContentSelect');if(select){select.addEventListener('change',()=>{state.activeContentLibraryId=Number(select.value||0);const mount=id('packagingReusableContentActive');if(mount)mount.innerHTML=activeReusableContentMarkup(state.activeContentLibraryId);document.querySelectorAll('#packagingReusableContentActive [data-add-library-content]').forEach((button)=>button.onclick=()=>addLibraryContentToProject(Number(button.dataset.addLibraryContent||0)));document.querySelectorAll('#packagingReusableContentActive [data-delete-library-content]').forEach((button)=>button.onclick=()=>deleteLibraryContent(Number(button.dataset.deleteLibraryContent||0)));});}
-  }
+function bindReusableContentPicker(){
+const select=id('packagingReusableContentSelect');if(select){select.addEventListener('change',()=>{state.activeContentLibraryId=Number(select.value||0);const mount=id('packagingReusableContentActive');if(mount)mount.innerHTML=activeReusableContentMarkup(state.activeContentLibraryId);document.querySelectorAll('#packagingReusableContentActive [data-add-library-content]').forEach((button)=>button.onclick=()=>addLibraryContentToProject(Number(button.dataset.addLibraryContent||0)));document.querySelectorAll('#packagingReusableContentActive [data-delete-library-content]').forEach((button)=>button.onclick=()=>deleteLibraryContent(Number(button.dataset.deleteLibraryContent||0)));});}
+}
 
-  function bindDetail() {
-    document.querySelectorAll('[data-packaging-tab]').forEach((button) => button.addEventListener('click', () => activateTab(button.dataset.packagingTab)));
-    document.querySelectorAll('.packaging-editor-card input,.packaging-editor-card textarea,.packaging-editor-card select').forEach((node) => { const eventName = node.type === 'color' || node.type === 'checkbox' ? 'input' : 'change'; node.addEventListener(eventName, renderPreview); if (node.tagName === 'TEXTAREA' || ['text','number','url','search'].includes(node.type)) node.addEventListener('input', renderPreview); });
-    id('reloadAttachedBaseIngredients')?.addEventListener('click', reloadAttachedBaseIngredients); id('generatePackagingFrenchDraftIngredients')?.addEventListener('click', generateFrenchDraft); id('addSoapIngredient')?.addEventListener('click', () => addIngredient({required_on_label:1})); id('addPackagingInventoryIngredient')?.addEventListener('click', addIngredientFromInventory); id('addSoapClaim')?.addEventListener('click', () => addClaim({icon_name:'leaf'})); id('addPackagingComponent')?.addEventListener('click', () => addComponent({component_type:'label',quantity_per_finished_unit:1})); bindDynamicRows();
-    id('packagingRoseAsset')?.addEventListener('change', (event) => applyRoseAssetPreset(event.target.value)); document.querySelectorAll('[data-cupcake-preset]').forEach((button) => button.addEventListener('click', () => applyCupcakePreset(button.dataset.cupcakePreset || ''))); document.querySelectorAll('[data-cupcake-colour]').forEach((button) => button.addEventListener('click', () => applyCupcakeColour(button.dataset.cupcakeColour || ''))); id('packagingProductRosePreset')?.addEventListener('change', (event) => applyProductRosePreset(event.target.value)); document.querySelectorAll('[data-product-rose-direction]').forEach((button)=>button.addEventListener('click',()=>{const key=button.dataset.productRoseDirection||'';if(id('packagingProductRosePreset'))id('packagingProductRosePreset').value=key;applyProductRosePreset(key);document.querySelectorAll('[data-product-rose-direction]').forEach((item)=>item.classList.toggle('is-active',item===button));})); id('packagingRoseColour')?.addEventListener('input', (event) => { const selected=rosePresetById(id('packagingRoseAsset')?.value); if(!selected.colour || String(selected.colour).toLowerCase()!==String(event.target.value).toLowerCase()){if(id('packagingRoseAsset'))id('packagingRoseAsset').value='rose-custom-v1';updateRoseAssetPath();} if(id('packagingSecondaryColour'))id('packagingSecondaryColour').value=mixHex(event.target.value,'#000000',.28); renderPreview(); });
-    id('packagingTemplateId')?.addEventListener('change', applySelectedTemplate); document.querySelectorAll('[data-use-packaging-template]').forEach((button)=>button.addEventListener('click',()=>{if(id('packagingTemplateId'))id('packagingTemplateId').value=button.dataset.usePackagingTemplate||'';applySelectedTemplate();})); id('savePackagingTemplate')?.addEventListener('click', saveAsTemplate);
-    id('generatePackagingFrenchDraft')?.addEventListener('click', generateFrenchDraft);
-    if (String(currentTemplate().package_type) === 'soap_ribbon' && id('packagingDesignProfile')) id('packagingDesignProfile').value = 'soap_reference_v3'; if (String(currentTemplate().package_type) === 'soap_cupcake_label' && id('packagingDesignProfile')) id('packagingDesignProfile').value = 'cupcake_soap_square';
-    id('savePackagingProject')?.addEventListener('click', saveProject); id('savePackagingComponents')?.addEventListener('click', saveComponents); id('saveClaimLibraryItem')?.addEventListener('click',saveReusableClaim); id('savePackagingVersion')?.addEventListener('click', saveVersion); id('duplicatePackagingProject')?.addEventListener('click', duplicateProject); id('archivePackagingProject')?.addEventListener('click', archiveProject); id('deletePackagingProject')?.addEventListener('click', deleteProject); id('savePrintTest')?.addEventListener('click', savePrintTest); id('applyGlacialPurpleReference')?.addEventListener('click', applyGlacialPurpleReference); id('applyPackagingFormulaLibrary')?.addEventListener('click', applyFormulaLibrary); id('savePackagingFormulaLibrary')?.addEventListener('click', saveFormulaLibrary); id('deletePackagingFormulaLibrary')?.addEventListener('click', deleteFormulaLibrary); id('savePackagingLibraryContent')?.addEventListener('click', saveLibraryContent); document.querySelectorAll('[data-add-library-content]').forEach((button)=>button.addEventListener('click',()=>addLibraryContentToProject(Number(button.dataset.addLibraryContent||0)))); document.querySelectorAll('[data-delete-library-content]').forEach((button)=>button.addEventListener('click',()=>deleteLibraryContent(Number(button.dataset.deleteLibraryContent||0)))); bindSourceLibraryControls(); bindReusableContentPicker(); id('printTestPrinterProfile')?.addEventListener('change',(event)=>applyPrinterProfile(event.target.value)); id('savePrinterProfile')?.addEventListener('click',saveCurrentPrinterProfile); id('deletePrinterProfile')?.addEventListener('click',deleteCurrentPrinterProfile); id('printOptimizedSheet')?.addEventListener('click',printOptimizedSheet); ['printTestScale','printProfileMargin','printProfileGap','printProfileAutoRotate'].forEach((field)=>{const node=id(field);if(node){node.addEventListener('input',updatePrintSheetPlan);node.addEventListener('change',updatePrintSheetPlan);}}); if(id('printTestPrinterProfile'))applyPrinterProfile(id('printTestPrinterProfile').value||defaultPrinterProfile()?.name||''); else updatePrintSheetPlan();
-    document.querySelectorAll('[data-packaging-export]').forEach((button) => button.addEventListener('click', () => exportFile(button.dataset.packagingExport))); document.querySelectorAll('[data-review-version]').forEach((button) => button.addEventListener('click', () => reviewVersion(Number(button.dataset.reviewVersion || 0))));
-    renderPreview();
-  }
+function bindDetail() {
+document.querySelectorAll('[data-packaging-tab]').forEach((button) => button.addEventListener('click', () => activateTab(button.dataset.packagingTab)));
+document.querySelectorAll('.packaging-editor-card input,.packaging-editor-card textarea,.packaging-editor-card select').forEach((node) => { const eventName = node.type === 'color' || node.type === 'checkbox' ? 'input' : 'change'; node.addEventListener(eventName, renderPreview); if (node.tagName === 'TEXTAREA' || ['text','number','url','search'].includes(node.type)) node.addEventListener('input', renderPreview); });
+id('reloadAttachedBaseIngredients')?.addEventListener('click', reloadAttachedBaseIngredients); id('generatePackagingFrenchDraftIngredients')?.addEventListener('click', generateFrenchDraft); id('addSoapIngredient')?.addEventListener('click', () => addIngredient({required_on_label:1})); id('addPackagingInventoryIngredient')?.addEventListener('click', addIngredientFromInventory); id('addSoapClaim')?.addEventListener('click', () => addClaim({icon_name:'leaf'})); id('addPackagingComponent')?.addEventListener('click', () => addComponent({component_type:'label',quantity_per_finished_unit:1})); bindDynamicRows();
+id('packagingRoseAsset')?.addEventListener('change', (event) => applyRoseAssetPreset(event.target.value)); document.querySelectorAll('[data-cupcake-preset]').forEach((button) => button.addEventListener('click', () => applyCupcakePreset(button.dataset.cupcakePreset || ''))); document.querySelectorAll('[data-cupcake-colour]').forEach((button) => button.addEventListener('click', () => applyCupcakeColour(button.dataset.cupcakeColour || ''))); id('packagingProductRosePreset')?.addEventListener('change', (event) => applyProductRosePreset(event.target.value)); document.querySelectorAll('[data-product-rose-direction]').forEach((button)=>button.addEventListener('click',()=>{const key=button.dataset.productRoseDirection||'';if(id('packagingProductRosePreset'))id('packagingProductRosePreset').value=key;applyProductRosePreset(key);document.querySelectorAll('[data-product-rose-direction]').forEach((item)=>item.classList.toggle('is-active',item===button));})); id('packagingRoseColour')?.addEventListener('input', (event) => { const selected=rosePresetById(id('packagingRoseAsset')?.value); if(!selected.colour || String(selected.colour).toLowerCase()!==String(event.target.value).toLowerCase()){if(id('packagingRoseAsset'))id('packagingRoseAsset').value='rose-custom-v1';updateRoseAssetPath();} if(id('packagingSecondaryColour'))id('packagingSecondaryColour').value=mixHex(event.target.value,'#000000',.28); renderPreview(); });
+id('packagingTemplateId')?.addEventListener('change', applySelectedTemplate); document.querySelectorAll('[data-use-packaging-template]').forEach((button)=>button.addEventListener('click',()=>{if(id('packagingTemplateId'))id('packagingTemplateId').value=button.dataset.usePackagingTemplate||'';applySelectedTemplate();})); id('savePackagingTemplate')?.addEventListener('click', saveAsTemplate);
+id('generatePackagingFrenchDraft')?.addEventListener('click', generateFrenchDraft);
+if (String(currentTemplate().package_type) === 'soap_ribbon' && id('packagingDesignProfile')) id('packagingDesignProfile').value = 'soap_reference_v3'; if (String(currentTemplate().package_type) === 'soap_cupcake_label' && id('packagingDesignProfile')) id('packagingDesignProfile').value = 'cupcake_soap_square';
+id('savePackagingProject')?.addEventListener('click', saveProject); id('savePackagingComponents')?.addEventListener('click', saveComponents); id('saveClaimLibraryItem')?.addEventListener('click',saveReusableClaim); id('savePackagingVersion')?.addEventListener('click', saveVersion); id('duplicatePackagingProject')?.addEventListener('click', duplicateProject); id('archivePackagingProject')?.addEventListener('click', archiveProject); id('deletePackagingProject')?.addEventListener('click', deleteProject); id('savePrintTest')?.addEventListener('click', savePrintTest); id('applyGlacialPurpleReference')?.addEventListener('click', applyGlacialPurpleReference); id('applyPackagingFormulaLibrary')?.addEventListener('click', applyFormulaLibrary); id('savePackagingFormulaLibrary')?.addEventListener('click', saveFormulaLibrary); id('deletePackagingFormulaLibrary')?.addEventListener('click', deleteFormulaLibrary); id('savePackagingLibraryContent')?.addEventListener('click', saveLibraryContent); document.querySelectorAll('[data-add-library-content]').forEach((button)=>button.addEventListener('click',()=>addLibraryContentToProject(Number(button.dataset.addLibraryContent||0)))); document.querySelectorAll('[data-delete-library-content]').forEach((button)=>button.addEventListener('click',()=>deleteLibraryContent(Number(button.dataset.deleteLibraryContent||0)))); bindSourceLibraryControls(); bindReusableContentPicker(); id('printTestPrinterProfile')?.addEventListener('change',(event)=>applyPrinterProfile(event.target.value)); id('savePrinterProfile')?.addEventListener('click',saveCurrentPrinterProfile); id('deletePrinterProfile')?.addEventListener('click',deleteCurrentPrinterProfile); id('printOptimizedSheet')?.addEventListener('click',printOptimizedSheet); ['printTestScale','printProfileMargin','printProfileGap','printProfileAutoRotate'].forEach((field)=>{const node=id(field);if(node){node.addEventListener('input',updatePrintSheetPlan);node.addEventListener('change',updatePrintSheetPlan);}}); if(id('printTestPrinterProfile'))applyPrinterProfile(id('printTestPrinterProfile').value||defaultPrinterProfile()?.name||''); else updatePrintSheetPlan();
+document.querySelectorAll('[data-packaging-export]').forEach((button) => button.addEventListener('click', () => exportFile(button.dataset.packagingExport))); document.querySelectorAll('[data-review-version]').forEach((button) => button.addEventListener('click', () => reviewVersion(Number(button.dataset.reviewVersion || 0))));
+renderPreview();
+}
 
-  function restoreLocal(showMessage = true) {
-    try { const draft = JSON.parse(localStorage.getItem(STORAGE_KEY) || 'null'); if (!draft) { if (showMessage) message('No browser packaging draft was found.', 'error'); return; } if (!state.detail?.project) { if (showMessage) message('Open or create a project before restoring the browser draft.', 'error'); return; }
-      const simple = { packagingProjectName:'packagingProjectName', packagingCollection:'packagingCollection', packagingProductName:'packagingProductName', packagingSubtitle:'packagingSubtitle', packagingIdentityEn:'packagingIdentityEn', packagingIdentityFr:'packagingIdentityFr', packagingInci:'packagingInci', packagingIngredientsEn:'packagingIngredientsEn', packagingIngredientsFr:'packagingIngredientsFr', packagingNetQuantity:'packagingNetQuantity', packagingNetWeightOz:'packagingNetWeightOz', packagingNetWeightG:'packagingNetWeightG', packagingWebsite:'packagingWebsite', packagingDealerName:'packagingDealerName', packagingDealerAddress:'packagingDealerAddress', packagingContact:'packagingContact', packagingMadeInCanada:'packagingMadeInCanada', packagingWarningsEn:'packagingWarningsEn', packagingWarningsFr:'packagingWarningsFr', packagingPrintNotes:'packagingPrintNotes' };
-      Object.entries(simple).forEach(([key,field]) => { if (id(field) && draft[key] !== undefined) id(field).value = draft[key] ?? ''; });
-      if (draft.theme) Object.entries({rose_colour:'packagingRoseColour',theme_colour:'packagingThemeColour',border_colour:'packagingBorderColour',accent_gold:'packagingAccentGold',secondary_colour:'packagingSecondaryColour'}).forEach(([key,field]) => { if (id(field) && draft.theme[key]) id(field).value = draft.theme[key]; });
-      if (draft.artwork) Object.entries({ rose_asset_id:'packagingRoseAsset', rose_style:'packagingRoseStyle', badge_shape:'packagingBadgeShape', top_arc_text:'packagingTopArcText', bottom_arc_text:'packagingBottomArcText', centre_mark:'packagingCentreMark', candle_primary_text:'packagingCandlePrimaryText', candle_date_line_1:'packagingCandleDateLine1', candle_event_line:'packagingCandleEventLine', candle_date_line_2:'packagingCandleDateLine2', cupcake_reference_id:'packagingCupcakeReference', cupcake_label_title:'packagingCupcakeLabelTitle', cupcake_purpose_text:'packagingCupcakePurpose', cupcake_palette_id:'packagingCupcakePalette', artwork_asset:'packagingArtworkAsset' }).forEach(([key,field]) => { if (id(field) && draft.artwork[key] !== undefined) id(field).value = draft.artwork[key] ?? ''; });
-      if (Array.isArray(draft.structured_ingredients)) { id('soapIngredientRows').innerHTML = draft.structured_ingredients.map(ingredientRow).join(''); }
-      if (Array.isArray(draft.structured_claims)) { id('soapClaimRows').innerHTML = draft.structured_claims.map(claimRow).join(''); }
+function restoreLocal(showMessage = true) {
+try { const draft = JSON.parse(localStorage.getItem(STORAGE_KEY) || 'null'); if (!draft) { if (showMessage) message('No browser packaging draft was found.', 'error'); return; } if (!state.detail?.project) { if (showMessage) message('Open or create a project before restoring the browser draft.', 'error'); return; }
+const simple = { packagingProjectName:'packagingProjectName', packagingCollection:'packagingCollection', packagingProductName:'packagingProductName', packagingSubtitle:'packagingSubtitle', packagingIdentityEn:'packagingIdentityEn', packagingIdentityFr:'packagingIdentityFr', packagingInci:'packagingInci', packagingIngredientsEn:'packagingIngredientsEn', packagingIngredientsFr:'packagingIngredientsFr', packagingNetQuantity:'packagingNetQuantity', packagingNetWeightOz:'packagingNetWeightOz', packagingNetWeightG:'packagingNetWeightG', packagingWebsite:'packagingWebsite', packagingDealerName:'packagingDealerName', packagingDealerAddress:'packagingDealerAddress', packagingContact:'packagingContact', packagingMadeInCanada:'packagingMadeInCanada', packagingWarningsEn:'packagingWarningsEn', packagingWarningsFr:'packagingWarningsFr', packagingPrintNotes:'packagingPrintNotes' };
+Object.entries(simple).forEach(([key,field]) => { if (id(field) && draft[key] !== undefined) id(field).value = draft[key] ?? ''; });
+if (draft.theme) Object.entries({rose_colour:'packagingRoseColour',theme_colour:'packagingThemeColour',border_colour:'packagingBorderColour',accent_gold:'packagingAccentGold',secondary_colour:'packagingSecondaryColour'}).forEach(([key,field]) => { if (id(field) && draft.theme[key]) id(field).value = draft.theme[key]; });
+if (draft.artwork) Object.entries({ rose_asset_id:'packagingRoseAsset', rose_style:'packagingRoseStyle', badge_shape:'packagingBadgeShape', top_arc_text:'packagingTopArcText', bottom_arc_text:'packagingBottomArcText', centre_mark:'packagingCentreMark', candle_primary_text:'packagingCandlePrimaryText', candle_date_line_1:'packagingCandleDateLine1', candle_event_line:'packagingCandleEventLine', candle_date_line_2:'packagingCandleDateLine2', cupcake_reference_id:'packagingCupcakeReference', cupcake_label_title:'packagingCupcakeLabelTitle', cupcake_purpose_text:'packagingCupcakePurpose', cupcake_palette_id:'packagingCupcakePalette', artwork_asset:'packagingArtworkAsset' }).forEach(([key,field]) => { if (id(field) && draft.artwork[key] !== undefined) id(field).value = draft.artwork[key] ?? ''; });
+if (Array.isArray(draft.structured_ingredients)) { id('soapIngredientRows').innerHTML = draft.structured_ingredients.map(ingredientRow).join(''); }
+if (Array.isArray(draft.structured_claims)) { id('soapClaimRows').innerHTML = draft.structured_claims.map(claimRow).join(''); }
       bindDynamicRows(); updateRoseAssetPath(); renderPreview(); if (showMessage) message(`Browser draft restored from ${draft.saved_at || 'an earlier session'}. Review and save it to D1.`, 'success');
-    } catch { if (showMessage) message('The browser draft could not be restored.', 'error'); }
-  }
+} catch { if (showMessage) message('The browser draft could not be restored.', 'error'); }
+}
 
-  function bind() {
-    id('newPackagingProject')?.addEventListener('click', createProject); id('newCupcakeSoapLabel')?.addEventListener('click', createCupcakeProject); id('refreshPackagingStudio')?.addEventListener('click', () => load(Number(state.detail?.project?.packaging_project_id || 0))); id('restorePackagingDraft')?.addEventListener('click', () => restoreLocal(true)); id('packagingProjectSearch')?.addEventListener('input', renderProjects);
-    id('packagingProjectList')?.addEventListener('click', (event) => { const button = event.target.closest('[data-open-packaging]'); if (button) load(Number(button.dataset.openPackaging || 0)); });
-  }
+function bind() {
+id('newPackagingProject')?.addEventListener('click', createProject); id('newCupcakeSoapLabel')?.addEventListener('click', createCupcakeProject); id('refreshPackagingStudio')?.addEventListener('click', () => load(Number(state.detail?.project?.packaging_project_id || 0))); id('restorePackagingDraft')?.addEventListener('click', () => restoreLocal(true)); id('packagingProjectSearch')?.addEventListener('input', renderProjects);
+id('packagingProjectList')?.addEventListener('click', (event) => { const button = event.target.closest('[data-open-packaging]'); if (button) load(Number(button.dataset.openPackaging || 0)); });
+}
 
-  document.addEventListener('DOMContentLoaded', () => { bind(); load(); });
+document.addEventListener('DOMContentLoaded', () => { bind(); load(); });
 })();
