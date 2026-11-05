@@ -35,6 +35,41 @@ jobs:
 
           declare -A archive_sha
           archive_sha["release467-build198-media-fit-attention-context-help"]="b3b9f1c4287604ff9f60402d1f782c1e5359d62e"
+          # Build 608 owner-authorized archival: preserve every exact legacy head
+          # as a recoverable tag before deleting a no-open-PR branch. A moved
+          # head or a newly opened PR fails closed and is never deleted.
+          archive_sha["build415-production-candidate"]="6c232afb264d4a5f35f6764b95c0c6218c74533b"
+          archive_sha["build415-sla-closure-decision"]="3d642b34fad4a38ac8c89d3aa43674c06e2d78e7"
+          archive_sha["build416-closure-packet"]="7767d6ed3c686bbad401e2c4bfc978de8aad43aa"
+          archive_sha["build416-production-candidate"]="c8d9ab1f6649ff707f2c6d588d97f234181f0fa1"
+          archive_sha["build417-closure-approval"]="03ed74f72fb07a09a59e246a61b7acb7f12ff74e"
+          archive_sha["build417-production-candidate"]="eefacfeac82eeee69e0427e6dffaed2a83f4aa26"
+          archive_sha["build418-closure-history"]="f2e7d8381b7660dcb65165bb3ef3eeb78bb02abe"
+          archive_sha["build418-production-candidate"]="acb7b6a802ecf20760b5618204cfb81ed8db2c7c"
+          archive_sha["build419-production-candidate"]="4acc061686c84fe8ee90ec2138285787fa83281d"
+          archive_sha["build419-reopen-decision"]="afe073e197abc5e6dce26220a6d579c14b7a2c3c"
+          archive_sha["build420-production-candidate"]="1a9911cad2c5879646bb6b1b9da0394e24d00121"
+          archive_sha["build420-reopen-continuity"]="02b59fb63c53c6fbbb16b84e425449fce9174ed8"
+          archive_sha["build421-exception-followup"]="2abc506030bdcc3ffc67128e1c1f736827038832"
+          archive_sha["build421-production-candidate"]="04cd2f0869f4ddd85a6abed3923babfdbbdd9e7c"
+          archive_sha["build422-owner-ack"]="1d68326e6e8307e6507676a840918d0f2bb96217"
+          archive_sha["build422-production-candidate"]="3150c369e05d02e6b9f3971238d1f1faa9a61615"
+          archive_sha["build423-handoff-governance"]="33e04cb33c5b176de75cf42ae4479af64f17d629"
+          archive_sha["build423-production-candidate"]="faa0aa2808ed1ad4c8e7ab5ba77e72d64842768c"
+          archive_sha["build424-owner-acceptance"]="03b435ef2c578016ff54716f53f023c8fafc0b40"
+          archive_sha["build424-production-candidate"]="3847bccd289677cb332c7b5be89183e05e9dc32d"
+          archive_sha["build425-owner-acceptance-receipt"]="7d32837ffd913b86eac509785644342b6c423bbb"
+          archive_sha["build425-production-candidate"]="1bb4da8cc66ceb96496d2a4dff77339743ddfd56"
+          archive_sha["dd-brand-palette-v3"]="87026c60662cf5d98ebf2d251b76cecba85c74fe"
+          archive_sha["dd-brand-v3-50-images-gate-recovery"]="28ae0e817bf688b53168c3a79b5a76da564861ab"
+          archive_sha["dd-brand-v3-50-images-production"]="d4784fd4076f453b06735350310da61cbc11131c"
+          archive_sha["dd-brand-v3-image-autowire-50"]="9f9cb40c4c0044b7e9e22ae3474fdbc98c7e1019"
+          archive_sha["dd-brand-v3-images-production-candidate"]="51850ffff5d7e7552bd525a4ba03eb1154bf371c"
+          archive_sha["dd-brand-v3-production-candidate"]="d9e4291af6ef459d0cf6cb31e1b8a6a319039891"
+          archive_sha["dd-signature-design-v1"]="b5980ce446eaceb4e2493cc235ee3a20ce3e8cc2"
+          archive_sha["dd-signature-v1-production-candidate"]="bbfe7bd29be3915e8b98f6d0a96c3825ef51be8a"
+          archive_sha["planning/maker-queue-439-455"]="18d268b84901294aa74d8bdf7011ef608ef5c419"
+          archive_sha["repair-build320-readiness-source-contract"]="0acf8d01614169b10ab4501a3929eb7ed60e1205"
 
           deleted=0
           archived=0
