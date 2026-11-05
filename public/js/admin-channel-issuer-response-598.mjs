@@ -2193,3 +2193,330 @@ function init605(doc=globalThis.document,win=globalThis.window){
   get('dd605CopyHandoff').addEventListener('click',()=>copy('handoff'));
 }
 if(typeof document!=='undefined')init605();
+
+/* Build 606 — no network challenge is sent here. This review merely tracks
+ * externally supplied, unverified reference metadata against exact Build 605. */
+export const FORMAT_606='devilndove-issuer-challenge-witness-consent-606-v1';
+export const KEY_606='dd:issuer-challenge-witness-consent:606:v1';
+export const KINDS_606=['ISSUER_CALLBACK_CHALLENGE','WITNESS_REVERIFICATION',
+  'OWNER_CONSENT_READINESS'];
+export const CHALLENGE_STATES_606=['NOT_SENT','SENT_AWAITING_REPLY',
+  'REPORTED_MATCH_UNVERIFIED','DISPUTED'];
+export const WITNESS_STATES_606=['PENDING','REPORTED_REVERIFIED_UNTRUSTED','IDENTITY_CONFLICT'];
+export const OWNER_STATES_606=['RENEWAL_REQUESTED','REPORTED_SIGNED_UNVERIFIED','EXPIRED'];
+export const FILTERS_606=['ALL','CHALLENGE','CHALLENGE_EXPIRED','WITNESS','OWNER',
+  'OWNER_EXPIRED','OWNER_DUE','OVERDUE','CONFLICT'];
+const FIELDS_606=['case_pin','exception_code','challenge_ref','challenge_digest',
+  'issuer_authority_ref','callback_channel_ref','response_receipt_ref','issuer_verifier_ref',
+  'witness_identity_ref','witness_authority_ref','witness_reverification_ref',
+  'witness_reviewer_ref','owner_signer_ref','owner_signed_receipt_ref',
+  'owner_witness_ref','owner_account','owner_product','owner_action','reason'];
+const DATES_606=['challenge_sent_at','response_received_at','challenge_expires_at',
+  'witness_reverified_at','owner_signed_at','owner_expires_at',
+  'owner_consent_review_due_at','recorded_at','next_review_at'];
+export function challengeReviewCandidate606(d){
+  if(!d||Array.isArray(d)||Object.keys(d).some(k=>![...FIELDS_606,...DATES_606,
+    'kind','challenge_state','witness_state','owner_state'].includes(k))||
+    FIELDS_606.some(k=>!safe600(d[k],k==='reason'?900:220))||
+    DATES_606.some(k=>!safe600(d[k],40))||!d.case_pin.startsWith('dd596-case:')||
+    d.exception_code.length<4||!sha600(d.challenge_digest)||
+    !KINDS_606.includes(d.kind)||!CHALLENGE_STATES_606.includes(d.challenge_state)||
+    !WITNESS_STATES_606.includes(d.witness_state)||
+    !OWNER_STATES_606.includes(d.owner_state)||d.reason.trim().length<15||
+    !iso600(d.recorded_at)||!iso600(d.next_review_at)||
+    DATES_606.slice(0,-2).some(k=>d[k]&&!iso600(d[k]))||
+    DATES_606.slice(0,-2).filter(k=>!['challenge_expires_at','owner_expires_at',
+      'owner_consent_review_due_at'].includes(k)).some(k=>d[k]&&
+      Date.parse(d[k])>Date.parse(d.recorded_at))||
+    Date.parse(d.next_review_at)<Date.parse(d.recorded_at)||
+    (d.challenge_sent_at&&d.response_received_at&&
+      Date.parse(d.response_received_at)<Date.parse(d.challenge_sent_at))||
+    (d.challenge_sent_at&&d.challenge_expires_at&&
+      Date.parse(d.challenge_expires_at)<=Date.parse(d.challenge_sent_at))||
+    (d.owner_signed_at&&d.owner_expires_at&&
+      Date.parse(d.owner_expires_at)<=Date.parse(d.owner_signed_at)))
+    throw Error('Unverified challenge, witness or exact consent cannot authorize provider work.');
+  return {...Object.fromEntries(FIELDS_606.map(k=>[k,d[k].trim()])),
+    ...Object.fromEntries(DATES_606.map(k=>[k,d[k]])),kind:d.kind,
+    challenge_state:d.challenge_state,witness_state:d.witness_state,
+    owner_state:d.owner_state,issuer_authenticated:false,witness_reverified:false,
+    owner_consent_authenticated:false,trial_authorized:false};
+}
+export function reconcileChallengeReadiness606(exact605,source605,rows=[],
+  asOf=new Date().toISOString()){
+  if(exact605?.format!==FORMAT_605||!Array.isArray(source605)||source605.length!==3||
+    !Array.isArray(rows)||rows.length>100||!iso600(asOf))
+    throw Error('Exact source-pinned Build 605 callback/witness chain required.');
+  const replay=reconcileAuthenticationHandoff605(...source605,exact605.as_of);
+  if(JSON.stringify(replay)!==JSON.stringify(exact605))
+    throw Error('Original Build 605 issuer/witness/owner source changed or became stale.');
+  return reviewChallengeReadiness606(
+    reconcileAuthenticationHandoff605(...source605,asOf),rows,asOf);
+}
+export function reviewChallengeReadiness606(current,rows=[],asOf=new Date().toISOString()){
+  if(current?.format!==FORMAT_605||!Array.isArray(current.cases)||
+    !Array.isArray(rows)||rows.length>100||!iso600(asOf))
+    throw Error('Validated Build 605 exact original-source cases required.');
+  const entered=rows.map(challengeReviewCandidate606);
+  const cases=current.cases.map(c=>{
+    const owner=c.owner_trial_decision_pending;
+    const notes=entered.filter(n=>n.case_pin===c.case_pin).map(n=>{
+      if(!c.open_exceptions.includes(n.exception_code)||
+        (!owner&&n.kind==='OWNER_CONSENT_READINESS')||
+        (!owner&&[n.owner_signer_ref,n.owner_signed_receipt_ref,n.owner_witness_ref,
+          n.owner_account,n.owner_product,n.owner_action,n.owner_signed_at,
+          n.owner_expires_at,n.owner_consent_review_due_at].some(Boolean))||
+        (owner&&(n.owner_account!==c.account_id||n.owner_product!==c.product_ref||
+          n.owner_action!==c.exact_action)))
+        throw Error('Wrong unresolved original issuer, witness or exact owner action.');
+      const priorIssuer=c.issuer_auth_witness_owner_handoffs?.filter(
+        x=>x.kind==='ISSUER_AUTH_FOLLOWUP').at(-1)||{};
+      const priorWitness=c.issuer_auth_witness_owner_handoffs?.filter(
+        x=>x.kind==='WITNESS_DISPOSITION_RECHECK').at(-1)||{};
+      const priorOwner=c.issuer_auth_witness_owner_handoffs?.filter(
+        x=>x.kind==='EXACT_OWNER_RENEWAL_HANDOFF').at(-1)||{};
+      const reused=key=>n[key]&&entered.some(x=>x.case_pin!==n.case_pin&&
+        x[key]===n[key]);
+      const expired=n.challenge_expires_at&&
+        Date.parse(n.challenge_expires_at)<=Date.parse(asOf);
+      const expiry=owner?renewalClock604(n.owner_signed_at||
+        priorOwner.owner_renewed_signed_at||'',n.owner_expires_at||
+        priorOwner.owner_renewed_expires_at||'',asOf):null;
+      const conflicts=uniq600([
+        n.kind==='ISSUER_CALLBACK_CHALLENGE'&&(!n.challenge_ref||
+          !n.challenge_digest||!n.issuer_authority_ref||!n.callback_channel_ref||
+          !n.issuer_verifier_ref||!n.challenge_sent_at||!n.challenge_expires_at)?
+          'ISSUER_CALLBACK_CHALLENGE_DETAILS_MISSING':null,
+        n.challenge_state==='REPORTED_MATCH_UNVERIFIED'&&
+          (!n.response_receipt_ref||!n.response_received_at)?
+          'REPORTED_CALLBACK_RESPONSE_MISSING_ORIGINAL_RECEIPT':null,
+        n.challenge_state==='REPORTED_MATCH_UNVERIFIED'?
+          'REPORTED_CALLBACK_MATCH_NOT_AUTHENTICATED':null,
+        expired?'ISSUER_CALLBACK_CHALLENGE_EXPIRED':null,
+        n.challenge_expires_at&&n.response_received_at&&
+          Date.parse(n.response_received_at)>Date.parse(n.challenge_expires_at)?
+          'ISSUER_RESPONSE_AFTER_CHALLENGE_EXPIRY':null,
+        n.issuer_authority_ref&&[n.challenge_ref,n.response_receipt_ref,
+          n.callback_channel_ref].includes(n.issuer_authority_ref)?
+          'ISSUER_CHALLENGE_AUTHORITY_SELF_REFERENTIAL':null,
+        n.issuer_verifier_ref&&[n.witness_identity_ref,n.witness_reviewer_ref,
+          n.owner_signer_ref,c.expected_issuer_ref].includes(n.issuer_verifier_ref)?
+          'ISSUER_CHALLENGE_VERIFIER_NOT_INDEPENDENT':null,
+        n.response_receipt_ref&&n.response_receipt_ref===priorIssuer.issuer_original_receipt_ref?
+          'ISSUER_CALLBACK_REUSES_ORIGINAL_RECEIPT':null,
+        reused('challenge_ref')?'CHALLENGE_IDENTIFIER_REUSED_ACROSS_CASES':null,
+        reused('response_receipt_ref')?'ISSUER_RESPONSE_REUSED_ACROSS_CASES':null,
+        n.kind==='WITNESS_REVERIFICATION'&&(!n.witness_identity_ref||
+          !n.witness_authority_ref||!n.witness_reverification_ref||
+          !n.witness_reviewer_ref||!n.witness_reverified_at)?
+          'INDEPENDENT_WITNESS_REVERIFICATION_DETAILS_MISSING':null,
+        n.witness_identity_ref&&priorWitness.witness_identity_ref&&
+          n.witness_identity_ref!==priorWitness.witness_identity_ref?
+          'WITNESS_IDENTITY_CHANGED_SINCE_ORIGINAL':null,
+        n.witness_identity_ref&&[n.witness_reviewer_ref,n.issuer_verifier_ref,
+          n.owner_signer_ref].includes(n.witness_identity_ref)?
+          'WITNESS_REVERIFIER_NOT_SEPARATE':null,
+        n.witness_authority_ref&&[n.witness_identity_ref,n.witness_reverification_ref]
+          .includes(n.witness_authority_ref)?'WITNESS_AUTHORITY_SELF_REFERENTIAL':null,
+        n.witness_state==='REPORTED_REVERIFIED_UNTRUSTED'?
+          'REPORTED_WITNESS_REVERIFICATION_NOT_AUTHENTICATED':null,
+        reused('witness_reverification_ref')?'WITNESS_REVERIFICATION_REUSED_ACROSS_CASES':null,
+        owner&&n.owner_signer_ref&&c.expected_owner_signer_ref&&
+          n.owner_signer_ref!==c.expected_owner_signer_ref?
+          'EXACT_OWNER_SIGNER_SUBSTITUTED':null,
+        owner&&n.owner_signed_receipt_ref&&priorOwner.owner_renewed_receipt_ref&&
+          n.owner_signed_receipt_ref!==priorOwner.owner_renewed_receipt_ref?
+          'OWNER_RENEWED_RECEIPT_CHANGED_SINCE_HANDOFF':null,
+        owner&&n.owner_witness_ref&&[n.owner_signer_ref,n.witness_reviewer_ref,
+          n.issuer_verifier_ref].includes(n.owner_witness_ref)?
+          'OWNER_RENEWAL_WITNESS_NOT_INDEPENDENT':null,
+        owner&&n.owner_signed_receipt_ref&&n.owner_signed_receipt_ref===
+          priorOwner.owner_original_receipt_ref?'OWNER_ORIGINAL_SIGNOFF_REUSED':null,
+        owner&&expiry?.state==='RENEWAL_EXPIRED'?'OWNER_RENEWAL_CONSENT_EXPIRED':null,
+        owner&&expiry?.state==='RENEWAL_EXPIRES_WITHIN_72H'?
+          'OWNER_RENEWAL_CONSENT_EXPIRING':null,
+        n.owner_state==='REPORTED_SIGNED_UNVERIFIED'?
+          'CLAIMED_SIGNED_OWNER_CONSENT_NOT_AUTHENTICATED':null,
+        n.kind==='OWNER_CONSENT_READINESS'&&(!n.owner_signed_receipt_ref||
+          !n.owner_signer_ref||!n.owner_witness_ref||!n.owner_signed_at||
+          !n.owner_expires_at)?'OWNER_RENEWAL_CONSENT_PROOF_MISSING':null
+      ]);
+      return {...n,conflicts,challenge_expired:Boolean(expired),
+        renewal_expiry:expiry,issuer_authenticated:false,witness_reverified:false,
+        owner_consent_authenticated:false,trial_authorized:false,
+        provider_reads:0,provider_writes:0,d1_operations:0};
+    });
+    const latest=notes.at(-1)||null;
+    const priorOwner=c.issuer_auth_witness_owner_handoffs?.filter(
+      x=>x.kind==='EXACT_OWNER_RENEWAL_HANDOFF').at(-1)||{};
+    const latestOwner=notes.filter(x=>x.kind==='OWNER_CONSENT_READINESS').at(-1);
+    const clock=owner?renewalClock604(latestOwner?.owner_signed_at||
+      priorOwner.owner_renewed_signed_at||'',latestOwner?.owner_expires_at||
+      priorOwner.owner_renewed_expires_at||'',asOf):null;
+    const blockers=uniq600([...c.remaining_blockers,...notes.flatMap(n=>n.conflicts),
+      !notes.some(n=>n.kind==='ISSUER_CALLBACK_CHALLENGE')?
+        'ORIGINAL_ISSUER_CALLBACK_CHALLENGE_NOT_RECORDED':null,
+      !notes.some(n=>n.kind==='WITNESS_REVERIFICATION')?
+        'INDEPENDENT_WITNESS_REVERIFICATION_NOT_RECORDED':null,
+      owner&&!latestOwner?'EXACT_OWNER_RENEWAL_CONSENT_REVIEW_NOT_RECORDED':null]);
+    return {...c,challenge_witness_consent_notes:notes,latest_challenge_review:latest,
+      renewal_clock:clock,remaining_blockers:blockers,
+      aging:aging600(latest?.next_review_at||c.aging?.due_at||'',asOf),
+      issuer_authenticated:false,independent_witness_closed:false,
+      owner_consent_authenticated:false,trial_authorized:false,
+      status:'ORIGINAL_ISSUER_CHALLENGE_WITNESS_OWNER_CONSENT_HOLD'};
+  });
+  const pins=new Set(cases.map(c=>c.case_pin));
+  return {format:FORMAT_606,build:606,source_build:605,as_of:asOf,cases,
+    open_cases:cases.length,expired_challenges:cases.filter(c=>
+      c.challenge_witness_consent_notes.some(n=>n.challenge_expired)).length,
+    witness_conflicts:cases.filter(c=>c.remaining_blockers.some(x=>
+      /WITNESS|REVERIFICATION/.test(x))).length,
+    consent_expired:cases.filter(c=>c.renewal_clock?.state==='RENEWAL_EXPIRED').length,
+    consent_due:cases.filter(c=>c.renewal_clock?.state==='RENEWAL_EXPIRES_WITHIN_72H').length,
+    overdue_reviews:cases.filter(c=>c.aging.bucket.startsWith('OVERDUE')).length,
+    stale_unmatched_notes:entered.filter(n=>!pins.has(n.case_pin)),
+    issuer_authenticated:0,independent_witness_verified:0,
+    owner_consent_authenticated:0,authorized_trials:0,
+    provider_reads:0,provider_writes:0,d1_operations:0,
+    release_gate:'HOLD_ISSUER_CALLBACK_CHALLENGE_WITNESS_AND_EXACT_OWNER_CONSENT'};
+}
+export function filterChallengeReadiness606(p,kind='ALL',term=''){
+  if(p?.format!==FORMAT_606||!FILTERS_606.includes(kind)||!safe600(term,120))
+    throw Error('Invalid Build 606 source-pinned challenge filter.');
+  const q=term.trim().toLowerCase();
+  return p.cases.filter(c=>(kind==='ALL'||
+    (kind==='CHALLENGE'&&c.remaining_blockers.some(x=>/ISSUER|CHALLENGE/.test(x)))||
+    (kind==='CHALLENGE_EXPIRED'&&c.challenge_witness_consent_notes.some(n=>n.challenge_expired))||
+    (kind==='WITNESS'&&c.remaining_blockers.some(x=>/WITNESS|REVERIFICATION/.test(x)))||
+    (kind==='OWNER'&&c.owner_trial_decision_pending)||
+    (kind==='OWNER_EXPIRED'&&c.renewal_clock?.state==='RENEWAL_EXPIRED')||
+    (kind==='OWNER_DUE'&&c.renewal_clock?.state==='RENEWAL_EXPIRES_WITHIN_72H')||
+    (kind==='OVERDUE'&&c.aging.bucket.startsWith('OVERDUE'))||
+    (kind==='CONFLICT'&&c.challenge_witness_consent_notes.some(n=>n.conflicts.length)))&&
+    (!q||[c.channel,c.account_id,c.product_ref,c.exact_action,c.priority]
+      .some(x=>String(x).toLowerCase().includes(q))));
+}
+export function unsignedChallengeHandoff606(p,pin){
+  if(p?.format!==FORMAT_606)throw Error('Validated Build 606 source required.');
+  const c=p.cases.find(x=>x.case_pin===pin);
+  if(!c)throw Error('Exact original-source issuer/witness/owner case required.');
+  return {format:'devilndove-unsigned-issuer-callback-owner-consent-606-v1',
+    build:606,source_build:605,case_pin:pin,prepared_at:p.as_of,
+    channel:c.channel,exact_shop_account:c.account_id,
+    exact_product_sku:c.product_ref,exact_action:c.exact_action,
+    original_source_digest:c.source_digest,
+    issuer_callback_challenges:c.challenge_witness_consent_notes.filter(n=>
+      n.kind==='ISSUER_CALLBACK_CHALLENGE'),
+    independent_witness_reverification:c.challenge_witness_consent_notes.filter(n=>
+      n.kind==='WITNESS_REVERIFICATION'),
+    exact_owner_consent_readiness:c.challenge_witness_consent_notes.filter(n=>
+      n.kind==='OWNER_CONSENT_READINESS'),
+    owner_renewal_clock:c.renewal_clock,remaining_blockers:c.remaining_blockers,
+    external_requirements:['Trusted issuer must independently confirm original callback response',
+      'Separate witness must independently verify original identity and disposition',
+      ...(c.owner_trial_decision_pending?
+        ['Exact owner must separately authenticate signed, unexpired, scoped consent']:[])],
+    issuer_authenticated:false,independent_witness_verified:false,
+    owner_consent_authenticated:false,trial_authorized:false,
+    provider_read_or_write_authorized:false,status:'UNSIGNED_CHALLENGE_AND_CONSENT_HOLD'};
+}
+function init606(doc=globalThis.document,win=globalThis.window){
+  if(!doc?.getElementById('dd606Refresh'))return;
+  const get=id=>doc.getElementById(id),status=get('dd606Status'),output=get('dd606Output');
+  const read=(key,defaultValue)=>{const v=win.localStorage.getItem(key);
+    return v?JSON.parse(v):defaultValue;};
+  const stored=()=>read(KEY_606,[]);
+  let previousPin=null;
+  const source=()=>{
+    const v=['dd605Output','dd604Output','dd603Output','dd602Output',
+      'dd601Output','dd600Output','dd599Output','dd598Output','dd597Output']
+      .map(id=>get(id)?.value);
+    if(v.some(x=>!x||x.length>900000))throw Error('Recompute original sections 5–30.');
+    const s599=[JSON.parse(v[6]),[JSON.parse(v[7]),
+      [JSON.parse(v[8]),sourceContext597(doc,win),read(KEY_597,[])],
+      read(KEY_598,[])],read(KEY_599,[])];
+    const s601=[JSON.parse(v[5]),s599,read(KEY_600,[])];
+    const s602=[JSON.parse(v[4]),s601,read(KEY_601,[])];
+    const s603=[JSON.parse(v[3]),s602,read(KEY_602,[]),read(KEY_603,[])];
+    const s604=[JSON.parse(v[1]),[JSON.parse(v[2]),s603,read(KEY_604,[])]];
+    return [JSON.parse(v[0]),s604.concat([read(KEY_605,[])])];
+  };
+  const refresh=()=>{
+    const [exact,chain]=source();
+    const p=reconcileChallengeReadiness606(exact,chain,stored());
+    output.value=JSON.stringify(p,null,2);
+    get('dd606Metrics').textContent=p.open_cases+' open · '+p.expired_challenges+
+      ' expired challenges · '+p.witness_conflicts+' witness gaps · '+
+      p.consent_expired+' expired consent · '+p.consent_due+' due soon · HOLD';
+    const select=get('dd606Case'),old=select.value;select.replaceChildren();
+    for(const c of p.cases){const o=doc.createElement('option');o.value=c.case_pin;
+      o.textContent=c.priority+' · '+c.channel+' · '+c.product_ref;select.append(o);}
+    if([...select.options].some(o=>o.value===old))select.value=old;
+    const c=p.cases.find(x=>x.case_pin===select.value),exception=get('dd606Exception');
+    const prior=exception.value;exception.replaceChildren();
+    for(const x of c?.open_exceptions||[]){const o=doc.createElement('option');
+      o.value=x;o.textContent=x.replaceAll('_',' ');exception.append(o);}
+    if([...exception.options].some(o=>o.value===prior))exception.value=prior;
+    if(previousPin!==c?.case_pin){previousPin=c?.case_pin||null;
+      get('dd606Kind').value=c?.owner_trial_decision_pending?
+        'OWNER_CONSENT_READINESS':'ISSUER_CALLBACK_CHALLENGE';
+      for(const [id,value] of [['dd606Account',c?.owner_trial_decision_pending?c.account_id:''],
+        ['dd606Product',c?.owner_trial_decision_pending?c.product_ref:''],
+        ['dd606Action',c?.owner_trial_decision_pending?c.exact_action:'']])get(id).value=value;
+    }
+    const list=get('dd606Rows');list.replaceChildren();
+    for(const c of filterChallengeReadiness606(p,get('dd606Filter').value,
+      get('dd606Search').value)){
+      const li=doc.createElement('li');li.textContent=c.priority+' · '+c.channel+
+        ' · '+c.product_ref+' · '+(c.renewal_clock?.state||'issuer/witness')+
+        ' · '+c.remaining_blockers.length+' unresolved';list.append(li);}
+    status.textContent='External callback, witness reverification and owner consent HOLD.';
+    return p;
+  };
+  const guard=()=>{try{return refresh();}catch{
+    status.textContent='Recompute exact original sections 5–30 first · HOLD.';return null;}};
+  for(const [id,event] of [['dd606Refresh','click'],['dd606Filter','change'],
+    ['dd606Search','input'],['dd606Case','change']])get(id).addEventListener(event,guard);
+  get('dd606Save').addEventListener('click',()=>{try{
+    if(!get('dd606Ack').checked)throw Error('Explicit unverified HOLD required.');
+    const p=refresh(),c=p.cases.find(x=>x.case_pin===get('dd606Case').value);
+    if(!c)throw Error('Exact original source-pinned case required.');
+    const v=id=>get(id).value.trim(),date=id=>v(id)?new Date(v(id)).toISOString():'';
+    const fields=[['challenge_ref','Challenge'],['challenge_digest','ChallengeHash'],
+      ['issuer_authority_ref','Authority'],['callback_channel_ref','CallbackChannel'],
+      ['response_receipt_ref','Response'],['issuer_verifier_ref','Verifier'],
+      ['witness_identity_ref','Witness'],['witness_authority_ref','WitnessAuthority'],
+      ['witness_reverification_ref','WitnessReceipt'],['witness_reviewer_ref','WitnessReviewer'],
+      ['owner_signer_ref','Signer'],['owner_signed_receipt_ref','OwnerReceipt'],
+      ['owner_witness_ref','OwnerWitness'],['owner_account','Account'],
+      ['owner_product','Product'],['owner_action','Action'],['reason','Reason']];
+    const candidate=challengeReviewCandidate606({case_pin:c.case_pin,
+      exception_code:v('dd606Exception'),kind:v('dd606Kind'),
+      challenge_state:v('dd606ChallengeState'),witness_state:v('dd606WitnessState'),
+      owner_state:v('dd606OwnerState'),
+      ...Object.fromEntries(fields.map(([key,id])=>[key,v('dd606'+id)])),
+      challenge_sent_at:date('dd606Sent'),response_received_at:date('dd606Responded'),
+      challenge_expires_at:date('dd606Expires'),witness_reverified_at:date('dd606WitnessAt'),
+      owner_signed_at:date('dd606OwnerSigned'),owner_expires_at:date('dd606OwnerExpires'),
+      owner_consent_review_due_at:date('dd606OwnerDue'),
+      recorded_at:new Date().toISOString(),next_review_at:date('dd606Due')});
+    const next=[...stored(),candidate], [exact,chain]=source();
+    reconcileChallengeReadiness606(exact,chain,next);
+    win.localStorage.setItem(KEY_606,JSON.stringify(next));get('dd606Ack').checked=false;refresh();
+  }catch{status.textContent='Rejected: stale original, invalid challenge or consent scope · HOLD.';}});
+  const prepare=()=>{const p=refresh();get('dd606Handoff').value=JSON.stringify(
+    unsignedChallengeHandoff606(p,get('dd606Case').value),null,2);
+    status.textContent='Unsigned exact original-source handoff prepared · HOLD.';};
+  get('dd606Prepare').addEventListener('click',()=>{try{prepare();}catch{
+    status.textContent='Choose exact original-source case · HOLD.';}});
+  const copy=async(kind)=>{try{if(kind==='handoff')prepare();else refresh();
+    const el=get(kind==='handoff'?'dd606Handoff':'dd606Output');
+    try{await win.navigator.clipboard.writeText(el.value);
+      status.textContent='Unsigned documentary packet copied · HOLD.';
+    }catch{el.focus();el.select();status.textContent='Select and copy manually · HOLD.';}
+  }catch{status.textContent='Recompute original-source chain before copying · HOLD.';}};
+  get('dd606Copy').addEventListener('click',()=>copy('queue'));
+  get('dd606CopyHandoff').addEventListener('click',()=>copy('handoff'));
+}
+if(typeof document!=='undefined')init606();

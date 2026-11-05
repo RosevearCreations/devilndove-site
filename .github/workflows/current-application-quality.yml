@@ -761,6 +761,12 @@ jobs:
           node --check scripts/release467_build605_issuer_witness_owner_handoff.test.mjs
           node --test scripts/release467_build605_issuer_witness_owner_handoff.test.mjs
 
+      - name: Build 606 issuer callback challenge, witness reverification and owner consent readiness HOLD
+        run: |
+          node --check public/js/admin-channel-issuer-response-598.mjs
+          node --check scripts/release467_build606_issuer_challenge_witness_consent.test.mjs
+          node --test scripts/release467_build606_issuer_challenge_witness_consent.test.mjs
+
       - name: JavaScript syntax
         run: |
           node --check functions/_middleware.js
