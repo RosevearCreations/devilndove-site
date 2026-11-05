@@ -8,3 +8,5 @@ Devil n Dove remains the first owned maker business, not an authenticated multi-
 - First child slug for later source review: `devil-n-dove`. No second maker is enrolled, and no existing data or provider action is changed.
 
 Local acceptance: `node --test scripts/release467_build610_ql336_child_shell.test.mjs` and `python3 scripts/migration_policy_gate.py`. Live multi-tenant enrollment and signed TEST are **NO-GO** pending separately reviewed proof.
+
+**Performance budget review:** QL-336 introduces exactly three small runtime files (two Cloudflare shell route entries and one shared fail-closed validator). The pre-existing cap of 1,800 runtime files is increased by exactly three to **1,803**; total runtime byte cap (18,000,000), per-file size caps, data-URI caps and the mandatory protected performance gate remain unchanged. Current source inventory is 1,803 files / 17,999,565 bytes. Future expansion still requires the existing budget review.
