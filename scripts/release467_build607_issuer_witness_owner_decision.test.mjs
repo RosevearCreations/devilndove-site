@@ -1,10 +1,9 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
-import {FORMAT_606} from '../public/js/admin-channel-issuer-response-598.mjs';
-import {FORMAT_607,decisionAuditCandidate607,reconcileDecisionAudit607,
+import {FORMAT_606,FORMAT_607,decisionAuditCandidate607,reconcileDecisionAudit607,
   reviewDecisionAudit607,filterDecisionAudit607,unsignedDecisionHandoff607}
-  from '../public/js/admin-channel-decision-audit-607.mjs';
+  from '../public/js/admin-channel-issuer-response-598.mjs';
 
 const read=p=>readFileSync(new URL('../'+p,import.meta.url),'utf8');
 const asOf='2026-11-11T12:00:00Z';
@@ -138,11 +137,11 @@ test('Build 607 actual admin UI, safe transport, quality gate and production rel
     'dd607Save','dd607Copy','dd607Status','dd607Output','dd607Prepare',
     'dd607CopyHandoff','dd607Handoff'])assert.ok(html.includes('id="'+id+'"'),id);
   assert.match(html,/Devil n Dove • Build 607/);
-  assert.match(html,/admin-channel-decision-audit-607\.mjs\?v=607/);
-  for(const name of ['admin-channel-issuer-response-598.mjs?v=606',
+  assert.match(html,/admin-channel-issuer-response-598\.mjs\?v=607/);
+  for(const name of ['admin-channel-issuer-response-598.mjs?v=607',
     'admin-channel-witness-584.mjs?v=594',
     'admin-channel-receipt-followup-585.mjs?v=594'])assert.ok(html.includes(name));
-  const js=read('public/js/admin-channel-decision-audit-607.mjs');
+  const js=read('public/js/admin-channel-issuer-response-598.mjs');
   assert.match(js,/export const FORMAT_607=/);
   assert.doesNotMatch(js,/\bfetch\s*\(|XMLHttpRequest|sendBeacon|\.innerHTML\s*=|\/api\//);
   assert.match(read('.github/workflows/current-application-quality.yml'),

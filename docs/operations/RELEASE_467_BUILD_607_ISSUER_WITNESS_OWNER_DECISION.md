@@ -4,6 +4,8 @@
 
 Channel Trials section 32 replays and verifies the exact Build 606 issuer callback, witness and owner-consent chain before adding browser-local, unsigned documentary notes. It does not contact any original issuer or provider, authenticate witnesses, obtain signed consent, query or mutate D1, publish Etsy/Meta listings, or create a live trial. Reported outcomes and resolutions remain **unverified and HOLD**.
 
+The Build 607 logic is consolidated into the existing Channel Trials issuer-response module to preserve the enforced Release 465 runtime-file count; no additional runtime file is introduced.
+
 ## Owner review steps
 
 1. Recompute the original Channel Trials sections 5–31, select a still-open source-pinned case, and check the exact provider account, Product/SKU and proposed action.
