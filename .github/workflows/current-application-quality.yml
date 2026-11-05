@@ -767,6 +767,12 @@ jobs:
           node --check scripts/release467_build606_issuer_challenge_witness_consent.test.mjs
           node --test scripts/release467_build606_issuer_challenge_witness_consent.test.mjs
 
+      - name: Build 607 original callback outcome, independent witness conflict and exact consent decision audit HOLD
+        run: |
+          node --check public/js/admin-channel-decision-audit-607.mjs
+          node --check scripts/release467_build607_issuer_witness_owner_decision.test.mjs
+          node --test scripts/release467_build607_issuer_witness_owner_decision.test.mjs
+
       - name: JavaScript syntax
         run: |
           node --check functions/_middleware.js
