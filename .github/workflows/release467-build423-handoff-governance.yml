@@ -1,9 +1,6 @@
 name: Release 467 Build 423 Handoff Governance Proof
+# Build 609: historical proof is manual-only; consolidated Quality gate retains tests.
 on:
-  push:
-    branches: [dev, main, build423-handoff-governance, build423-production-candidate]
-  pull_request:
-    branches: [dev, main]
   workflow_dispatch:
 jobs:
   handoff-governance:

@@ -1,19 +1,6 @@
 name: Release 467 Build 409 Remote Draft Isolation
+# Build 609: historical proof is manual-only; consolidated Quality gate retains tests.
 on:
-  push:
-    branches: [dev, main]
-    paths:
-      - 'functions/api/_lib/etsyTrialGate409.mjs'
-      - 'functions/api/admin/etsy-trial-409.js'
-      - 'functions/api/admin/etsy-remote-draft-trial.js'
-      - 'functions/api/_lib/appModuleRoutes.js'
-      - 'public/js/admin-etsy-trial-v409.js'
-      - 'public/js/admin-etsy-remote-draft-v399.js'
-      - 'admin/it-integrations/index.html'
-      - 'scripts/release467_build409_etsy_trial.test.mjs'
-      - '.github/workflows/release467-build409-etsy-trial.yml'
-  pull_request:
-    branches: [dev, main]
   workflow_dispatch:
 jobs:
   operator-trial-and-publication-isolation:

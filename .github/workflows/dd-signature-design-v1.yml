@@ -1,9 +1,6 @@
 name: Devil n Dove Signature Design V1 UI Structural Acceptance
+# Build 609: historical proof is manual-only; consolidated Quality gate retains tests.
 on:
-  push:
-    branches: [dev, main, dd-signature-design-v1, dd-signature-v1-production-candidate]
-  pull_request:
-    branches: [dev, main]
   workflow_dispatch:
 jobs:
   ui-signature:

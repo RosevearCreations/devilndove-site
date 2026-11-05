@@ -1,17 +1,6 @@
 name: Release 467 Build 414 Follow-Up Completion & SLA Exceptions
+# Build 609: historical proof is manual-only; consolidated Quality gate retains tests.
 on:
-  push:
-    branches: [dev, main]
-    paths:
-      - 'functions/api/_lib/providerCompletion414.mjs'
-      - 'functions/api/admin/provider-completion-414.js'
-      - 'public/js/admin-provider-completion-v414.js'
-      - 'admin/it-integrations/index.html'
-      - 'functions/api/_lib/appModuleRoutes.js'
-      - 'scripts/release467_build414_completion.test.mjs'
-      - '.github/workflows/release467-build414-completion.yml'
-  pull_request:
-    branches: [dev, main]
   workflow_dispatch:
 jobs:
   evidence-safe-followup-completion:

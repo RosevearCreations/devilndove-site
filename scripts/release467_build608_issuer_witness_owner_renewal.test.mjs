@@ -180,5 +180,5 @@ test('Actual admin controls, read-only runtime, protected quality gate and relea
   assert.doesNotMatch(js,/\bfetch\s*\(|XMLHttpRequest|sendBeacon|\.innerHTML\s*=|\/api\//);
   assert.match(read('.github/workflows/current-application-quality.yml'),
     /release467_build608_issuer_witness_owner_renewal\.test\.mjs/);
-  assert.match(read('.github/workflows/production-pages-deploy-current.yml'),/"build":608/);
+  assert.match(read('.github/workflows/production-pages-deploy-current.yml'),/"build":6\d{2}/);
 });

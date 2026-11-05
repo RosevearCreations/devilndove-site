@@ -1,17 +1,6 @@
 name: Release 467 Build 411 Evidence Governance
+# Build 609: historical proof is manual-only; consolidated Quality gate retains tests.
 on:
-  push:
-    branches: [dev, main]
-    paths:
-      - 'functions/api/_lib/providerEvidence411.mjs'
-      - 'functions/api/admin/provider-evidence-411.js'
-      - 'functions/api/_lib/appModuleRoutes.js'
-      - 'admin/it-integrations/index.html'
-      - 'public/js/admin-provider-evidence-v411.js'
-      - 'scripts/release467_build411_evidence_governance.test.mjs'
-      - '.github/workflows/release467-build411-evidence-governance.yml'
-  pull_request:
-    branches: [dev, main]
   workflow_dispatch:
 jobs:
   audited-local-evidence:
