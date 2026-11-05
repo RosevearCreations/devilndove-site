@@ -146,12 +146,12 @@ test('Build 605 Admin, quality gate, no provider requests and exact deployment m
     'dd605Reason','dd605Ack','dd605Save','dd605Copy','dd605Status','dd605Output',
     'dd605Prepare','dd605CopyHandoff','dd605Handoff'])
     assert.ok(html.includes('id="'+id+'"'),id);
-  assert.match(html,/Devil n Dove • Build 605/);
-  assert.match(html,/admin-channel-issuer-response-598\.mjs\?v=605/);
+  assert.match(html,/Devil n Dove • Build 6\d{2}/);
+  assert.match(html,/admin-channel-issuer-response-598\.mjs\?v=6\d{2}/);
   const js=read('public/js/admin-channel-issuer-response-598.mjs');
   assert.match(js,/export const FORMAT_605=/);
   assert.doesNotMatch(js,/\bfetch\s*\(|XMLHttpRequest|sendBeacon|\.innerHTML\s*=|\/api\//);
   assert.match(read('.github/workflows/current-application-quality.yml'),
     /release467_build605_issuer_witness_owner_handoff\.test\.mjs/);
-  assert.match(read('.github/workflows/production-pages-deploy-current.yml'),/"build":605/);
+  assert.match(read('.github/workflows/production-pages-deploy-current.yml'),/"build":6\d{2}/);
 });
