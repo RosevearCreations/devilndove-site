@@ -753,6 +753,14 @@ jobs:
           node --check scripts/release467_build613_trust_workbench.test.mjs
           node --test scripts/release467_build613_trust_workbench.test.mjs
 
+      - name: Build 614 server-side Ed25519 original issuer/witness and scoped owner ledger HOLD
+        run: |
+          node --check functions/api/_lib/trustAuthority614.js
+          node --check functions/api/admin/trust-authority-614.js
+          node --check public/js/admin-channel-trust-authority-614.mjs
+          node --check scripts/release467_build614_trust_authority.test.mjs
+          node --test scripts/release467_build614_trust_authority.test.mjs
+
       - name: Build 609 consolidated historical proof and CI fan-out guard
         run: |
           node --check scripts/release467_build609_ci_bundle.mjs
