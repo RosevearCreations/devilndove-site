@@ -72,5 +72,57 @@ export function init614(doc=globalThis.document,win=globalThis.window){
   });
   doc.querySelector('main').append(section);
   read();
+  const ceremony=doc.createElement('section');ceremony.className='dd569-panel';
+  ceremony.setAttribute('aria-label','36. Independent authority activation and custody audit');
+  const item=(tag,text)=>{const el=doc.createElement(tag);
+    if(text)el.textContent=text;ceremony.append(el);return el;};
+  item('h2','36. Independent activation ceremony, original custody and ledger audit — Build 615');
+  item('p','First obtain the original issuer source and independent custody evidence through approved official channels. Only the independently approved authority registrar can activate keys. This page can stage untrusted custody notes, verify three distinct pinned signatures, and audit the decision chain; it cannot activate keys or publish.');
+  const state=item('p','Original custody and activation remain HOLD.');
+  state.setAttribute('role','status');
+  const out=item('textarea');out.rows=9;out.readOnly=true;
+  out.setAttribute('aria-label','Build 615 independent ledger and custody audit');
+  const endpoint615='/api/admin/trust-ceremony-615';
+  const run=async(action,part,pass)=>{
+    try{
+      const res=await win.fetch(endpoint615,{method:'POST',credentials:'same-origin',
+        headers:{'Content-Type':'application/json'},
+        body:JSON.stringify({action,...part,confirm_password:pass})});
+      const data=await res.json();out.value=JSON.stringify(data,null,2);
+      state.textContent=data.ok?'Receipt accepted for separate independent review. Authority and providers remain HOLD.':
+        'Ceremony not verified or schema unavailable · HOLD.';
+    }catch{state.textContent='Independent ceremony not available · HOLD.';}
+  };
+  const refresh=async()=>{try{
+    const res=await win.fetch(endpoint615,{credentials:'same-origin',cache:'no-store'});
+    const data=await res.json();out.value=JSON.stringify(data,null,2);
+    state.textContent=data.ledger_audit?.chain_consistent?
+      'Local chain recomputed; independent external anchor still required · HOLD.':
+      'Complete custody/ledger verification not available · HOLD.';
+  }catch{state.textContent='Readback not available · HOLD.';}};
+  const b=(label,fn)=>{const btn=item('button',label);btn.type='button';
+    btn.className='dd569-button';btn.addEventListener('click',fn);};
+  b('Audit complete decision chain and original custody status',refresh);
+  const ceremonyField=(label,rows=5,secret=false)=>{const caption=item('label',label);
+    const t=doc.createElement(secret?'input':'textarea');if(secret)t.type='password';else t.rows=rows;
+    t.style.display='block';t.style.maxWidth='100%';caption.append(t);return t;};
+  const custodyJSON=ceremonyField('Original custody documentary candidate JSON (no tokens or private keys)');
+  const custodyPass=ceremonyField('Admin password confirmation (not saved)',1,true);
+  custodyPass.setAttribute('autocomplete','off');
+  b('Stage original custody note — UNVERIFIED',()=>{
+    const password=custodyPass.value;custodyPass.value='';
+    try{run('stage_original_custody',{candidate:JSON.parse(custodyJSON.value)},password);}
+    catch{state.textContent='Invalid custody JSON · HOLD.';}
+  });
+  const ceremonyJSON=ceremonyField('Three-party signed activation ceremony JSON (public signatures only)');
+  const ceremonyPass=ceremonyField('Confirm admin password (not saved)',1,true);
+  ceremonyPass.setAttribute('autocomplete','off');
+  b('Verify independent ceremony — never activate provider',()=>{
+    const password=ceremonyPass.value;ceremonyPass.value='';
+    try{run('verify_activation_ceremony',{ceremony:JSON.parse(ceremonyJSON.value)},password);}
+    catch{state.textContent='Invalid signed ceremony JSON · HOLD.';}
+  });
+  doc.querySelector('main').append(ceremony);
+  refresh();
 }
 if(typeof document!=='undefined')init614();

@@ -761,6 +761,15 @@ jobs:
           node --check scripts/release467_build614_trust_authority.test.mjs
           node --test scripts/release467_build614_trust_authority.test.mjs
 
+      # Build 615 exact-head reproof after non-forced dev/main squash ancestry reconciliation.
+      - name: Build 615 independent authority activation ceremony and original custody/ledger audit HOLD
+        run: |
+          node --check functions/api/_lib/trustCeremony615.js
+          node --check functions/api/admin/trust-ceremony-615.js
+          node --check public/js/admin-channel-trust-authority-614.mjs
+          node --check scripts/release467_build615_custody_ceremony_audit.test.mjs
+          node --test scripts/release467_build615_custody_ceremony_audit.test.mjs
+
       - name: Build 609 consolidated historical proof and CI fan-out guard
         run: |
           node --check scripts/release467_build609_ci_bundle.mjs
