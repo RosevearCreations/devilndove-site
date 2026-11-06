@@ -124,5 +124,63 @@ export function init614(doc=globalThis.document,win=globalThis.window){
   });
   doc.querySelector('main').append(ceremony);
   refresh();
+  const checkpoint=doc.createElement('section');checkpoint.className='dd569-panel';
+  checkpoint.setAttribute('aria-label','37. External checkpoint, protective revocation and recovery drill');
+  const put=(tag,content)=>{const e=doc.createElement(tag);if(content)e.textContent=content;
+    checkpoint.append(e);return e;};
+  put('h2','37. Independent checkpoint, key quarantine and recovery drill — Build 616');
+  put('p','Only independent custodians can verify original external anchors. Signing or staging a checkpoint does not prove external publication. Quarantining a compromised key blocks older verification paths; rotation evidence stays pending. No live activation or marketplace actions occur here.');
+  const stage=put('p','External checkpoint and authority remain HOLD.');stage.setAttribute('role','status');
+  const receipt=put('textarea');receipt.rows=10;receipt.readOnly=true;
+  receipt.setAttribute('aria-label','Build 616 external checkpoint and quarantine readback');
+  const url616='/api/admin/trust-checkpoint-616';
+  const fetch616=async(action,part={},pass='')=>{
+    try{
+      const opts=action?{method:'POST',credentials:'same-origin',
+        headers:{'Content-Type':'application/json'},
+        body:JSON.stringify({action,...part,confirm_password:pass})}:
+        {credentials:'same-origin',cache:'no-store'};
+      const res=await win.fetch(url616,opts),json=await res.json();
+      receipt.value=JSON.stringify(json,null,2);
+      stage.textContent=json.ok?'Receipt/drill read back; independent activation still HOLD.':
+        'Independent anchor, schema or signed proof unavailable · HOLD.';
+    }catch{stage.textContent='Build 616 external readback unavailable · HOLD.';}
+  };
+  const button616=(label,handler)=>{const b=put('button',label);b.type='button';
+    b.className='dd569-button';b.addEventListener('click',handler);};
+  const input616=(label,secret=false)=>{const box=put('label',label);
+    const x=doc.createElement(secret?'input':'textarea');
+    if(secret){x.type='password';x.setAttribute('autocomplete','off');}
+    else x.rows=5;
+    x.style.display='block';x.style.maxWidth='100%';box.append(x);return x;};
+  button616('Refresh signed checkpoint, quarantines and rotations',()=>fetch616());
+  const drillPassword=input616('Confirm admin password for recovery simulation',true);
+  button616('Run READ-ONLY controlled recovery simulation',()=>{
+    const pass=drillPassword.value;drillPassword.value='';
+    fetch616('run_recovery_drill',{},pass);
+  });
+  const quarantineJSON=input616('Protective quarantine JSON: authority_id, key_sha256, reason, evidence_ref and evidence_sha256');
+  const quarantinePassword=input616('Confirm admin password for irreversible quarantine',true);
+  button616('Quarantine key — deny only; cannot undo here',()=>{
+    const pass=quarantinePassword.value;quarantinePassword.value='';
+    try{fetch616('quarantine_key',{candidate:JSON.parse(quarantineJSON.value)},pass);}
+    catch{stage.textContent='Invalid quarantine JSON · HOLD.';}
+  });
+  const checkpointJSON=input616('Signed external checkpoint JSON: exact payload and independent witness/owner signatures');
+  const checkpointPassword=input616('Confirm admin password for checkpoint intake',true);
+  button616('Verify signed checkpoint — external readback still pending',()=>{
+    const pass=checkpointPassword.value;checkpointPassword.value='';
+    try{fetch616('record_signed_checkpoint',{checkpoint:JSON.parse(checkpointJSON.value)},pass);}
+    catch{stage.textContent='Invalid checkpoint JSON · HOLD.';}
+  });
+  const rotationJSON=input616('Key rotation JSON: old/new issuer proofs and independent witness/owner signatures');
+  const rotationPassword=input616('Confirm admin password for pending rotation',true);
+  button616('Stage key rotation evidence — never activate replacement',()=>{
+    const pass=rotationPassword.value;rotationPassword.value='';
+    try{fetch616('stage_rotation',{rotation:JSON.parse(rotationJSON.value)},pass);}
+    catch{stage.textContent='Invalid rotation JSON · HOLD.';}
+  });
+  doc.querySelector('main').append(checkpoint);
+  fetch616();
 }
 if(typeof document!=='undefined')init614();

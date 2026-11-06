@@ -770,6 +770,16 @@ jobs:
           node --check scripts/release467_build615_custody_ceremony_audit.test.mjs
           node --test scripts/release467_build615_custody_ceremony_audit.test.mjs
 
+      - name: Build 616 external checkpoint, immutable key quarantine and recovery drill HOLD
+        run: |
+          node --check functions/api/_lib/trustCheckpoint616.js
+          node --check functions/api/admin/trust-checkpoint-616.js
+          node --check functions/api/admin/trust-authority-614.js
+          node --check functions/api/admin/trust-ceremony-615.js
+          node --check public/js/admin-channel-trust-authority-614.mjs
+          node --check scripts/release467_build616_checkpoint_revocation_recovery.test.mjs
+          node --test scripts/release467_build616_checkpoint_revocation_recovery.test.mjs
+
       - name: Build 609 consolidated historical proof and CI fan-out guard
         run: |
           node --check scripts/release467_build609_ci_bundle.mjs
