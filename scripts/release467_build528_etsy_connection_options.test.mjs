@@ -54,7 +54,7 @@ test('Build 528 loads options by explicit owner action and never performs a hidd
   const code=read('public/js/admin-product-etsy-package-v500.mjs');
   assert.match(code,/verifyEtsyOptionsAfterExplicitClick528\(api,id/);
   assert.match(code,/No hidden OAuth/);
-  const opened=code.match(/document\.addEventListener\('dd:editor-tab-opened'[\s\S]*?\n  \}\);/);
+  const opened=code.match(/document\.addEventListener\('dd:editor-tab-opened'[\s\S]*?\n\s*\}\);/);
   assert.ok(opened,'Etsy tab listener should exist');
   assert.doesNotMatch(opened[0],/await loadOptions\(/);
   assert.match(code,/failure\.blockers=Array\.isArray/);

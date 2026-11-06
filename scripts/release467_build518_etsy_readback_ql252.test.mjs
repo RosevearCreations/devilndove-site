@@ -21,7 +21,7 @@ test('Build 518 retains successful reads but never accepts a partial 503',()=>{
 test('owner verifier does three independent GETs, no automatic photo/metadata retry or provider write',()=>{
   const ui=read('public/js/admin-product-etsy-package-v500.mjs');
   const html=read('admin/product-editor/index.html');
-  const check=ui.match(/async function verifyOwner517\(\)\{([\s\S]*?)\n  \}\n  async function approveOwner517/);
+  const check=ui.match(/async function verifyOwner517\(\)\{([\s\S]*?)\n\s*\}\n\s*async function approveOwner517/);
   assert.ok(check);assert.match(check[1],/Promise\.allSettled/);
   assert.match(check[1],/summarizeOwnerReads518/);
   for(const path of ['product-etsy-images?product_id=','product-etsy-owner-signoff-504?product_id=',
