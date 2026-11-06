@@ -32,6 +32,7 @@ Open [Admin → Channel Trials](https://devilndove.com/admin/channel-trials/) an
 
 ## Regression and release controls
 
+- **Exact-head branch ancestry:** The prior Build 614 `main` release was squash-merged, so Build 615's `dev` needed a normal, non-forced two-parent reconciliation with Build 614 `main`. The reconciliation preserved Build 615's source tree. This documented follow-up source commit explicitly re-triggers path-filtered System Gate and D1 fan-out checks against the exact new `dev` head; historic checks for a different SHA are not accepted.
 - Build 615 tests exercise real ephemeral-key Ed25519 signatures, witness/owner independence, pin substitution, expired challenge, wrong original digest, pending custody HOLD, 500-row audit limit, changed ledger content, predecessor conflicts, CSRF/session/step-up source assertions and zero-provider-operation boundaries.
 - The protected Quality gate still runs Builds 613–614. System Gate, I.T. Admin Runtime, Repository Hygiene, Cloudflare preview, exact Production deployment and independent live resource integrity remain mandatory.
 - **Explicit runtime budget review:** two new isolated server modules raise Release 465's source-file ceiling from 1,806 to **1,808**. The total source measures **18,036,711 bytes**, still inside the existing **18,040,000-byte** ceiling; per-file, inline-data, and fail-closed gates are unchanged. Distinct modules keep cryptographic custody logic isolated from existing provider execution. This is a narrow, reviewed file-count adjustment, not a waiver.
