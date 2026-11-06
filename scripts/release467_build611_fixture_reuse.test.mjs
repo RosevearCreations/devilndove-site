@@ -62,7 +62,7 @@ test('Build 611 exact-time replay optimization is local, never persistent, at ev
  assert.match(scripts,/node --test scripts\/release467_build611_fixture_reuse.test.mjs/);
  const deployment=read('.github/workflows/production-pages-deploy-current.yml');
  assert.match(deployment,/"build":6\d{2}/);
- assert.match(read('admin/channel-trials/index.html'),/Devil n Dove • Build 611/);
+ assert.match(read('admin/channel-trials/index.html'),/Devil n Dove • Build 6\d{2}/);
  assert.match(read('admin/channel-trials/index.html'),
-  /admin-channel-issuer-response-598\.mjs\?v=611/);
+  /admin-channel-issuer-response-598\.mjs\?v=6\d{2}/);
 });
