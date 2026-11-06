@@ -6,6 +6,7 @@ import {existsSync,mkdirSync,writeFileSync,appendFileSync,readFileSync} from 'no
 import {fileURLToPath} from 'node:url';
 import path from 'node:path';
 import {performance} from 'node:perf_hooks';
+import {availableParallelism,loadavg} from 'node:os';
 
 export const TEST_FILES_610=[
  'scripts/release467_build602_external_issuer_witness_owner.test.mjs',
@@ -27,6 +28,13 @@ export const BUDGET_610=Object.freeze({
  max_concurrent:3, per_file_hard_ms:240000, total_hard_ms:420000,
  soft_total_ms:180000, report_version:1
 });
+/* Build 612: keep one CPU execution slot available for the protected job's other tasks. */
+export function workerCapacity612(logicalCores,configuredMax=BUDGET_610.max_concurrent){
+ if(!Number.isInteger(logicalCores)||logicalCores<1||logicalCores>4096||
+ !Number.isInteger(configuredMax)||configuredMax<1||configuredMax>BUDGET_610.max_concurrent)
+ throw Error('Invalid original-source test CPU capacity.');
+ return Math.min(configuredMax,Math.max(1,logicalCores-1));
+}
 const ROOT=fileURLToPath(new URL('../',import.meta.url));
 const REPORT='artifacts/build610-evidence-test-timings.json';
 const read=p=>readFileSync(path.join(ROOT,p),'utf8');
@@ -79,9 +87,12 @@ function runTest610(testPath){
 }
 export async function runBudget610(){
  auditInventory610();
- const started=performance.now(),results=[],active=new Set();
+ const started=performance.now(),results=[];
+ const logical_cores=availableParallelism();
+ const effective_workers=workerCapacity612(logical_cores);
+ const cpu_load_1m_start=Math.round(loadavg()[0]*100)/100;
  let next=0;
- const workers=Array.from({length:BUDGET_610.max_concurrent},async()=>{
+ const workers=Array.from({length:effective_workers},async()=>{
   while(next<TEST_FILES_610.length){
    const i=next++;
    const r=await runTest610(TEST_FILES_610[i]);
@@ -97,7 +108,13 @@ export async function runBudget610(){
   schema:'devilndove-build610-exact-source-test-budget-v1',
   source_sha:process.env.GITHUB_SHA||null,
   tested_files:TEST_FILES_610.length,executed_files:results.length,
-  max_concurrent:BUDGET_610.max_concurrent,
+  max_concurrent:effective_workers,
+  configured_max_concurrent:BUDGET_610.max_concurrent,
+  available_cpu_cores:logical_cores,
+  reserved_runner_cpu_slots:Math.max(0,logical_cores-effective_workers),
+  cpu_load_1m_start,
+  cpu_load_1m_end:Math.round(loadavg()[0]*100)/100,
+  cpu_pressure_warning:cpu_load_1m_start>logical_cores*1.25,
   hard_per_file_ms:BUDGET_610.per_file_hard_ms,
   hard_total_ms:BUDGET_610.total_hard_ms,
   soft_target_ms:BUDGET_610.soft_total_ms,
@@ -113,7 +130,7 @@ export async function runBudget610(){
   appendFileSync(process.env.GITHUB_STEP_SUMMARY,
    '\n### Build 610 exact evidence tests\n'+
    '- Cases: '+report.executed_files+'/'+report.tested_files+'\n'+
-   '- Parallel workers: '+report.max_concurrent+'\n'+
+   '- Parallel workers: '+report.max_concurrent+' (available CPU: '+logical_cores+')\n'+
    '- Elapsed: '+(total_ms/1000).toFixed(1)+' s; target: '+
     (BUDGET_610.soft_total_ms/1000).toFixed(0)+' s\n'+
    '- Failures: '+failures.length+'\n'+

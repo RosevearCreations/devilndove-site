@@ -737,6 +737,14 @@ jobs:
           node --test scripts/release467_build611_profile.test.mjs
           node scripts/release467_build611_replay_profile.mjs
 
+      - name: Build 612 verified source replay graph and CPU contention guardrails
+        run: |
+          node --check scripts/release467_build612_source_graph_cpu.mjs
+          node --check scripts/release467_build612_source_graph_cpu.test.mjs
+          node scripts/release467_build612_source_graph_cpu.mjs --audit-only
+          node --test scripts/release467_build612_source_graph_cpu.test.mjs
+          node scripts/release467_build612_source_graph_cpu.mjs
+
       - name: Build 609 consolidated historical proof and CI fan-out guard
         run: |
           node --check scripts/release467_build609_ci_bundle.mjs
@@ -759,6 +767,7 @@ jobs:
             artifacts/build610-evidence-test-timings.json
             artifacts/build610-promotion-queue-sla.json
             artifacts/build611-source-replay-profile.json
+            artifacts/build612-source-graph-cpu-guard.json
           if-no-files-found: warn
           retention-days: 30
 
