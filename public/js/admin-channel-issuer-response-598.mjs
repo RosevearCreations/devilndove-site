@@ -1,5 +1,4 @@
-/* Build 598: original issuer response, independent conflict closure and owner witness readiness.
-* Local documentary review is NEVER issuer authentication, exception closure or trial authority. */
+
 import {reconcileSource597,sourceContext597,KEY_597,FORMAT_597} from './admin-channel-source-disposition-597.mjs?v=597';
 export const FORMAT_598='devilndove-issuer-response-conflict-closure-owner-witness-598-v1';
 export const KEY_598='dd:issuer-response-conflict-witness:598:v1';
@@ -240,7 +239,7 @@ get('dd598CopyPacket').addEventListener('click',()=>copy('dd598Packet'));
 }
 if(typeof document!=='undefined')init598();
 
-/* Build 599 consolidated review implementation: one existing runtime module, no extra runtime file. */
+
 export const FORMAT_599='devilndove-issuer-receipt-conflict-witness-consent-599-v1';
 export const KEY_599='dd:issuer-receipt-consent-preflight:599:v1';
 export const METHODS_599=['PENDING','OFFICIAL_PROVIDER_PORTAL_CLAIM','OFFICIAL_SUPPORT_RECEIPT_CLAIM','SIGNED_ISSUER_ORIGINAL_CLAIM'];
@@ -486,8 +485,7 @@ get('dd599CopyOwner').addEventListener('click',()=>copy('owner'));
 if(typeof document!=='undefined')init599();
 
 
-/* Build 600 — independent issuer decision register, open exception aging and owner readiness.
-Local dispositions are NOT source authentication, closure or trial authority. */
+
 export const FORMAT_600='devilndove-issuer-authenticity-decision-owner-readiness-600-v1';
 export const KEY_600='dd:issuer-authenticity-decision-owner-readiness:600:v1';
 export const STATES_600=['ISSUER_AUTHENTICITY_PENDING','ISSUER_SOURCE_DISPUTED',
@@ -750,8 +748,7 @@ get('dd600CopyOwner').addEventListener('click',()=>copy('owner'));
 }
 if(typeof document!=='undefined')init600();
 
-/* Build 601 — exact-source issuer evidence reconciliation, unresolved conflict escalation,
-* and unsigned owner authorization handoff. This local queue cannot verify external proof. */
+
 export const FORMAT_601='devilndove-issuer-decision-conflict-escalation-owner-handoff-601-v1';
 export const KEY_601='dd:issuer-conflict-owner-handoff:601:v1';
 export const STATES_601=['ISSUER_DECISION_EVIDENCE_AWAITED','ISSUER_DECISION_DISPUTED',
@@ -992,8 +989,7 @@ get('dd601CopyHandoff').addEventListener('click',()=>copy('handoff'));
 }
 if(typeof document!=='undefined')init601();
 
-/* Build 602 — external original-issuer evidence intake, independent witness cross-check,
-* and exact owner authorization exception recheck. Everything remains documentary HOLD. */
+
 export const FORMAT_602='devilndove-external-issuer-witness-owner-recheck-602-v1';
 export const KEY_602='dd:external-issuer-witness-owner-recheck:602:v1';
 export const TYPES_602=['ORIGINAL_ISSUER_EVIDENCE','INDEPENDENT_CONFLICT_WITNESS',
@@ -1269,8 +1265,7 @@ get('dd602CopyHandoff').addEventListener('click',()=>copy('handoff'));
 }
 if(typeof document!=='undefined')init602();
 
-/* Build 603 — source-pinned custody continuity, independent witness identity follow-up
-* and exact owner signed-scope expiry. All records are unauthenticated local claims. */
+
 export const FORMAT_603='devilndove-custody-witness-owner-expiry-603-v1';
 export const KEY_603='dd:custody-witness-owner-expiry:603:v1';
 export const KINDS_603=['CUSTODY_HANDOFF','WITNESS_IDENTITY_FOLLOWUP','OWNER_SIGNOFF_EXPIRY'];
@@ -1325,8 +1320,7 @@ throw Error('Stale or substituted Build 602 original evidence packet.');
 const current=recheckExternalEvidence602(...source602,local602,asOf);
 return reviewCustodyWitnessExpiry603(current,rows,asOf);
 }
-/* Pure documentary audit is testable without repeating the expensive original-source
-* replay; the browser entrypoint above always verifies that exact chain first. */
+
 export function reviewCustodyWitnessExpiry603(current,rows=[],asOf=new Date().toISOString()){
 if(current?.format!==FORMAT_602||!Array.isArray(current.cases)||
 !Array.isArray(rows)||rows.length>100||!iso600(asOf))
@@ -1546,8 +1540,7 @@ get('dd603CopyHandoff').addEventListener('click',()=>copy('handoff'));
 }
 if(typeof document!=='undefined')init603();
 
-/* Build 604 — original issuer receipt confirmations, independent witness exception
-* disposition and exact owner sign-off renewal. This queue can only record HOLD. */
+
 export const FORMAT_604='devilndove-original-issuer-witness-owner-renewal-604-v1';
 export const KEY_604='dd:original-issuer-witness-owner-renewal:604:v1';
 export const KINDS_604=['ISSUER_CONFIRMATION','WITNESS_EXCEPTION_DISPOSITION',
@@ -1607,8 +1600,7 @@ throw Error('Stale or substituted Build 603 source-pinned external case packet.'
 const current=reconcileCustodyWitnessExpiry603(...source603,asOf);
 return reviewOriginalConfirmations604(current,rows,asOf);
 }
-/* Pure review permits focused deterministic tests. The live entrypoint always
-* replays and compares exact Build 603 source before calling this audit. */
+
 export function reviewOriginalConfirmations604(current,rows=[],asOf=new Date().toISOString()){
 if(current?.format!==FORMAT_603||!Array.isArray(current.cases)||
 !Array.isArray(rows)||rows.length>100||!iso600(asOf))
@@ -1848,8 +1840,7 @@ get('dd604CopyHandoff').addEventListener('click',()=>copy('handoff'));
 }
 if(typeof document!=='undefined')init604();
 
-/* Build 605 — independent original-issuer authentication follow-up, witness
-* disposition reconciliation and exact owner renewal evidence handoff. */
+
 export const FORMAT_605='devilndove-issuer-witness-renewal-handoff-605-v1';
 export const KEY_605='dd:issuer-witness-renewal-handoff:605:v1';
 export const KINDS_605=['ISSUER_AUTH_FOLLOWUP','WITNESS_DISPOSITION_RECHECK',
@@ -1903,8 +1894,7 @@ throw Error('Original issuer/witness/renewal source was changed or is stale.');
 return reviewAuthenticationHandoff605(
 reconcileOriginalConfirmations604(...source604,asOf),rows,asOf);
 }
-/* The live entrypoint above always replays the Build 604 source. The pure audit
-* below has no provider transport and can be deterministically tested alone. */
+
 export function reviewAuthenticationHandoff605(current,rows=[],asOf=new Date().toISOString()){
 if(current?.format!==FORMAT_604||!Array.isArray(current.cases)||
 !Array.isArray(rows)||rows.length>100||!iso600(asOf))
@@ -2197,8 +2187,7 @@ get('dd605CopyHandoff').addEventListener('click',()=>copy('handoff'));
 }
 if(typeof document!=='undefined')init605();
 
-/* Build 606 — no network challenge is sent here. This review merely tracks
-* externally supplied, unverified reference metadata against exact Build 605. */
+
 export const FORMAT_606='devilndove-issuer-challenge-witness-consent-606-v1';
 export const KEY_606='dd:issuer-challenge-witness-consent:606:v1';
 export const KINDS_606=['ISSUER_CALLBACK_CHALLENGE','WITNESS_REVERIFICATION',
@@ -2523,8 +2512,7 @@ get('dd606Copy').addEventListener('click',()=>copy('queue'));
 get('dd606CopyHandoff').addEventListener('click',()=>copy('handoff'));
 }
 if(typeof document!=='undefined')init606();
-/* Build 607: consolidated into the existing source-owned Channel Trials runtime
-* so the Release 465 runtime file budget remains intact. */
+
 export const FORMAT_607='devilndove-issuer-outcome-witness-owner-decision-607-v1';
 export const KEY_607='dd:issuer-outcome-witness-owner-decision:607:v1';
 export const KINDS_607=['ISSUER_CALLBACK_OUTCOME','WITNESS_IDENTITY_CONFLICT',
@@ -2858,8 +2846,7 @@ get('dd607CopyHandoff').addEventListener('click',()=>copy('handoff'));
 }
 if(typeof document!=='undefined')init607();
 
-/* Build 608 — original issuer outcome attestation, witness escalation aging
-* and exact owner renewal handoff. Browser-local evidence only; NEVER approval. */
+
 export const FORMAT_608='devilndove-original-issuer-witness-renewal-608-v1';
 export const KEY_608='dd:original-issuer-witness-renewal:608:v1';
 export const KINDS_608=['ISSUER_OUTCOME_ATTESTATION','WITNESS_CONFLICT_ESCALATION',
@@ -3196,3 +3183,178 @@ get('dd608Copy').addEventListener('click',()=>copy('queue'));
 get('dd608CopyHandoff').addEventListener('click',()=>copy('handoff'));
 }
 if(typeof document!=='undefined')init608();
+
+/* Build 613 — review-first trusted-source intake; local claims NEVER confer authority. */
+export const FORMAT_613='devilndove-independent-issuer-witness-owner-workbench-613-v1';
+export const KEY_613='dd:issuer-witness-owner-trust-review:613:v1';
+export const KINDS_613=['ORIGINAL_ISSUER','INDEPENDENT_WITNESS','EXACT_OWNER_CONSENT'];
+export const DECISIONS_613=['PENDING','APPROVE_CLAIM_UNVERIFIED','DECLINE','REVOKE'];
+const FIELDS_613=['case_pin','kind','original_ref','authority_ref','reviewer_ref',
+'witness_ref','source_sha256','signed_receipt_ref','owner_signer_ref',
+'owner_account','owner_product','owner_action','reason'];
+const TIME_613=['signed_at','expires_at','recorded_at'];
+export function candidate613(r){
+const allow=new Set([...FIELDS_613,...TIME_613,'decision']);
+if(!r||Array.isArray(r)||Object.keys(r).some(k=>!allow.has(k))||
+FIELDS_613.some(k=>typeof r[k]!=='string'||r[k].length>(k==='reason'?900:220)||
+/(?:access[_ -]?token|bearer\s+\S+|client[_ -]?secret|password\s*[:=]|api[_ -]?key\s*[:=]|private[_ -]?key)/i.test(r[k]))||
+!KINDS_613.includes(r.kind)||!DECISIONS_613.includes(r.decision)||
+!r.case_pin.startsWith('dd596-case:')||
+(r.source_sha256!==''&&!/^[a-f0-9]{64}$/.test(r.source_sha256))||
+TIME_613.some(k=>r[k]!==''&&!iso600(r[k]))||
+!r.recorded_at||r.reason.trim().length<15||
+(r.signed_at&&Date.parse(r.signed_at)>Date.parse(r.recorded_at))||
+(r.expires_at&&(!r.signed_at||Date.parse(r.expires_at)<=Date.parse(r.signed_at))))
+throw Error('Untrusted or invalid source/witness/owner evidence; no approval.');
+return {...Object.fromEntries(FIELDS_613.map(k=>[k,r[k].trim()])),
+...Object.fromEntries(TIME_613.map(k=>[k,r[k]])),decision:r.decision};
+}
+export function review613(exact608,rows=[],asOf=new Date().toISOString()){
+if(exact608?.format!==FORMAT_608||exact608?.build!==608||
+exact608?.release_gate!=='HOLD_ORIGINAL_ISSUER_WITNESS_ESCALATION_EXACT_OWNER_RENEWAL'||
+!Array.isArray(exact608.cases)||!Array.isArray(rows)||rows.length>100||!iso600(asOf))
+throw Error('Build 608 original source packet required.');
+const notes=rows.map(candidate613),used=new Map();
+for(const n of notes)for(const key of ['original_ref','signed_receipt_ref']){
+if(n[key]){const set=used.get(n[key])||new Set();set.add(n.case_pin);
+used.set(n[key],set);}}
+const cases=exact608.cases.map(c=>{
+const owner=c.owner_trial_decision_pending;
+const reviews=notes.filter(n=>n.case_pin===c.case_pin).map(n=>{
+if(n.owner_account!==c.account_id||n.owner_product!==c.product_ref||
+n.owner_action!==c.exact_action||
+(n.kind==='EXACT_OWNER_CONSENT'&&!owner))
+throw Error('Exact account, SKU, action or case type conflict.');
+const conflicts=uniq600([
+!n.original_ref||!n.authority_ref?'ORIGINAL_AUTHORITY_NOT_OBTAINED':null,
+!n.source_sha256?'ORIGINAL_DOCUMENT_HASH_MISSING':null,
+n.source_sha256&&c.source_digest&&n.source_sha256!==c.source_digest?
+'ORIGINAL_SOURCE_DIGEST_CONFLICT':null,
+!n.reviewer_ref||!n.witness_ref?'INDEPENDENT_REVIEWER_WITNESS_MISSING':null,
+n.reviewer_ref&&n.reviewer_ref===n.witness_ref?'SELF_WITNESSED_REVIEW':null,
+n.authority_ref&&[n.original_ref,n.reviewer_ref,n.witness_ref].includes(n.authority_ref)?
+'UNTRUSTED_SELF_REFERENTIAL_AUTHORITY':null,
+n.witness_ref&&[n.owner_signer_ref,c.expected_issuer_ref].includes(n.witness_ref)?
+'WITNESS_NOT_INDEPENDENT':null,
+used.get(n.original_ref)?.size>1||used.get(n.signed_receipt_ref)?.size>1?
+'EVIDENCE_REUSED_ACROSS_CASES':null,
+n.kind==='EXACT_OWNER_CONSENT'&&(!n.signed_receipt_ref||!n.owner_signer_ref||
+!n.signed_at||!n.expires_at)?'SIGNED_OWNER_SCOPE_INCOMPLETE':null,
+n.kind==='EXACT_OWNER_CONSENT'&&c.expected_owner_signer_ref&&
+n.owner_signer_ref!==c.expected_owner_signer_ref?'ORIGINAL_OWNER_SIGNER_CHANGED':null,
+n.kind==='EXACT_OWNER_CONSENT'&&n.expires_at&&
+Date.parse(n.expires_at)<=Date.parse(asOf)?'SIGNED_OWNER_SCOPE_EXPIRED':null,
+n.decision==='DECLINE'||n.decision==='REVOKE'?'OWNER_CONSENT_NOT_GRANTED':null,
+n.decision==='APPROVE_CLAIM_UNVERIFIED'?
+'CLAIMED_APPROVAL_REQUIRES_TRUSTED_SIGNATURE_VERIFICATION':null,
+'TRUSTED_EXTERNAL_VERIFIER_NOT_ENROLLED'
+]);
+return {...n,conflicts,status:'UNVERIFIED_DOCUMENTARY_INTAKE',
+issuer_authenticated:false,witness_authenticated:false,
+signed_owner_consent_authenticated:false,trial_authorized:false};
+});
+return {case_pin:c.case_pin,channel:c.channel,account_id:c.account_id,
+product_ref:c.product_ref,exact_action:c.exact_action,owner_trial_decision_pending:owner,
+reviews,remaining_blockers:uniq600([...(c.remaining_blockers||[]),
+...reviews.flatMap(n=>n.conflicts),'TRUSTED_ORIGINAL_AUTHORITY_PENDING']),
+issuer_authenticated:false,witness_authenticated:false,
+owner_consent_authenticated:false,trial_authorized:false};
+});
+return {format:FORMAT_613,build:613,source_build:608,as_of:asOf,cases,
+unmatched:notes.filter(n=>!cases.some(c=>c.case_pin===n.case_pin)),
+issuer_authenticated:0,independent_witness_authenticated:0,
+owner_consents_authenticated:0,authorized_trials:0,
+provider_reads:0,provider_writes:0,d1_operations:0,
+release_gate:'HOLD_EXTERNAL_ISSUER_WITNESS_SIGNED_OWNER_TRUST'};
+}
+export function reconcile613(exact608,source608,local608=[],rows=[],
+asOf=new Date().toISOString()){
+if(!Array.isArray(source608)||source608.length!==2||!Array.isArray(local608))
+throw Error('Original Build 608 replay context required.');
+const reproduced=reconcileAttestation608(...source608,local608,exact608?.as_of);
+if(JSON.stringify(reproduced)!==JSON.stringify(exact608))
+throw Error('Forged, outdated or substituted Build 608 packet.');
+const current=asOf===exact608.as_of?reproduced:
+reconcileAttestation608(...source608,local608,asOf);
+return review613(current,rows,asOf);
+}
+export function unsignedHandoff613(p,pin){
+if(p?.format!==FORMAT_613)throw Error('Exact reviewed evidence required.');
+const c=p.cases.find(x=>x.case_pin===pin);
+if(!c)throw Error('Choose existing case.');
+return {format:'devilndove-unsigned-independent-trust-handoff-613-v1',
+case_pin:pin,exact_channel:c.channel,shop_account:c.account_id,
+product_sku:c.product_ref,permitted_action_requested:c.exact_action,
+documentary_reviews:c.reviews,remaining_blockers:c.remaining_blockers,
+required_outside_checks:['Validate original issuer through independent official provider channel',
+'Authenticate a separate independent reviewer and witness',
+'Verify owner identity and original signature for exact account, SKU and action',
+'Verify expiry, revocation and explicit scoped owner authorization'],
+original_issuer_authenticated:false,independent_witness_authenticated:false,
+owner_signature_authenticated:false,provider_action_authorized:false,
+status:'UNSIGNED_UNTRUSTED_EXTERNAL_VERIFICATION_REQUIRED'};
+}
+function init613(doc=globalThis.document,win=globalThis.window){
+if(!doc?.getElementById('dd613Refresh'))return;
+const get=id=>doc.getElementById(id),status=get('dd613Status');
+const stored=()=>{const x=win.localStorage.getItem(KEY_613);return x?JSON.parse(x):[];};
+const source=()=>{
+const ids=['dd607Output','dd606Output','dd605Output','dd604Output',
+'dd603Output','dd602Output','dd601Output','dd600Output',
+'dd599Output','dd598Output','dd597Output'];
+const v=ids.map(x=>get(x)?.value);
+if(v.some(x=>!x||x.length>900000))throw Error('Refresh preceding source sections.');
+const rd=(k)=>{const x=win.localStorage.getItem(k);return x?JSON.parse(x):[];};
+const s599=[JSON.parse(v[8]),[JSON.parse(v[9]),
+[JSON.parse(v[10]),sourceContext597(doc,win),rd(KEY_597)],
+rd(KEY_598)],rd(KEY_599)];
+const s601=[JSON.parse(v[7]),s599,rd(KEY_600)];
+const s602=[JSON.parse(v[6]),s601,rd(KEY_601)];
+const s603=[JSON.parse(v[5]),s602,rd(KEY_602),rd(KEY_603)];
+const s604=[JSON.parse(v[3]),[JSON.parse(v[4]),s603,rd(KEY_604)]];
+const s605=[JSON.parse(v[2]),s604.concat([rd(KEY_605)])];
+const s606=[JSON.parse(v[1]),s605.concat([rd(KEY_606)])];
+return [JSON.parse(get('dd608Output').value),
+[JSON.parse(v[0]),s606.concat([rd(KEY_607)])],rd(KEY_608)];
+};
+const refresh=()=>{
+const [exact,s608,local]=source();
+const p=reconcile613(exact,s608,local,stored());
+get('dd613Output').value=JSON.stringify(p,null,2);
+get('dd613Metrics').textContent=p.cases.length+' original cases · '+
+p.cases.reduce((a,c)=>a+c.reviews.length,0)+' local reviews · all external checks HOLD';
+const select=get('dd613Case'),prior=select.value;select.replaceChildren();
+for(const c of p.cases){const o=doc.createElement('option');o.value=c.case_pin;
+o.textContent=c.channel+' · '+c.product_ref+' · '+c.exact_action;select.append(o);}
+if([...select.options].some(x=>x.value===prior))select.value=prior;
+status.textContent='Browser-local intake; no original issuer, witness or owner authority verified.';
+return p;
+};
+const guard=()=>{try{refresh();}catch{status.textContent='Recompute exact sources 5–33 · HOLD.';}};
+get('dd613Refresh').addEventListener('click',guard);
+get('dd613Save').addEventListener('click',()=>{try{
+if(!get('dd613Ack').checked)throw Error('Acknowledgement required.');
+const p=refresh(),c=p.cases.find(x=>x.case_pin===get('dd613Case').value);
+if(!c)throw Error('Choose exact source case.');
+const v=id=>get('dd613'+id).value.trim();
+const date=id=>v(id)?new Date(v(id)).toISOString():'';
+const record=candidate613({case_pin:c.case_pin,kind:v('Kind'),
+original_ref:v('Original'),authority_ref:v('Authority'),
+reviewer_ref:v('Reviewer'),witness_ref:v('Witness'),
+source_sha256:v('Digest'),signed_receipt_ref:v('SignedReceipt'),
+owner_signer_ref:v('Signer'),owner_account:c.account_id,
+owner_product:c.product_ref,owner_action:c.exact_action,
+decision:v('Decision'),signed_at:date('Signed'),expires_at:date('Expires'),
+recorded_at:new Date().toISOString(),reason:v('Reason')});
+const next=[...stored(),record],[exact,chain,local]=source();
+reconcile613(exact,chain,local,next);
+win.localStorage.setItem(KEY_613,JSON.stringify(next));
+get('dd613Ack').checked=false;refresh();
+}catch{status.textContent='Evidence rejected, or exact original source unavailable · HOLD.';}});
+get('dd613Prepare').addEventListener('click',()=>{
+try{const p=refresh();get('dd613Handoff').value=JSON.stringify(
+unsignedHandoff613(p,get('dd613Case').value),null,2);
+status.textContent='Unsigned review packet prepared · HOLD.';
+}catch{status.textContent='Choose current original case · HOLD.';}});
+}
+if(typeof document!=='undefined')init613();

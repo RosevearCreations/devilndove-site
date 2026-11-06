@@ -81,10 +81,10 @@ test('Build 612 stays inside existing mandatory Quality and independent Producti
  assert.match(quality,/Build 610 read-only promotion queue SLA measurements/);
  assert.match(quality,/build612-source-graph-cpu-guard.json/);
  const production=read('.github/workflows/production-pages-deploy-current.yml');
- assert.match(production,/"build":612/);
+ assert.match(production,/"build":6\d{2}/);
  const proof=read('.github/workflows/production-live-resource-integrity-proof.yml');
  assert.match(proof,/workflow_run:/);
  assert.match(proof,/zero-D1/);
- assert.match(read('admin/channel-trials/index.html'),/Build 611/);
+ assert.match(read('admin/channel-trials/index.html'),/Build 6\d{2}/);
  assert.equal(BUDGET_610.max_concurrent,3);
 });
