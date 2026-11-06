@@ -7,8 +7,8 @@
     "max_js_bytes": 600000,
     "max_css_bytes": 500000,
     "max_html_bytes": 500000,
-    "max_runtime_source_bytes": 18040000,
-    "max_runtime_source_files": 1808,
+    "max_runtime_source_bytes": 18080000,
+    "max_runtime_source_files": 1810,
     "max_inline_data_uri_bytes": 650000
   },
   "baseline_observed": {

@@ -12,11 +12,17 @@ async function database(c) {
   try {
     await db.prepare('SELECT authority_id FROM dd614_authorities LIMIT 1').all();
     await db.prepare('SELECT event_hash FROM dd614_owner_decisions LIMIT 1').all();
+    // Build 616 deny-list is mandatory; absence denies older signed-proof endpoints too.
+    await db.prepare('SELECT authority_id FROM dd616_key_quarantines LIMIT 1').all();
     return db;
   } catch {return null;}
 }
 const root=(db,id)=>db.prepare(
-  'SELECT authority_id,role,public_key,key_sha256,status FROM dd614_authorities WHERE authority_id=? LIMIT 1'
+  `SELECT a.authority_id,a.role,a.public_key,a.key_sha256,
+   CASE WHEN EXISTS(SELECT 1 FROM dd616_key_quarantines q
+     WHERE q.authority_id=a.authority_id OR q.key_sha256=a.key_sha256)
+   THEN 'QUARANTINED' ELSE a.status END AS status
+   FROM dd614_authorities a WHERE a.authority_id=? LIMIT 1`
 ).bind(id).first();
 const safeError=error=>{
   const message=String(error?.message||'');
@@ -30,7 +36,11 @@ export async function onRequestGet(c) {
   if (!db) return reply(disabled,503);
   const pins=trustedPins614(c.env);
   const candidates=(await db.prepare(
-    'SELECT authority_id,role,key_sha256,status,created_at FROM dd614_authorities ORDER BY created_at DESC LIMIT 50'
+    `SELECT a.authority_id,a.role,a.key_sha256,a.created_at,
+      CASE WHEN EXISTS(SELECT 1 FROM dd616_key_quarantines q
+        WHERE q.authority_id=a.authority_id OR q.key_sha256=a.key_sha256)
+      THEN 'QUARANTINED' ELSE a.status END AS status
+      FROM dd614_authorities a ORDER BY a.created_at DESC LIMIT 50`
   ).all()).results||[];
   const recent=(await db.prepare(
     'SELECT event_hash,previous_hash,case_pin,channel,account_id,product_ref,exact_action,owner_decision,created_at FROM dd614_owner_decisions ORDER BY sequence DESC LIMIT 30'

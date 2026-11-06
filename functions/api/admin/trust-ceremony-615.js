@@ -9,7 +9,11 @@ const blocked={ok:false,build:615,release_gate:HOLD_615,
   error:'Separately approved authority/custody schema and original evidence are not installed.',
   authority_activated:false,provider_action_authorized:false};
 const authority=(db,id)=>db.prepare(
-  'SELECT authority_id,role,public_key,key_sha256,status FROM dd614_authorities WHERE authority_id=?'
+  `SELECT a.authority_id,a.role,a.public_key,a.key_sha256,
+   CASE WHEN EXISTS(SELECT 1 FROM dd616_key_quarantines q
+     WHERE q.authority_id=a.authority_id OR q.key_sha256=a.key_sha256)
+   THEN 'QUARANTINED' ELSE a.status END AS status
+   FROM dd614_authorities a WHERE a.authority_id=?`
 ).bind(id).first();
 const custody=(db,id)=>db.prepare(
   'SELECT receipt_id,authority_id,original_source_sha256,original_receipt_sha256,witness_authority_id,owner_authority_id,status FROM dd615_custody_readbacks WHERE receipt_id=?'
@@ -21,6 +25,7 @@ async function database(c){
     await db.prepare('SELECT event_hash FROM dd614_owner_decisions LIMIT 1').all();
     await db.prepare('SELECT receipt_id FROM dd615_custody_readbacks LIMIT 1').all();
     await db.prepare('SELECT ceremony_hash FROM dd615_activation_ceremonies LIMIT 1').all();
+    await db.prepare('SELECT authority_id FROM dd616_key_quarantines LIMIT 1').all();
     return db;
   }catch{return null;}
 }
