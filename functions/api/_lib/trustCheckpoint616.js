@@ -49,7 +49,7 @@ export function canonicalRotation616(p,now=new Date().toISOString()){
     !HASH.test(p.original_source_sha256)) throw Error('Invalid or self-rotation evidence.');
   return s;
 }
-async function verifySigner(proof,role,canonicalText,{authority,pins,cryptoApi},seen){
+export async function verifySigner616(proof,role,canonicalText,{authority,pins,cryptoApi},seen){
   if(!proof||Object.keys(proof).sort().join(',')!=='authority_id,role,signature'||
     proof.role!==role||!ID.test(proof.authority_id)||seen.has(proof.authority_id))
     throw Error('Missing or reused independent signer.');
@@ -79,7 +79,7 @@ export async function verifyCheckpoint616(input,{ledgerRows,authority,pins,
   const seen=new Set(),fingerprints=new Set();
   for(const role of ['WITNESS','OWNER']){
     const proof=input.signatures.find(x=>x?.role===role);
-    const fp=await verifySigner(proof,role,signed,{authority,pins,cryptoApi},seen);
+    const fp=await verifySigner616(proof,role,signed,{authority,pins,cryptoApi},seen);
     if(fingerprints.has(fp))throw Error('Shared checkpoint signer key.');
     fingerprints.add(fp);
   }

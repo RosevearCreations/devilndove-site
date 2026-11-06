@@ -182,5 +182,58 @@ export function init614(doc=globalThis.document,win=globalThis.window){
   });
   doc.querySelector('main').append(checkpoint);
   fetch616();
+  const external=doc.createElement('section');external.className='dd569-panel';
+  external.setAttribute('aria-label','38. Original external anchor readback and witnessed TEST approval');
+  const output=(tag,content)=>{const el=doc.createElement(tag);
+    if(content)el.textContent=content;external.append(el);return el;};
+  output('h2','38. Original external anchor, quarantine recovery and witnessed provider TEST — Build 617');
+  output('p','An approved independent custodian must host an exact, independently signed HTTPS receipt and be enrolled by a separately authorized operator. This page fetches and verifies its real bytes; it cannot approve custodians, restore quarantined keys, execute a TEST or publish. Independent original issuer and explicit owner consent remain necessary.');
+  const externalStatus=output('p','Original custodian and signed TEST authority remain HOLD.');
+  externalStatus.setAttribute('role','status');
+  const externalRead=output('textarea');externalRead.rows=10;externalRead.readOnly=true;
+  externalRead.setAttribute('aria-label','Build 617 externally retrieved anchor and TEST preflight status');
+  const address='/api/admin/trust-readback-617';
+  const externalField=(label,secret=false)=>{const holder=output('label',label);
+    const el=doc.createElement(secret?'input':'textarea');
+    if(secret){el.type='password';el.setAttribute('autocomplete','off');}
+    else el.rows=6;
+    el.style.display='block';el.style.maxWidth='100%';holder.append(el);return el;};
+  const externalButton=(label,fn)=>{const el=output('button',label);
+    el.type='button';el.className='dd569-button';el.addEventListener('click',fn);};
+  const externalRequest=async(action,data={},password='')=>{
+    try{
+      const req=action?{method:'POST',credentials:'same-origin',
+        headers:{'Content-Type':'application/json'},
+        body:JSON.stringify({action,...data,confirm_password:password})}:
+        {credentials:'same-origin',cache:'no-store'};
+      const response=await win.fetch(address,req),json=await response.json();
+      externalRead.value=JSON.stringify(json,null,2);
+      externalStatus.textContent=json.ok?'Readback or pending packet recorded; original authority still HOLD.':
+        'Original custody or signed owner/witness evidence not verified · HOLD.';
+    }catch{externalStatus.textContent='Independent external origin unavailable · HOLD.';}
+  };
+  externalButton('Refresh independently read back anchors and pending TEST packets',()=>externalRequest());
+  const checkpointId=externalField('Signed Build 616 checkpoint SHA-256 (not a credential)');
+  const anchorPassword=externalField('Admin password to independently fetch original HTTPS receipt',true);
+  externalButton('Fetch approved external anchor and verify independent signatures',()=>{
+    const password=anchorPassword.value;anchorPassword.value='';
+    externalRequest('read_external_anchor',{checkpoint_sha256:checkpointId.value.trim()},password);
+  });
+  const recoveryJSON=externalField('Quarantine recovery packet JSON (two independent signatures; never a private key)');
+  const recoveryPassword=externalField('Admin password for recovery packet intake',true);
+  externalButton('Stage independently signed recovery packet — quarantine stays',()=>{
+    const password=recoveryPassword.value;recoveryPassword.value='';
+    try{externalRequest('stage_recovery_packet',{packet:JSON.parse(recoveryJSON.value)},password);}
+    catch{externalStatus.textContent='Invalid recovery packet JSON · HOLD.';}
+  });
+  const preflightJSON=externalField('TEST_CONNECTION_READBACK scope signed by separate witness and owner (JSON)');
+  const preflightPassword=externalField('Admin password for witnessed TEST preflight',true);
+  externalButton('Verify provider TEST preflight — NO TEST EXECUTION',()=>{
+    const password=preflightPassword.value;preflightPassword.value='';
+    try{externalRequest('preflight_witnessed_test',{preflight:JSON.parse(preflightJSON.value)},password);}
+    catch{externalStatus.textContent='Invalid TEST signature JSON · HOLD.';}
+  });
+  doc.querySelector('main').append(external);
+  externalRequest();
 }
 if(typeof document!=='undefined')init614();
