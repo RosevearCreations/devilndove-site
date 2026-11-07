@@ -13,7 +13,7 @@ const safe={build:627,release_gate:HOLD_627,connected:false,
   publishing_enabled:false,token_refreshed:false,d1_mutation:false,
   original_root_enrolled:false,decision_persisted:false};
 
-async function originalReceipt627(db,current){
+export async function originalReceipt627(db,current){
   if(current?.walkthrough?.accepted_for_readonly_test_only!==true||
     current?.walkthrough?.renewal?.source_window?.state==='EXPIRED')return null;
   try{
@@ -43,7 +43,7 @@ async function originalReceipt627(db,current){
       original_source_verified:true,actual_meta_get_verified:true};
   }catch{return null;}
 }
-const roots=db=>id=>db.prepare(`SELECT a.authority_id,a.role,a.public_key,a.key_sha256,
+export const roots627=db=>id=>db.prepare(`SELECT a.authority_id,a.role,a.public_key,a.key_sha256,
   CASE WHEN EXISTS(SELECT 1 FROM dd616_key_quarantines q
     WHERE q.authority_id=a.authority_id OR q.key_sha256=a.key_sha256)
   THEN 'QUARANTINED' ELSE a.status END AS status
@@ -101,7 +101,7 @@ export async function onRequestPost(c){
   if(!step.ok)return step.response;
   try{
     const verified=await verifyDecision627(body.signed_bundle,{receipt,
-      roots:roots(db),pins:trustedPins614(c.env)});
+      roots:roots627(db),pins:trustedPins614(c.env)});
     return reply({ok:true,...safe,...verified,
       original_owner_signed_decision_verified:true,
       approved_for_one_historical_readonly_test_only:true,
