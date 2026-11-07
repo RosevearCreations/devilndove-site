@@ -16,6 +16,15 @@ const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-
 const SIG = /^[A-Za-z0-9_-]{86}$/;
 const exact = (v,fields) => v && typeof v === 'object' && !Array.isArray(v) &&
   Object.keys(v).length === fields.length && Object.keys(v).every(k => fields.includes(k));
+function approvedHttpsOrigin(value) {
+  if (typeof value !== 'string' || value.length > 250) return false;
+  try {
+    const url = new URL(value);
+    return url.protocol === 'https:' && url.origin === value &&
+      url.pathname === '/' && !url.username && !url.password &&
+      !url.search && !url.hash;
+  } catch { return false; }
+}
 export function canonicalQl364(v) {
   if (Array.isArray(v)) return '[' + v.map(canonicalQl364).join(',') + ']';
   if (v && typeof v === 'object') return '{' + Object.keys(v).sort().map(
@@ -48,7 +57,7 @@ function validOriginalRequest(v,sourceId,now) {
     COMMIT.test(v.sourceCommitSha??'') && SHA.test(v.handoffSha256??'') &&
     SHA.test(v.manifestSha256??'') && typeof v.archiveId==='string' &&
     v.archiveId.length>0 && v.archiveId.length<160 &&
-    typeof v.sourceOrigin==='string' && /^https:\/\/[^/?#]+$/.test(v.sourceOrigin) &&
+    approvedHttpsOrigin(v.sourceOrigin) &&
     Number.isFinite(start) && Number.isFinite(end) &&
     v.issuedAt===new Date(start).toISOString() &&
     v.expiresAt===new Date(end).toISOString() &&
@@ -81,7 +90,8 @@ export async function handleQl364SourceHealth({request,sourceId,repository,
     const bytes=Uint8Array.from(json,c=>c.charCodeAt(0));
     const intent=JSON.parse(new TextDecoder('utf-8',{fatal:true}).decode(bytes));
     if (!validOriginalRequest(intent,sourceId,now) ||
-        intent.repository!==repository) return response('DENY_QL362_SCOPE_OR_EXPIRY',403);
+        intent.repository!==repository || intent.sourceOrigin!==url.origin)
+      return response('DENY_QL362_SCOPE_OR_EXPIRY',403);
     const requestSha256=await hashQl364(intent);
     const approved=await approveOriginalGet({sourceId,operationId:intent.operationId,
       requestSha256,intent});
