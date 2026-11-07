@@ -142,7 +142,7 @@ async function verifyRecordedCompletion(db,env,row){
     throw Error('Immutable original owner completion digest changed.');
   return {approved,closed,archived,source};
 }
-async function readOnlyWindow(db,env,windowRow){
+export async function readOnlyWindow(db,env,windowRow){
   if(!windowRow)return {state:'NO_ORIGINAL_WINDOW_ON_HOLD',verified:false};
   try{
     const signed=JSON.parse(windowRow.signed_bundle_json),p=signed.payload;
