@@ -653,5 +653,64 @@ export function init614(doc=globalThis.document,win=globalThis.window){
   });
   doc.querySelector('main').append(owner626);
   read626();
+  const decision627=doc.createElement('section');decision627.className='dd569-panel';
+  decision627.setAttribute('aria-label','48. Original Meta evidence gap resolution and three-party read-only channel decision');
+  const add627=(tag,value,parent=decision627)=>{const el=doc.createElement(tag);
+    if(value)el.textContent=value;parent.append(el);return el;};
+  add627('h2','48. Original Meta evidence gaps, independently signed ceremony and READ-ONLY channel decision — Build 627');
+  add627('p','This is a decision about ONE genuine historical Meta Page-ID GET, not activation of a Meta connection. The original issuer, separate witness and owner must each sign the exact same fresh ten-minute decision tied to the already independently verified original GET receipt. Unverified external evidence, expired windows, mismatched keys and changed source identity remain HOLD. We never generate signatures, apply migrations, refresh credentials, send another provider request or enable publication. The signed decision is evaluated only; keep the original signed packet privately.');
+  const status627=add627('p','Original Meta signed read-only decision · HOLD.');
+  status627.setAttribute('role','status');
+  const gaps627=add627('ol');gaps627.setAttribute('aria-label','Original independent evidence gaps still needing resolution');
+  const out627=add627('textarea');out627.readOnly=true;out627.rows=12;
+  out627.setAttribute('aria-label','Current independent Meta authority decision and gap readback');
+  const templateLabel627=add627('label','Original current source-pinned UNSIGNED decision template (copy to separate original signers; not a signature)');
+  const template627=doc.createElement('textarea');template627.readOnly=true;template627.rows=8;
+  template627.setAttribute('aria-label','Unsigned actual original GET witness-bound decision template');
+  templateLabel627.append(template627);
+  const signedLabel627=add627('label','Three independently signed ORIGINAL source decision JSON (ISSUER / WITNESS / OWNER; no private keys or tokens)');
+  const signed627=doc.createElement('textarea');signed627.rows=9;
+  signed627.setAttribute('aria-label','Three separate authentic original read-only decision signatures');
+  signedLabel627.append(signed627);
+  const passLabel627=add627('label','Admin password — original owner-supervised evidence-only decision');
+  const password627=doc.createElement('input');password627.type='password';
+  password627.autocomplete='off';passLabel627.append(password627);
+  const btn627=(name,fn)=>{const b=add627('button',name);b.type='button';
+    b.className='dd569-button';b.addEventListener('click',fn);return b;};
+  const read627=async()=>{
+    try{const response=await win.fetch('/api/admin/trust-channel-decision-627',
+      {credentials:'same-origin',cache:'no-store'}),data=await response.json();
+      out627.value=JSON.stringify(data,null,2);gaps627.replaceChildren();
+      for(const id of data.original_evidence_pending||[]){const item=doc.createElement('li');
+        item.textContent='HOLD original source gap: '+id;gaps627.append(item);}
+      template627.value=data.unsigned_original_ceremony_template?
+        JSON.stringify(data.unsigned_original_ceremony_template,null,2):'';
+      status627.textContent=response.ok&&data.ceremony_ready?
+        'ONE genuine original Page-ID GET independently verified. Obtain three new signatures for the exact template. No operational channel connection.':
+        'Original evidence HOLD. '+(data.next_owner_step||'Complete sections 44–47 and refresh.');
+    }catch{status627.textContent='Original source or current signed GET evidence unavailable · HOLD.';}
+  };
+  btn627('Read exact original GET, missing evidence and unsigned decision template (NO provider call)',read627);
+  btn627('Verify ORIGINAL signed evidence-only read-only channel decision — NO CONNECTION',async()=>{
+    const confirm_password=password627.value;password627.value='';
+    let signed_bundle;try{signed_bundle=JSON.parse(signed627.value);}catch{
+      status627.textContent='Malformed signed original three-party decision · HOLD.';return;}
+    try{const response=await win.fetch('/api/admin/trust-channel-decision-627',
+      {method:'POST',credentials:'same-origin',headers:{'Content-Type':'application/json'},
+        body:JSON.stringify({action:'evaluate_original_read_only_decision',
+          signed_bundle,confirm_password})}),data=await response.json();
+      out627.value=JSON.stringify(data,null,2);
+      status627.textContent=response.ok&&data.original_owner_signed_decision_verified===true?
+        'Original issuer, witness and owner signed decision VERIFIED for ONE historic read-only GET only. Evidence not persisted; no Meta channel connected.':
+        'Independent original signature, current receipt or admin authorization failed · HOLD.';
+    }catch{status627.textContent='Original owner-supervised decision validation failed · HOLD.';}
+  });
+  for(const id of ['47','46','44','45'])btn627('Go to original evidence section '+id,()=>{
+    const el=doc.querySelector(`section[aria-label^="${id}."]`);
+    el?.scrollIntoView?.({behavior:'smooth',block:'start'});
+    el?.querySelector('button')?.focus?.({preventScroll:true});
+  });
+  doc.querySelector('main').append(decision627);
+  read627();
 }
 if(typeof document!=='undefined')init614();

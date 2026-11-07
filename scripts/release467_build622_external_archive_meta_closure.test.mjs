@@ -191,8 +191,8 @@ test('622 endpoint stays admin+step-up only, proposed D1 schema immutable, no li
   assert.match(execFileSync('python3',['-c',code],{cwd:new URL('..',import.meta.url),
     encoding:'utf8'}),/622_IMMUTABLE_SOURCE_ONLY_IN_MEMORY/);
   assert.match(read('public/js/admin-channel-trust-authority-614.mjs'),/43\. Verified external original archive/);
-  assert.match(read('public/js/admin-channel-issuer-response-598.mjs'),/trust-authority-614\.mjs\?v=626/);
-  assert.match(read('.github/workflows/production-pages-deploy-current.yml'),/"build":626/);
+  assert.match(read('public/js/admin-channel-issuer-response-598.mjs'),/trust-authority-614\.mjs\?v=627/);
+  assert.match(read('.github/workflows/production-pages-deploy-current.yml'),/"build":627/);
   assert.match(read('.github/workflows/current-application-quality.yml'),
     /release467_build622_external_archive_meta_closure\.test\.mjs/);
 });

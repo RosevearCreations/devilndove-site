@@ -26,7 +26,7 @@ export function deriveWalkthrough626({source,window,provider,grant,
     original?.actual_readonly_meta_test_witnessed===true&&
     provider?.latest_verified_original_get===
       'ORIGINAL_ONE_GENUINE_META_GET_WITNESSED_READ_ONLY_NO_CONNECTION'&&
-    !!latest&&!!latest.test_nonce&&
+    !!latest&&/^[a-f0-9]{64}$/.test(latest.witness_sha256||'')&&!!latest.test_nonce&&
     outcomes.some(x=>x.test_nonce===latest.test_nonce&&!!x.receipt_sha256)&&
     attempts.some(x=>x.test_nonce===latest.test_nonce)&&
     !failures.some(x=>x.test_nonce===latest.test_nonce)&&
@@ -73,6 +73,7 @@ export function deriveWalkthrough626({source,window,provider,grant,
   ];
   const pending=checklist.filter(s=>!s.complete);
   return {build:626,release_gate:witnessed?ACCEPT_626:HOLD_626,
+    readback_witness_sha256:witnessed?latest.witness_sha256:null,
     original_readonly_test_acceptance:witnessed?'VERIFIED_SINGLE_GET_RECEIPT_READ_ONLY_TEST_ONLY':
       'HOLD_NOT_INDEPENDENTLY_VERIFIED',
     accepted_for_readonly_test_only:witnessed,connected:false,
