@@ -129,7 +129,7 @@ test('Build 615 server is admin-only, migration-gated and has no self-activation
  assert.match(ui,/36\. Independent activation ceremony/);
  assert.match(ui,/trust-ceremony-615/);
  assert.doesNotMatch(ui,/innerHTML|localStorage|sessionStorage/);
- assert.match(read('public/js/admin-channel-issuer-response-598.mjs'),/trust-authority-614\.mjs\?v=(?:61[56789]|620)/);
+ assert.match(read('public/js/admin-channel-issuer-response-598.mjs'),/trust-authority-614\.mjs\?v=(?:61[56789]|620|621)/);
  assert.match(read('.github/workflows/current-application-quality.yml'),/release467_build615_custody_ceremony_audit\.test\.mjs/);
- assert.match(read('.github/workflows/production-pages-deploy-current.yml'),/"build":(?:61[56789]|620)/);
+ assert.match(read('.github/workflows/production-pages-deploy-current.yml'),/"build":(?:61[56789]|620|621)/);
 });

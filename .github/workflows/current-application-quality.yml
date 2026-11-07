@@ -813,6 +813,14 @@ jobs:
           node --check scripts/release467_build620_full_etsy_meta_identity.test.mjs
           node --test scripts/release467_build620_full_etsy_meta_identity.test.mjs
 
+      - name: Build 621 independently signed complete Etsy history and original witnessed Meta GET HOLD
+        run: |
+          node --check functions/api/_lib/trustHistory621.js
+          node --check functions/api/admin/trust-history-meta-621.js
+          node --check public/js/admin-channel-trust-authority-614.mjs
+          node --check scripts/release467_build621_full_history_original_meta_witness.test.mjs
+          node --test scripts/release467_build621_full_history_original_meta_witness.test.mjs
+
       - name: Build 609 consolidated historical proof and CI fan-out guard
         run: |
           node --check scripts/release467_build609_ci_bundle.mjs
