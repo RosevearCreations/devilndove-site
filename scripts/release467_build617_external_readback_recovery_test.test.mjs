@@ -168,8 +168,8 @@ test('Build 617 server, immutable proposed D1 and UI remain release-gated',async
  assert.match(execFileSync('python3',['-c',validation],{cwd:new URL('..',import.meta.url),encoding:'utf8'}),
   /PROPOSED_MIGRATION_EPHEMERAL_ONLY/);
  assert.match(read('public/js/admin-channel-trust-authority-614.mjs'),/38\. Original external anchor/);
- assert.match(read('public/js/admin-channel-issuer-response-598.mjs'),/trust-authority-614\.mjs\?v=(?:61[789]|620|621|622|623|624|625)/);
+ assert.match(read('public/js/admin-channel-issuer-response-598.mjs'),/trust-authority-614\.mjs\?v=(?:61[789]|620|621|622|623|624|625|626)/);
  assert.match(read('.github/workflows/current-application-quality.yml'),
   /release467_build617_external_readback_recovery_test\.test\.mjs/);
- assert.match(read('.github/workflows/production-pages-deploy-current.yml'),/"build":(?:61[789]|620|621|622|623|624|625)/);
+ assert.match(read('.github/workflows/production-pages-deploy-current.yml'),/"build":(?:61[789]|620|621|622|623|624|625|626)/);
 });
