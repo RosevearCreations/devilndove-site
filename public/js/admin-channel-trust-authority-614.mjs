@@ -463,5 +463,51 @@ export function init614(doc=globalThis.document,win=globalThis.window){
   });
   doc.querySelector('main').append(closure622);
   request622();
+  const activation623=doc.createElement('section');activation623.className='dd569-panel';
+  activation623.setAttribute('aria-label','44. Original Meta owner completion and archive continuity');
+  const add623=(tag,value)=>{const el=doc.createElement(tag);
+    if(value)el.textContent=value;activation623.append(el);return el;};
+  add623('h2','44. Owner-supervised Meta identity and independent archive continuity — Build 623');
+  add623('p','Three independently signed stages: complete ORIGINAL Meta authority for the already witnessed single GET; witness two distinct genuine historical archive GET receipts; approve a ten-minute stored Page-ID receipt view. The status is computed from current original pins, immutable source receipts and saved OAuth Page ID/scopes. Nothing here calls Meta, grants new OAuth scopes, publishes, or connects a channel. Original source migrations 0052–0061 are separate owner-supervised work.');
+  const status623=add623('p','Original authority and independent archive continuity · HOLD.');
+  status623.setAttribute('role','status');
+  const result623=add623('textarea');result623.readOnly=true;result623.rows=15;
+  result623.setAttribute('aria-label','Original signed Meta authority and stored Page identity read-only view status');
+  const button623=(label,callback)=>{const el=add623('button',label);el.type='button';
+    el.className='dd569-button';el.addEventListener('click',callback);return el;};
+  const field623=(label,password=false)=>{const el=add623('label',label);
+    const input=doc.createElement(password?'input':'textarea');
+    if(password){input.type='password';input.autocomplete='off';}else input.rows=8;
+    input.style.display='block';input.style.maxWidth='100%';el.append(input);return input;};
+  const request623=async(action=null,bundle=null,password='')=>{
+    status623.textContent='Rechecking original signatures, source continuity and exact read-only scope · HOLD…';
+    try{const response=await win.fetch('/api/admin/trust-activation-623',
+      action?{method:'POST',credentials:'same-origin',headers:{'Content-Type':'application/json'},
+        body:JSON.stringify({action,signed_bundle:bundle,confirm_password:password})}:
+        {credentials:'same-origin',cache:'no-store'});
+      const data=await response.json();result623.value=JSON.stringify(data,null,2);
+      status623.textContent=data.derived_readonly_page_identity_window?.verified===true?
+        'Original stored Page-ID TEST view independently verified; never connected or publishing.':
+        data.ok?'Evidence recorded for separate independent review. Provider integration remains HOLD.':
+        'Original issuer, independent witness, owner or exact archive/Meta receipt missing · HOLD.';
+    }catch{status623.textContent='Original Meta or historical external archive evidence unavailable · HOLD.';}
+  };
+  button623('Read back independently verified Meta Page-ID receipt view (NO provider request)',()=>request623());
+  for(const [action,label,description] of [
+    ['record_original_meta_completion','Complete original Meta authority with THREE original signatures',
+      'Externally signed ORIGINAL Meta ISSUER / independent WITNESS / OWNER original authority completion JSON'],
+    ['witness_two_original_archives','Witness TWO genuine separate complete-history archive receipts',
+      'Three-party signed TWO real external archive GET receipts, separate nonces, original history JSON'],
+    ['record_one_readonly_meta_test_window','Approve ONE ten-minute STORED Meta Page-ID receipt view',
+      'Three-party signed exact Page-ID / OAuth-scope / original-ledger read-only test window JSON']]){
+    const signed=field623(description),password=field623('Admin password — owner-supervised '+action,true);
+    button623(label+' — NO PUBLISHING / NO PROVIDER CALL',()=>{
+      const pw=password.value;password.value='';
+      try{request623(action,JSON.parse(signed.value),pw);}
+      catch{status623.textContent='Malformed separately signed original evidence · HOLD.';}
+    });
+  }
+  doc.querySelector('main').append(activation623);
+  request623();
 }
 if(typeof document!=='undefined')init614();
