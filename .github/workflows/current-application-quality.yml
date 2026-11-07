@@ -845,6 +845,14 @@ jobs:
           node --check scripts/release467_build624_original_meta_credential_live_recheck.test.mjs
           node --test scripts/release467_build624_original_meta_credential_live_recheck.test.mjs
 
+      - name: Build 625 original-owner activation assistant, D1 source schema readback and genuine TEST witness HOLD
+        run: |
+          node --check functions/api/_lib/trustActivationAssistant625.js
+          node --check functions/api/admin/trust-activation-assistant-625.js
+          node --check public/js/admin-channel-trust-authority-614.mjs
+          node --check scripts/release467_build625_meta_activation_assistant.test.mjs
+          node --test scripts/release467_build625_meta_activation_assistant.test.mjs
+
       - name: Build 609 consolidated historical proof and CI fan-out guard
         run: |
           node --check scripts/release467_build609_ci_bundle.mjs

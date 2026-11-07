@@ -141,7 +141,7 @@ test('Build 620 API stays admin/step-up only, no grant creation, and new client 
   assert.match(api,/FULL_ETSY_SQL_620/);
   assert.doesNotMatch(api,/INSERT INTO dd620_meta_read_grants|UPDATE dd614_authorities|POST \/me\/feed/i);
   assert.match(read('public/js/admin-channel-trust-authority-614.mjs'),/41\. Full-history Etsy/);
-  assert.match(read('public/js/admin-channel-issuer-response-598.mjs'),/trust-authority-614\.mjs\?v=624/);
+  assert.match(read('public/js/admin-channel-issuer-response-598.mjs'),/trust-authority-614\.mjs\?v=625/);
   assert.match(read('.github/workflows/current-application-quality.yml'),/release467_build620_full_etsy_meta_identity\.test\.mjs/);
-  assert.match(read('.github/workflows/production-pages-deploy-current.yml'),/"build":624/);
+  assert.match(read('.github/workflows/production-pages-deploy-current.yml'),/"build":625/);
 });
