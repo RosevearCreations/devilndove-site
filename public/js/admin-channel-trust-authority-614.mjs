@@ -607,5 +607,51 @@ export function init614(doc=globalThis.document,win=globalThis.window){
   }
   doc.querySelector('main').append(help625);
   read625();
+  const owner626=doc.createElement('section');owner626.className='dd569-panel';
+  owner626.setAttribute('aria-label','47. Original Meta owner evidence walkthrough, renewal and read-only TEST acceptance');
+  const add626=(tag,value,parent=owner626)=>{const el=doc.createElement(tag);
+    if(value)el.textContent=value;parent.append(el);return el;};
+  add626('h2','47. Original Meta owner walkthrough, expiring approvals and independent read-only TEST acceptance — Build 626');
+  add626('p','Owner-supervised steps only. Every refresh rechecks real source evidence, saved credential expiry, signed ten-minute windows, spent nonces and the original independent witness of an actual one-time Meta Page GET. An expiring approval is never silently extended, and a spent nonce can never be reused. Accepted means ONE independently witnessed read-only TEST — not an operational channel connection, publication or automatic token renewal.');
+  const status626=add626('p','Original Meta READ-ONLY TEST acceptance · HOLD.');
+  status626.setAttribute('role','status');
+  const expiry626=add626('p','Original authorization expiry: not verified.');
+  const steps626=add626('ol');steps626.setAttribute('aria-label','Original owner supervised activation steps and renewal decisions');
+  const output626=add626('textarea');output626.readOnly=true;output626.rows=13;
+  output626.setAttribute('aria-label','Original signed TEST acceptance and renewal evidence readback (no secrets)');
+  const btn626=(name,fn)=>{const btn=add626('button',name);btn.type='button';
+    btn.className='dd569-button';btn.addEventListener('click',fn);return btn;};
+  const read626=async()=>{
+    status626.textContent='Independently rechecking original authority, one-use GET, current expiries and signed witness · HOLD…';
+    try{const response=await win.fetch('/api/admin/trust-owner-walkthrough-626',
+      {credentials:'same-origin',cache:'no-store'}),data=await response.json();
+      output626.value=JSON.stringify(data,null,2);steps626.replaceChildren();
+      for(const stage of data.walkthrough?.checklist||[]){const row=doc.createElement('li');
+        row.textContent=(stage.complete?'✓ VERIFIED — ':'HOLD — ')+stage.id+
+          ' (Admin '+stage.section+'): '+stage.action;
+        steps626.append(row);}
+      const renewal=data.walkthrough?.renewal;
+      expiry626.textContent=renewal?
+        'Owner window: '+renewal.source_window.state+
+        ' · latest one-use grant: '+renewal.most_recent_one_use_grant.state+
+        ' · saved encrypted credential: '+renewal.saved_meta_credential.state+
+        ' · last nonce spent: '+(renewal.most_recent_nonce_spent?'YES — NEVER RETRY':'no matching claim observed')+
+        '. Any expired or expiring approval needs fresh original signatures.':
+        'No current original owner renewal evidence can be read · HOLD.';
+      status626.textContent=!response.ok?'Original evidence readback unavailable · HOLD.':
+        data.walkthrough?.accepted_for_readonly_test_only===true?
+          'VERIFIED: one genuine original Meta Page GET independently witnessed — READ-ONLY TEST ACCEPTED; channel NOT connected.':
+          'HOLD: original owner/signed source/actual Meta GET evidence incomplete. Next: '+
+            (data.walkthrough?.next_action||'review section 46') ;
+    }catch{status626.textContent='Original source/witness readback unavailable · HOLD.';}
+  };
+  btn626('Refresh current owner approval expiry and VERIFIED single-GET TEST (NO provider request)',read626);
+  for(const id of ['46','44','45'])btn626('Go to original owner evidence section '+id,()=>{
+    const el=doc.querySelector(`section[aria-label^="${id}."]`);
+    el?.scrollIntoView?.({behavior:'smooth',block:'start'});
+    el?.querySelector('button')?.focus?.({preventScroll:true});
+  });
+  doc.querySelector('main').append(owner626);
+  read626();
 }
 if(typeof document!=='undefined')init614();
