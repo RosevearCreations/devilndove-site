@@ -235,5 +235,64 @@ export function init614(doc=globalThis.document,win=globalThis.window){
   });
   doc.querySelector('main').append(external);
   externalRequest();
+  const issuer618=doc.createElement('section');issuer618.className='dd569-panel';
+  issuer618.setAttribute('aria-label','39. Original issuer custody and genuine Etsy TEST challenge');
+  const append618=(tag,content)=>{const el=doc.createElement(tag);
+    if(content)el.textContent=content;issuer618.append(el);return el;};
+  append618('h2','39. Original issuer, witnessed backup and first genuine provider TEST — Build 618');
+  append618('p','Independent original-source registration and a separate owner-authorized migration/backup decision are required. This page cannot grant itself authority. A specially approved one-time Etsy TEST performs exactly one authenticated GET /users/me (never a listing write), then requires separate signed witness/owner acceptance of the real response digest. Other providers remain HOLD.');
+  const issuerStatus=append618('p','Original issuer, backup and live TEST remain HOLD.');
+  issuerStatus.setAttribute('role','status');
+  const issuerResult=append618('textarea');issuerResult.rows=10;issuerResult.readOnly=true;
+  issuerResult.setAttribute('aria-label','Build 618 original custody, backup and TEST receipt readback');
+  const issuerField=(label,secret=false)=>{const wrapper=append618('label',label);
+    const el=doc.createElement(secret?'input':'textarea');
+    if(secret){el.type='password';el.setAttribute('autocomplete','off');}
+    else el.rows=6;
+    el.style.display='block';el.style.maxWidth='100%';wrapper.append(el);return el;};
+  const issuerButton=(label,run)=>{const el=append618('button',label);
+    el.type='button';el.className='dd569-button';el.addEventListener('click',run);};
+  const run618=async(action,payload={},password='')=>{
+    try{const opts=action?{method:'POST',credentials:'same-origin',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({action,...payload,confirm_password:password})}:
+      {credentials:'same-origin',cache:'no-store'};
+      const response=await win.fetch('/api/admin/trust-issuer-618',opts);
+      const data=await response.json();issuerResult.value=JSON.stringify(data,null,2);
+      issuerStatus.textContent=data.ok?'Readback/receipt recorded; provider publishing and global authority remain HOLD.':
+        'Required original independent custody, consent, migration or TEST grant absent · HOLD.';
+    }catch{issuerStatus.textContent='Original issuer trust readback unavailable · HOLD.';}
+  };
+  issuerButton('Read original issuer, backup, one-use grant and TEST status',()=>run618());
+  const issuerJSON=issuerField('Original issuer signed CANDIDATE/WITNESS/OWNER custody attestation JSON');
+  const issuerPassword=issuerField('Admin password to stage original issuer attestation',true);
+  issuerButton('Stage authenticated issuer proof — no activation',()=>{
+    const password=issuerPassword.value;issuerPassword.value='';
+    try{run618('attest_original_issuer',{attestation:JSON.parse(issuerJSON.value)},password);}
+    catch{issuerStatus.textContent='Invalid issuer proof JSON · HOLD.';}
+  });
+  const backupJSON=issuerField('Witness/owner signed backup hash and exact migration-manifest review JSON');
+  const backupPassword=issuerField('Admin password for witnessed backup packet',true);
+  issuerButton('Record witnessed backup — never apply D1 migrations',()=>{
+    const password=backupPassword.value;backupPassword.value='';
+    try{run618('witness_backup_migration',{packet:JSON.parse(backupJSON.value)},password);}
+    catch{issuerStatus.textContent='Invalid backup packet JSON · HOLD.';}
+  });
+  const grant618=issuerField('Separately approved original TEST grant ID (not a token)');
+  const challengePassword=issuerField('Admin password for one-time real Etsy GET',true);
+  issuerButton('Execute SINGLE authorized real Etsy identity GET — no write or automatic retry',()=>{
+    const password=challengePassword.value;challengePassword.value='';
+    run618('execute_single_etsy_identity_get',{grant_id:grant618.value.trim()},password);
+  });
+  const acceptanceJSON=issuerField('Independent witness/owner signed exact genuine Etsy receipt JSON');
+  const acceptancePassword=issuerField('Admin password to accept TEST receipt (not publication)',true);
+  issuerButton('Verify and record genuine GET acceptance — never publish',()=>{
+    const password=acceptancePassword.value;acceptancePassword.value='';
+    try{run618('accept_witnessed_etsy_receipt',
+      {acceptance:JSON.parse(acceptanceJSON.value)},password);}
+    catch{issuerStatus.textContent='Invalid witnessed GET receipt JSON · HOLD.';}
+  });
+  doc.querySelector('main').append(issuer618);
+  run618();
 }
 if(typeof document!=='undefined')init614();
