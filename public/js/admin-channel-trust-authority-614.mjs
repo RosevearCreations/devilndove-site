@@ -854,5 +854,67 @@ export function init614(doc=globalThis.document,win=globalThis.window){
   });
   doc.querySelector('main').append(certify629);
   read629();
+  const original630=doc.createElement('section');original630.className='dd569-panel';
+  original630.setAttribute('aria-label','51. Original bound D1 migration readback and Meta readiness reconciliation');
+  const add630=(tag,value,parent=original630)=>{const el=doc.createElement(tag);
+    if(value)el.textContent=value;parent.append(el);return el;};
+  add630('h2','51. Actual D1 migration readback, first genuine archive GET and owner-signed Meta readiness — Build 630');
+  add630('p','First verify the CURRENT BOUND D1 schema, append-only triggers and original 0052–0064 Wrangler migration history. This does not independently identify the original Cloudflare account; an original operator must verify that binding and approve the migrations. A separate explicit owner-controlled action may then fetch exactly two previously signed archive URLs through Build 629. No automatic provider, publication, credentials or Meta connection.');
+  const status630=add630('p','Original database and independent signed Meta evidence · HOLD.');
+  status630.setAttribute('role','status');
+  const out630=add630('textarea');out630.rows=12;out630.readOnly=true;
+  out630.setAttribute('aria-label','Original D1 630 migration schema and signed owner decision readback');
+  const custodyLabel630=add630('label','Original immutable Build 628 custody SHA-256 (from section 49/50)');
+  const custody630=doc.createElement('input');custody630.type='text';
+  custody630.setAttribute('aria-label','Exact original signed custody digest for Build 630');
+  custodyLabel630.append(custody630);
+  const fetchLabel630=add630('label');
+  const authorized630=doc.createElement('input');authorized630.type='checkbox';
+  authorized630.setAttribute('aria-label','Original owner expressly authorizes two signed external HTTPS archive GETs');
+  fetchLabel630.append(authorized630,doc.createTextNode(' I am the original authorized owner and expressly approve the TWO independent HTTPS archive GET requests for this specific signed custody record. This is not permission to contact Meta.'));
+  const passwordLabel630=add630('label','Confirm original owner admin password (never paste private keys)');
+  const password630=doc.createElement('input');password630.type='password';
+  password630.autocomplete='off';passwordLabel630.append(password630);
+  const btn630=(name,fn)=>{const b=add630('button',name);b.type='button';
+    b.className='dd569-button';b.addEventListener('click',fn);return b;};
+  const endpoint630='/api/admin/trust-original-readiness-630';
+  const read630=async()=>{try{
+    const res=await win.fetch(endpoint630,{credentials:'same-origin',cache:'no-store'});
+    const data=await res.json();out630.value=JSON.stringify(data,null,2);
+    if(!custody630.value)custody630.value=custody629.value||receipt628.value;
+    status630.textContent=data.live_migration_readback_verified?
+      'Current bound D1 migration SQL and Wrangler history VERIFIED; original-host identity and signed external provider evidence remain separately supervised. NO META CONNECTION.':
+      'HOLD · Original live D1 0052–0064 schema/ledger incomplete; see missing objects or migration names above.';
+  }catch{status630.textContent='Bound original D1 readback unavailable · HOLD.';}};
+  btn630('READ ONLY: Verify deployed D1 migration schema, triggers and Wrangler history',read630);
+  const post630=async action=>{
+    const explicit_two_external_https_get_authorization=authorized630.checked;
+    if(action==='owner_supervised_first_archive_readback'&&
+      !explicit_two_external_https_get_authorization){
+      status630.textContent='Original owner must explicitly authorize both archive HTTPS GETs · HOLD.';return;}
+    authorized630.checked=false;
+    const confirm_password=password630.value;password630.value='';
+    try{const res=await win.fetch(endpoint630,{method:'POST',credentials:'same-origin',
+      headers:{'Content-Type':'application/json'},body:JSON.stringify({action,
+        custody_sha256:custody630.value.trim(),confirm_password,
+        explicit_two_external_https_get_authorization})});
+      const data=await res.json();out630.value=JSON.stringify(data,null,2);
+      status630.textContent=res.ok&&data.original_meta_read_only_readiness_certified===true?
+        'ORIGINAL OWNER READ-ONLY READINESS CERTIFIED for separate authorization; Meta STILL NOT CONNECTED.':
+        res.ok?'Original evidence step verified. Independent issuer/witness/owner signing and separate activation remain required; NO META CONNECTION.':
+          'HOLD · Original migration provenance, archive bytes, signed decision or owner authorization missing.';
+    }catch{status630.textContent='Original supervised readback or signed reconciliation failed · HOLD.';}
+  };
+  btn630('Owner-supervised FIRST GENUINE independent archive byte GETs (two signed URLs only)',
+    ()=>post630('owner_supervised_first_archive_readback'));
+  btn630('Reconcile latest ORIGINAL owner-signed Meta readiness with bound live D1 (NO PROVIDER)',
+    ()=>post630('reconcile_original_signed_readiness'));
+  btn630('Go to Build 629 independent archive and three-party signing (section 50)',()=>{
+    const el=doc.querySelector('section[aria-label^="50."]');
+    el?.scrollIntoView?.({behavior:'smooth',block:'start'});
+    el?.querySelector('button')?.focus?.({preventScroll:true});
+  });
+  doc.querySelector('main').append(original630);
+  read630();
 }
 if(typeof document!=='undefined')init614();

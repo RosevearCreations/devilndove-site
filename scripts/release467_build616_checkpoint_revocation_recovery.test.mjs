@@ -135,7 +135,7 @@ test('Build 616 D1 migration is proposed, immutable, and denies older verifier p
  assert.doesNotMatch(ui,/localStorage|sessionStorage|innerHTML/);
  assert.match(read('.github/workflows/current-application-quality.yml'),
   /release467_build616_checkpoint_revocation_recovery\.test\.mjs/);
- assert.match(read('.github/workflows/production-pages-deploy-current.yml'),/"build":(?:61[6789]|620|621|622|623|624|625|626|627|628|629)/);
+ assert.match(read('.github/workflows/production-pages-deploy-current.yml'),/"build":(?:61[6789]|620|621|622|623|624|625|626|627|628|629|630)/);
  // Apply the three proposed migrations only in ephemeral SQLite memory; never touch real D1.
  const validation=`import sqlite3\nc=sqlite3.connect(':memory:')\nfor f in ${JSON.stringify([
   'migrations/proposed/0052_devilndove_build614_external_authority_hold.sql',
