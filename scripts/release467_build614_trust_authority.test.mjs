@@ -98,9 +98,9 @@ test('Build 614 UI and protected release cadence keep old verification and HOLD'
   assert.match(ui,/provider still HOLD/);
   assert.doesNotMatch(ui,/localStorage|sessionStorage|innerHTML/);
   assert.match(read('public/js/admin-channel-issuer-response-598.mjs'),
-    /admin-channel-trust-authority-614\.mjs\?v=(?:614|615|616|617|618|619|620|621|622|623|624)/);
+    /admin-channel-trust-authority-614\.mjs\?v=(?:614|615|616|617|618|619|620|621|622|623|624|625)/);
   const workflow=read('.github/workflows/current-application-quality.yml');
   assert.match(workflow,/release467_build614_trust_authority\.test\.mjs/);
   assert.match(workflow,/release467_build613_trust_workbench\.test\.mjs/);
-  assert.match(read('.github/workflows/production-pages-deploy-current.yml'),/"build":(?:614|615|616|617|618|619|620|621|622|623|624)/);
+  assert.match(read('.github/workflows/production-pages-deploy-current.yml'),/"build":(?:614|615|616|617|618|619|620|621|622|623|624|625)/);
 });

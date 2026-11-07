@@ -112,7 +112,7 @@ test('Build 613 UI, fail-closed boundaries, protected CI and production release 
  for(const ref of ['Build 609 consolidated','Build 610 exact','Build 611 evidence',
  'Build 612 verified'])assert.ok(quality.includes(ref));
  const prod=read('.github/workflows/production-pages-deploy-current.yml');
- assert.match(prod,/"build":(?:613|614|615|616|617|618|619|620|621|622|623|624)/);
+ assert.match(prod,/"build":(?:613|614|615|616|617|618|619|620|621|622|623|624|625)/);
  assert.match(read('.github/workflows/production-live-resource-integrity-proof.yml'),
  /zero-D1/i);
 });

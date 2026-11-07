@@ -566,5 +566,46 @@ export function init614(doc=globalThis.document,win=globalThis.window){
   });
   doc.querySelector('main').append(live624);
   request624();
+  const help625=doc.createElement('section');help625.className='dd569-panel';
+  help625.setAttribute('aria-label','46. Original-owner Meta activation assistant and D1 migration readback');
+  const add625=(tag,value,parent=help625)=>{const el=doc.createElement(tag);
+    if(value)el.textContent=value;parent.append(el);return el;};
+  add625('h2','46. Original-owner Meta activation assistant and first genuine TEST closure — Build 625');
+  add625('p','This assistant checks which source D1 tables are visible and which original custody receipts exist. Table presence does not prove a migration was approved or applied by its original operator; receipt counts do not prove signatures. Only sections 44/45 verify original signatures and the real single-use Meta Page GET. This screen never migrates, signs, decrypts, contacts Meta or connects an account.');
+  const status625=add625('p','Checking original owner and first genuine live GET witness · HOLD.');
+  status625.setAttribute('role','status');
+  const steps625=add625('ol');steps625.setAttribute('aria-label','Original Meta activation checklist');
+  const result625=add625('textarea');result625.rows=13;result625.readOnly=true;
+  result625.setAttribute('aria-label','Original D1 table presence and genuine TEST readback, redacted');
+  const button625=(label,fn)=>{const b=add625('button',label);b.type='button';
+    b.className='dd569-button';b.addEventListener('click',fn);return b;};
+  const read625=async()=>{
+    status625.textContent='Checking D1 table visibility, original signed custody and live witness · HOLD…';
+    try{const response=await win.fetch('/api/admin/trust-activation-assistant-625',
+      {credentials:'same-origin',cache:'no-store'}),data=await response.json();
+      result625.value=JSON.stringify(data,null,2);steps625.replaceChildren();
+      for(const check of data.assistant?.checks||[]){const item=doc.createElement('li');
+        item.textContent=(check.complete?'Verified readback: ':'HOLD: ')+check.id+' — '+
+          (check.complete?'Evidence present; existing signature checks remain authoritative.':check.next);
+        steps625.append(item);}
+      const missing=(data.original_database_readback?.migration_tables||[])
+        .filter(group=>!group.schema_present).map(group=>group.migration).join(', ');
+      status625.textContent=!response.ok?'Original D1 readback inaccessible · HOLD.':
+        data.assistant?.source_proof_verified?
+        'Original source window and actual one-use GET witness verified — READ-ONLY TEST ONLY; account connection still HOLD.':
+        'Original evidence incomplete · HOLD. Missing proposed schema groups: '+(missing||'none; check signed source proofs below')+'.';
+    }catch{status625.textContent='Original D1 or signed evidence readback unavailable · HOLD.';}
+  };
+  button625('Refresh original D1 migration and live TEST evidence (READ ONLY)',read625);
+  for(const [id,label] of [['44','Go to original-owner authority and archive continuity (section 44)'],
+    ['45','Go to single-use Meta GET and independent witness (section 45)']]){
+    button625(label,()=>{
+      const target=doc.querySelector(`section[aria-label^="${id}."]`);
+      target?.scrollIntoView?.({behavior:'smooth',block:'start'});
+      target?.querySelector('button')?.focus?.({preventScroll:true});
+    });
+  }
+  doc.querySelector('main').append(help625);
+  read625();
 }
 if(typeof document!=='undefined')init614();
