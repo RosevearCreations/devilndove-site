@@ -5,7 +5,7 @@
   "source_app_id": "devilndove",
   "source_role": "business_shell",
   "repository": "RosevearCreations/devilndove-site",
-  "source_revision": "ql333-discovery-v1",
+  "source_revision": "1f0e220b0cf7aff2dfeb650c96304d96502ede54",
   "issuer": "devilndove",
   "audience": "rosevear-master",
   "tenant_boundary": "owned_business_legacy",
