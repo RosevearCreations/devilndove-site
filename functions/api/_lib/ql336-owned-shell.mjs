@@ -1,5 +1,6 @@
 /** QL-336 preparation: Devil n Dove remains the first maker-business child,
  * not a provisioned multi-maker platform or signed gateway authorization. */
+import {handleQl364SourceHealth} from './ql364-source-health.mjs';
 export const SHELL_ID='devilndove';
 export const FIRST_CHILD='devil-n-dove';
 export const CONTRACT='rosevear.shell.nonproduction.v1';
@@ -22,6 +23,9 @@ export function evaluateShellRequest(request){
   return {status:503,code:'HOLD_ORIGINAL_SIGNER_CHILD_ISOLATION_AND_TEST_APPROVAL'};
 }
 export async function onRequest({request}){
+  if(request.headers.has('x-rosevear-ql362-request'))
+    return handleQl364SourceHealth({request,sourceId:'devilndove',
+      repository:'devilndove-site'});
   const gate=evaluateShellRequest(request);
   return response(gate.status,gate.code);
 }
