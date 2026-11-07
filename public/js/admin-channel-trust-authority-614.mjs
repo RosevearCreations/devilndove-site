@@ -333,5 +333,42 @@ export function init614(doc=globalThis.document,win=globalThis.window){
   });
   doc.querySelector('main').append(reconcile619);
   request619();
+  const audit620=doc.createElement('section');audit620.className='dd569-panel';
+  audit620.setAttribute('aria-label','41. Full-history Etsy audit and original Meta read-only TEST');
+  const add620=(tag,value)=>{const element=doc.createElement(tag);
+    if(value)element.textContent=value;audit620.append(element);return element;};
+  add620('h2','41. Full-history Etsy receipt audit and controlled Meta Page identity — Build 620');
+  add620('p','The server scans ALL immutable Etsy grant/attempt/outcome/witness/failure tables for counts, source links and conflicts, not just 100 recent records. These are database consistency findings, not an external cryptographic witness. Meta can execute only an independently approved single-use GET for the exact saved Facebook Page ID. No Marketplace, Instagram or posting rights are inferred. Original authority and independent signed consent remain mandatory.');
+  const state620=add620('p','Full source history and original Meta test remain on HOLD.');
+  state620.setAttribute('role','status');
+  const results620=add620('textarea');results620.rows=12;results620.readOnly=true;
+  results620.setAttribute('aria-label','Full-history Etsy integrity and Meta genuine provider TEST evidence');
+  const request620=async(action=null,extra={},password='')=>{
+    try{const options=action?{method:'POST',credentials:'same-origin',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({action,...extra,confirm_password:password})}:
+      {credentials:'same-origin',cache:'no-store'};
+      const response=await win.fetch('/api/admin/trust-audit-meta-620',options);
+      const data=await response.json();results620.value=JSON.stringify(data,null,2);
+      state620.textContent=data.ok?'Local full-history audit/guarded receipt readback returned; publishing and independent final witness remain HOLD.':
+        'Exact original custody, D1, account, or independent owner consent not verified · HOLD.';
+    }catch{state620.textContent='Full Etsy audit or Meta original provider readback unavailable · HOLD.';}
+  };
+  const button620=(label,fn)=>{const button=add620('button',label);button.type='button';
+    button.className='dd569-button';button.addEventListener('click',fn);};
+  button620('Run full-history immutable Etsy SQL consistency audit (NO provider call)',()=>request620());
+  const grantLabel=add620('label','Separately approved original Meta Page GET grant ID (never a token)');
+  const metaGrant=doc.createElement('input');metaGrant.type='text';metaGrant.style.display='block';
+  metaGrant.style.maxWidth='100%';grantLabel.append(metaGrant);
+  const passLabel=add620('label','Admin password for independently authorized SINGLE Meta Page GET');
+  const metaPassword=doc.createElement('input');metaPassword.type='password';
+  metaPassword.setAttribute('autocomplete','off');metaPassword.style.display='block';
+  metaPassword.style.maxWidth='100%';passLabel.append(metaPassword);
+  button620('Run ONE pre-approved Meta Page ID GET — NO RETRY / NO PUBLISH',()=>{
+    const password=metaPassword.value;metaPassword.value='';
+    request620('execute_one_meta_page_id_get',{grant_id:metaGrant.value.trim()},password);
+  });
+  doc.querySelector('main').append(audit620);
+  request620();
 }
 if(typeof document!=='undefined')init614();
