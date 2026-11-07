@@ -805,6 +805,14 @@ jobs:
           node --check scripts/release467_build619_receipt_failure_meta_preflight.test.mjs
           node --test scripts/release467_build619_receipt_failure_meta_preflight.test.mjs
 
+      - name: Build 620 all-row Etsy integrity and separately signed exact Meta Page GET challenge HOLD
+        run: |
+          node --check functions/api/_lib/trustAuditMeta620.js
+          node --check functions/api/admin/trust-audit-meta-620.js
+          node --check public/js/admin-channel-trust-authority-614.mjs
+          node --check scripts/release467_build620_full_etsy_meta_identity.test.mjs
+          node --test scripts/release467_build620_full_etsy_meta_identity.test.mjs
+
       - name: Build 609 consolidated historical proof and CI fan-out guard
         run: |
           node --check scripts/release467_build609_ci_bundle.mjs
