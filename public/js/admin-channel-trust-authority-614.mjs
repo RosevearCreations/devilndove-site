@@ -784,5 +784,75 @@ export function init614(doc=globalThis.document,win=globalThis.window){
   });
   doc.querySelector('main').append(custody628);
   read628();
+  const certify629=doc.createElement('section');certify629.className='dd569-panel';
+  certify629.setAttribute('aria-label','50. Original Meta external archive byte readback and go-live readiness');
+  const add629=(tag,value,parent=certify629)=>{const el=doc.createElement(tag);
+    if(value)el.textContent=value;parent.append(el);return el;};
+  add629('h2','50. Independent original archive BYTE readback, signed owner decision and safe Meta readiness — Build 629');
+  add629('p','Only with separate original-owner supervision, the server may fetch the TWO exact HTTPS archives already fixed in the signed Build 628 custody record. It follows NO redirects, sends NO credentials, limits response bytes and compares the raw content to the exact signed Build 627 packet. An independent issuer, witness and owner must then separately sign the readiness decision. A positive certificate is NOT a connected Meta channel or publishing approval.');
+  const status629=add629('p','Original external byte evidence and go-live readiness · HOLD.');
+  status629.setAttribute('role','status');
+  const out629=add629('textarea');out629.readOnly=true;out629.rows=12;
+  out629.setAttribute('aria-label','Original Meta archive byte readback and go-live readiness results');
+  const custodyLabel629=add629('label','Saved original Build 628 signed custody SHA-256');
+  const custody629=doc.createElement('input');custody629.type='text';
+  custody629.setAttribute('aria-label','Immutable original Meta custody digest');
+  custodyLabel629.append(custody629);
+  const unsignedLabel629=add629('label','UNSIGNED go-live readiness decision template for three independent original signers');
+  const unsigned629=doc.createElement('textarea');unsigned629.readOnly=true;unsigned629.rows=8;
+  unsigned629.setAttribute('aria-label','Original unsigned Meta go-live readiness decision template');
+  unsignedLabel629.append(unsigned629);
+  const signedLabel629=add629('label','Three signed ORIGINAL ISSUER / WITNESS / OWNER readiness proofs (PUBLIC signatures only)');
+  const signed629=doc.createElement('textarea');signed629.rows=8;
+  signed629.setAttribute('aria-label','Original three-signature readiness decision JSON');
+  signedLabel629.append(signed629);
+  const passwordLabel629=add629('label','Confirm admin password for original owner-supervised operation');
+  const password629=doc.createElement('input');password629.type='password';
+  password629.autocomplete='off';passwordLabel629.append(password629);
+  const btn629=(name,fn)=>{const b=add629('button',name);b.type='button';
+    b.className='dd569-button';b.addEventListener('click',fn);return b;};
+  const endpoint629='/api/admin/trust-archive-certification-629';
+  const read629=async()=>{
+    try{const res=await win.fetch(endpoint629,{credentials:'same-origin',cache:'no-store'});
+      const data=await res.json();out629.value=JSON.stringify(data,null,2);
+      if(!custody629.value&&data.latest_original_archive_readback?.custody_sha256)
+        custody629.value=data.latest_original_archive_readback.custody_sha256;
+      else if(!custody629.value&&receipt628.value)custody629.value=receipt628.value;
+      status629.textContent=data.original_meta_source_window_current&&
+        data.original_archive_and_owner_decision_schema_present?
+        'Original source and archive/decision tables visible. Independent byte proof and separate signed readiness still required; NO CONNECTION.':
+        'Original source or proposed database still HOLD · '+(data.next_owner_action||'Complete Admin sections 44–49.');
+    }catch{status629.textContent='Original archive/readiness status unavailable · HOLD.';}
+  };
+  btn629('Read current original Meta archive and readiness status (NO PROVIDER)',read629);
+  const post629=async action=>{
+    const confirm_password=password629.value;password629.value='';
+    let signed_bundle;
+    if(action==='record_signed_go_live_readiness'){
+      try{signed_bundle=JSON.parse(signed629.value);}catch{
+        status629.textContent='Invalid original three-signature readiness decision JSON · HOLD.';return;}}
+    try{const res=await win.fetch(endpoint629,{method:'POST',credentials:'same-origin',
+      headers:{'Content-Type':'application/json'},body:JSON.stringify({action,
+        custody_sha256:custody629.value.trim(),signed_bundle,confirm_password})});
+      const data=await res.json();out629.value=JSON.stringify(data,null,2);
+      if(data.unsigned_original_owner_readiness_template)
+        unsigned629.value=JSON.stringify(data.unsigned_original_owner_readiness_template,null,2);
+      status629.textContent=res.ok&&data.go_live_readiness_certified===true?
+        'Original read-only readiness CERTIFIED for a separate owner-controlled decision — Meta NOT CONNECTED.':
+        res.ok?'Source evidence accepted for the requested step. Further original independent owner approval required; Meta NOT CONNECTED.':
+          'Original external archive bytes, owner signatures or fresh source authority failed · HOLD.';
+    }catch{status629.textContent='Original archive/owner-governed readiness request failed · HOLD.';}
+  };
+  btn629('Owner-supervised FETCH of TWO original external archives (HTTPS BYTE CHECK)',()=>post629('read_back_two_original_archives'));
+  btn629('Prepare UNSIGNED original go-live readiness review template',()=>post629('prepare_go_live_readiness_decision'));
+  btn629('Record ORIGINAL independently SIGNED owner readiness decision — NO CONNECTION',()=>post629('record_signed_go_live_readiness'));
+  btn629('Independently reverify SAVED owner readiness certificate — NO PROVIDER',()=>post629('verify_original_go_live_readiness'));
+  btn629('Go to original signed custody section 49',()=>{
+    const el=doc.querySelector('section[aria-label^="49."]');
+    el?.scrollIntoView?.({behavior:'smooth',block:'start'});
+    el?.querySelector('button')?.focus?.({preventScroll:true});
+  });
+  doc.querySelector('main').append(certify629);
+  read629();
 }
 if(typeof document!=='undefined')init614();

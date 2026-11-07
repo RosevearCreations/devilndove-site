@@ -140,8 +140,8 @@ test('628 proposes immutable owner-approved D1 custody without provider or chann
   assert.match(read('public/js/admin-channel-trust-authority-614.mjs'),
     /49\. Original Meta signed decision custody/);
   assert.match(read('public/js/admin-channel-issuer-response-598.mjs'),
-    /trust-authority-614\.mjs\?v=628/);
-  assert.match(read('.github/workflows/production-pages-deploy-current.yml'),/"build":628/);
+    /trust-authority-614\.mjs\?v=629/);
+  assert.match(read('.github/workflows/production-pages-deploy-current.yml'),/"build":629/);
   assert.match(read('.github/workflows/current-application-quality.yml'),
     /release467_build628_meta_custody_handoff\.test\.mjs/);
 });

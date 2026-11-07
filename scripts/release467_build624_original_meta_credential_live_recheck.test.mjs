@@ -183,8 +183,8 @@ test('624 gate keeps original DB proposed-only, single-use receipt immutable and
   assert.match(execFileSync('python3',['-c',code],{cwd:new URL('..',import.meta.url),
     encoding:'utf8'}),/624_D1_SOURCE_PROPOSED_ONLY/);
   assert.match(read('public/js/admin-channel-trust-authority-614.mjs'),/45\. Original Meta encrypted credential/);
-  assert.match(read('public/js/admin-channel-issuer-response-598.mjs'),/trust-authority-614\.mjs\?v=628/);
-  assert.match(read('.github/workflows/production-pages-deploy-current.yml'),/"build":628/);
+  assert.match(read('public/js/admin-channel-issuer-response-598.mjs'),/trust-authority-614\.mjs\?v=629/);
+  assert.match(read('.github/workflows/production-pages-deploy-current.yml'),/"build":629/);
   assert.match(read('.github/workflows/current-application-quality.yml'),
     /release467_build624_original_meta_credential_live_recheck\.test\.mjs/);
 });

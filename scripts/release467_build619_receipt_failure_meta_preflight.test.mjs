@@ -132,7 +132,7 @@ test('Build 619 API stays admin-only, proposed-only, immutable and no Meta remot
   assert.match(execFileSync('python3',['-c',validation],{cwd:new URL('..',import.meta.url),encoding:'utf8'}),
     /BUILD619_MIGRATIONS_TESTED_IN_MEMORY_ONLY/);
   assert.match(read('public/js/admin-channel-trust-authority-614.mjs'),/40\. Genuine Etsy receipt/);
-  assert.match(read('public/js/admin-channel-issuer-response-598.mjs'),/trust-authority-614\.mjs\?v=628/);
+  assert.match(read('public/js/admin-channel-issuer-response-598.mjs'),/trust-authority-614\.mjs\?v=629/);
   assert.match(read('.github/workflows/current-application-quality.yml'),/release467_build619_receipt_failure_meta_preflight\.test\.mjs/);
-  assert.match(read('.github/workflows/production-pages-deploy-current.yml'),/"build":628/);
+  assert.match(read('.github/workflows/production-pages-deploy-current.yml'),/"build":629/);
 });

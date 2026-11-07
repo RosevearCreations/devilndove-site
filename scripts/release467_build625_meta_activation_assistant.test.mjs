@@ -87,8 +87,8 @@ test('625 admin readback is authenticated, no POST action and independent verifi
   assert.match(server,/ORIGINAL_ONE_GENUINE_META_GET_WITNESSED_READ_ONLY_NO_CONNECTION/);
   assert.doesNotMatch(server,/fetch\(|decryptOAuthSecret|probeMetaPage620|INSERT INTO|UPDATE |DELETE FROM|CREATE TABLE|POST \/feed/);
   assert.match(read('public/js/admin-channel-trust-authority-614.mjs'),/46\. Original-owner Meta activation assistant/);
-  assert.match(read('public/js/admin-channel-issuer-response-598.mjs'),/trust-authority-614\.mjs\?v=628/);
-  assert.match(read('.github/workflows/production-pages-deploy-current.yml'),/"build":628/);
+  assert.match(read('public/js/admin-channel-issuer-response-598.mjs'),/trust-authority-614\.mjs\?v=629/);
+  assert.match(read('.github/workflows/production-pages-deploy-current.yml'),/"build":629/);
   assert.match(read('.github/workflows/current-application-quality.yml'),
     /release467_build625_meta_activation_assistant\.test\.mjs/);
 });
