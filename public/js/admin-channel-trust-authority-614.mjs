@@ -418,5 +418,50 @@ export function init614(doc=globalThis.document,win=globalThis.window){
   });
   doc.querySelector('main').append(review621);
   request621();
+  const closure622=doc.createElement('section');closure622.className='dd569-panel';
+  closure622.setAttribute('aria-label','43. External archive original readback and witnessed Meta TEST closure');
+  const add622=(tag,value)=>{const el=doc.createElement(tag);
+    if(value)el.textContent=value;closure622.append(el);return el;};
+  add622('h2','43. Verified external original archive and single Meta TEST closure — Build 622');
+  add622('p','A genuine independent archive readback is a single, issuer/witness/owner-approved HTTPS GET from the already pinned external custodian, with a spent nonce and exact all-history SHA-256 match. Meta TEST closure then requires that real archive receipt plus the already witnessed one-use original Page-ID GET. No account connection, posting, new authority key or D1 migration is activated here.');
+  const status622=add622('p','Independent original archive and real Meta TEST closure · HOLD.');
+  status622.setAttribute('role','status');
+  const result622=add622('textarea');result622.readOnly=true;result622.rows=14;
+  result622.setAttribute('aria-label','Verified original archive and real Meta provider TEST closure readback');
+  const button622=(label,callback)=>{const el=add622('button',label);el.type='button';
+    el.className='dd569-button';el.addEventListener('click',callback);return el;};
+  const field622=(label,password=false)=>{const el=add622('label',label);
+    const input=doc.createElement(password?'input':'textarea');
+    if(password){input.type='password';input.autocomplete='off';}else input.rows=8;
+    input.style.display='block';input.style.maxWidth='100%';el.append(input);return input;};
+  const request622=async(action=null,bundle=null,password='')=>{
+    status622.textContent=action?'Validating separately signed exact-source original evidence…':
+      'Reviewing original external archive and Meta authority · HOLD…';
+    try{const res=await win.fetch('/api/admin/trust-archive-meta-622',
+      action?{method:'POST',credentials:'same-origin',headers:{'Content-Type':'application/json'},
+        body:JSON.stringify({action,signed_bundle:bundle,confirm_password:password})}:
+        {credentials:'same-origin',cache:'no-store'});
+      const data=await res.json();result622.value=JSON.stringify(data,null,2);
+      status622.textContent=data.ok?'Exact source proof readback completed. No provider publishing or automatic connected state.':
+        'Original external custody or actual provider TEST evidence not verified · HOLD.';
+    }catch{status622.textContent='External custodian or original Meta source evidence unavailable · HOLD.';}
+  };
+  button622('Read back original Meta authority and archive status (NO NETWORK TEST)',()=>request622());
+  const archiveBundle622=field622('Separately approved three-party ORIGINAL archive GET signed JSON (ONE NONCE)');
+  const archivePassword622=field622('Admin password for one exact verified external archive GET',true);
+  button622('Execute ONE independently approved original archive HTTPS GET — NO RETRY',()=>{
+    const pw=archivePassword622.value;archivePassword622.value='';
+    try{request622('one_exact_original_archive_readback',JSON.parse(archiveBundle622.value),pw);}
+    catch{status622.textContent='Malformed independent external readback signatures · HOLD.';}
+  });
+  const closureBundle622=field622('Three-party signed original closure for an ALREADY witnessed real Meta Page GET JSON');
+  const closurePassword622=field622('Admin password to record actual TEST closure',true);
+  button622('Record original genuine Meta Page GET TEST closure — NO PUBLISH / NO CONNECTION',()=>{
+    const pw=closurePassword622.value;closurePassword622.value='';
+    try{request622('close_one_witnessed_meta_page_get',JSON.parse(closureBundle622.value),pw);}
+    catch{status622.textContent='Malformed independent Meta TEST closure evidence · HOLD.';}
+  });
+  doc.querySelector('main').append(closure622);
+  request622();
 }
 if(typeof document!=='undefined')init614();

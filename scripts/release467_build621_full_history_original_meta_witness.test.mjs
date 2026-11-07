@@ -176,8 +176,8 @@ test('621 proposed D1 migration remains immutable and no automatic source enroll
   const code=`import sqlite3\nc=sqlite3.connect(':memory:')\nfor f in ${JSON.stringify(files.map(f=>'migrations/proposed/'+f))}: c.executescript(open(f).read())\nfor t in ['dd621_etsy_history_checkpoints','dd621_meta_get_witness_acceptances']: assert c.execute('SELECT name FROM sqlite_master WHERE name=?',(t,)).fetchone()\nprint('621_MIGRATION_IN_MEMORY_ONLY')`;
   assert.match(execFileSync('python3',['-c',code],{cwd:new URL('..',import.meta.url),
     encoding:'utf8'}),/621_MIGRATION_IN_MEMORY_ONLY/);
-  assert.match(read('public/js/admin-channel-issuer-response-598.mjs'),/trust-authority-614\.mjs\?v=621/);
+  assert.match(read('public/js/admin-channel-issuer-response-598.mjs'),/trust-authority-614\.mjs\?v=622/);
   assert.match(read('.github/workflows/current-application-quality.yml'),
     /release467_build621_full_history_original_meta_witness\.test\.mjs/);
-  assert.match(read('.github/workflows/production-pages-deploy-current.yml'),/"build":621/);
+  assert.match(read('.github/workflows/production-pages-deploy-current.yml'),/"build":622/);
 });
