@@ -370,5 +370,53 @@ export function init614(doc=globalThis.document,win=globalThis.window){
   });
   doc.querySelector('main').append(audit620);
   request620();
+  const review621=doc.createElement('section');review621.className='dd569-panel';
+  review621.setAttribute('aria-label','42. Independent full-history checkpoint and witnessed original Meta GET');
+  const add621=(tag,value)=>{const element=doc.createElement(tag);
+    if(value)element.textContent=value;review621.append(element);return element;};
+  add621('h2','42. Original Etsy audit checkpoint and genuine Meta provider TEST witness — Build 621');
+  add621('p','A complete row-by-row digest may be independently signed only by already verified original ISSUER, WITNESS and OWNER keys. The original Meta issuer must separately enroll outside this application. A genuine signed Meta GET witness is accepted only after the one-use provider GET receipt actually exists. No activation, publication, automatic migration, or simulated provider approval.');
+  const state621=add621('p','Original external authority and genuine TEST witness are on HOLD.');
+  state621.setAttribute('role','status');
+  const result621=add621('textarea');result621.readOnly=true;result621.rows=15;
+  result621.setAttribute('aria-label','Full Etsy history checkpoint and original Meta signed evidence results');
+  const button621=(label,callback)=>{const b=add621('button',label);b.type='button';
+    b.className='dd569-button';b.addEventListener('click',callback);return b;};
+  const field621=(label,secret=false)=>{const l=add621('label',label);
+    const el=doc.createElement(secret?'input':'textarea');
+    if(secret){el.type='password';el.autocomplete='off';}else el.rows=8;
+    el.style.display='block';el.style.maxWidth='100%';l.append(el);return el;};
+  const request621=async (full=false,action=null,bundle=null,password='')=>{
+    state621.textContent=full?'Hashing every immutable source receipt row (no provider call)…':
+      'Reviewing independently signed source evidence · HOLD…';
+    try{const response=await win.fetch('/api/admin/trust-history-meta-621'+
+      (full?'?full_history=1':''),action?{method:'POST',credentials:'same-origin',
+        headers:{'Content-Type':'application/json'},body:JSON.stringify({action,
+          signed_bundle:bundle,confirm_password:password})}:
+      {credentials:'same-origin',cache:'no-store'});
+      const data=await response.json();result621.value=JSON.stringify(data,null,2);
+      state621.textContent=data.ok?'Independent handoff evidence readback received; production provider permissions remain HOLD.':
+        'Independent original signatures, full-history readback or actual provider TEST receipt missing · HOLD.';
+    }catch{state621.textContent='Independent history or Meta source evidence unavailable · HOLD.';}
+  };
+  button621('Review original Meta issuer enrollment handoff and actual GET receipts (NO provider call)',()=>request621());
+  button621('Compute COMPLETE immutable Etsy history SHA-256 checkpoint (NO provider call)',
+    ()=>request621(true));
+  const historyProof621=field621('Externally signed ORIGINAL ISSUER / independent WITNESS / OWNER complete Etsy checkpoint JSON');
+  const historyPassword621=field621('Admin password to record signed complete-history evidence',true);
+  button621('Record three-party signed COMPLETE Etsy history checkpoint — NO D1 MIGRATION',()=>{
+    const password=historyPassword621.value;historyPassword621.value='';
+    try{request621(false,'witness_complete_etsy_history',JSON.parse(historyProof621.value),password);}
+    catch{state621.textContent='Malformed independently signed Etsy source bundle · HOLD.';}
+  });
+  const metaProof621=field621('Externally signed three-party witness acceptance of ACTUAL Meta Page GET receipt JSON');
+  const metaPassword621=field621('Admin password to witness an existing one-use real Meta GET receipt',true);
+  button621('Witness existing genuine Meta Page GET receipt — NO REPLAY / NO PUBLICATION',()=>{
+    const password=metaPassword621.value;metaPassword621.value='';
+    try{request621(false,'accept_actual_meta_page_get',JSON.parse(metaProof621.value),password);}
+    catch{state621.textContent='Malformed independent original Meta receipt witness · HOLD.';}
+  });
+  doc.querySelector('main').append(review621);
+  request621();
 }
 if(typeof document!=='undefined')init614();
