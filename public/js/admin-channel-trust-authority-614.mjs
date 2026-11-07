@@ -712,5 +712,77 @@ export function init614(doc=globalThis.document,win=globalThis.window){
   });
   doc.querySelector('main').append(decision627);
   read627();
+  const custody628=doc.createElement('section');custody628.className='dd569-panel';
+  custody628.setAttribute('aria-label','49. Original Meta signed decision custody and owner-only handoff');
+  const add628=(tag,value,parent=custody628)=>{const el=doc.createElement(tag);
+    if(value)el.textContent=value;parent.append(el);return el;};
+  add628('h2','49. Original signed Meta decision custody, independent eligibility and owner-controlled handoff — Build 628');
+  add628('p','The three ORIGINAL roles must sign a fresh custody statement for the exact Build 627 signed decision. The two listed archives must be on distinct HTTPS domains; a signed claim does not prove the archived bytes were remotely read back. Signed originals may be stored only in an owner-approved append-only D1 table (proposed migration 0063). The resulting handoff is REVIEW-ONLY, never an activated Meta channel or permission to publish.');
+  const status628=add628('p','Original Meta decision custody · HOLD.');
+  status628.setAttribute('role','status');
+  const out628=add628('textarea');out628.readOnly=true;out628.rows=12;
+  out628.setAttribute('aria-label','Original Meta signed custody and eligibility readback');
+  const bundleLabel628=add628('label','Original three-signature decision JSON from section 48 (public signatures only)');
+  const decisionBundle628=doc.createElement('textarea');decisionBundle628.rows=7;
+  decisionBundle628.setAttribute('aria-label','Exact signed Build 627 original decision');
+  bundleLabel628.append(decisionBundle628);
+  const unsignedLabel628=add628('label','Unsigned original custody template, for separate original signers');
+  const unsigned628=doc.createElement('textarea');unsigned628.rows=8;unsigned628.readOnly=true;
+  unsigned628.setAttribute('aria-label','Unsigned Build 628 exact original custody packet');
+  unsignedLabel628.append(unsigned628);
+  const custodyLabel628=add628('label','Three original ISSUER/WITNESS/OWNER signatures over final custody template (never private keys)');
+  const custodyBundle628=doc.createElement('textarea');custodyBundle628.rows=8;
+  custodyBundle628.setAttribute('aria-label','Original three-signature signed custody JSON');
+  custodyLabel628.append(custodyBundle628);
+  const receiptLabel628=add628('label','Immutable original custody SHA-256 for review-only handoff');
+  const receipt628=doc.createElement('input');receipt628.type='text';
+  receipt628.setAttribute('aria-label','Saved original custody SHA-256');
+  receiptLabel628.append(receipt628);
+  const passwordLabel628=add628('label','Confirm admin password for original-owner action');
+  const password628=doc.createElement('input');password628.type='password';
+  password628.autocomplete='off';passwordLabel628.append(password628);
+  const btn628=(name,fn)=>{const b=add628('button',name);b.type='button';
+    b.className='dd569-button';b.addEventListener('click',fn);return b;};
+  const endpoint628='/api/admin/trust-custody-handoff-628';
+  const read628=async()=>{try{
+    const res=await win.fetch(endpoint628,{credentials:'same-origin',cache:'no-store'});
+    const data=await res.json();out628.value=JSON.stringify(data,null,2);
+    if(data.latest_original_owner_custody?.custody_sha256)
+      receipt628.value=data.latest_original_owner_custody.custody_sha256;
+    status628.textContent=data.owner_custody_schema_present&&data.signed_original_single_get_current?
+      'Original read-only GET and custody table available; separate signatures and independent external readback still required. NO CONNECTION.':
+      'HOLD · '+(data.next_owner_action||'Original source, owner signatures or proposed D1 custody table missing.');
+  }catch{status628.textContent='Original signed custody readback unavailable · HOLD.';}};
+  const post628=async action=>{
+    const confirm_password=password628.value;password628.value='';
+    let original_signed_decision,signed_custody;
+    if(action!=='prepare_owner_review_handoff'){
+      try{original_signed_decision=JSON.parse(decisionBundle628.value||signed627.value);
+        if(action==='archive_signed_original_custody')signed_custody=JSON.parse(custodyBundle628.value);
+      }catch{status628.textContent='Exact signed original decision or custody JSON missing · HOLD.';return;}}
+    try{const res=await win.fetch(endpoint628,{method:'POST',credentials:'same-origin',
+      headers:{'Content-Type':'application/json'},body:JSON.stringify({action,
+        original_signed_decision,signed_custody,custody_sha256:receipt628.value.trim(),
+        confirm_password})});
+      const data=await res.json();out628.value=JSON.stringify(data,null,2);
+      if(data.unsigned_original_custody_template)
+        unsigned628.value=JSON.stringify(data.unsigned_original_custody_template,null,2);
+      if(data.original_owner_signed_custody_recorded)receipt628.value=data.custody_sha256;
+      status628.textContent=res.ok?
+        'Original custody evidence prepared or verified. EXTERNAL READBACK / GO-LIVE remain HOLD; Meta is NOT connected.':
+        'Original custody or signed owner handoff rejected · HOLD.';
+    }catch{status628.textContent='Original signed custody verification failed · HOLD.';}
+  };
+  btn628('Refresh original signed custody and eligibility (READ ONLY)',read628);
+  btn628('Prepare exact UNSIGNED original custody template (NO WRITE)',()=>post628('prepare_custody_template'));
+  btn628('Archive three-party SIGNED original decision custody (APPEND ONLY)',()=>post628('archive_signed_original_custody'));
+  btn628('Prepare independently checked OWNER REVIEW handoff — NO META CONNECTION',()=>post628('prepare_owner_review_handoff'));
+  btn628('Go to original signed decision section 48',()=>{
+    const el=doc.querySelector('section[aria-label^="48."]');
+    el?.scrollIntoView?.({behavior:'smooth',block:'start'});
+    el?.querySelector('button')?.focus?.({preventScroll:true});
+  });
+  doc.querySelector('main').append(custody628);
+  read628();
 }
 if(typeof document!=='undefined')init614();
