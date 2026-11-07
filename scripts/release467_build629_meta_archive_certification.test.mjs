@@ -211,8 +211,8 @@ test('629 proposed append-only readback/decision schema and owner-only endpoint 
   assert.match(read('public/js/admin-channel-trust-authority-614.mjs'),
     /50\. Original Meta external archive byte readback/);
   assert.match(read('public/js/admin-channel-issuer-response-598.mjs'),
-    /trust-authority-614\.mjs\?v=629/);
-  assert.match(read('.github/workflows/production-pages-deploy-current.yml'),/"build":629/);
+    /trust-authority-614\.mjs\?v=630/);
+  assert.match(read('.github/workflows/production-pages-deploy-current.yml'),/"build":630/);
   assert.match(read('.github/workflows/current-application-quality.yml'),
     /release467_build629_meta_archive_certification\.test\.mjs/);
 });

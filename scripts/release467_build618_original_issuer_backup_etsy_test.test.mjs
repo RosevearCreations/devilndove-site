@@ -162,8 +162,8 @@ test('Build 618 proposed migration remains immutable, admin-only, and actual GET
  assert.match(execFileSync('python3',['-c',validation],{cwd:new URL('..',import.meta.url),encoding:'utf8'}),
   /PROPOSED_MIGRATIONS_ONLY_IN_MEMORY/);
  assert.match(read('public/js/admin-channel-trust-authority-614.mjs'),/39\. Original issuer/);
-  assert.match(read('public/js/admin-channel-issuer-response-598.mjs'),/trust-authority-614\.mjs\?v=629/);
+  assert.match(read('public/js/admin-channel-issuer-response-598.mjs'),/trust-authority-614\.mjs\?v=630/);
  assert.match(read('.github/workflows/current-application-quality.yml'),
   /release467_build618_original_issuer_backup_etsy_test\.test\.mjs/);
-  assert.match(read('.github/workflows/production-pages-deploy-current.yml'),/"build":629/);
+  assert.match(read('.github/workflows/production-pages-deploy-current.yml'),/"build":630/);
 });
