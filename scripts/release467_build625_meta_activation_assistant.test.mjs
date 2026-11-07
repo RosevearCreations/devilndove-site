@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {readFileSync} from 'node:fs';
+import {readFileSync,readdirSync} from 'node:fs';
 import {execFileSync} from 'node:child_process';
 import {HOLD_625,ORIGINAL_TABLES_625,RECEIPT_TABLES_625,
   schemaReadback625,deriveAssistance625}
@@ -66,10 +66,10 @@ test('625 never turns counts, archived receipts or simulated GET into verified l
 test('625 proposed source schema matches actual 0052–0062 SQL in memory; never applies migrations',()=>{
   const migrations=['0052','0053','0054','0055','0056','0057','0058','0059',
     '0060','0061','0062'];
-  const names=execFileSync('rg',['--files','migrations/proposed'],{
-    cwd:new URL('..',import.meta.url),encoding:'utf8'}).trim().split('\n');
-  const files=migrations.map(id=>names.find(n=>n.split('/').at(-1).startsWith(id+'_')));
-  assert.equal(files.length,11);assert.ok(files.every(Boolean));
+  const names=readdirSync(new URL('../migrations/proposed/',import.meta.url));
+  const files=migrations.map(id=>'migrations/proposed/'+
+    names.find(n=>n.startsWith(id+'_')));
+  assert.equal(files.length,11);assert.ok(files.every(f=>!f.endsWith('/undefined')));
   const script=`import sqlite3\nc=sqlite3.connect(':memory:')\nfor f in ${JSON.stringify(files)}: c.executescript(open(f).read())\nfor t in ${JSON.stringify(known)}: assert c.execute('SELECT name FROM sqlite_master WHERE name=?',(t,)).fetchone(), t\nprint('625_FULL_SOURCE_SCHEMA_IN_MEMORY_ONLY')`;
   assert.match(execFileSync('python3',['-c',script],{
     cwd:new URL('..',import.meta.url),encoding:'utf8'}),
