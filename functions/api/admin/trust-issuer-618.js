@@ -4,6 +4,7 @@ import {trustedPins614} from '../_lib/trustAuthority614.js';
 import {decryptOAuthSecret} from '../_lib/oauthSecurity.js';
 import {HOLD_618,verifyIssuerCustody618,verifyBackupWitness618,
   verifyProviderAcceptance618,probeEtsyIdentity618} from '../_lib/trustIssuer618.js';
+import {classifyEtsyFailure619,failureFingerprint619} from '../_lib/trustReconcile619.js';
 
 const reply=(body,status=200)=>jsonResponse(body,status,{'Cache-Control':'no-store'});
 const hold={build:618,release_gate:HOLD_618,d1_migration_performed:false,
@@ -27,6 +28,8 @@ async function database(c){
       'SELECT test_nonce FROM dd618_provider_test_outcomes LIMIT 1',
       'SELECT acceptance_sha256 FROM dd618_provider_test_acceptances LIMIT 1'])
       await db.prepare(query).all();
+    // Do not begin an external GET unless its immutable failure-custody table exists.
+    await db.prepare('SELECT failure_sha256 FROM dd619_etsy_failure_custody LIMIT 1').all();
     return db;
   }catch{return null;}
 }
@@ -221,14 +224,43 @@ export async function onRequestPost(c){
       let observed;
       try{observed=await probeEtsyIdentity618({apiKey:c.env.ETSY_API_KEYSTRING,
         secret:c.env.ETSY_SHARED_SECRET,token:auth.token,expectedUserId:auth.subject});}
-      catch{return reply({ok:false,...hold,grant_id:grant.grant_id,
-        test_nonce:grant.test_nonce,attempt_spent:true,
-        error:'One-use Etsy GET failed; no retry until separate new owner grant.'},422);}
-      await db.prepare(`INSERT INTO dd618_provider_test_outcomes
-        (test_nonce,provider_receipt_sha256,remote_subject_id,endpoint,status)
-        VALUES (?,?,?,'GET /v3/application/users/me',
-          'ETSY_IDENTITY_GET_VERIFIED_PENDING_WITNESS_ACCEPTANCE')`).bind(
-        grant.test_nonce,observed.provider_receipt_sha256,observed.remote_subject_id).run();
+      catch(error){
+        const code=classifyEtsyFailure619(error),digest=await failureFingerprint619({
+          grant_id:grant.grant_id,test_nonce:grant.test_nonce,code});
+        let recorded=false;
+        try{const audit=await db.prepare(`INSERT INTO dd619_etsy_failure_custody
+          (test_nonce,grant_id,failure_sha256,failure_code,endpoint,status)
+          VALUES (?,?,?,?,'GET /v3/application/users/me','SPENT_NONCE_NO_RETRY_PRESERVED')`).bind(
+          grant.test_nonce,grant.grant_id,digest,code).run();recorded=audit.meta?.changes===1;
+        }catch{/* Nonce remains spent; never retry or claim the failure was documented. */}
+        return reply({ok:false,...hold,grant_id:grant.grant_id,
+          test_nonce:grant.test_nonce,attempt_spent:true,
+          failure_custody_recorded:recorded,
+          failure_sha256:recorded?digest:null,
+          error:recorded?'One-use Etsy GET failed; independently witnessed no-retry disposition required.':
+            'One-use Etsy GET failed; custody write unavailable, operator investigation required. Never retry this nonce.'},422);
+      }
+      try{await db.prepare(`INSERT INTO dd618_provider_test_outcomes
+          (test_nonce,provider_receipt_sha256,remote_subject_id,endpoint,status)
+          VALUES (?,?,?,'GET /v3/application/users/me',
+            'ETSY_IDENTITY_GET_VERIFIED_PENDING_WITNESS_ACCEPTANCE')`).bind(
+          grant.test_nonce,observed.provider_receipt_sha256,observed.remote_subject_id).run();
+      }catch{
+        // A successful remote GET without durable source receipt is NOT a verified GET.
+        // The nonce was already spent before the HTTP request and must not be retried.
+        let recorded=false;
+        try{const code='RECEIPT_PERSISTENCE_FAILED',digest=await failureFingerprint619({
+          grant_id:grant.grant_id,test_nonce:grant.test_nonce,code});
+          const audit=await db.prepare(`INSERT INTO dd619_etsy_failure_custody
+            (test_nonce,grant_id,failure_sha256,failure_code,endpoint,status)
+            VALUES (?,?,?,?,'GET /v3/application/users/me','SPENT_NONCE_NO_RETRY_PRESERVED')`).bind(
+            grant.test_nonce,grant.grant_id,digest,code).run();recorded=audit.meta?.changes===1;
+        }catch{/* Both receipts absent: explicit unresolved custody, never retry. */}
+        return reply({ok:false,...hold,grant_id:grant.grant_id,
+          test_nonce:grant.test_nonce,attempt_spent:true,
+          failure_custody_recorded:recorded,
+          error:'Etsy GET returned but its immutable receipt was not safely persisted. Spent nonce cannot retry; independent custody review required.'},503);
+      }
       return reply({ok:true,...hold,...observed,grant_id:grant.grant_id,
         test_nonce:grant.test_nonce,attempt_spent:true,
         witness_acceptance_pending:true},201);

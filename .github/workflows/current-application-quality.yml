@@ -796,6 +796,15 @@ jobs:
           node --check scripts/release467_build618_original_issuer_backup_etsy_test.test.mjs
           node --test scripts/release467_build618_original_issuer_backup_etsy_test.test.mjs
 
+      - name: Build 619 actual Etsy receipt, spent failure custody and Meta read-only preflight HOLD
+        run: |
+          node --check functions/api/_lib/trustReconcile619.js
+          node --check functions/api/admin/trust-reconciliation-619.js
+          node --check functions/api/admin/trust-issuer-618.js
+          node --check public/js/admin-channel-trust-authority-614.mjs
+          node --check scripts/release467_build619_receipt_failure_meta_preflight.test.mjs
+          node --test scripts/release467_build619_receipt_failure_meta_preflight.test.mjs
+
       - name: Build 609 consolidated historical proof and CI fan-out guard
         run: |
           node --check scripts/release467_build609_ci_bundle.mjs

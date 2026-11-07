@@ -294,5 +294,44 @@ export function init614(doc=globalThis.document,win=globalThis.window){
   });
   doc.querySelector('main').append(issuer618);
   run618();
+  const reconcile619=doc.createElement('section');reconcile619.className='dd569-panel';
+  reconcile619.setAttribute('aria-label','40. Genuine Etsy TEST receipt reconciliation and Meta read-only local preflight');
+  const add619=(tag,value)=>{const el=doc.createElement(tag);
+    if(value)el.textContent=value;reconcile619.append(el);return el;};
+  add619('h2','40. Genuine Etsy receipt ledger, spent nonce failure custody and Meta READ-only preflight — Build 619');
+  add619('p','Read existing immutable Etsy TEST attempt/outcome/witness receipts. Any spent nonce is final, even after a timeout; conflicting or missing evidence stays on HOLD. Meta permission checks inspect only saved local OAuth metadata and never call Meta or authorize publishing. Original issuer/operator and owner consent are still required.');
+  const status619=add619('p','Receipt audit and Meta source credentials not yet independently accepted · HOLD.');
+  status619.setAttribute('role','status');
+  const read619=add619('textarea');read619.rows=11;read619.readOnly=true;
+  read619.setAttribute('aria-label','Build 619 source-owned TEST receipt and Meta capability readback');
+  const endpoint619='/api/admin/trust-reconciliation-619';
+  const request619=async(action=null,extra={},password='')=>{
+    try{const options=action?{method:'POST',credentials:'same-origin',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({action,...extra,confirm_password:password})}:
+      {credentials:'same-origin',cache:'no-store'};
+      const response=await win.fetch(endpoint619,options),result=await response.json();
+      read619.value=JSON.stringify(result,null,2);
+      status619.textContent=response.ok?'Immutable local readback available; provider, publication and original authority remain HOLD.':
+        'Witnessed receipts or proposed D1 schema unavailable · HOLD.';
+    }catch{status619.textContent='Source-owned receipt readback unavailable · HOLD.';}
+  };
+  const button619=(label,fn)=>{const el=add619('button',label);el.type='button';
+    el.className='dd569-button';el.addEventListener('click',fn);};
+  const field619=(label,secret=false)=>{const wrapper=add619('label',label);
+    const el=doc.createElement(secret?'input':'textarea');
+    if(secret){el.type='password';el.setAttribute('autocomplete','off');}else el.rows=6;
+    el.style.display='block';el.style.maxWidth='100%';wrapper.append(el);return el;};
+  button619('Reconcile actual stored Etsy one-use GET receipts and inspect Meta READ-only permissions',()=>request619());
+  const failurePacket=field619('Signed independent WITNESS/OWNER spent-nonce failure acknowledgement JSON');
+  const failurePassword=field619('Admin password for witnessed failure acknowledgement',true);
+  button619('Record independent spent Etsy nonce disposition — NO RETRY',()=>{
+    const password=failurePassword.value;failurePassword.value='';
+    try{request619('witness_spent_etsy_failure',
+      {disposition:JSON.parse(failurePacket.value)},password);}
+    catch{status619.textContent='Malformed exact failure evidence · HOLD.';}
+  });
+  doc.querySelector('main').append(reconcile619);
+  request619();
 }
 if(typeof document!=='undefined')init614();
