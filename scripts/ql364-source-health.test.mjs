@@ -1,5 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
+import {readFileSync} from 'node:fs';
 import {createHash,generateKeyPairSync,sign,verify} from 'node:crypto';
 import {handleQl364SourceHealth,hashQl364,canonicalQl364,
   QL364_PATH,QL364_ENVELOPE_SCHEMA} from '../functions/api/_lib/ql364-source-health.mjs';
@@ -38,6 +39,18 @@ function privateAdapters() {
       signature:sign(null,bytes,keyPair.privateKey).toString('base64url')})
   };
 }
+test('QL365D discovery binds the owned-business shell to an immutable reviewed source revision',()=>{
+  const m=JSON.parse(readFileSync(new URL('../.well-known/rosevear-integration-manifest.json',import.meta.url)));
+  assert.equal(m.source_id,'devilndove');
+  assert.equal(m.source_app_id,'devilndove');
+  assert.equal(m.repository,'RosevearCreations/devilndove-site');
+  assert.equal(m.tenant_boundary,'owned_business_legacy');
+  assert.equal(m.audience,'rosevear-master');
+  assert.match(m.source_revision,/^[a-f0-9]{40}$/);
+  assert.equal(m.signature.state,'AWAITING_INDEPENDENT_SOURCE_SIGNER');
+  assert.equal(m.transport.origin,null);
+  assert.equal(m.connection_state,'DISCONNECTED / HOLD');
+});
 test('QL364 default original-owner trust HOLD; never uses a tenant or integration secret',async()=>{
   const result=await handleQl364SourceHealth({request:request(intent()),sourceId,repository,now});
   assert.equal(result.status,503);
@@ -63,10 +76,16 @@ test('QL364 one verified private GET returns exact source-signed, redacted QL363
 test('QL364 rejects scope escalation, expiry, wrong source, unverified signer and mutation',async()=>{
   const adapters=privateAdapters();
   for(const v of [{...intent(),customerDataAllowed:true},{...intent(),sourceId:'unexpected-source'},
-    {...intent(),expiresAt:new Date(now-500).toISOString()}]){
+    {...intent(),expiresAt:new Date(now-500).toISOString()},
+    {...intent(),sourceOrigin:'https://user:password@original.example'},
+    {...intent(),sourceOrigin:'https://other.example'}]){
     assert.equal((await handleQl364SourceHealth({request:request(v),
       sourceId,repository,now,...adapters})).status,403);
   }
+  const otherOrigin=new Request('https://other.example'+QL364_PATH,{
+    headers:{'x-rosevear-ql362-request':encode(intent())}});
+  assert.equal((await handleQl364SourceHealth({
+    request:otherOrigin,sourceId,repository,now,...adapters})).status,403);
   assert.equal((await handleQl364SourceHealth({
     request:request(intent(),'POST'),sourceId,repository,now,...adapters})).status,405);
   assert.equal((await handleQl364SourceHealth({
@@ -75,4 +94,15 @@ test('QL364 rejects scope escalation, expiry, wrong source, unverified signer an
   assert.equal((await handleQl364SourceHealth({
     request:request(intent()),sourceId,repository,now,
     ...adapters,signSourceReceipt:async()=>({attested:false})})).status,503);
+  assert.equal((await handleQl364SourceHealth({
+    request:request(intent()),sourceId,repository,now,
+    ...adapters,approveOriginalGet:async()=>({state:'REVOKED'})})).status,403);
+  assert.equal((await handleQl364SourceHealth({
+    request:request(intent()),sourceId,repository,now,
+    ...adapters,claimOperation:async()=>false})).status,409);
+  assert.equal((await handleQl364SourceHealth({
+    request:request(intent()),sourceId,repository,now,
+    ...privateAdapters(),signSourceReceipt:async()=>({attested:true,
+      spkiSha256:'0'.repeat(64),keyId:'wrong-signer',signature:'a'.repeat(86)})
+  })).status,503);
 });

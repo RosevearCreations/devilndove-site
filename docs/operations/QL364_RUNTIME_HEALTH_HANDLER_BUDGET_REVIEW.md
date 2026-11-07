@@ -20,3 +20,19 @@ measured and approved independently.
 
 The new health handler itself is inert without verified original-owner
 authority, durable nonce claims, and independent source-signer custody.
+
+## QL-365D final compatibility adjustment
+
+The public held discovery manifest now identifies immutable, reviewed source
+revision `1f0e220b0cf7aff2dfeb650c96304d96502ede54` (Build 630 protected
+production promotion) instead of the QL-333 placeholder. This revision is
+historical source provenance, not the self-referential SHA of the later commit
+that publishes this manifest; the final deployed commit must be independently
+read back and pinned for a future QL-363 contract.
+
+The QL-364 handler additionally rejects an original GET whose actual HTTPS
+request origin differs from the signed, approved source origin or whose claimed
+origin contains credentials/noncanonical components. Synthetic source-signer
+tests are not production-key enrollment. No private source-signer callback,
+durable one-use claim, owner signature, QL-363 source-signed contract or genuine
+private GET was provisioned; runtime stays `DISCONNECTED / HOLD`.
