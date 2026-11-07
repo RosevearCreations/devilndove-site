@@ -509,5 +509,62 @@ export function init614(doc=globalThis.document,win=globalThis.window){
   }
   doc.querySelector('main').append(activation623);
   request623();
+  const live624=doc.createElement('section');live624.className='dd569-panel';
+  live624.setAttribute('aria-label','45. Original encrypted Meta credential and one-use live read-only recheck');
+  const add624=(tag,value)=>{const e=doc.createElement(tag);
+    if(value)e.textContent=value;live624.append(e);return e;};
+  add624('h2','45. Original Meta encrypted credential, expiring one-use live identity and witness — Build 624');
+  add624('p','Requires an already verified Build 623 signed Page-ID window and separately signed ORIGINAL ISSUER / WITNESS / OWNER decisions. Enrollment only attests the SAVED encrypted Meta credential — never paste access tokens here. Each new live Page-ID GET requires a fresh ten-minute original authorization, unique nonce, admin password and explicit operator click. The nonce is spent BEFORE the external read. An independent signed receipt witness follows. No token refresh, Meta posting, OAuth account connection or automatic recheck. Proposed migrations 0052–0062 remain separately supervised.');
+  const status624=add624('p','Original encrypted Meta custody and actual single-use provider GET · HOLD.');
+  status624.setAttribute('role','status');
+  const result624=add624('textarea');result624.readOnly=true;result624.rows=14;
+  result624.setAttribute('aria-label','Original Meta encrypted credential, genuine provider GET and witness readback');
+  const button624=(label,callback)=>{const e=add624('button',label);e.type='button';
+    e.className='dd569-button';e.addEventListener('click',callback);return e;};
+  const field624=(label,password=false,single=false)=>{const e=add624('label',label);
+    const input=doc.createElement(password||single?'input':'textarea');
+    if(password){input.type='password';input.autocomplete='off';}
+    if(single)input.autocomplete='off';if(!password&&!single)input.rows=8;
+    input.style.display='block';input.style.maxWidth='100%';e.append(input);return input;};
+  const request624=async(action=null,bundle=null,password='',authorizationId=null)=>{
+    status624.textContent='Verifying original Meta authority, encrypted token fingerprint and expiring one-use scope…';
+    try{const response=await win.fetch('/api/admin/trust-meta-live-624',
+      action?{method:'POST',credentials:'same-origin',headers:{'Content-Type':'application/json'},
+        body:JSON.stringify({action,signed_bundle:bundle,authorization_id:authorizationId,
+          confirm_password:password})}:{credentials:'same-origin',cache:'no-store'});
+      const data=await response.json();result624.value=JSON.stringify(data,null,2);
+      status624.textContent=data.latest_verified_original_get===
+        'ORIGINAL_ONE_GENUINE_META_GET_WITNESSED_READ_ONLY_NO_CONNECTION'?
+        'Genuine original Meta Page-ID GET independently witnessed; no publication or connection.':
+        data.actual_provider_get_performed===true?
+          'One real Meta identity GET recorded. Original independent witness acceptance STILL REQUIRED.':
+        data.ok?'Original read-only evidence received; live Meta acceptance requires separate verification.':
+          'Original issuer, witness, owner, encrypted OAuth token or real receipt missing · HOLD.';
+    }catch{status624.textContent='Original Meta authority or independent signed evidence unavailable · HOLD.';}
+  };
+  button624('Review original encrypted Meta enrollment and witnessed actual GET (NO provider call)',()=>request624());
+  for(const [action,label,description] of [
+    ['enroll_existing_encrypted_credential','Attest SAVED encrypted Meta credential',
+      'Original three-party signed exact encrypted-token fingerprint and current Page-ID window JSON'],
+    ['approve_one_live_meta_recheck','Authorize ONE expiring original Page-ID GET',
+      'Fresh original three-party signed exact Page GET authorization, unique nonce and expiry JSON'],
+    ['accept_one_genuine_meta_receipt','Witness existing ACTUAL Meta GET receipt',
+      'Independent three-party signed genuine saved Meta Page-ID GET receipt JSON']]){
+    const signed=field624(description),password=field624('Admin password for '+action,true);
+    button624(label+' — OWNER SUPERVISED / NO PUBLISH',()=>{
+      const pw=password.value;password.value='';
+      try{request624(action,JSON.parse(signed.value),pw);}
+      catch{status624.textContent='Malformed external original signature bundle · HOLD.';}
+    });
+  }
+  const singleGrant624=field624('Previously signed exact authorization ID for ONE genuine Meta Page-ID GET',false,true);
+  const singlePassword624=field624('Admin password for irreversible one-use provider GET',true);
+  button624('EXECUTE ONE ORIGINAL APPROVED META PAGE-ID GET — NONCE SPENT / NEVER RETRY',()=>{
+    const pw=singlePassword624.value;singlePassword624.value='';
+    if(!win.confirm('Perform ONE real Meta Page-ID GET under this independently signed original authorization? The nonce is spent even on failure. No retry or publication.'))return;
+    request624('execute_one_live_meta_recheck',null,pw,singleGrant624.value.trim());
+  });
+  doc.querySelector('main').append(live624);
+  request624();
 }
 if(typeof document!=='undefined')init614();
