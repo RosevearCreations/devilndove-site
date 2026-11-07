@@ -96,8 +96,8 @@ test('626 UI and GET-only server keep original source migration, provider and si
   assert.match(api,/readOriginalWitness624/);
   assert.doesNotMatch(api,/fetch\(|decryptOAuthSecret|probeMetaPage620|INSERT INTO|UPDATE |DELETE FROM|CREATE TABLE|POST \/feed/);
   assert.match(read('public/js/admin-channel-trust-authority-614.mjs'),/47\. Original Meta owner walkthrough/);
-  assert.match(read('public/js/admin-channel-issuer-response-598.mjs'),/trust-authority-614\.mjs\?v=629/);
-  assert.match(read('.github/workflows/production-pages-deploy-current.yml'),/"build":629/);
+  assert.match(read('public/js/admin-channel-issuer-response-598.mjs'),/trust-authority-614\.mjs\?v=630/);
+  assert.match(read('.github/workflows/production-pages-deploy-current.yml'),/"build":630/);
   assert.match(read('.github/workflows/current-application-quality.yml'),
     /release467_build626_meta_owner_renewal_acceptance\.test\.mjs/);
   assert.match(read('migrations/proposed/0062_devilndove_build624_meta_original_enrollment_recheck_hold.sql'),/PROPOSED ONLY/);

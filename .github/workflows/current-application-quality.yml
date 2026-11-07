@@ -885,6 +885,14 @@ jobs:
           node --check scripts/release467_build629_meta_archive_certification.test.mjs
           node --test scripts/release467_build629_meta_archive_certification.test.mjs
 
+      - name: Build 630 original bound D1 migration source readback and owner-supervised genuine archive HOLD
+        run: |
+          node --check functions/api/_lib/trustOriginalMigration630.js
+          node --check functions/api/admin/trust-original-readiness-630.js
+          node --check public/js/admin-channel-trust-authority-614.mjs
+          node --check scripts/release467_build630_original_migration_meta_readback.test.mjs
+          node --test scripts/release467_build630_original_migration_meta_readback.test.mjs
+
       - name: Build 609 consolidated historical proof and CI fan-out guard
         run: |
           node --check scripts/release467_build609_ci_bundle.mjs
