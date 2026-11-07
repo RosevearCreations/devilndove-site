@@ -96,8 +96,8 @@ test('627 original-owner endpoint requires admin access and cannot silently migr
   assert.match(api,/readOwnerWalkthrough626/);
   assert.doesNotMatch(api,/INSERT INTO|UPDATE\s+|DELETE FROM|CREATE TABLE|decryptOAuthSecret|probeMetaPage620|refreshOAuthToken|fetch\(/);
   assert.match(read('public/js/admin-channel-trust-authority-614.mjs'),/48\. Original Meta evidence gaps/);
-  assert.match(read('public/js/admin-channel-issuer-response-598.mjs'),/trust-authority-614\.mjs\?v=628/);
-  assert.match(read('.github/workflows/production-pages-deploy-current.yml'),/"build":628/);
+  assert.match(read('public/js/admin-channel-issuer-response-598.mjs'),/trust-authority-614\.mjs\?v=629/);
+  assert.match(read('.github/workflows/production-pages-deploy-current.yml'),/"build":629/);
   assert.match(read('.github/workflows/current-application-quality.yml'),
     /release467_build627_original_meta_channel_decision\.test\.mjs/);
 });
