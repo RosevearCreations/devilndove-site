@@ -33,17 +33,31 @@ async function read(db,key){
 const key=(userId,planId)=>`${PREFIX}${userId}.review.${planId}`;
 export async function onRequestGet(context){const a=gate(context);if(a.error)return a.error;
   const params=new URL(context.request.url).searchParams,planId=params.get('plan_id'),before=params.get('before');
-  if(!ID.test(planId||'')||(before!==null&&!ID.test(before)))return reply({ok:false,error:'Valid saved plan ID and server-issued history cursor required.'},400);
+  const outcome=params.get('outcome')||'',rawQuery=params.get('q')??'',query=rawQuery.trim().toLowerCase();
+  if(!ID.test(planId||'')||(before!==null&&!ID.test(before))||
+    (outcome&&!OUTCOMES.has(outcome))||rawQuery.length>80||(query.length===1))
+    return reply({ok:false,error:'Valid owner plan, history cursor, outcome and 2–80 character search (or blank) required.'},400);
   try{
     const parent=await ownerPlan(a.db,a.admin.user_id,planId);
     if(!parent)return reply({ok:false,error:'Saved owner plan not found.'},404);
     const {doc}=await read(a.db,key(a.admin.user_id,planId));
-    let offset=0;if(before!==null){offset=doc.events.findIndex(x=>x.event_id===before);
+    // At most 50 private events are examined; the summary is *all outcomes*,
+    // independent of the selected search/filter page. No Product authority.
+    const outcome_counts=Object.fromEntries([...OUTCOMES].map(value=>[value,0]));
+    for(const event of doc.events)if(Object.hasOwn(outcome_counts,event?.outcome))outcome_counts[event.outcome]++;
+    const summary={review_count:doc.events.length,outcome_counts,
+      latest_outcome:doc.events[0]?.outcome||null,latest_review_at:doc.events[0]?.recorded_at||null,
+      plan_status:String(parent.plan.status||'draft'),plan_follow_up_on:String(parent.plan.follow_up_on||''),
+      advisory_only:true,inventory_mutation:false,order_mutation:false};
+    const matching=doc.events.filter(event=>(!outcome||event?.outcome===outcome)&&
+      (!query||String(event?.note||'').toLowerCase().includes(query)));
+    let offset=0;if(before!==null){offset=matching.findIndex(x=>x.event_id===before);
       if(offset<0)return reply({ok:false,error:'History cursor is stale. Reload the first page.'},400);
       offset++;}
-    const events=doc.events.slice(offset,offset+LIMIT),hasMore=offset+LIMIT<doc.events.length;
+    const events=matching.slice(offset,offset+LIMIT),hasMore=offset+LIMIT<matching.length;
     return reply({ok:true,owner_user_id:a.admin.user_id,plan_id:planId,plan_version:parent.version,
       timeline_version:doc.version,events,next_cursor:hasMore?events.at(-1)?.event_id:null,
+      matched_total:matching.length,search:{q:query,outcome},summary,
       private:true,read_only:true,automatic:false,inventory_mutation:false});
   }catch{return reply({ok:false,error:'Owner plan review history could not be verified. No history returned.',retry_automatically:false},503);}
 }
