@@ -56,6 +56,15 @@
     .dd638-history{overflow-x:auto;max-width:100%}
     .dd638-history table{min-width:580px;width:100%;border-collapse:collapse}
     .dd638-history th,.dd638-history td{text-align:left;padding:8px;vertical-align:top;border-bottom:1px solid var(--border)}
+    .dd639-stock-panel{margin:14px 0;padding:16px;border:1px solid var(--border);border-radius:12px}
+    .dd639-stock-panel[hidden]{display:none}
+    .dd639-stock-actions{display:flex;gap:8px;flex-wrap:wrap;margin:12px 0}
+    .dd639-stock-actions .btn{min-height:46px}
+    .dd639-stock-metrics{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,175px),1fr));gap:10px;margin:12px 0}
+    .dd639-metric{padding:12px;background:rgba(128,128,128,.08);border:1px solid var(--border);border-radius:10px;min-width:0}
+    .dd639-metric strong{display:block;font-size:1.6rem;font-variant-numeric:tabular-nums;margin:5px 0}
+    .dd639-alert,.dd639-caution{padding:10px 12px;border-left:4px solid #c28c34;background:rgba(194,140,52,.10);border-radius:6px}
+    .dd639-lots{overflow-wrap:anywhere;padding-left:22px}
     @media(max-width:680px){
       .dd635-toolbar{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
       .dd635-toolbar label,.dd635-toolbar label:first-child{grid-column:1/-1;min-width:0}
@@ -117,6 +126,13 @@
           <tbody id="productBrowserBody"><tr><td colspan="4" class="dd-empty">Loading one compact Product page…</td></tr></tbody>
         </table>
       </div>
+      <section class="dd639-stock-panel" id="dd639StockPanel" aria-labelledby="dd639StockHeading" hidden>
+        <h3 id="dd639StockHeading">Saved stock and order commitments — read-only</h3>
+        <p class="small">Select Availability on a tracked physical Product above. This on-demand review checks one Product, qualifying order commitments, serialized restrictions and finished-lot sources. It does not change stock or call Etsy.</p>
+        <div class="dd639-stock-actions"><button class="btn" type="button" id="dd639StockReload">Refresh saved stock and commitments</button><button class="btn" type="button" id="dd639StockClose">Close</button></div>
+        <p id="dd639StockStatus" role="status" aria-live="polite">Nothing has been read yet.</p>
+        <div id="dd639StockResults" aria-live="polite"></div>
+      </section>
       <section class="dd638-count-panel" id="dd638CountPanel" aria-labelledby="dd638CountHeading" hidden>
         <h3 id="dd638CountHeading">Finished inventory — count &amp; recorded history</h3>
         <p id="dd638CountProduct" role="status" aria-live="polite">Select Count / History on a Product above.</p>
@@ -189,8 +205,9 @@
   </div>
 
   <script src="/public/js/auth.js?v=440"></script>\n  <script src="/public/js/admin-route-usage.js?v=249"></script>
-  <script src="/public/js/admin-products-browser-v162.js?v=170&b635=1&b636=1&b637=1&b638=1"></script>
+  <script src="/public/js/admin-products-browser-v162.js?v=170&b635=1&b636=1&b637=1&b638=1&b639=1"></script>
   <script src="/public/js/admin-product-count-history-638.js?v=638"></script>
+  <script src="/public/js/admin-product-stock-visibility-639.js?v=639"></script>
 <script src="/public/js/admin-product-zero-price-review-v390.js?v=390"></script>
 <script src="/public/js/admin-product-price-source-review-v394.js?v=394"></script>
 </body>

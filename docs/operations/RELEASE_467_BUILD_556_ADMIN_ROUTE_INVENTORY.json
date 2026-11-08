@@ -1545,9 +1545,9 @@
       "reference_screen": "Product Management",
       "reason": "Build 557 now provides the four-area Product Entry 2.0 shell. Preserve until real owner visual acceptance or an observed functional correction is requested.",
       "evidence": {
-        "byte_length": 166933,
+        "byte_length": 168807,
         "stylesheets": 38,
-        "scripts": 42,
+        "scripts": 43,
         "forms": 1,
         "has_viewport": true
       },
@@ -1590,9 +1590,9 @@
       "reference_screen": "Product Management",
       "reason": "Existing compact Product browser and low-read recovery were previously revamped; preserve behavior and styling.",
       "evidence": {
-        "byte_length": 20319,
+        "byte_length": 22059,
         "stylesheets": 2,
-        "scripts": 6,
+        "scripts": 7,
         "forms": 1,
         "has_viewport": true
       },
