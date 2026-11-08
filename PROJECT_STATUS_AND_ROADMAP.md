@@ -1,4 +1,12 @@
-# Release 467 Build 645 — Restock Review Handoff Digest & Owner Decision Export (Production candidate)
+# Release 467 Build 646 — Workshop Handoff Checklist & Owner Acknowledgement (Production candidate)
+
+Admin → Products now offers a **private workshop checklist and local owner acknowledgement** linked to Build 645's deliberately prepared, verified review digest. The owner explicitly loads that digest, confirms four separate safety boundaries, enters a specific next action and future follow-up date, then deliberately prepares an unsigned acknowledgement for manual copy or local text download. No private note bodies are included in the acknowledgement; source/plan/version changes invalidate it. This is **browser-session-only**, not a permanent audit signature, inventory count, supplier order, stock mutation or publication approval. The unchanged Release 465 runtime budget was met by removing the orphaned Build 296 packaging transport adapter (the active Build 297 adapter remains wired and verified) and mechanically minifying the active Build 297 adapter and new checklist client. [Build 646 operator guidance](docs/operations/RELEASE_467_BUILD_646_WORKSHOP_HANDOFF_ACKNOWLEDGEMENT.md).
+
+**Next proposed Build 647 — Workshop Follow-Up Status & Owner Reopen Guidance** (a clear source-checked handoff lifecycle and reopen/next-step guidance without granting inventory or supplier authority).
+
+---
+
+## Previous release — Build 645
 
 Admin → Products now lets the verified owner select dated reviews from Build 644's explicitly loaded matching results and prepare a **private workshop follow-up digest**. The owner controls which entries are included; full private note bodies are excluded unless separately opted in. The digest includes a dated source/version label, the current saved-plan snapshot, the complete bounded outcome count, selected dated facts, and a prominent no-stock-authority warning. The owner must deliberately prepare and inspect the preview before copying or downloading a local `.txt` file. New searches, changed plans or failed source verification clear selections and prepared text. This export has no persistence, supplier messaging, purchase, payment, stock mutation or external publication path. [Build 645 operator guidance](docs/operations/RELEASE_467_BUILD_645_RESTOCK_HANDOFF_DIGEST.md).
 

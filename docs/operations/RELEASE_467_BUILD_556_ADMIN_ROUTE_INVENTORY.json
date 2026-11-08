@@ -1590,9 +1590,9 @@
       "reference_screen": "Product Management",
       "reason": "Existing compact Product browser and low-read recovery were previously revamped; preserve behavior and styling.",
       "evidence": {
-        "byte_length": 36384,
+        "byte_length": 39760,
         "stylesheets": 2,
-        "scripts": 13,
+        "scripts": 14,
         "forms": 1,
         "has_viewport": true
       },
