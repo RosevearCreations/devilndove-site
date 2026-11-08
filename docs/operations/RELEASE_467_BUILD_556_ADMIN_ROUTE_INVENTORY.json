@@ -30,7 +30,7 @@
       "reference_screen": "Admin Dashboard",
       "reason": "Existing Admin dashboard already received a dedicated shell/hero modernization. Preserve until owner review.",
       "evidence": {
-        "byte_length": 19014,
+        "byte_length": 20798,
         "stylesheets": 5,
         "scripts": 12,
         "forms": 0,
