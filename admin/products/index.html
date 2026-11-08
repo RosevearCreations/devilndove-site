@@ -135,6 +135,22 @@
         <label class="small" for="dd640Preview">Review/copy text (read-only; does not publish or save)</label>
         <textarea class="input dd640-copy" id="dd640Preview" rows="6" readonly placeholder="After preparing the draft, our review text appears here."></textarea>
       </section>
+      <section class="dd640-inbox" id="dd642PriorityPanel" aria-labelledby="dd642Heading">
+        <h3 id="dd642Heading">Owner Restock Follow-Up Priority Board</h3>
+        <p class="small">A read-only view of the same private owner plans below. Choose <strong>Load my saved plans</strong> once to populate both sections. Due dates use this device's local calendar day; there are no automatic reminders, background reads, stock movements or supplier orders.</p>
+        <p id="dd642Status" role="status" aria-live="polite">Priority board waiting for an explicit owner plan load.</p>
+        <div class="dd640-actions" role="group" aria-label="Filter owner plan follow-ups">
+          <button class="btn" type="button" data-dd642-filter="all" aria-pressed="true" disabled>All plans</button>
+          <button class="btn" type="button" data-dd642-filter="overdue" aria-pressed="false" disabled>Overdue</button>
+          <button class="btn" type="button" data-dd642-filter="week" aria-pressed="false" disabled>Due within 7 days</button>
+          <button class="btn" type="button" data-dd642-filter="blocked" aria-pressed="false" disabled>Blocked</button>
+          <button class="btn" type="button" data-dd642-filter="undated" aria-pressed="false" disabled>Needs a date</button>
+          <button class="btn" type="button" data-dd642-filter="completed" aria-pressed="false" disabled>Completed review</button>
+        </div>
+        <p class="small" id="dd642Counts">No current owner plan evidence.</p>
+        <div id="dd642Rows"><p class="small">Load saved plans below to see follow-up priorities.</p></div>
+        <p class="dd640-warning small">Review plan opens its owner-only draft for a deliberate update. A completed follow-up does not prove Product stock, actual physical counts, offsite commitments or supplier availability.</p>
+      </section>
       <section class="dd640-inbox" id="dd641PlansPanel" aria-labelledby="dd641Heading">
         <h3 id="dd641Heading">Saved Owner Restock Plans &amp; Follow-Ups</h3>
         <p class="small">Private to the signed-in admin owner. Saving a draft is an internal planning note only; it never restocks Products, reserves orders, purchases anything or publishes to marketplaces. Saved stock snapshots may be out of date when reopened.</p>
@@ -257,5 +273,6 @@
 <script src="/public/js/admin-product-price-source-review-v394.js?v=394"></script>
 <script src="/public/js/admin-product-stock-exceptions-640.js?v=640"></script>
 <script src="/public/js/admin-owner-restock-plans-641.js?v=641"></script>
+<script src="/public/js/admin-owner-restock-priority-642.js?v=642"></script>
 </body>
 </html>
