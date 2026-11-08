@@ -1,4 +1,12 @@
-# Release 467 Build 646 — Workshop Handoff Checklist & Owner Acknowledgement (Production candidate)
+# Release 467 Build 647 — Workshop Follow-Up Status & Owner Reopen Guidance (Production candidate)
+
+Admin → Products now provides a **private, source-verified workshop follow-up status view** based solely on owner plans explicitly loaded through Build 641. Owners can filter open, due/overdue, blocked, completed-review and all saved plans, inspect contextual next-step guidance, and deliberately reopen the original plan editor; no Save, API call, stock adjustment, supplier order or automatic notification is triggered by this view. An optional **Inspect local acknowledgement** action reads only a currently prepared, unsigned Build 646 receipt for that same owner, plan and source version; stale or changed session receipts are rejected and invalidated. The view never treats planning status as completed workshop/stock work. A historical Admin brand-content helper with no active script/import reference was preserved as a `.txt` archival source outside the runtime tree, and the new client was mechanically minified to keep the original Release 465 runtime source budget unchanged. [Build 647 owner guidance](docs/operations/RELEASE_467_BUILD_647_WORKSHOP_FOLLOWUP_STATUS.md).
+
+**Next proposed Build 648 — Workshop Follow-Up Outcome Review & Source-Linked Closure Checklist** (an explicit owner review of what was actually checked before a separate, deliberate saved-plan status update; no implied stock authority).
+
+---
+
+## Previous release — Build 646
 
 Admin → Products now offers a **private workshop checklist and local owner acknowledgement** linked to Build 645's deliberately prepared, verified review digest. The owner explicitly loads that digest, confirms four separate safety boundaries, enters a specific next action and future follow-up date, then deliberately prepares an unsigned acknowledgement for manual copy or local text download. No private note bodies are included in the acknowledgement; source/plan/version changes invalidate it. This is **browser-session-only**, not a permanent audit signature, inventory count, supplier order, stock mutation or publication approval. The unchanged Release 465 runtime budget was met by removing the orphaned Build 296 packaging transport adapter (the active Build 297 adapter remains wired and verified) and mechanically minifying the active Build 297 adapter and new checklist client. [Build 646 operator guidance](docs/operations/RELEASE_467_BUILD_646_WORKSHOP_HANDOFF_ACKNOWLEDGEMENT.md).
 

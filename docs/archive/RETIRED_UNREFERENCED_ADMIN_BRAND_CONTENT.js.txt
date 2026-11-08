@@ -1,4 +1,6 @@
-// File: /public/js/admin-brand-content.js
+// Archived from /public/js/admin-brand-content.js in Build 647.
+// Historical admin/catalog helper with no active runtime script/import reference.
+// Preserve for deliberate owner reactivation, but not in the shipped runtime budget.
 // Brief description: Adds a lightweight catalog-side helper for gallery/creations publishing,
 // brand-image uploads, and visibility into the current public social profile links.
 
