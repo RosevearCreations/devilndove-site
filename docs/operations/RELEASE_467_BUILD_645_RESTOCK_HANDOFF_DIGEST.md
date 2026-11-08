@@ -20,3 +20,5 @@
 ## Validation
 
 `node --test scripts/release467_build645_restock_handoff_digest.test.mjs` verifies the owner-selection gate, explicit note opt-in, filtered/paged continuity, stale-state clearing, HTML escaping, and absence of automatic external sends. Build 641–644 regressions, the canonical D1 migration policy and the current application quality gate remain required.
+
+The first PR source-gate run identified the unchanged Release 465 runtime-byte ceiling (18,610,000) exceeded by 5,883 bytes. To fix the *actual payload* without raising or bypassing the gate, the shipped Build 642–645 owner-restock JavaScript assets were syntax/whitespace-minified. All 34 Build 641–645 tests reran green and the resulting runtime source size was **18,608,466 bytes**, below the existing limit. The source map is deliberately not shipped, to keep the runtime budget truthful; build-specific documentation and regression fixtures remain readable.
