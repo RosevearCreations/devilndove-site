@@ -223,6 +223,27 @@
           </fieldset>
           <p class="dd640-warning small">Private browser-session record only. A prepared receipt is erased when the owner, plan, source digest, checklist or follow-up details change. Copy or download is an explicit owner action; this does not create a server-side audit record.</p>
         </div>
+        <div class="dd640-plan" id="dd647FollowUp" aria-labelledby="dd647Heading">
+          <h4 id="dd647Heading">Workshop Follow-Up Status &amp; Reopen Guidance</h4>
+          <p class="small">Use the private saved-plan source above to review which workshop follow-ups are due, blocked or completed as planning notes. Reopen a saved plan for a deliberate owner edit; no status or inventory is changed from this panel.</p>
+          <div class="dd640-actions" role="group" aria-label="Workshop follow-up status filter">
+            <button type="button" class="btn" data-dd647-filter="open" aria-pressed="true" disabled>Open follow-ups</button>
+            <button type="button" class="btn secondary" data-dd647-filter="due" aria-pressed="false" disabled>Due or overdue</button>
+            <button type="button" class="btn secondary" data-dd647-filter="blocked" aria-pressed="false" disabled>Blocked</button>
+            <button type="button" class="btn secondary" data-dd647-filter="completed" aria-pressed="false" disabled>Reviewed complete</button>
+            <button type="button" class="btn secondary" data-dd647-filter="all" aria-pressed="false" disabled>All plans</button>
+          </div>
+          <p id="dd647Status" role="status" aria-live="polite">Load saved owner plans above before inspecting workshop follow-ups.</p>
+          <p id="dd647Counts" class="small">No verified owner follow-up counts yet.</p>
+          <div id="dd647Rows"><p class="small">No owner plan source has been loaded.</p></div>
+          <div class="dd640-plan" id="dd647Detail" aria-labelledby="dd647DetailHeading" hidden>
+            <h5 id="dd647DetailHeading">Selected workshop follow-up</h5>
+            <p id="dd647Guidance" class="small">Choose a saved plan above for source-checked guidance.</p>
+            <p id="dd647Receipt" class="small">An unsigned local acknowledgement has not been inspected.</p>
+            <div class="dd640-actions"><button type="button" class="btn" id="dd647Inspect" disabled>Inspect local acknowledgement</button><button type="button" class="btn" id="dd647Reopen" disabled>Reopen owner plan to review</button><button type="button" class="btn secondary" id="dd647Clear" disabled>Clear selection</button></div>
+          </div>
+          <p class="dd640-warning small">These are saved planning statuses, not evidence of actual stock, supplier confirmation, completed workshop work, purchase approval or publication. The local acknowledgement is unsigned and disappears after session/source changes; use the original owner editor for any explicit update.</p>
+        </div>
         <p class="dd640-warning small">Review notes document recommendations only. Neither a completed review nor a recommended action verifies physical stock or authorizes purchasing, order changes, manufacturing or marketplace publication.</p>
       </section>
       <form id="productBrowserSearchForm" class="dd-product-toolbar dd635-toolbar">
@@ -336,5 +357,6 @@
 <script src="/public/js/admin-owner-restock-search-644.js?v=644"></script>
 <script src="/public/js/admin-owner-restock-digest-645.js?v=645"></script>
 <script src="/public/js/admin-workshop-handoff-646.js?v=646"></script>
+<script src="/public/js/admin-workshop-followup-647.js?v=647"></script>
 </body>
 </html>
