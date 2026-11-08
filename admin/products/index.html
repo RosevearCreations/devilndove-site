@@ -289,6 +289,23 @@
           <textarea class="input dd640-copy" id="dd649Preview" rows="5" readonly placeholder="Load history and explicitly compare a current prepared worksheet to draft a review note."></textarea>
           <p class="dd640-warning small">Only a separately authenticated, deliberate Save in the dated review editor can persist a note. Review-note outcomes do not prove stock counts, supplier replies, orders, completed workshop work or plan closure. A saved plan status still changes only in its original editor.</p>
         </details>
+        <details class="dd640-plan" id="dd650Review" aria-labelledby="dd650Heading">
+          <summary id="dd650Heading"><strong>Workshop Decision Summaries &amp; Saved Timeline Freshness</strong></summary>
+          <p class="small">Review one saved plan's owner-reported decision totals and most recent outcome. Each refresh is a deliberate authenticated, read-only check. No stock, supplier or plan status changes occur.</p>
+          <div class="dd640-plan-fields">
+            <label>Saved owner plan<select id="dd650Plan" class="input" disabled><option value="">Load verified owner plans first</option></select></label>
+          </div>
+          <div class="dd640-actions"><button type="button" class="btn" id="dd650Refresh" disabled>Review current saved decisions</button><button type="button" class="btn secondary" id="dd650Clear" disabled>Clear private summary</button></div>
+          <p id="dd650Status" role="status" aria-live="polite">Load saved owner plans, choose one and deliberately check its private decisions.</p>
+          <h5>Saved decisions (owner-reported, not physical stock)</h5>
+          <p id="dd650Summary" class="small">No current, verified owner decision summary.</p>
+          <h5>Source freshness</h5>
+          <p id="dd650Freshness" class="small">Not checked. Saved decisions may have changed.</p>
+          <h5>Guided owner follow-up</h5>
+          <p id="dd650Guidance" class="small">Choose a plan and explicitly review its private dated decisions.</p>
+          <div class="dd640-actions"><button type="button" class="btn" id="dd650Reopen" disabled>Reopen original owner plan for separate Save</button></div>
+          <p class="dd640-warning small">A fresh review read verifies only the saved owner-note record at that moment. It does not verify workbench completion, physical count, supplier availability, payment, marketplace publication or a live inventory balance. The original editor requires a separate deliberate Save.</p>
+        </details>
         <p class="dd640-warning small">Review notes document recommendations only. Neither a completed review nor a recommended action verifies physical stock or authorizes purchasing, order changes, manufacturing or marketplace publication.</p>
       </section>
       <form id="productBrowserSearchForm" class="dd-product-toolbar dd635-toolbar">
@@ -405,5 +422,6 @@
 <script src="/public/js/admin-workshop-followup-647.js?v=647"></script>
 <script src="/public/js/admin-workshop-closure-648.js?v=648"></script>
 <script src="/public/js/admin-workshop-history-649.js?v=649"></script>
+<script src="/public/js/admin-workshop-decision-summary-650.js?v=650"></script>
 </body>
 </html>

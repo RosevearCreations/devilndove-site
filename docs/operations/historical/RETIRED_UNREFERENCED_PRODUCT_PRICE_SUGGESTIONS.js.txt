@@ -1,3 +1,4 @@
+// Historical script, archived from public/js after verifying no active HTML or JS reference.
 document.addEventListener('DOMContentLoaded', () => {
   const mounts = [document.getElementById('productPriceSuggestionMount')].filter(Boolean);
   if (!mounts.length) return;
