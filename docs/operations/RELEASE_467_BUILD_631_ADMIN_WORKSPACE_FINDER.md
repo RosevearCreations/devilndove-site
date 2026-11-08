@@ -31,5 +31,6 @@ The pre-change runtime baseline was approximately 18,412,517 bytes. After adding
 - `node --check public/js/admin-home-on-demand-v398.js` — script syntax.
 - `python3 scripts/release465_performance_budget_gate.py` — unchanged file and inline-data caps with bounded source-byte growth.
 - `python3 scripts/current_application_quality_gate.py` and existing required checks through protected `dev`/`main` release workflows.
+- `node scripts/release467_build556_admin_interface_inventory.mjs --check` — the reviewed Admin Home source-byte count is regenerated in the existing 152-route inventory; route decisions and owner visual-acceptance statuses remain unchanged.
 
 Admin UI browser acceptance and actual private business/provider actions are separate from passing static tests. The code does not claim they were performed.
