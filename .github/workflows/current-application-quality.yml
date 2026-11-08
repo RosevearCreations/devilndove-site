@@ -65,6 +65,8 @@ jobs:
         run: node --test scripts/release467_build647_workshop_followup_guidance.test.mjs
       - name: Build 648 source-linked workshop closure review and zero automatic write regression
         run: node --test scripts/release467_build648_workshop_closure_review.test.mjs
+      - name: Build 649 authenticated private history, owner decision continuity and explicit manual save boundary
+        run: node --test scripts/release467_build649_workshop_closure_history.test.mjs
       - name: Current help, search, H1, responsive, Packaging, Grey Hair CAIP, Content Studio review/execution boundary, authority restart integrity, I.T. truth and release provenance quality
         run: python scripts/current_application_quality_gate.py
       - name: Preserve password-hash compatibility and current-write security
