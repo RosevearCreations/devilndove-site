@@ -53,6 +53,8 @@ jobs:
         run: node --test scripts/release467_build641_owner_restock_plans.test.mjs
       - name: Build 642 read-only owner restock priority board, due-date filters and safe reopen regression
         run: node --test scripts/release467_build642_restock_priority_board.test.mjs
+      - name: Build 643 private owner review-note history, pagination, audit redaction and retired I.T. milestone clarity
+        run: node --test scripts/release467_build643_owner_restock_review_timeline.test.mjs
       - name: Current help, search, H1, responsive, Packaging, Grey Hair CAIP, Content Studio review/execution boundary, authority restart integrity, I.T. truth and release provenance quality
         run: python scripts/current_application_quality_gate.py
       - name: Preserve password-hash compatibility and current-write security
