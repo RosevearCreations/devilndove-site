@@ -31,6 +31,8 @@ jobs:
           python scripts/migration_policy_gate.py
       - name: Build 631 static Admin workspace finder accessibility and zero-network regression
         run: node --test scripts/release467_build631_admin_workspace_finder.test.mjs
+      - name: Build 632 Product Editor save-state and fail-closed recovery regression
+        run: node --test scripts/release467_build632_product_save_confidence.test.mjs
       - name: Current help, search, H1, responsive, Packaging, Grey Hair CAIP, Content Studio review/execution boundary, authority restart integrity, I.T. truth and release provenance quality
         run: python scripts/current_application_quality_gate.py
       - name: Preserve password-hash compatibility and current-write security
