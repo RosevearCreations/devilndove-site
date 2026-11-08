@@ -127,13 +127,29 @@
         <p id="dd640Status" role="status" aria-live="polite">Nothing has been scanned. No database read until we choose Start.</p>
         <p id="dd640Scope" class="small">No current verified inbox.</p>
         <div id="dd640Rows"><p class="small">Exceptions will appear after a deliberate scan.</p></div>
-        <h4>Owner draft restock worksheet (not saved)</h4>
-        <p class="small">Choose Add to draft on an exception, enter planned whole units, possible source and a factual note. This stays in the current browser memory; copy it before leaving the page. It never changes supplier purchases, stock, orders or external channels.</p>
+        <h4>Owner draft restock worksheet (temporary until saved)</h4>
+        <p class="small">Choose Add to draft on an exception, enter planned whole units, possible source and a factual note. First prepare the review text, then explicitly save a private owner draft below or copy it. Neither action changes supplier purchases, stock, orders or external channels.</p>
         <div id="dd640Draft"><p class="small">No Product selected for planning.</p></div>
         <div class="dd640-actions"><button class="btn" id="dd640Prepare" type="button" disabled>Prepare review text</button><button class="btn" id="dd640Copy" type="button" disabled>Copy reviewed text</button><button class="btn" id="dd640Reset" type="button" disabled>Clear draft</button></div>
         <p id="dd640DraftStatus" role="status" aria-live="polite">Draft plans are not stored.</p>
         <label class="small" for="dd640Preview">Review/copy text (read-only; does not publish or save)</label>
         <textarea class="input dd640-copy" id="dd640Preview" rows="6" readonly placeholder="After preparing the draft, our review text appears here."></textarea>
+      </section>
+      <section class="dd640-inbox" id="dd641PlansPanel" aria-labelledby="dd641Heading">
+        <h3 id="dd641Heading">Saved Owner Restock Plans &amp; Follow-Ups</h3>
+        <p class="small">Private to the signed-in admin owner. Saving a draft is an internal planning note only; it never restocks Products, reserves orders, purchases anything or publishes to marketplaces. Saved stock snapshots may be out of date when reopened.</p>
+        <div class="dd640-actions"><button type="button" class="btn" id="dd641Load">Load my saved plans</button><button type="button" class="btn" id="dd641New">Start new from reviewed worksheet</button></div>
+        <p class="small" id="dd641Status" role="status" aria-live="polite">No saved plans have been read. Choose Load my saved plans.</p>
+        <div id="dd641List"><p class="small">Open owner plans appear here after a deliberate read.</p></div>
+        <div class="dd640-plan-fields">
+          <label>Plan title (4–100 characters)<input class="input" id="dd641Title" maxlength="100" placeholder="e.g. Weekend rings replenishment"/></label>
+          <label>Follow-up date (optional)<input class="input" id="dd641Due" type="date"/></label>
+          <label>Status<select class="input" id="dd641State"><option value="draft">Draft</option><option value="follow_up">Owner follow-up</option><option value="blocked">Blocked / investigate</option><option value="completed">Reviewed / completed (no stock movement)</option></select></label>
+          <label class="dd640-note">Owner follow-up note (up to 500 characters)<textarea class="input" id="dd641Note" maxlength="500" rows="2" placeholder="What we checked; next owner action"></textarea></label>
+        </div>
+        <p class="small" id="dd641Items">For a new plan, first review the worksheet above. For an existing plan, select it from the saved list. To change Product quantities, create a fresh worksheet from current stock evidence.</p>
+        <div class="dd640-actions"><button type="button" class="btn" id="dd641Save" disabled>Save owner plan</button><button type="button" class="btn" id="dd641Cancel">Clear selection</button></div>
+        <p class="dd640-warning small">If another session updates these plans, we must reload and review before saving again. There is no automatic retry. Existing stock, supplier and purchase authorities remain separate.</p>
       </section>
       <form id="productBrowserSearchForm" class="dd-product-toolbar dd635-toolbar">
         <label><span class="small">Find a Product</span><input class="input" id="productBrowserQuery" type="search" placeholder="ID, product no., name, SKU or category" autocomplete="off"/></label>
@@ -240,5 +256,6 @@
 <script src="/public/js/admin-product-zero-price-review-v390.js?v=390"></script>
 <script src="/public/js/admin-product-price-source-review-v394.js?v=394"></script>
 <script src="/public/js/admin-product-stock-exceptions-640.js?v=640"></script>
+<script src="/public/js/admin-owner-restock-plans-641.js?v=641"></script>
 </body>
 </html>

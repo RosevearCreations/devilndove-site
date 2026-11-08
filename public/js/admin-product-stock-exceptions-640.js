@@ -9,7 +9,7 @@
   if(!root||!window.DDAuth)return;
   const esc=v=>String(v??'').replace(/[&<>"']/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
   const priority={source_hold:0,overcommitted:1,unavailable:2,low:3};
-  let found=new Map(),plans=new Map(),busy=false,nextCursor=null,totalScanned=0,scanComplete=false,verified=false;
+  let found=new Map(),plans=new Map(),busy=false,nextCursor=null,totalScanned=0,scanComplete=false,verified=false,reviewedItems=null;
   const say=(node,text,tone='')=>{if(node){node.textContent=text;node.dataset.tone=tone;}};
   function sync(){scan.disabled=busy;next.disabled=busy||!verified||nextCursor===null;previewButton.disabled=busy||!plans.size;
     copy.disabled=busy||!preview?.value?.trim();reset.disabled=busy||!plans.size;}
@@ -28,7 +28,7 @@
     }));
     say(scanScope,`${totalScanned} Product(s) scanned in explicit pages; ${found.size} exception(s) in this partial inbox. ${scanComplete?'All eligible Products in this scan have been visited.':'More eligible Product pages may remain; an unscanned Product could be more urgent.'}`);
   }
-  function invalidateDraft(){if(preview)preview.value='';say(draftStatus,'Draft was changed. Prepare and review the complete text again before copying. Not saved.','warn');sync();}
+  function invalidateDraft(){reviewedItems=null;if(preview)preview.value='';say(draftStatus,'Draft was changed. Prepare and review the complete text again before copying or saving.','warn');sync();}
   function renderDraft(){
     draft.innerHTML=plans.size?[...plans.values()].map(p=>`<div class="dd640-plan" data-plan-row="${p.product_id}"><strong>${esc(p.name)} (#${p.product_id})</strong>
       <p class="small">Saved ${p.saved_on_hand}, qualifying committed ${p.qualifying_order_committed}; suggested ${p.suggested_units_to_review} extra units as an unapproved planning prompt.</p>
@@ -83,14 +83,16 @@
     for(const p of entries){const units=Number(p.units),note=String(p.note||'').trim();
       if(!Number.isSafeInteger(units)||units<1||units>100000||note.length<8||note.length>240||!['make','buy','review'].includes(p.method)){
         say(draftStatus,`Fix ${p.name}: enter 1–100000 whole planned units, choose a source and give a factual 8–240 character note. Nothing was copied.`, 'error');
-        preview.value='';sync();return;
+        reviewedItems=null;preview.value='';sync();return;
       }
       lines.push(`Product #${p.product_id} ${p.name} (${p.sku||'no SKU'})`,
         `  saved=${p.saved_on_hand}, post-cutover committed=${p.qualifying_order_committed}, remaining=${p.remaining_after_orders}, planning prompt=${p.suggested_units_to_review}`,
         `  owner draft: ${units} unit(s), source=${p.method}, note=${note}`,'');
     }
     lines.push('NEXT: Recheck live Product, actual physical count, orders and source. Apply only through a separately approved stock correction.');
-    preview.value=lines.join('\n');say(draftStatus,'Draft text ready for review or copying. It remains unsaved in this browser session.','ok');sync();
+    reviewedItems=entries.map(p=>({product_id:p.product_id,units:Number(p.units),method:p.method,note:String(p.note).trim(),
+      saved_on_hand:p.saved_on_hand,qualifying_order_committed:p.qualifying_order_committed}));
+    preview.value=lines.join('\n');say(draftStatus,'Draft text ready for review, copying or deliberate owner-only save. It remains unsaved until Save is chosen.','ok');sync();
   }
   scan?.addEventListener('click',()=>void load(true));next?.addEventListener('click',()=>void load(false));
   previewButton?.addEventListener('click',prepare);
@@ -101,5 +103,6 @@
     }catch{say(draftStatus,'Clipboard permission was unavailable. Select and copy the prepared text manually; nothing was saved.','warn');preview.focus();preview.select?.();}
   });
   reset?.addEventListener('click',()=>{plans.clear();invalidateDraft();renderDraft();display();});
+  window.DD640RestockDraft={reviewedItems:()=>reviewedItems&&preview?.value?.trim()?reviewedItems.map(item=>({...item})):null};
   renderDraft();sync();
 })();
