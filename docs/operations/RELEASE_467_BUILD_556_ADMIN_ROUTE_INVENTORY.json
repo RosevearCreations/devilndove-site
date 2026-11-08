@@ -1545,7 +1545,7 @@
       "reference_screen": "Product Management",
       "reason": "Build 557 now provides the four-area Product Entry 2.0 shell. Preserve until real owner visual acceptance or an observed functional correction is requested.",
       "evidence": {
-        "byte_length": 164330,
+        "byte_length": 166933,
         "stylesheets": 38,
         "scripts": 42,
         "forms": 1,
