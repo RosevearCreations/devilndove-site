@@ -18,6 +18,19 @@
     .dd635-photo-label[data-ready="missing"]{color:#b54708;font-weight:700}
     .dd635-photo-label[data-ready="set"]{color:#027a48;font-weight:700}
     .dd635-photo-note{font-size:.79rem;opacity:.85}
+    .dd636-bulk-review{margin:14px 0;padding:16px;border:1px solid var(--border);border-radius:12px}
+    .dd636-bulk-controls{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,220px),1fr));gap:12px;margin-top:12px}
+    .dd636-bulk-controls label{display:block;min-width:0}
+    .dd636-bulk-controls select{width:100%;min-height:46px}
+    .dd636-bulk-actions{display:flex;flex-wrap:wrap;gap:8px;margin:12px 0}
+    .dd636-bulk-actions .btn{min-height:46px}
+    .dd636-bulk-choose{display:block;margin-top:8px;font-size:.87rem}
+    .dd636-bulk-choose input{width:18px;height:18px;vertical-align:middle;margin-right:5px}
+    .dd636-bulk-ack{display:block;margin:12px 0;padding:12px;border:1px solid var(--border);border-radius:9px;line-height:1.55}
+    .dd636-bulk-ack input{width:19px;height:19px;vertical-align:middle;margin-right:8px}
+    #dd636PreviewRows{overflow-x:auto;max-width:100%}
+    #dd636PreviewRows table{width:100%;border-collapse:collapse;min-width:540px}
+    #dd636PreviewRows th,#dd636PreviewRows td{text-align:left;vertical-align:top;padding:8px;border-bottom:1px solid var(--border)}
     @media(max-width:680px){
       .dd635-toolbar{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
       .dd635-toolbar label,.dd635-toolbar label:first-child{grid-column:1/-1;min-width:0}
@@ -78,6 +91,20 @@
           <tbody id="productBrowserBody"><tr><td colspan="4" class="dd-empty">Loading one compact Product page…</td></tr></tbody>
         </table>
       </div>
+      <section class="dd636-bulk-review" id="dd636BulkPanel" aria-labelledby="dd636BulkHeading">
+        <h3 id="dd636BulkHeading">Bulk draft changes — review first</h3>
+        <p class="small">Select up to eight <strong>draft</strong> Products using the checkboxes above, including across pages. We can change a category or return drafts to Pending review / Needs changes. Changing category always forces Needs changes. Prices, stock, images, publish status and external destinations are excluded.</p>
+        <p id="dd636SelectedCount" role="status" aria-live="polite">No draft Products selected.</p>
+        <div class="dd636-bulk-controls">
+          <label><span class="small">Change category (optional)</span><select id="dd636BulkCategory" class="input"><option value="">Keep each category</option><option value="Jewelry">Jewelry</option><option value="Earrings">Earrings</option><option value="Rings">Rings</option><option value="Necklaces">Necklaces</option><option value="Other">Other</option></select></label>
+          <label><span class="small">Change draft review state (optional)</span><select id="dd636BulkReviewState" class="input"><option value="">Keep review state</option><option value="pending_review">Pending review</option><option value="needs_changes">Needs changes</option></select></label>
+        </div>
+        <div class="dd636-bulk-actions"><button class="btn" type="button" id="dd636Preview" disabled>Preview selected drafts</button><button class="btn" type="button" id="dd636Clear">Clear selection</button></div>
+        <p id="dd636BulkStatus" role="status" aria-live="polite">No changes have been prepared or saved.</p>
+        <div id="dd636PreviewRows">Choose drafts and click Preview to see their actual saved values before deciding.</div>
+        <label class="dd636-bulk-ack"><input id="dd636OwnerConfirmed" type="checkbox" disabled/>I reviewed every Product and every before/after value. I authorize only these draft category/review changes; no external publication.</label>
+        <button class="btn primary" type="button" id="dd636Apply" disabled>Confirm and save reviewed draft changes</button>
+      </section>
       <details class="card" style="margin:14px 0" id="productBrowser390PriceAuditPanel">
         <summary>Build 394 · Source-backed Product price review</summary>
         <p class="small">Some Product prices may have been set to zero by the previous malformed decimal validator. This read-only review never changes prices. Verify intended amounts from invoices or earlier source evidence.</p>
@@ -103,7 +130,7 @@
   </div>
 
   <script src="/public/js/auth.js?v=440"></script>\n  <script src="/public/js/admin-route-usage.js?v=249"></script>
-  <script src="/public/js/admin-products-browser-v162.js?v=170&b635=1"></script>
+  <script src="/public/js/admin-products-browser-v162.js?v=170&b635=1&b636=1"></script>
 <script src="/public/js/admin-product-zero-price-review-v390.js?v=390"></script>
 <script src="/public/js/admin-product-price-source-review-v394.js?v=394"></script>
 </body>

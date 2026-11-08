@@ -39,6 +39,8 @@ jobs:
         run: node --test scripts/release467_build634_product_gallery_review.test.mjs
       - name: Build 635 Product catalog server filters, stable sorting, security and mobile usability regression
         run: node --test scripts/release467_build635_product_catalog_filters.test.mjs
+      - name: Build 636 owner-reviewed atomic draft bulk edit and negative-access regression
+        run: node --test scripts/release467_build636_bulk_draft_review.test.mjs
       - name: Current help, search, H1, responsive, Packaging, Grey Hair CAIP, Content Studio review/execution boundary, authority restart integrity, I.T. truth and release provenance quality
         run: python scripts/current_application_quality_gate.py
       - name: Preserve password-hash compatibility and current-write security
