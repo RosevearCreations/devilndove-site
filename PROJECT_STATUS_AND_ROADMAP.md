@@ -1,4 +1,12 @@
-# Release 467 Build 650 — Workshop Decision Review Summaries, Saved Timeline Freshness & Guided Owner Follow-Up (Production candidate)
+# Release 467 Build 651 — Workshop Follow-Up Review Queue, Decision Aging Filters & Owner Action Handoff (Production candidate)
+
+Admin → Products includes a **deliberate owner workshop follow-up queue** built from current saved owner plans and per-plan private dated Build 643 reviews. Owners explicitly scan at most five plans per click, sequentially, with no background reads. Each result checks owner/plan/version/timeline evidence and labels partial coverage; the queue filters due/overdue, decisions aged over seven days, plans without dated decisions, recent decisions, and owner-recommended attention. Selecting a verified plan opens safe manual actions: select that plan in Build 649's private history for its own explicit read, reopen the original saved-plan editor (separate Save), or prepare/copy an **unsigned, local, note-body-free follow-up handoff**. Any source change or failed result clears the queue; no provider, inventory, purchasing, supplier or status writes are authorized. Two historical orphaned Product JS modules are preserved as documentation-only archives to stay below the unchanged performance budget. [Build 651 owner guide](docs/operations/RELEASE_467_BUILD_651_WORKSHOP_REVIEW_QUEUE.md).
+
+**Next proposed Build 652 — Workshop Follow-Up Queue Saved Views, Explicit Action Priority Explanations & Review Continuity** (session-safe owner filters and a clearer return-to-workflow path without automatic writes or provider authority).
+
+---
+
+## Previous release — Build 650
 
 Admin → Products now offers an explicit, authenticated **saved owner decision summary** for one selected saved restock plan. The owner chooses **Review current saved decisions** to read the latest bounded ten dated reviews and full 50-event outcome totals through the existing Build 643 read-only endpoint. The summary shows the checked time, last saved-review age, a warning for owner notes older than seven days, recent recommendation changes, due-date context, and a specific manual next step. Changed owner/source or invalid response clears the private summary; the plan must be reselected and refreshed explicitly. **No automatic refresh, background read, stock adjustment, supplier order or status Save**. The retired, unreferenced Product price-suggestions helper is preserved as archival source, keeping the unchanged Release 465 performance budget. [Build 650 owner guide](docs/operations/RELEASE_467_BUILD_650_WORKSHOP_DECISION_SUMMARIES.md).
 

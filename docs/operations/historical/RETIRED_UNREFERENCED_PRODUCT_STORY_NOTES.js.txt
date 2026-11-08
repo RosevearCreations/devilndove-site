@@ -1,4 +1,4 @@
-// File: /public/js/admin-product-story-notes.js
+// Historical source formerly at /public/js/admin-product-story-notes.js; no active runtime reference.
 // Brief description: Admin panel for product_story_public_notes so public product stories can be drafted,
 // privacy-reviewed, approved, and published without hand-editing D1.
 
