@@ -31,6 +31,19 @@
     #dd636PreviewRows{overflow-x:auto;max-width:100%}
     #dd636PreviewRows table{width:100%;border-collapse:collapse;min-width:540px}
     #dd636PreviewRows th,#dd636PreviewRows td{text-align:left;vertical-align:top;padding:8px;border-bottom:1px solid var(--border)}
+    .dd637-restock{margin:14px 0;padding:16px;border:1px solid var(--border);border-radius:12px}
+    .dd637-restock[hidden]{display:none}
+    .dd637-restock-fields{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,230px),1fr));gap:12px}
+    .dd637-restock-fields label{display:block;min-width:0}
+    .dd637-restock-fields input{width:100%;min-height:46px}
+    .dd637-restock-actions{display:flex;gap:8px;flex-wrap:wrap;margin:12px 0}
+    .dd637-restock-actions .btn{min-height:46px}
+    .dd637-restock-ack{display:block;padding:12px;border:1px solid var(--border);border-radius:9px;line-height:1.55}
+    .dd637-restock-ack input{width:19px;height:19px;vertical-align:middle;margin-right:8px}
+    .dd637-stock-badge{display:inline-block;margin-top:4px;font-weight:700;font-size:.82rem}
+    .dd637-stock-badge[data-stock="out"]{color:#bc3434}
+    .dd637-stock-badge[data-stock="low"]{color:#b16a03}
+    .dd637-stock-badge[data-stock="healthy"]{color:#027a48}
     @media(max-width:680px){
       .dd635-toolbar{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
       .dd635-toolbar label,.dd635-toolbar label:first-child{grid-column:1/-1;min-width:0}
@@ -62,7 +75,7 @@
 
     <header class="hero compact-hero dd-products-compact-head">
       <div>
-        <p class="eyebrow">Release 467 • Build 170</p>
+        <p class="eyebrow">Release 467 • Build 637</p>
         <h1>Products</h1>
         <p>Find a Product and move straight into Product or image editing. A normal page load now performs one bounded Product query only; missing fallback photos are recovered only when you explicitly request one.</p>
       </div>
@@ -77,6 +90,7 @@
         <label><span class="small">Category</span><select class="input" id="productBrowserCategory"><option value="">All categories</option><option value="Jewelry">Jewelry</option><option value="Earrings">Earrings</option><option value="Rings">Rings</option><option value="Necklaces">Necklaces</option><option value="Other">Other</option></select></label>
         <label><span class="small">Sort all matching Products</span><select class="input" id="productBrowserSort"><option value="newest">Newest Product first</option><option value="updated">Recently updated</option><option value="name">Name A–Z</option><option value="price">Price low–high</option></select></label>
         <label><span class="small">Photo status</span><select class="input" id="productBrowserPhotos"><option value="all">All photos</option><option value="featured-missing">Missing featured photo</option></select></label>
+        <label><span class="small">Finished stock</span><select class="input" id="productBrowserStock"><option value="all">All stock levels</option><option value="attention">Needs attention (0–2)</option><option value="low">Low stock (1–2)</option><option value="out">Out of stock (0)</option><option value="tracked">Tracked Products</option><option value="untracked">Not tracked</option></select></label>
         <label class="dd-product-rows-label"><span class="small">Rows</span><select class="input" id="productBrowserPageSize"><option value="8" selected>8</option><option value="16">16</option><option value="24">24</option></select></label>
         <button class="btn" type="submit">Search</button>
         <button class="btn" id="productBrowserRefresh" type="button">Refresh</button>
@@ -91,6 +105,20 @@
           <tbody id="productBrowserBody"><tr><td colspan="4" class="dd-empty">Loading one compact Product page…</td></tr></tbody>
         </table>
       </div>
+      <section class="dd637-restock" id="dd637RestockPanel" aria-labelledby="dd637RestockHeading" hidden>
+        <h3 id="dd637RestockHeading">Restock one finished Product — verify first</h3>
+        <p id="dd637RestockProduct" role="status" aria-live="polite">Choose Restock on a tracked Product above.</p>
+        <p class="small">Enter only finished units we physically counted or received. This shortcut does not purchase supplies, receive inventory lots, change prices, or synchronize Etsy and other channels. Active Products may show increased availability on our storefront after Save.</p>
+        <div class="dd637-restock-fields">
+          <label><span class="small">Whole finished units added (1–1000)</span><input class="input" id="dd637RestockUnits" type="number" min="1" max="1000" step="1" value="1" inputmode="numeric"/></label>
+          <label><span class="small">Factual source/count note (required)</span><input class="input" id="dd637RestockNote" type="text" maxlength="240" placeholder="e.g. Counted 4 finished rings on workbench"/></label>
+        </div>
+        <div class="dd637-restock-actions"><button class="btn" id="dd637RestockPreview" type="button">Preview fresh stock</button><button class="btn" id="dd637RestockCancel" type="button">Close</button></div>
+        <p id="dd637RestockStatus" role="status" aria-live="polite">Nothing has been changed.</p>
+        <div id="dd637RestockComparison" aria-live="polite">Preview current saved stock before confirming.</div>
+        <label class="dd637-restock-ack"><input id="dd637RestockOwnerConfirmed" type="checkbox" disabled/>We verified the actual finished units, the Product, the before/after total and its storefront impact. Authorize this one stock update only.</label>
+        <button class="btn primary" id="dd637RestockApply" type="button" disabled>Confirm and add reviewed units</button>
+      </section>
       <section class="dd636-bulk-review" id="dd636BulkPanel" aria-labelledby="dd636BulkHeading">
         <h3 id="dd636BulkHeading">Bulk draft changes — review first</h3>
         <p class="small">Select up to eight <strong>draft</strong> Products using the checkboxes above, including across pages. We can change a category or return drafts to Pending review / Needs changes. Changing category always forces Needs changes. Prices, stock, images, publish status and external destinations are excluded.</p>
@@ -130,7 +158,7 @@
   </div>
 
   <script src="/public/js/auth.js?v=440"></script>\n  <script src="/public/js/admin-route-usage.js?v=249"></script>
-  <script src="/public/js/admin-products-browser-v162.js?v=170&b635=1&b636=1"></script>
+  <script src="/public/js/admin-products-browser-v162.js?v=170&b635=1&b636=1&b637=1"></script>
 <script src="/public/js/admin-product-zero-price-review-v390.js?v=390"></script>
 <script src="/public/js/admin-product-price-source-review-v394.js?v=394"></script>
 </body>
