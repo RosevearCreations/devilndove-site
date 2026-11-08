@@ -17,7 +17,7 @@
 
 ## Runtime budget and archived code
 
-The historical `public/js/admin-brand-content.js` standalone Admin catalog helper had **no active runtime script/import reference** when audited. Its unused mount in the catalog page remains for possible future development, and its exact source (apart from an explanatory archival header) is preserved at `docs/archive/RETIRED_UNREFERENCED_ADMIN_BRAND_CONTENT.js.txt`. No production route referenced the previous helper before archiving. It can be consciously reviewed and reactivated later; no functional replacement or external action is claimed.
+The historical `public/js/admin-brand-content.js` standalone Admin catalog helper had **no active runtime script/import reference** when audited. Its unused mount in the catalog page remains for possible future development, and its source (apart from an explanatory historical header) is preserved at `docs/operations/historical/RETIRED_UNREFERENCED_ADMIN_BRAND_CONTENT.js.txt`. No production route referenced the previous helper before preserving it. It can be consciously reviewed and reactivated later; no functional replacement or external action is claimed. The protected repository hygiene policy forbids shipping a `docs/archive` directory; the historical operations area preserves the original policy without any exception.
 
 Build 647's standalone owner follow-up client was mechanically minified. No release performance limit, required security check, D1 migration or provider authority was changed.
 
