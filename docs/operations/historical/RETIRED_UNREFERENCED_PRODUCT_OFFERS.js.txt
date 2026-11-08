@@ -1,4 +1,4 @@
-// Build 220 — catalog controls for volume-price specials and component-reserved sets.
+// Historical Build 220 catalog offers helper, preserved after verifying no active runtime reference.
 (() => {
   const esc = (value) => String(value ?? '').replace(/[&<>"']/g, (c) => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
   const money = (cents, currency='CAD') => { try { return new Intl.NumberFormat(undefined,{style:'currency',currency}).format(Number(cents||0)/100); } catch { return `$${(Number(cents||0)/100).toFixed(2)}`; } };
