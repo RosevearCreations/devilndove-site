@@ -1,4 +1,12 @@
-# Release 467 Build 641 — Saved Restock Plan Drafts & Owner Follow-Up Tracking (Production candidate)
+# Release 467 Build 642 — Restock Follow-Up Priority Board & Due-Date Review Shortcuts (Production candidate)
+
+Admin → Products now presents a read-only **Restock Follow-Up Priority Board** from the already loaded, authenticated owner's Build 641 plan snapshot. Explicit filters separate overdue, due in seven days (today included), blocked, undated and completed plans. Overdue, due today and blocked plans surface ahead of less urgent scheduled and completed reviews. Each **Review plan** shortcut reopens the original owner's saved draft to update follow-up date, status or notes through the existing explicit save/version checks. The board performs zero additional network requests, never opens another owner's plans, displays source snapshots as historical planning evidence, and never adjusts Product stock, reserves orders or places supplier purchases. Seven date/accessibility/security/integration regressions accompany the change. [Build 642 owner guidance](docs/operations/RELEASE_467_BUILD_642_RESTOCK_PRIORITY_BOARD.md).
+
+**Next proposed Build 643 — Owner Restock Follow-Up Notes Timeline & Review Outcome Clarity** (readable owner review outcomes and dated notes without treating plan completion as stock replenishment).
+
+---
+
+# Release 467 Build 641 — Saved Restock Plan Drafts & Owner Follow-Up Tracking
 
 Admin → Products now supports deliberate, private per-owner D1 saving of reviewed Build 640 restock worksheets, reopening those saved drafts, optional follow-up dates, status and notes. It rechecks the live Product and qualified commitments when first saving a draft; subsequent status edits preserve original snapshot line items and cannot be mistaken for current stock. Optimistic version compare-and-swap prevents silent concurrent overwrites; owner identity comes only from the verified admin session; generic app-settings GET/POST cannot disclose or overwrite the reserved owner-plan documents. Every confirmed write is read back and attempts a limited admin audit entry. Plans never create a stock movement, supplier order or external channel action. [Build 641 operator guidance](docs/operations/RELEASE_467_BUILD_641_OWNER_RESTOCK_FOLLOWUP.md).
 
