@@ -244,6 +244,33 @@
           </div>
           <p class="dd640-warning small">These are saved planning statuses, not evidence of actual stock, supplier confirmation, completed workshop work, purchase approval or publication. The local acknowledgement is unsigned and disappears after session/source changes; use the original owner editor for any explicit update.</p>
         </div>
+        <details class="dd640-plan" id="dd648Closure" aria-labelledby="dd648Heading">
+          <summary id="dd648Heading"><strong>Workshop Follow-Up Outcome Review &amp; Source-Linked Closure Checklist</strong></summary>
+          <p class="small">Review dated owner evidence and document a proposed follow-up or closure decision. This is a private, local planning worksheet. No plan is marked completed until an owner separately reviews and saves the original plan.</p>
+          <div class="dd640-plan-fields">
+            <label>Saved owner plan<select id="dd648Plan" class="input" disabled><option value="">Load private owner plans above first</option></select></label>
+            <label>Proposed review outcome<select id="dd648Outcome" class="input" disabled><option value="keep_open">Keep follow-up open</option><option value="follow_up">Schedule another owner follow-up</option><option value="blocked">Recommend blocked review</option><option value="closure_candidate">Recommend manual closure review (not completion)</option></select></label>
+          </div>
+          <div class="dd640-actions"><button type="button" class="btn" id="dd648Link" disabled>Link currently prepared dated-review digest</button><button type="button" class="btn secondary" id="dd648Reset" disabled>Clear closure worksheet</button></div>
+          <p id="dd648Status" role="status" aria-live="polite">Load private owner plans, choose one and prepare its dated-review digest above. No evidence is linked automatically.</p>
+          <fieldset id="dd648Checklist" disabled>
+            <legend>Owner review confirmations (not proof of physical completion)</legend>
+            <label class="dd640-plan small"><input type="checkbox" data-dd648-check="source"> I compared the selected dated review outcomes with the current saved owner plan version.</label>
+            <label class="dd640-plan small"><input type="checkbox" data-dd648-check="stock"> I understand a physical count and qualified order commitments require separate actual-source verification.</label>
+            <label class="dd640-plan small"><input type="checkbox" data-dd648-check="supplier"> I understand supplier availability, purchase approvals and payments are separate controlled actions.</label>
+            <label class="dd640-plan small"><input type="checkbox" data-dd648-check="authority"> I am recording an owner planning recommendation; the checklist cannot itself complete, restock, manufacture or publish Products.</label>
+            <div class="dd640-plan-fields">
+              <label>Owner-supplied review evidence note (8–300 characters)<textarea id="dd648Evidence" class="input" rows="3" minlength="8" maxlength="300" placeholder="Which workbench record or actual count should we check separately?"></textarea></label>
+              <label>Suggested next step (8–180 characters)<textarea id="dd648Next" class="input" rows="3" minlength="8" maxlength="180" placeholder="What remains to do before any owner Save?"></textarea></label>
+              <label>Suggested follow-up date (optional)<input id="dd648Due" class="input" type="date"></label>
+            </div>
+            <label class="small"><input type="checkbox" id="dd648Confirm"> I confirm this is an unsigned, owner-reported planning assessment, not an independently verified closure.</label>
+            <div class="dd640-actions"><button type="button" class="btn" id="dd648Prepare" disabled>Prepare closure-review worksheet</button><button type="button" class="btn" id="dd648Copy" disabled>Copy private review</button><button type="button" class="btn" id="dd648Download" disabled>Download private .txt</button><button type="button" class="btn secondary" id="dd648Reopen" disabled>Reopen owner plan for separate Save</button></div>
+            <label for="dd648Preview" class="small">Read-only proposed review text (no server write)</label>
+            <textarea id="dd648Preview" class="input dd640-copy" rows="9" readonly placeholder="Link a current dated digest and explicitly complete each review acknowledgement to prepare a local worksheet."></textarea>
+          </fieldset>
+          <p class="dd640-warning small">A closure candidate is NOT a completed stock count, receipt, supplier order or completed owner-plan status. The original owner editor controls every deliberate status update; never infer completion or automatically share this private worksheet.</p>
+        </details>
         <p class="dd640-warning small">Review notes document recommendations only. Neither a completed review nor a recommended action verifies physical stock or authorizes purchasing, order changes, manufacturing or marketplace publication.</p>
       </section>
       <form id="productBrowserSearchForm" class="dd-product-toolbar dd635-toolbar">
@@ -358,5 +385,6 @@
 <script src="/public/js/admin-owner-restock-digest-645.js?v=645"></script>
 <script src="/public/js/admin-workshop-handoff-646.js?v=646"></script>
 <script src="/public/js/admin-workshop-followup-647.js?v=647"></script>
+<script src="/public/js/admin-workshop-closure-648.js?v=648"></script>
 </body>
 </html>
