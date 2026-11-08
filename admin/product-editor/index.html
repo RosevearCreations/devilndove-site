@@ -47,6 +47,18 @@
     .dd633-field-hint{display:block;margin-top:5px;color:#e4d7f0;font-size:.84rem;line-height:1.4}
     .dd633-field-hint[data-error="true"]{color:#ffd0c7;font-weight:700}
     #productEditorForm [aria-invalid="true"]{outline:3px solid #f39b91;outline-offset:2px;border-color:#f39b91!important}
+    #productEditorMediaStrip{grid-template-columns:repeat(auto-fill,minmax(min(100%,220px),1fr));gap:12px}
+    #productEditorMediaStrip .dd-editor-media-card{gap:10px;padding:11px;min-width:0}
+    #productEditorMediaStrip .dd634-review-photo{display:block;width:100%;padding:0;border:1px solid var(--border);border-radius:9px;background:rgba(128,128,128,.12);cursor:zoom-in;overflow:hidden}
+    #productEditorMediaStrip .dd634-review-photo:focus-visible{outline:3px solid #dbaafa;outline-offset:3px}
+    #productEditorMediaStrip .dd634-review-photo img{display:block;width:100%;height:180px;object-fit:contain;aspect-ratio:auto;margin:0;background:transparent}
+    #productEditorMediaStrip .dd634-featured-label{display:inline-block;padding:3px 8px;border:1px solid currentColor;border-radius:999px;font-weight:700;font-size:.82rem}
+    #productEditorMediaStrip .dd-editor-media-card .dd-product-actions .btn{min-height:44px;flex:1 1 120px;white-space:normal}
+    #dd634GalleryReview{max-width:min(92vw,900px);max-height:90vh;width:100%;padding:18px;border:1px solid var(--border);border-radius:14px;background:var(--card,#191725);color:inherit}
+    #dd634GalleryReview::backdrop{background:rgba(0,0,0,.85)}
+    #dd634GalleryReview img{display:block;width:100%;max-height:54vh;object-fit:contain;border-radius:9px;background:rgba(128,128,128,.1)}
+    #dd634GalleryReview .dd634-review-controls{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
+    #dd634GalleryReview .dd634-review-controls .btn{min-height:44px}
     @media(max-width:600px){
       .dd540-finished-product .dd557-steps{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
       .dd540-finished-product .dd557-steps>.btn{min-width:0;min-height:48px;white-space:normal;padding:10px 7px;line-height:1.3}
@@ -343,8 +355,16 @@
 
       <section class="dd-editor-panel" id="dd557PhotosArea" data-editor-panel="media" hidden role="tabpanel" aria-labelledby="dd567TabPhotos" tabindex="0">
         <div class="dd-products-browser-heading"><div><h2>Media — one shared Product gallery</h2><p class="small">Photos already uploaded to this Product are reused for the store, Etsy and Marketplace. In the photo list choose “Choose square framing” to drag a crop box, preview the result and explicitly replace that same gallery photo if desired. Cropping is optional; 800 × 800 is our minimum, while Etsy recommends 2000 px on the shortest side.</p></div><a class="btn" id="productEditorMediaLink" href="/admin/catalog-media/">Open Image Editor (advanced)</a></div>
+        <p class="dd-low-read-note" id="dd634GalleryGuidance">Select a photo to review it at full width, without cropping. <strong>Use as featured</strong> only changes this unsaved Product draft; press <strong>Save Product</strong> to keep the choice. Image rights and channel approvals must still be checked in Image Editor before external use.</p>
         <div id="productEditorMediaStatus" class="small" aria-live="polite">Images not loaded yet.</div>
+        <p id="dd634GalleryCount" class="small" role="status" aria-live="polite">Open Photos to load the saved Product gallery.</p>
         <div id="productEditorMediaStrip" class="dd-editor-media-strip"></div>
+        <dialog id="dd634GalleryReview" aria-labelledby="dd634ReviewTitle" aria-describedby="dd634ReviewDescription">
+          <h3 id="dd634ReviewTitle">Review Product photo</h3>
+          <img id="dd634ReviewImage" alt=""/>
+          <p id="dd634ReviewDescription" class="small"></p>
+          <div class="dd634-review-controls"><button class="btn" id="dd634ReviewPrevious" type="button">Previous photo</button><button class="btn" id="dd634ReviewNext" type="button">Next photo</button><button class="btn primary" id="dd634ReviewClose" type="button">Close review</button></div>
+        </dialog>
         <div class="dd-editor-grid cols-2" style="margin-top:14px"><label><span class="small">Featured image URL</span><input class="input" name="featured_image_url" type="url"/></label><div><span class="small">Featured preview</span><div><img id="productEditorFeaturedPreview" class="dd-product-thumb" alt=""/></div></div></div>
       </section>
 
@@ -1052,7 +1072,7 @@
     </form>
   </div>
   <script src="/public/js/auth.js?v=440"></script>
-  <script src="/public/js/admin-product-channel-intent-v405.js?v=527"></script><script src="/public/js/admin-product-creation-flow-471.js?v=527"></script><script src="/public/js/admin-product-distribution-v406.js?v=533"></script><script src="/public/js/admin-listing-sync-v408.js?v=436"></script><script src="/public/js/admin-recovery-policy-468.js?v=467b468"></script><script src="/public/js/admin-product-editor-v163.js?v=632&b390=1&b633=1"></script>
+  <script src="/public/js/admin-product-channel-intent-v405.js?v=527"></script><script src="/public/js/admin-product-creation-flow-471.js?v=527"></script><script src="/public/js/admin-product-distribution-v406.js?v=533"></script><script src="/public/js/admin-listing-sync-v408.js?v=436"></script><script src="/public/js/admin-recovery-policy-468.js?v=467b468"></script><script src="/public/js/admin-product-editor-v163.js?v=632&b390=1&b633=1&b634=1"></script>
   <script src="/public/js/admin-product-marketplace-drafts-v438.js?v=496"></script>
   <script src="/public/js/admin-product-image-inline-v495.js?v=533"></script>
   <script src="/public/js/admin-product-unified-publishing-v443.js?v=496"></script>
