@@ -1,4 +1,12 @@
-# Release 467 Build 647 — Workshop Follow-Up Status & Owner Reopen Guidance (Production candidate)
+# Release 467 Build 648 — Workshop Follow-Up Outcome Review & Source-Linked Closure Checklist (Production candidate)
+
+Admin → Products now provides a **private, owner-prepared workshop follow-up closure worksheet** linked to the saved plan and a deliberately prepared, source-verified dated-review digest. The owner selects a review outcome, adds a stated evidence note and next action, acknowledges four distinct stock/supplier/status boundaries, then deliberately prepares an unsigned local preview for manual copy or download. Changes in source, owner, plan or inputs invalidate it. **No plan status, inventory, purchasing, supplier, payment or publication change occurs**; only the original editor can separately Save a planning status. The unused historical Build 220 offers helper is preserved in operations documentation after its active references were checked, maintaining the existing runtime budget. [Build 648 owner instructions](docs/operations/RELEASE_467_BUILD_648_WORKSHOP_CLOSURE_REVIEW.md).
+
+**Next proposed Build 649 — Workshop Follow-Up Closure History & Owner Decision Continuity** (source-verified recent review recommendations, manual reopen history and clear next-step guidance without implicit approval or inventory authority).
+
+---
+
+## Previous release — Build 647
 
 Admin → Products now provides a **private, source-verified workshop follow-up status view** based solely on owner plans explicitly loaded through Build 641. Owners can filter open, due/overdue, blocked, completed-review and all saved plans, inspect contextual next-step guidance, and deliberately reopen the original plan editor; no Save, API call, stock adjustment, supplier order or automatic notification is triggered by this view. An optional **Inspect local acknowledgement** action reads only a currently prepared, unsigned Build 646 receipt for that same owner, plan and source version; stale or changed session receipts are rejected and invalidated. The view never treats planning status as completed workshop/stock work. A historical Admin brand-content helper with no active script/import reference was preserved as a `.txt` archival source outside the runtime tree, and the new client was mechanically minified to keep the original Release 465 runtime source budget unchanged. [Build 647 owner guidance](docs/operations/RELEASE_467_BUILD_647_WORKSHOP_FOLLOWUP_STATUS.md).
 

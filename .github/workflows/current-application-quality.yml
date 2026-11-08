@@ -63,6 +63,8 @@ jobs:
         run: node --test scripts/release467_build646_workshop_handoff_acknowledgement.test.mjs
       - name: Build 647 workshop follow-up status and safe owner reopen regression
         run: node --test scripts/release467_build647_workshop_followup_guidance.test.mjs
+      - name: Build 648 source-linked workshop closure review and zero automatic write regression
+        run: node --test scripts/release467_build648_workshop_closure_review.test.mjs
       - name: Current help, search, H1, responsive, Packaging, Grey Hair CAIP, Content Studio review/execution boundary, authority restart integrity, I.T. truth and release provenance quality
         run: python scripts/current_application_quality_gate.py
       - name: Preserve password-hash compatibility and current-write security
