@@ -9,6 +9,7 @@
   const category=document.getElementById('productBrowserCategory');
   const sort=document.getElementById('productBrowserSort');
   const photos=document.getElementById('productBrowserPhotos');
+  const stockFilter=document.getElementById('productBrowserStock');
   const clearFilters=document.getElementById('productBrowserClear');
   const body=document.getElementById('productBrowserBody');
   const status=document.getElementById('productBrowserStatus');
@@ -24,6 +25,15 @@
   const bulkPreviewButton636=document.getElementById('dd636Preview');
   const bulkApplyButton636=document.getElementById('dd636Apply');
   const bulkOwnerConfirmed636=document.getElementById('dd636OwnerConfirmed');
+  const restockPanel637=document.getElementById('dd637RestockPanel');
+  const restockProduct637=document.getElementById('dd637RestockProduct');
+  const restockUnits637=document.getElementById('dd637RestockUnits');
+  const restockNote637=document.getElementById('dd637RestockNote');
+  const restockStatus637=document.getElementById('dd637RestockStatus');
+  const restockComparison637=document.getElementById('dd637RestockComparison');
+  const restockPreviewButton637=document.getElementById('dd637RestockPreview');
+  const restockApplyButton637=document.getElementById('dd637RestockApply');
+  const restockOwnerConfirmed637=document.getElementById('dd637RestockOwnerConfirmed');
   if(!form||!body||!status||!window.DDAuth)return;
 
   const history=[];
@@ -36,6 +46,7 @@
   let stoppedForQuota=false;
   let currentEntry=null;
   const bulkSelection636=new Map();let bulkPreview636=null,bulkBusy636=false,bulkBlocked636=false;
+  let restockSelection637=null,restockPreview637=null,restockBusy637=false,restockBlocked637=false;
 
   const esc=(value)=>String(value??'').replace(/[&<>"']/g,(ch)=>({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[ch]));
   const money=(cents,currency='CAD')=>{try{return new Intl.NumberFormat('en-CA',{style:'currency',currency:String(currency||'CAD')}).format(Number(cents||0)/100);}catch{return `$${(Number(cents||0)/100).toFixed(2)}`;}};
@@ -45,10 +56,89 @@
   const sortValue=()=>String(sort?.value||'newest');
   const categoryValue=()=>String(category?.value||'').trim();
   const photoValue=()=>String(photos?.value||'all');
-  const cacheKey=(q,pageLimit,requestedCursor)=>JSON.stringify([String(q||'').trim().toLowerCase(),Number(pageLimit||8),String(requestedCursor||''),sortValue(),categoryValue(),photoValue()]);
+  const stockValue=()=>String(stockFilter?.value||'all');
+  const cacheKey=(q,pageLimit,requestedCursor)=>JSON.stringify([String(q||'').trim().toLowerCase(),Number(pageLimit||8),String(requestedCursor||''),sortValue(),categoryValue(),photoValue(),stockValue()]);
   const sortLabels={newest:'newest Product first',updated:'recently updated',name:'name A–Z',price:'price low–high'};
   function setStatus(message,tone=''){status.textContent=message;status.dataset.tone=tone;status.hidden=!message;}
   function bulkMessage636(message,tone=''){if(bulkStatus636){bulkStatus636.textContent=message;bulkStatus636.dataset.tone=tone;}}
+  function restockMessage637(message,tone=''){if(restockStatus637){restockStatus637.textContent=message;restockStatus637.dataset.tone=tone;}}
+  function syncRestock637(){
+    if(restockPreviewButton637)restockPreviewButton637.disabled=restockBusy637||restockBlocked637||!restockSelection637;
+    if(restockApplyButton637)restockApplyButton637.disabled=restockBusy637||restockBlocked637||!restockPreview637||!restockOwnerConfirmed637?.checked;
+    for(const control of [restockUnits637,restockNote637])if(control)control.disabled=restockBusy637||restockBlocked637;
+    body.querySelectorAll('[data-dd637-restock-id]').forEach(button=>button.disabled=restockBusy637||restockBlocked637);
+  }
+  function invalidateRestock637(message='Stock proposal changed. Preview actual saved stock again.'){
+    restockPreview637=null;
+    if(restockOwnerConfirmed637){restockOwnerConfirmed637.checked=false;restockOwnerConfirmed637.disabled=true;}
+    if(restockComparison637)restockComparison637.textContent='No verified preview. Review the actual saved stock before confirming.';
+    if(message)restockMessage637(message,'warn');syncRestock637();
+  }
+  function openRestock637(product){
+    if(restockBusy637||restockBlocked637||Number(product?.inventory_tracking)!==1||
+      String(product.product_type||'').toLowerCase()!=='physical'||!['draft','active'].includes(String(product.status||'').toLowerCase()))return;
+    restockSelection637={product_id:Number(product.product_id),name:String(product.name||''),listed_quantity:Number(product.inventory_quantity||0)};
+    if(restockPanel637)restockPanel637.hidden=false;
+    if(restockProduct637)restockProduct637.textContent=`${restockSelection637.name} (#${restockSelection637.product_id}) — catalog shows ${restockSelection637.listed_quantity} finished unit(s). Preview reads current saved stock.`;
+    if(restockUnits637)restockUnits637.value='1';if(restockNote637)restockNote637.value='';
+    invalidateRestock637('Enter counted finished units and a factual note, then Preview. Nothing has been saved.');
+    restockUnits637?.focus();
+  }
+  function restockInput637(){const units=Number(restockUnits637?.value),note=String(restockNote637?.value||'').trim();
+    return {units,note,valid:Number.isSafeInteger(units)&&units>=1&&units<=1000&&note.length>=8&&note.length<=240};}
+  async function previewRestock637(){
+    if(restockBusy637||restockBlocked637||!restockSelection637)return;
+    const input=restockInput637();
+    if(!input.valid){invalidateRestock637('Enter 1–1000 whole units and a factual note of 8–240 characters. Nothing saved.');return;}
+    invalidateRestock637('Reading the saved Product stock for a fresh, read-only preview…');restockBusy637=true;syncRestock637();
+    try{
+      const response=await window.DDAuth.apiFetch('/api/admin/product-restock-review',{method:'POST',headers:{'Content-Type':'application/json'},cache:'no-store',
+        body:JSON.stringify({action:'preview',product_id:restockSelection637.product_id,add_units:input.units,note:input.note})});
+      const data=await readJson(response);
+      if(data.action!=='preview'||data.saved!==false||Number(data.product_id)!==restockSelection637.product_id||
+        Number(data.add_units)!==input.units||data.note!==input.note||!data.snapshot)throw new Error('The stock preview was incomplete. Nothing saved.');
+      restockPreview637={product_id:Number(data.product_id),add_units:input.units,note:input.note,
+        snapshot:data.snapshot,previewed_at:data.previewed_at};
+      if(restockComparison637)restockComparison637.innerHTML=`<p><strong>${esc(data.name||restockSelection637.name)} (#${Number(data.product_id)})</strong></p>
+        <p>Saved now: <strong>${Number(data.before_quantity)} units</strong> + verified received: <strong>${input.units} units</strong> = proposed: <strong>${Number(data.after_quantity)} units</strong>.</p>
+        <p>Source/count note: ${esc(input.note)}</p><p>${data.storefront_availability_may_change?'This Product is active: storefront availability may increase immediately after saving.':'This Product is a draft; no publication is performed.'}</p>`;
+      if(restockOwnerConfirmed637){restockOwnerConfirmed637.checked=false;restockOwnerConfirmed637.disabled=false;}
+      restockMessage637('Fresh preview ready. No stock has been changed. Verify every value and confirm deliberately.','ok');
+    }catch(error){invalidateRestock637(`${error.message||'Preview unavailable.'} Nothing saved.`);}
+    finally{restockBusy637=false;syncRestock637();}
+  }
+  async function applyRestock637(){
+    if(restockBusy637||restockBlocked637||!restockPreview637||!restockOwnerConfirmed637?.checked)return;
+    const input=restockInput637(),preview=restockPreview637;
+    if(!input.valid||input.units!==preview.add_units||input.note!==preview.note||
+      restockSelection637?.product_id!==preview.product_id){invalidateRestock637('Proposal changed. Preview saved stock again.');return;}
+    restockBusy637=true;syncRestock637();restockMessage637('Saving the exact reviewed restock once…','warn');
+    try{
+      const response=await window.DDAuth.apiFetch('/api/admin/product-restock-review',{method:'POST',headers:{'Content-Type':'application/json'},cache:'no-store',
+        body:JSON.stringify({action:'apply',product_id:preview.product_id,add_units:preview.add_units,note:preview.note,
+          snapshot:preview.snapshot,previewed_at:preview.previewed_at,owner_confirmed:true,acknowledgement:'I VERIFIED PHYSICAL STOCK'})});
+      const data=await readJson(response);
+      if(data.action!=='apply'||data.confirmed!==true||Number(data.product_id)!==preview.product_id||
+        Number(data.after_quantity)!==Number(preview.snapshot.inventory_quantity)+preview.add_units)
+        throw new Error('Restock result is not confirmed. Refresh the Product before any new attempt.');
+      pageCache.clear();restockSelection637=null;restockPreview637=null;
+      if(restockOwnerConfirmed637){restockOwnerConfirmed637.checked=false;restockOwnerConfirmed637.disabled=true;}
+      if(restockComparison637)restockComparison637.textContent=`Saved ${Number(data.before_quantity)} → ${Number(data.after_quantity)} units. Press Refresh to reload the original Product list.`;
+      restockMessage637(`Saved ✓ ${preview.add_units} actual finished unit(s) added. Press Refresh for the current catalog; external channels were not synchronized.`,'ok');
+    }catch(error){
+      restockBlocked637=true;restockSelection637=null;
+      invalidateRestock637(`HOLD — ${error.message||'Result unconfirmed.'} Refresh, verify real stock, then start a new review. Never retry the same Save automatically.`);
+    }finally{restockBusy637=false;syncRestock637();}
+  }
+  restockUnits637?.addEventListener('input',()=>invalidateRestock637());
+  restockNote637?.addEventListener('input',()=>invalidateRestock637());
+  restockOwnerConfirmed637?.addEventListener('change',syncRestock637);
+  restockPreviewButton637?.addEventListener('click',()=>void previewRestock637());
+  restockApplyButton637?.addEventListener('click',()=>void applyRestock637());
+  document.getElementById('dd637RestockCancel')?.addEventListener('click',()=>{
+    if(restockBusy637)return;restockSelection637=null;invalidateRestock637('Restock review closed; no pending stock change.');
+    if(restockPanel637)restockPanel637.hidden=true;
+  });
   function syncBulkControls636(){
     if(bulkCount636)bulkCount636.textContent=bulkSelection636.size?`${bulkSelection636.size} of 8 draft Product${bulkSelection636.size===1?'':'s'} selected: ${[...bulkSelection636.keys()].join(', ')}.`:'No draft Products selected.';
     if(bulkPreviewButton636)bulkPreviewButton636.disabled=bulkBusy636||bulkBlocked636||bulkSelection636.size===0;
@@ -166,7 +256,11 @@
     body.innerHTML=products.map((p)=>{
       const id=Number(p.product_id||0);const recovery=imageRecoveryState.get(id)||{status:'idle',image:null};const recovered=recovery.image||{};const featured=String(p.featured_image_url||'').trim();const fallback=featured?'':String(recovered.image_url||'').trim();const candidates=mediaCandidates(featured,fallback);
       const edit=`/admin/product-editor/?product_id=${encodeURIComponent(id)}`;const media=`/admin/catalog-media/?product_id=${encodeURIComponent(id)}`;const publicLink=p.slug?`/shop/product/?slug=${encodeURIComponent(p.slug)}`:'';
-      const stock=Number(p.inventory_tracking||0)===1?String(Number(p.inventory_quantity||0)):'not tracked';
+      const tracked=Number(p.inventory_tracking||0)===1,qty=Number(p.inventory_quantity||0);
+      const stock=tracked?String(qty):'not tracked';
+      const stockState=tracked?(qty<=0?'out':qty<=2?'low':'healthy'):'untracked';
+      const stockLabel=stockState==='out'?'OUT OF STOCK':stockState==='low'?'LOW STOCK (1–2)':stockState==='healthy'?'Tracked stock OK':'Not tracked';
+      const canRestock=tracked&&String(p.product_type||'').toLowerCase()==='physical'&&['draft','active'].includes(String(p.status||'').toLowerCase());
       let source='';let photoAction='';
       if(!featured){
         if(recovery.status==='loading'){source='Checking this Product only…';photoAction='<button class="btn" type="button" disabled>Loading photo…</button>';}
@@ -179,8 +273,8 @@
       return `<tr data-product-id="${id}">
         <td class="dd-product-image-cell"><img class="dd-product-thumb" loading="lazy" data-product-image-candidates='${esc(JSON.stringify(candidates))}' alt="${esc(p.name||'Product image')}"></td>
         <td><strong>${esc(p.name||`Product #${id}`)}</strong><div class="small">#${id}${p.product_number?` • No. ${esc(p.product_number)}`:''}${p.sku?` • ${esc(p.sku)}`:''}${p.product_category?` • ${esc(p.product_category)}`:''}</div><div class="dd-product-meta"><span>${esc(p.status||'draft')}</span><span>${esc(p.review_status||'pending')}</span></div><label class="dd636-bulk-choose"><input type="checkbox" data-dd636-select-id="${id}" data-dd636-eligible="${String(p.status||'').toLowerCase()==='draft'?'true':'false'}" ${String(p.status||'').toLowerCase()==='draft'?'':'disabled'} ${bulkSelection636.has(id)?'checked':''}/> ${String(p.status||'').toLowerCase()==='draft'?'Select draft for bulk review':'Not draft — bulk edit unavailable'}</label><div class="dd635-photo-label" data-ready="${photoReady?'set':'missing'}">${photoLabel}</div><div class="dd635-photo-note">Alt text / image rights: not checked in this list.</div><div class="small dd-product-photo-source">${source}</div></td>
-        <td><strong>${money(p.price_cents,p.currency)}</strong><div class="small">Stock: ${esc(stock)}</div></td>
-        <td class="dd-product-actions"><a class="btn" data-product-edit-id="${id}" href="${edit}">Edit</a><a class="btn" href="${media}">Images</a>${photoAction}${publicLink?`<a class="btn" href="${publicLink}" target="_blank" rel="noopener">View</a>`:''}</td>
+        <td><strong>${money(p.price_cents,p.currency)}</strong><div class="small">Stock: ${esc(stock)}</div><span class="dd637-stock-badge" data-stock="${stockState}">${stockLabel}</span></td>
+        <td class="dd-product-actions"><a class="btn" data-product-edit-id="${id}" href="${edit}">Edit</a>${canRestock?`<button class="btn" type="button" data-dd637-restock-id="${id}">Restock</button>`:''}<a class="btn" href="${media}">Images</a>${photoAction}${publicLink?`<a class="btn" href="${publicLink}" target="_blank" rel="noopener">View</a>`:''}</td>
       </tr>`;
     }).join('');
     body.querySelectorAll('[data-product-edit-id]').forEach((link)=>link.addEventListener('click',()=>rememberEditorSeed(byId.get(Number(link.dataset.productEditId||0)))));
@@ -188,8 +282,10 @@
     body.querySelectorAll('[data-dd636-select-id]').forEach((checkbox)=>checkbox.addEventListener('change',()=>{
       selectBulk636(byId.get(Number(checkbox.dataset.dd636SelectId||0)),checkbox.checked);
     }));
+    body.querySelectorAll('[data-dd637-restock-id]').forEach(button=>button.addEventListener('click',()=>openRestock637(byId.get(Number(button.dataset.dd637RestockId||0)))));
     armImages();
     syncBulkControls636();
+    syncRestock637();
   }
   async function readJson(response){const data=await response.json().catch(()=>null);if(!response.ok||!data?.ok){const error=new Error(data?.error||`Product Browser request failed (${response.status}).`);error.code=data?.code||'';error.status=response.status;throw error;}return data;}
   async function recoverPhoto(productId){
@@ -205,7 +301,7 @@
   function applyPage(entry,{fromCache=false}={}){
     currentEntry=entry;cursor=entry.cursor||null;nextCursor=entry.nextCursor||null;render(entry.products||[]);
     const rows=Number(entry.rows||0);const missing=(entry.products||[]).filter((p)=>!String(p?.featured_image_url||'').trim()).length;
-    const context=`Sort: ${sortLabels[sortValue()]||'newest Product first'}${categoryValue()?`; category: ${categoryValue()}`:''}${photoValue()==='featured-missing'?'; missing featured photos only':''}. ${missing} visible Product${missing===1?'':'s'} lack a featured image. Gallery alt text and image rights are not checked.`;
+    const context=`Sort: ${sortLabels[sortValue()]||'newest Product first'}${categoryValue()?`; category: ${categoryValue()}`:''}${photoValue()==='featured-missing'?'; missing featured photos only':''}${stockValue()!=='all'?`; finished stock filter: ${stockValue()}`:''}. ${missing} visible Product${missing===1?'':'s'} lack a featured image. Gallery alt text and image rights are not checked.`;
     setStatus(fromCache?`${entry.products.length} Product${entry.products.length===1?'':'s'} reused from this browser session. D1 rows read: 0 for this navigation. ${context} Press Refresh for live authority.`:`${entry.products.length} Product${entry.products.length===1?'':'s'} loaded from one bounded Product query. Automatic secondary image recovery reads: 0. ${context} Use Recover photo only when needed.${Number.isFinite(rows)?` D1 rows read: ${rows}.`:''}`,'ok');
     pageLabel.textContent=`Page ${page} • ${entry.pageLimit} per page${fromCache?' • session reuse':''}`;
   }
@@ -216,10 +312,10 @@
       if(remember)history.push(cursor);stoppedForQuota=false;applyPage(pageCache.get(key),{fromCache:true});next.disabled=!nextCursor;prev.disabled=history.length===0;refresh.disabled=false;if(pageSize)pageSize.disabled=false;return;
     }
     inFlight=true;next.disabled=true;prev.disabled=true;refresh.disabled=true;
-    for(const control of [pageSize,category,sort,photos])if(control)control.disabled=true;
+    for(const control of [pageSize,category,sort,photos,stockFilter])if(control)control.disabled=true;
     setStatus('Loading one compact Product page…');
     try{
-      const params=new URLSearchParams({limit:String(pageLimit),sort:sortValue(),photos:photoValue()});
+      const params=new URLSearchParams({limit:String(pageLimit),sort:sortValue(),photos:photoValue(),stock:stockValue()});
       if(q)params.set('q',q);if(categoryValue())params.set('category',categoryValue());if(requestedCursor)params.set('cursor',String(requestedCursor));
       const response=await window.DDAuth.apiFetch(`/api/admin/product-browser?${params.toString()}`,{method:'GET',cache:'no-store'});
       const data=await readJson(response);const products=Array.isArray(data.products)?data.products:[];
@@ -234,7 +330,7 @@
       body.innerHTML='<tr><td colspan="4" class="dd-empty">Product Browser is unavailable. No automatic retry will run.</td></tr>';
     }finally{
       inFlight=false;next.disabled=stoppedForQuota||!nextCursor;prev.disabled=stoppedForQuota||history.length===0;refresh.disabled=stoppedForQuota;
-      for(const control of [pageSize,category,sort,photos])if(control)control.disabled=stoppedForQuota;
+      for(const control of [pageSize,category,sort,photos,stockFilter])if(control)control.disabled=stoppedForQuota;
     }
   }
   function resetAndLoad(){history.length=0;cursor=null;nextCursor=null;page=1;stoppedForQuota=false;load({requestedCursor:null});}
@@ -243,10 +339,11 @@
   prev.addEventListener('click',()=>{if(!history.length)return;const prior=history.pop()??null;page=Math.max(1,page-1);stoppedForQuota=false;load({requestedCursor:prior});});
   refresh.addEventListener('click',()=>{
     stoppedForQuota=false;if(bulkBlocked636){bulkBlocked636=false;bulkSelection636.clear();invalidateBulkPreview636('Refreshed review authority. Select draft Products again before preparing a new change.');}
+    if(restockBlocked637){restockBlocked637=false;restockSelection637=null;invalidateRestock637('Choose a Product and preview the saved stock again after Refresh.');}
     const key=cacheKey(String(query.value||'').trim(),limit(),cursor);pageCache.delete(key);load({requestedCursor:cursor,force:true});
   });
-  for(const input of [category,sort,photos])input?.addEventListener('change',resetAndLoad);
-  clearFilters?.addEventListener('click',()=>{if(query)query.value='';if(category)category.value='';if(sort)sort.value='newest';if(photos)photos.value='all';resetAndLoad();query?.focus();});
+  for(const input of [category,sort,photos,stockFilter])input?.addEventListener('change',resetAndLoad);
+  clearFilters?.addEventListener('click',()=>{if(query)query.value='';if(category)category.value='';if(sort)sort.value='newest';if(photos)photos.value='all';if(stockFilter)stockFilter.value='all';resetAndLoad();query?.focus();});
   pageSize?.addEventListener('change',resetAndLoad);
   load({requestedCursor:null});
 })();
