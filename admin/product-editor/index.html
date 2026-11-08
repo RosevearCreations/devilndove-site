@@ -44,6 +44,18 @@
     .dd632-save-confidence[data-state="hold"],.dd632-save-confidence[data-state="invalid"],.dd632-save-confidence[data-state="blocked"]{border-color:#f39b91;background:rgba(243,155,145,.12)}
     #dd632ReviewSave{margin-top:8px;min-height:44px}
     #dd632ReviewSave[hidden]{display:none!important}
+    .dd633-field-hint{display:block;margin-top:5px;color:#e4d7f0;font-size:.84rem;line-height:1.4}
+    .dd633-field-hint[data-error="true"]{color:#ffd0c7;font-weight:700}
+    #productEditorForm [aria-invalid="true"]{outline:3px solid #f39b91;outline-offset:2px;border-color:#f39b91!important}
+    @media(max-width:600px){
+      .dd540-finished-product .dd557-steps{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+      .dd540-finished-product .dd557-steps>.btn{min-width:0;min-height:48px;white-space:normal;padding:10px 7px;line-height:1.3}
+      .dd540-finished-product .dd-editor-grid .input{min-width:0;max-width:100%;min-height:46px;font-size:16px}
+      .dd540-finished-product .dd-editor-grid textarea.input{min-height:96px}
+      .dd540-finished-product .dd557-save-bar>div{min-width:0;flex:1 1 100%}
+      .dd540-finished-product .dd557-save-bar>.btn{min-height:48px;width:100%}
+      .dd540-finished-product #dd632ReviewSave{min-width:0;max-width:100%;white-space:normal}
+    }
   </style>
 </head>
 <body data-admin-page="product-editor-v563" class="dd540-finished-product dd557-entry dd556-admin-root" data-dd-acceptance-v567="product-entry">
@@ -244,10 +256,10 @@
       <section class="dd-editor-panel" id="dd557DetailsArea" data-editor-panel="basics" role="tabpanel" aria-labelledby="dd567TabDetails" tabindex="0">
         <h2>Product details</h2>
         <div class="dd-editor-grid">
-          <label><span class="small">Product name <span class="dd-channel-required dd-channel-required--etsy">Etsy required</span></span><input class="input" name="name" maxlength="160" required/></label>
+          <label><span class="small">Product name <span class="dd-channel-required dd-channel-required--etsy">Etsy required</span></span><input class="input" name="name" maxlength="160" required aria-describedby="dd633NameHint"/><small class="dd633-field-hint" id="dd633NameHint">Required. Use the name we want customers to see.</small></label>
           <label><span class="small">Slug</span><input class="input" name="slug" maxlength="180"/></label>
           <label><span class="small">SKU</span><input class="input" name="sku" maxlength="80"/></label>
-          <label><span class="small">Category</span><select class="input" name="product_category" required><option value="">Choose category…</option><option value="Jewelry">Jewelry</option><option value="Earrings">Earrings</option><option value="Rings">Rings</option><option value="Necklaces">Necklaces</option><option value="Other">Other</option></select></label>
+          <label><span class="small">Category</span><select class="input" name="product_category" required aria-describedby="dd633CategoryHint"><option value="">Choose category…</option><option value="Jewelry">Jewelry</option><option value="Earrings">Earrings</option><option value="Rings">Rings</option><option value="Necklaces">Necklaces</option><option value="Other">Other</option></select><small class="dd633-field-hint" id="dd633CategoryHint">Required. Choose the closest real Product category.</small></label>
           <label><span class="small">Product type</span><select class="input" name="product_type"><option value="physical">Physical</option><option value="digital">Digital</option></select></label>
           <label><span class="small">Status</span><select class="input" name="status"><option value="draft">Draft</option><option value="active">Active</option><option value="archived">Archived</option></select></label>
           <label><span class="small">Review status</span><select class="input" name="review_status"><option value="pending_review">Pending review</option><option value="approved">Approved</option><option value="needs_changes">Needs changes</option><option value="published">Published</option></select></label>
@@ -259,8 +271,8 @@
       <section class="dd-editor-panel" data-editor-panel="pricing" hidden>
         <h2>Price and stock</h2>
         <p class="small">Prices are CAD dollars and cents (e.g. 8.00). Tax classes and shipping codes are selected from configured options; shipping codes do not calculate a delivery rate.</p><div class="dd-editor-grid cols-4">
-          <label><span class="small">Price (CAD, dollars.cents) <span class="dd-channel-required dd-channel-required--etsy">Etsy required</span></span><input class="input" type="text" inputmode="decimal" name="price" pattern="[0-9]+(\.[0-9]{1,2})?" placeholder="0.00" data-money-cad="1"/></label>
-          <label><span class="small">Compare-at price (CAD)</span><input class="input" type="text" inputmode="decimal" name="compare_at_price" pattern="[0-9]+(\.[0-9]{1,2})?" placeholder="0.00" data-money-cad="1"/></label>
+          <label><span class="small">Price (CAD, dollars.cents) <span class="dd-channel-required dd-channel-required--etsy">Etsy required</span></span><input class="input" type="text" inputmode="decimal" name="price" pattern="[0-9]+(\.[0-9]{1,2})?" placeholder="0.00" data-money-cad="1" aria-describedby="dd633PriceHint"/><small class="dd633-field-hint" id="dd633PriceHint">Required for Save. Example: 8.50. Free Products require a separate $0.00 confirmation.</small></label>
+          <label><span class="small">Compare-at price (CAD)</span><input class="input" type="text" inputmode="decimal" name="compare_at_price" pattern="[0-9]+(\.[0-9]{1,2})?" placeholder="0.00" data-money-cad="1" aria-describedby="dd633CompareHint"/><small class="dd633-field-hint" id="dd633CompareHint">Optional. Leave blank, or enter dollars and up to two decimal places.</small></label>
           <label><span class="small">Currency</span><input class="input" name="currency" maxlength="8" value="CAD"/></label>
           <label><span class="small">Sort order</span><input class="input" type="number" name="sort_order" min="0" step="1" value="0"/></label>
           <label><span class="small">Track inventory</span><select class="input" name="inventory_tracking"><option value="0">No</option><option value="1">Yes</option></select></label>
@@ -1040,7 +1052,7 @@
     </form>
   </div>
   <script src="/public/js/auth.js?v=440"></script>
-  <script src="/public/js/admin-product-channel-intent-v405.js?v=527"></script><script src="/public/js/admin-product-creation-flow-471.js?v=527"></script><script src="/public/js/admin-product-distribution-v406.js?v=533"></script><script src="/public/js/admin-listing-sync-v408.js?v=436"></script><script src="/public/js/admin-recovery-policy-468.js?v=467b468"></script><script src="/public/js/admin-product-editor-v163.js?v=632&b390=1"></script>
+  <script src="/public/js/admin-product-channel-intent-v405.js?v=527"></script><script src="/public/js/admin-product-creation-flow-471.js?v=527"></script><script src="/public/js/admin-product-distribution-v406.js?v=533"></script><script src="/public/js/admin-listing-sync-v408.js?v=436"></script><script src="/public/js/admin-recovery-policy-468.js?v=467b468"></script><script src="/public/js/admin-product-editor-v163.js?v=632&b390=1&b633=1"></script>
   <script src="/public/js/admin-product-marketplace-drafts-v438.js?v=496"></script>
   <script src="/public/js/admin-product-image-inline-v495.js?v=533"></script>
   <script src="/public/js/admin-product-unified-publishing-v443.js?v=496"></script>

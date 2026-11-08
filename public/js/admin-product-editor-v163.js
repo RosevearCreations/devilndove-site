@@ -42,6 +42,40 @@
   }};const get=(name)=>String(field(name)?.value??'').trim();
   const esc=(value)=>String(value??'').replace(/[&<>"']/g,(ch)=>({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[ch]));
   const setStatus=(message,tone='')=>{status.textContent=message;status.dataset.tone=tone;status.hidden=!message;};
+  // Build 633: guide the actual required fields without bypassing native form
+  // validation, sending a request, or changing the server's Product authority.
+  const hints633={name:['dd633NameHint','Product name is required.'],
+    product_category:['dd633CategoryHint','Choose a Product category before saving.'],
+    price:['dd633PriceHint','Enter a CAD price, such as 8.50, with no more than two decimals.'],
+    compare_at_price:['dd633CompareHint','Leave compare-at price blank, or enter a CAD amount with up to two decimals.']};
+  const validMoney633=(name)=>{const value=get(name);
+    if(name==='compare_at_price'&&!value)return true;
+    if(!/^[0-9]+(?:\.[0-9]{1,2})?$/.test(value))return false;
+    return Number.isSafeInteger(Math.round(Number(value)*100));
+  };
+  function validGuidedField633(name){return name==='name'||name==='product_category'?Boolean(get(name)):validMoney633(name);}
+  function clearFieldGuide633(name){const spec=hints633[name],el=field(name);
+    if(!spec||!el||!validGuidedField633(name))return;
+    el.removeAttribute?.('aria-invalid');const hint=document.getElementById(spec[0]);
+    if(hint){hint.dataset.error='false';hint.textContent=name==='name'?'Required. Use the name we want customers to see.':
+      name==='product_category'?'Required. Choose the closest real Product category.':
+      name==='price'?'Required for Save. Example: 8.50. Free Products require a separate $0.00 confirmation.':
+      'Optional. Leave blank, or enter dollars and up to two decimal places.';}
+  }
+  function guideInvalid633(name){const spec=hints633[name],el=field(name);if(!spec||!el)return;
+    const message=spec[1]+' Nothing was saved.';
+    el.setAttribute?.('aria-invalid','true');const hint=document.getElementById(spec[0]);
+    if(hint){hint.dataset.error='true';hint.textContent=spec[1];}
+    openTab('details');showSaveConfidence632('invalid',message);setStatus(message,'error');
+    const disclosure=el.closest?.('details');if(disclosure)disclosure.open=true;
+    el.focus();el.scrollIntoView?.({block:'center'});
+  }
+  form.addEventListener('invalid',event=>{
+    if(!hints633[event.target?.name])return;
+    event.preventDefault();
+    const first=['name','product_category','price','compare_at_price'].find(name=>field(name)&&!validGuidedField633(name));
+    guideInvalid633(first||event.target.name);
+  },true);
   const readJson=async(response,fallback)=>window.DDAuth.readApiJson(response,{fallbackMessage:fallback||'Product request failed.'});
   const incident=(error,operation='load')=>window.DDRecovery468?.classify(error,operation)||{category:'review',guidance:String(error?.message||'Request failed.'),temporary:false,uncertainWrite:false};
   const quota=(error)=>['d1_503','worker_1102'].includes(incident(error).category);
@@ -124,12 +158,13 @@
     clearRecovery();setStatus('Temporary browser copy discarded. Our saved Product is unchanged.','ok');
   });
   form.addEventListener('input',event=>{
+    clearFieldGuide633(event.target.name);
     if(seoKeys.includes(event.target.name))autoSeo.delete(event.target.name);
     if(['name','short_description','description'].includes(event.target.name))syncSeo();
     if(saveButton&&saveButton.textContent==='Saved ✓')saveButton.textContent='Save Product';
     refreshDirty();snapshotEdits();
   });
-  form.addEventListener('change',()=>{refreshDirty();snapshotEdits();});
+  form.addEventListener('change',event=>{clearFieldGuide633(event.target?.name);refreshDirty();snapshotEdits();});
   window.addEventListener('beforeunload',event=>{
     snapshotEdits();
     if(leavingAfterSave||form.dataset.productDirty!=='1')return;
@@ -354,7 +389,10 @@
       setStatus('Another Product save is blocked. Review the last outcome and reload the saved Product before attempting another write.','error');return;
     }
     if(state.productId&&!state.authorityLoaded){setStatus('Product authority has not loaded. Save is blocked to prevent stale edits.','error');return;}
-    if(!get('name')){showSaveConfidence632('invalid','Product name is required. Nothing was saved.');setStatus('Product name is required.','error');field('name')?.focus();return;}
+    if(!get('name')){guideInvalid633('name');return;}
+    if(field('product_category')&&!get('product_category')){guideInvalid633('product_category');return;}
+    if(!validMoney633('price')){guideInvalid633('price');return;}
+    if(field('compare_at_price')&&!validMoney633('compare_at_price')){guideInvalid633('compare_at_price');return;}
     let body,channelSnapshot;
     try{body=payload();channelSnapshot=window.DDProductChannels405?.captureForProductSave?.()||{changed:false};}
     catch(error){showSaveConfidence632('invalid',String(error.message||'Correct the Product fields before saving.').slice(0,220));setStatus(error.message,'error');if(/consent/i.test(error.message))document.getElementById('productChannel471Consent')?.focus();else field('price')?.focus();return;}
