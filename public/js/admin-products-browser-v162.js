@@ -6,6 +6,10 @@
   const form=document.getElementById('productBrowserSearchForm');
   const query=document.getElementById('productBrowserQuery');
   const pageSize=document.getElementById('productBrowserPageSize');
+  const category=document.getElementById('productBrowserCategory');
+  const sort=document.getElementById('productBrowserSort');
+  const photos=document.getElementById('productBrowserPhotos');
+  const clearFilters=document.getElementById('productBrowserClear');
   const body=document.getElementById('productBrowserBody');
   const status=document.getElementById('productBrowserStatus');
   const next=document.getElementById('productBrowserNext');
@@ -27,7 +31,13 @@
   const esc=(value)=>String(value??'').replace(/[&<>"']/g,(ch)=>({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[ch]));
   const money=(cents,currency='CAD')=>{try{return new Intl.NumberFormat('en-CA',{style:'currency',currency:String(currency||'CAD')}).format(Number(cents||0)/100);}catch{return `$${(Number(cents||0)/100).toFixed(2)}`;}};
   const limit=()=>Math.max(1,Math.min(24,Number(pageSize?.value||8)||8));
-  const cacheKey=(q,pageLimit,requestedCursor)=>JSON.stringify([String(q||'').trim().toLowerCase(),Number(pageLimit||8),Number(requestedCursor||0)]);
+  // Build 635: cache identity includes every server-side sort/filter and the
+  // opaque keyset cursor, so revisiting a page cannot reuse another ordering.
+  const sortValue=()=>String(sort?.value||'newest');
+  const categoryValue=()=>String(category?.value||'').trim();
+  const photoValue=()=>String(photos?.value||'all');
+  const cacheKey=(q,pageLimit,requestedCursor)=>JSON.stringify([String(q||'').trim().toLowerCase(),Number(pageLimit||8),String(requestedCursor||''),sortValue(),categoryValue(),photoValue()]);
+  const sortLabels={newest:'newest Product first',updated:'recently updated',name:'name A–Z',price:'price low–high'};
   function setStatus(message,tone=''){status.textContent=message;status.dataset.tone=tone;status.hidden=!message;}
   function mediaCandidates(primary,fallback){
     const values=[primary,fallback].map((value)=>String(value||'').trim()).filter(Boolean);const out=[];
@@ -61,7 +71,7 @@
     });
   }
   function render(products){
-    if(!products.length){body.innerHTML='<tr><td colspan="4" class="dd-empty">No Products matched this page.</td></tr>';return;}
+    if(!products.length){body.innerHTML='<tr><td colspan="4" class="dd-empty">No Products match these filters on this page. Clear filters or try another search.</td></tr>';return;}
     const byId=new Map(products.map((p)=>[Number(p.product_id||0),p]));
     body.innerHTML=products.map((p)=>{
       const id=Number(p.product_id||0);const recovery=imageRecoveryState.get(id)||{status:'idle',image:null};const recovered=recovery.image||{};const featured=String(p.featured_image_url||'').trim();const fallback=featured?'':String(recovered.image_url||'').trim();const candidates=mediaCandidates(featured,fallback);
@@ -74,9 +84,11 @@
         else if(recovery.status==='done'){source='No fallback photo found. Use Images to add one.';}
         else {source=recovery.status==='error'?'Photo recovery failed; explicit retry is available.':'No featured image loaded. Secondary photo lookup is idle.';photoAction=`<button class="btn" type="button" data-recover-photo-id="${id}">${recovery.status==='error'?'Retry photo':'Recover photo'}</button>`;}
       }
+      const photoReady=Boolean(featured);
+      const photoLabel=photoReady?'Featured photo set':'Featured photo missing';
       return `<tr data-product-id="${id}">
         <td class="dd-product-image-cell"><img class="dd-product-thumb" loading="lazy" data-product-image-candidates='${esc(JSON.stringify(candidates))}' alt="${esc(p.name||'Product image')}"></td>
-        <td><strong>${esc(p.name||`Product #${id}`)}</strong><div class="small">#${id}${p.product_number?` • No. ${esc(p.product_number)}`:''}${p.sku?` • ${esc(p.sku)}`:''}</div><div class="dd-product-meta"><span>${esc(p.status||'draft')}</span><span>${esc(p.review_status||'pending')}</span></div><div class="small dd-product-photo-source">${source}</div></td>
+        <td><strong>${esc(p.name||`Product #${id}`)}</strong><div class="small">#${id}${p.product_number?` • No. ${esc(p.product_number)}`:''}${p.sku?` • ${esc(p.sku)}`:''}${p.product_category?` • ${esc(p.product_category)}`:''}</div><div class="dd-product-meta"><span>${esc(p.status||'draft')}</span><span>${esc(p.review_status||'pending')}</span></div><div class="dd635-photo-label" data-ready="${photoReady?'set':'missing'}">${photoLabel}</div><div class="dd635-photo-note">Alt text / image rights: not checked in this list.</div><div class="small dd-product-photo-source">${source}</div></td>
         <td><strong>${money(p.price_cents,p.currency)}</strong><div class="small">Stock: ${esc(stock)}</div></td>
         <td class="dd-product-actions"><a class="btn" data-product-edit-id="${id}" href="${edit}">Edit</a><a class="btn" href="${media}">Images</a>${photoAction}${publicLink?`<a class="btn" href="${publicLink}" target="_blank" rel="noopener">View</a>`:''}</td>
       </tr>`;
@@ -99,7 +111,8 @@
   function applyPage(entry,{fromCache=false}={}){
     currentEntry=entry;cursor=entry.cursor||null;nextCursor=entry.nextCursor||null;render(entry.products||[]);
     const rows=Number(entry.rows||0);const missing=(entry.products||[]).filter((p)=>!String(p?.featured_image_url||'').trim()).length;
-    setStatus(fromCache?`${entry.products.length} Product${entry.products.length===1?'':'s'} reused from this browser session. D1 rows read: 0 for this navigation. Press Refresh for live authority.`:`${entry.products.length} Product${entry.products.length===1?'':'s'} loaded from one bounded Product query. Automatic secondary image recovery reads: 0. ${missing} visible Product${missing===1?'':'s'} lack a featured image; use Recover photo only when needed.${Number.isFinite(rows)?` D1 rows read: ${rows}.`:''}`,'ok');
+    const context=`Sort: ${sortLabels[sortValue()]||'newest Product first'}${categoryValue()?`; category: ${categoryValue()}`:''}${photoValue()==='featured-missing'?'; missing featured photos only':''}. ${missing} visible Product${missing===1?'':'s'} lack a featured image. Gallery alt text and image rights are not checked.`;
+    setStatus(fromCache?`${entry.products.length} Product${entry.products.length===1?'':'s'} reused from this browser session. D1 rows read: 0 for this navigation. ${context} Press Refresh for live authority.`:`${entry.products.length} Product${entry.products.length===1?'':'s'} loaded from one bounded Product query. Automatic secondary image recovery reads: 0. ${context} Use Recover photo only when needed.${Number.isFinite(rows)?` D1 rows read: ${rows}.`:''}`,'ok');
     pageLabel.textContent=`Page ${page} • ${entry.pageLimit} per page${fromCache?' • session reuse':''}`;
   }
   async function load({requestedCursor=cursor,remember=false,force=false}={}){
@@ -108,9 +121,12 @@
     if(!force&&pageCache.has(key)){
       if(remember)history.push(cursor);stoppedForQuota=false;applyPage(pageCache.get(key),{fromCache:true});next.disabled=!nextCursor;prev.disabled=history.length===0;refresh.disabled=false;if(pageSize)pageSize.disabled=false;return;
     }
-    inFlight=true;next.disabled=true;prev.disabled=true;refresh.disabled=true;if(pageSize)pageSize.disabled=true;setStatus('Loading one compact Product page…');
+    inFlight=true;next.disabled=true;prev.disabled=true;refresh.disabled=true;
+    for(const control of [pageSize,category,sort,photos])if(control)control.disabled=true;
+    setStatus('Loading one compact Product page…');
     try{
-      const params=new URLSearchParams({limit:String(pageLimit)});if(q)params.set('q',q);if(requestedCursor)params.set('cursor',String(requestedCursor));
+      const params=new URLSearchParams({limit:String(pageLimit),sort:sortValue(),photos:photoValue()});
+      if(q)params.set('q',q);if(categoryValue())params.set('category',categoryValue());if(requestedCursor)params.set('cursor',String(requestedCursor));
       const response=await window.DDAuth.apiFetch(`/api/admin/product-browser?${params.toString()}`,{method:'GET',cache:'no-store'});
       const data=await readJson(response);const products=Array.isArray(data.products)?data.products:[];
       if(remember)history.push(cursor);
@@ -123,7 +139,8 @@
       else setStatus(error?.message||'Could not load Products.','error');
       body.innerHTML='<tr><td colspan="4" class="dd-empty">Product Browser is unavailable. No automatic retry will run.</td></tr>';
     }finally{
-      inFlight=false;next.disabled=stoppedForQuota||!nextCursor;prev.disabled=stoppedForQuota||history.length===0;refresh.disabled=stoppedForQuota;if(pageSize)pageSize.disabled=stoppedForQuota;
+      inFlight=false;next.disabled=stoppedForQuota||!nextCursor;prev.disabled=stoppedForQuota||history.length===0;refresh.disabled=stoppedForQuota;
+      for(const control of [pageSize,category,sort,photos])if(control)control.disabled=stoppedForQuota;
     }
   }
   function resetAndLoad(){history.length=0;cursor=null;nextCursor=null;page=1;stoppedForQuota=false;load({requestedCursor:null});}
@@ -131,6 +148,8 @@
   next.addEventListener('click',()=>{if(!nextCursor)return;page+=1;load({requestedCursor:nextCursor,remember:true});});
   prev.addEventListener('click',()=>{if(!history.length)return;const prior=history.pop()??null;page=Math.max(1,page-1);stoppedForQuota=false;load({requestedCursor:prior});});
   refresh.addEventListener('click',()=>{stoppedForQuota=false;const key=cacheKey(String(query.value||'').trim(),limit(),cursor);pageCache.delete(key);load({requestedCursor:cursor,force:true});});
+  for(const input of [category,sort,photos])input?.addEventListener('change',resetAndLoad);
+  clearFilters?.addEventListener('click',()=>{if(query)query.value='';if(category)category.value='';if(sort)sort.value='newest';if(photos)photos.value='all';resetAndLoad();query?.focus();});
   pageSize?.addEventListener('change',resetAndLoad);
   load({requestedCursor:null});
 })();

@@ -9,6 +9,33 @@
   <link rel="icon" href="/assets/mark.png" type="image/png"/>
   <link rel="stylesheet" href="/css/styles.css?v=440"/>
   <link rel="stylesheet" href="/css/admin-product-v162.css?v=168"/>
+  <style>
+    .dd635-toolbar{align-items:end}
+    .dd635-toolbar label{min-width:145px;flex:1 1 160px}
+    .dd635-toolbar label:first-child{flex:2 1 250px}
+    .dd635-toolbar .btn{min-height:44px}
+    .dd635-photo-label{margin-top:5px;font-size:.84rem;line-height:1.4}
+    .dd635-photo-label[data-ready="missing"]{color:#b54708;font-weight:700}
+    .dd635-photo-label[data-ready="set"]{color:#027a48;font-weight:700}
+    .dd635-photo-note{font-size:.79rem;opacity:.85}
+    @media(max-width:680px){
+      .dd635-toolbar{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+      .dd635-toolbar label,.dd635-toolbar label:first-child{grid-column:1/-1;min-width:0}
+      .dd635-toolbar .dd-product-rows-label{grid-column:auto;max-width:none;flex:auto}
+      .dd635-toolbar .btn{min-width:0;width:100%}
+      .dd635-table{min-width:0;width:100%}
+      .dd635-table thead{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
+      .dd635-table tbody{display:grid;gap:10px;padding:8px}
+      .dd635-table tbody tr{display:grid;grid-template-columns:64px minmax(0,1fr);gap:5px 10px;padding:10px;border:1px solid var(--border);border-radius:10px;height:auto}
+      .dd635-table tbody td{border:0;padding:2px;min-width:0;overflow-wrap:anywhere}
+      .dd635-table tbody td:nth-child(1){grid-column:1;grid-row:1/3}
+      .dd635-table tbody td:nth-child(2){grid-column:2;grid-row:1}
+      .dd635-table tbody td:nth-child(3){grid-column:2;grid-row:2}
+      .dd635-table tbody td:nth-child(4){grid-column:1/-1;grid-row:3}
+      .dd635-table tbody td:nth-child(4) .btn{min-height:44px;flex:1 1 110px}
+      .dd635-table tbody td.dd-empty{grid-column:1/-1;grid-row:1}
+    }
+  </style>
 </head>
 <body data-admin-page="product-browser-v166">
   <div class="container admin-shell dd-product-shell">
@@ -30,18 +57,23 @@
     </header>
 
     <section class="card dd-products-browser-card">
-      <div class="dd-products-browser-heading"><div><h2>Product Browser</h2><p class="small">Eight compact rows by default. Previous/revisited pages reuse this browser session. Featured image authority comes from the Product row; when a Product has no featured image, use Recover photo to check that Product's existing gallery/media references explicitly.</p></div></div>
-      <details class="dd-low-read-details"><summary>Low-read / image-recovery details</summary><div class="dd-low-read-note small"><strong>Build 166 foundation, Build 168 session reuse, Build 170 explicit photo recovery:</strong> one bounded Product query for a fresh page. Automatic secondary image recovery reads are zero. Featured image authority comes from that same Product row. Only pressing <strong>Recover photo</strong> may read secondary image authorities, and that request is limited to one Product. Previous/revisited pages may reuse this session at zero D1 cost; Refresh deliberately returns to live authority. R2 is never listed, there are no timers, and failed reads do not loop.</div></details>
-      <form id="productBrowserSearchForm" class="dd-product-toolbar">
-        <label><span class="small">Find a Product</span><input class="input" id="productBrowserQuery" type="search" placeholder="ID, product no., name, SKU or slug" autocomplete="off"/></label>
+      <div class="dd-products-browser-heading"><div><h2>Product Browser</h2><p class="small">Eight compact rows by default. Search by Product name, SKU, slug or category, then sort across the matching catalog. Previous/revisited pages reuse this browser session. Featured image authority comes from the Product row; when a Product has no featured image, use Recover photo to check that Product's existing gallery/media references explicitly.</p></div></div>
+      <details class="dd-low-read-details"><summary>Low-read mode / image-recovery details</summary><div class="dd-low-read-note small"><strong>Build 166 foundation, Build 168 session reuse, Build 170 explicit photo recovery:</strong> one bounded Product query for a fresh page. Automatic secondary image recovery reads are zero. Featured image authority comes from that same Product row. Only pressing <strong>Recover photo</strong> may read secondary image authorities, and that request is limited to one Product. Previous/revisited pages may reuse this session at zero D1 cost; Refresh deliberately returns to live authority. R2 is never listed, there are no timers, and failed reads do not loop.</div></details>
+      <form id="productBrowserSearchForm" class="dd-product-toolbar dd635-toolbar">
+        <label><span class="small">Find a Product</span><input class="input" id="productBrowserQuery" type="search" placeholder="ID, product no., name, SKU or category" autocomplete="off"/></label>
+        <label><span class="small">Category</span><select class="input" id="productBrowserCategory"><option value="">All categories</option><option value="Jewelry">Jewelry</option><option value="Earrings">Earrings</option><option value="Rings">Rings</option><option value="Necklaces">Necklaces</option><option value="Other">Other</option></select></label>
+        <label><span class="small">Sort all matching Products</span><select class="input" id="productBrowserSort"><option value="newest">Newest Product first</option><option value="updated">Recently updated</option><option value="name">Name A–Z</option><option value="price">Price low–high</option></select></label>
+        <label><span class="small">Photo status</span><select class="input" id="productBrowserPhotos"><option value="all">All photos</option><option value="featured-missing">Missing featured photo</option></select></label>
         <label class="dd-product-rows-label"><span class="small">Rows</span><select class="input" id="productBrowserPageSize"><option value="8" selected>8</option><option value="16">16</option><option value="24">24</option></select></label>
         <button class="btn" type="submit">Search</button>
         <button class="btn" id="productBrowserRefresh" type="button">Refresh</button>
+        <button class="btn" id="productBrowserClear" type="button">Clear filters</button>
       </form>
+      <p class="small">Photo indicators use only the saved Product's featured-image field. Image descriptions, ownership rights and gallery completeness are <strong>not verified in this list</strong>; open <strong>Images</strong> on one Product to review them before external use. Filters and sorting never publish or update a Product.</p>
       <div id="productBrowserStatus" class="dd-product-status small" aria-live="polite"></div>
 
       <div class="dd-product-table-wrap dd-product-table-compact">
-        <table class="dd-product-table dd-product-table-v165">
+        <table class="dd-product-table dd-product-table-v165 dd635-table">
           <thead><tr><th>Image</th><th>Product</th><th>Price / Stock</th><th>Actions</th></tr></thead>
           <tbody id="productBrowserBody"><tr><td colspan="4" class="dd-empty">Loading one compact Product page…</td></tr></tbody>
         </table>
@@ -71,7 +103,7 @@
   </div>
 
   <script src="/public/js/auth.js?v=440"></script>\n  <script src="/public/js/admin-route-usage.js?v=249"></script>
-  <script src="/public/js/admin-products-browser-v162.js?v=170"></script>
+  <script src="/public/js/admin-products-browser-v162.js?v=170&b635=1"></script>
 <script src="/public/js/admin-product-zero-price-review-v390.js?v=390"></script>
 <script src="/public/js/admin-product-price-source-review-v394.js?v=394"></script>
 </body>

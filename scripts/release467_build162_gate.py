@@ -36,7 +36,7 @@ for token in ('productEditorForm','data-editor-tab="media"','No autosave','Back 
 for forbidden in ('admin-edit-product.js','admin-products.js','admin-product-workspaces.js','admin-product-seo.js','admin-product-resources.js','admin-site-item-inventory.js'):
     req(forbidden not in editor,f'dedicated Product Editor embeds legacy subsystem: {forbidden}')
 
-for token in ('/api/admin/product-browser','/admin/product-editor/?product_id=','/media/product?key=','Automatic retries are stopped','d1_rows_read'):
+for token in ('/api/admin/product-browser','/admin/product-editor/?product_id=','/api/product-media?key=','Automatic retries are stopped','d1_rows_read'):
     req(token in browser_js,f'Product Browser client missing {token}')
 for forbidden in ('setInterval(','MutationObserver','/api/admin/product-readiness','/api/admin/products?','/api/admin/product-lineage'):
     req(forbidden not in browser_js,f'Product Browser client gained background/heavy path: {forbidden}')
@@ -56,7 +56,7 @@ for token in ('WHERE p.product_id=?','LEFT JOIN product_seo','LIMIT 1','lazy_sec
 for forbidden in ('product_images','media_assets','product_resource_links','product_media_role_assignments','product_image_annotations','COUNT(','PRAGMA'):
     req(forbidden not in detail_api,f'Editor startup reads unrelated authority: {forbidden}')
 
-for token in ('FROM product_images','WHERE product_id=?','LIMIT 12','r2_listing:false','X-DD-D1-Rows-Read','measuredRows','d1_rows_read'):
+for token in ('FROM product_images','WHERE product_id=?','const MAX_GALLERY_ROWS=12','LIMIT ${MAX_GALLERY_ROWS}','r2_listing:false','X-DD-D1-Rows-Read','measuredRows','d1_rows_read'):
     req(token in media_api,f'on-demand Editor media API missing {token}')
 req("export { onRequestGet } from '../api/product-media.js';" in direct_media,'D1-free media route must reuse R2-only media authority')
 req('getDb' not in legacy_media and 'DB.' not in legacy_media,'R2 media authority must remain D1-free')
