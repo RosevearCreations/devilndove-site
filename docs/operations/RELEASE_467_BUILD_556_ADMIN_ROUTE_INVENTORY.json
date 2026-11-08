@@ -480,7 +480,7 @@
       "reference_screen": "Unassigned / contextual module",
       "reason": "Not individually approved for a revamp; inspect actual signed-in UI and owner acceptance before changing.",
       "evidence": {
-        "byte_length": 17387,
+        "byte_length": 17364,
         "stylesheets": 3,
         "scripts": 8,
         "forms": 0,
@@ -1530,7 +1530,7 @@
       "reference_screen": "Unassigned / contextual module",
       "reason": "Not individually approved for a revamp; inspect actual signed-in UI and owner acceptance before changing.",
       "evidence": {
-        "byte_length": 7855,
+        "byte_length": 7936,
         "stylesheets": 1,
         "scripts": 6,
         "forms": 0,
@@ -1590,9 +1590,9 @@
       "reference_screen": "Product Management",
       "reason": "Existing compact Product browser and low-read recovery were previously revamped; preserve behavior and styling.",
       "evidence": {
-        "byte_length": 30051,
+        "byte_length": 32392,
         "stylesheets": 2,
-        "scripts": 10,
+        "scripts": 11,
         "forms": 1,
         "has_viewport": true
       },
