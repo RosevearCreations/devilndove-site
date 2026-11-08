@@ -167,6 +167,19 @@
         <div class="dd640-actions"><button type="button" class="btn" id="dd641Save" disabled>Save owner plan</button><button type="button" class="btn" id="dd641Cancel">Clear selection</button></div>
         <p class="dd640-warning small">If another session updates these plans, we must reload and review before saving again. There is no automatic retry. Existing stock, supplier and purchase authorities remain separate.</p>
       </section>
+      <section class="dd640-inbox" id="dd643ReviewPanel" aria-labelledby="dd643Heading">
+        <h3 id="dd643Heading">Owner Restock Review Notes &amp; Outcome Timeline</h3>
+        <p class="small">Record a factual owner decision against an existing saved plan. These private dated notes are separate from its status and Product stock. Earlier Build 641/642 status edits are not retroactively presented as review notes.</p>
+        <div class="dd640-plan-fields">
+          <label>Saved owner plan<select class="input" id="dd643Plan"><option value="">First load saved plans above</option></select></label>
+          <label>Review outcome<select class="input" id="dd643Outcome"><option value="needs_physical_count">Physical count still needed</option><option value="needs_supplier_review">Supplier review still needed</option><option value="needs_workshop_review">Workshop review still needed</option><option value="follow_up_scheduled">Next owner follow-up scheduled</option><option value="no_change_recommended">No stock change recommended</option><option value="separate_action_recommended">Separate controlled action recommended</option></select></label>
+          <label class="dd640-note">Factual review note (8–300 characters)<textarea class="input" id="dd643Note" rows="3" maxlength="300" placeholder="What we checked, what remains uncertain, and our next action"></textarea></label>
+        </div>
+        <div class="dd640-actions"><button type="button" class="btn" id="dd643Load" disabled>Load recent 10 reviews</button><button type="button" class="btn" id="dd643Save" disabled>Record private review note</button><button type="button" class="btn" id="dd643More" disabled>Load earlier reviews</button></div>
+        <p id="dd643Status" role="status" aria-live="polite">Load the owner plans above, select one and choose Load recent reviews. No automatic history request is made.</p>
+        <div id="dd643Entries"><p class="small">Dated review notes appear after an explicit load.</p></div>
+        <p class="dd640-warning small">Review notes document recommendations only. Neither a completed review nor a recommended action verifies physical stock or authorizes purchasing, order changes, manufacturing or marketplace publication.</p>
+      </section>
       <form id="productBrowserSearchForm" class="dd-product-toolbar dd635-toolbar">
         <label><span class="small">Find a Product</span><input class="input" id="productBrowserQuery" type="search" placeholder="ID, product no., name, SKU or category" autocomplete="off"/></label>
         <label><span class="small">Category</span><select class="input" id="productBrowserCategory"><option value="">All categories</option><option value="Jewelry">Jewelry</option><option value="Earrings">Earrings</option><option value="Rings">Rings</option><option value="Necklaces">Necklaces</option><option value="Other">Other</option></select></label>
@@ -274,5 +287,6 @@
 <script src="/public/js/admin-product-stock-exceptions-640.js?v=640"></script>
 <script src="/public/js/admin-owner-restock-plans-641.js?v=641"></script>
 <script src="/public/js/admin-owner-restock-priority-642.js?v=642"></script>
+<script src="/public/js/admin-owner-restock-reviews-643.js?v=643"></script>
 </body>
 </html>

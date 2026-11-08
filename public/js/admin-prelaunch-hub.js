@@ -68,19 +68,19 @@
   function render(startupData,externalData){
     const mount=document.getElementById('prelaunchReadinessSummary');if(!mount)return;
     const startup=summarizeStartup(startupData),external=summarizeExternal(externalData);
-    // Build 91 is immutable exact-SHA Development + Production GREEN predecessor evidence ingested by Build 92.
-    const technicalGreen=true;
+    // Build 91 is archival proof only, never live evidence of the current release.
+    // This view evaluates commercial readiness, not repository deployment CI.
     const externalComplete=external.unresolved.length===0&&external.rows.length===laneOrder.length;
-    const launchReady=technicalGreen&&!startup.degraded&&startup.open_count===0&&externalComplete;
-    const decision=launchReady?'READY':'HOLD';
+    const commercialReady=!startup.degraded&&startup.open_count===0&&externalComplete;
+    const decision=commercialReady?'BUSINESS CHECKS COMPLETE':'HOLD';
     mount.innerHTML=`
       <div class="prelaunch-summary-metrics">
-        <article><span>Go-live decision</span><strong>${esc(decision)}</strong></article>
-        <article><span>Technical release proof</span><strong>GREEN</strong><small>Build ${VERIFIED_BUILD}</small></article>
+        <article><span>Commercial acceptance review</span><strong>${esc(decision)}</strong></article>
+        <article><span>Archived release proof</span><strong>HISTORICAL</strong><small>Build ${VERIFIED_BUILD}, not current CI</small></article>
         <article><span>Startup readiness</span><strong>${startup.complete}/${startup.total}</strong><small>${startup.open_count} unresolved${startup.degraded?' • degraded':''}</small></article>
         <article><span>External acceptance</span><strong>${Number(external.summary.accepted_lane_count||0)}/${Number(external.summary.required_lane_count||laneOrder.length)}</strong><small>${external.unresolved.length} unresolved</small></article>
       </div>
-      <div class="card" style="margin-top:14px"><h3>Decision boundary</h3><p class="small"><strong>${launchReady?'READY':'HOLD'}:</strong> a GREEN source/deployment is necessary but never sufficient for unrestricted launch. Startup Readiness must be complete and non-degraded, and every required external acceptance lane must be accepted.</p>${startup.warning?`<p class="small"><strong>Startup warning:</strong> ${esc(startup.warning)}</p>`:''}<p class="small">Verified Build ${VERIFIED_BUILD}: <code>${VERIFIED_SHA}</code> / tree <code>${VERIFIED_TREE}</code>. System ${VERIFIED_PROOFS.system} • Quality ${VERIFIED_PROOFS.quality} • I.T. ${VERIFIED_PROOFS.it} • Hygiene ${VERIFIED_PROOFS.hygiene} • Production ${VERIFIED_PROOFS.production_pages} • Live resources ${VERIFIED_PROOFS.live_resources}.</p></div>
+      <div class="card" style="margin-top:14px"><h3>Decision boundary</h3><p class="small"><strong>${commercialReady?'Business checks complete':'Commercial HOLD'}:</strong> this screen is a current checklist for unrestricted commercial opening, not a Development/Production deployment prerequisite. The protected release CI and live Pages proof establish each current technical release separately. A business-ready result is not automatic go-live approval. Startup Readiness must be non-degraded and accepted, with every required external lane accepted.</p>${startup.warning?`<p class="small"><strong>Startup warning:</strong> ${esc(startup.warning)}</p>`:''}<details><summary>Archived Build ${VERIFIED_BUILD} technical evidence (historical only)</summary><p class="small">Historic SHA <code>${VERIFIED_SHA}</code> / tree <code>${VERIFIED_TREE}</code>. System ${VERIFIED_PROOFS.system} • Quality ${VERIFIED_PROOFS.quality} • I.T. ${VERIFIED_PROOFS.it} • Hygiene ${VERIFIED_PROOFS.hygiene} • Production ${VERIFIED_PROOFS.production_pages} • Live resources ${VERIFIED_PROOFS.live_resources}. None of these old run IDs must be rerun for a later build.</p></details></div>
       <div class="grid cols-2" style="gap:14px;margin-top:14px"><section class="card"><h3>External acceptance status</h3>${external.rows.map(lane=>`<div style="padding:8px 0;border-bottom:1px solid var(--border)"><strong>${esc(lane.label||lane.key)}</strong> ${pill(lane.acceptance_state)}<div class="small">${Number(lane.accepted_check_count||0)}/${Number(lane.required_check_count||0)} required checks passed.</div><div class="small"><strong>Next:</strong> ${esc(lane.next_action?.label||'Review current evidence.')}${lane.next_action?.href?` <a href="${esc(lane.next_action.href)}">Open →</a>`:''}</div></div>`).join('')||'<p class="small">External acceptance data unavailable.</p>'}</section><section class="card"><h3>Commerce policy</h3><p class="small"><strong>Canada only:</strong> shipping country CA and currency CAD remain the active commerce boundary.</p><p class="small"><strong>U.S. sales/shipping:</strong> disabled. Build ${BUILD} does not re-enable U.S. checkout or shipping.</p><p class="small"><strong>Local pickup:</strong> remains supported under the existing Build 78 checkout boundary.</p><a class="btn secondary" href="/admin/release-control/external-acceptance/">Open External Acceptance</a></section></div>
       <section class="card" style="margin-top:14px"><h3>Startup Readiness action queue</h3>${startupQueueHtml(startup)}</section>
       <section class="card" style="margin-top:14px"><h3>External acceptance action queue</h3>${externalQueueHtml(external)}</section>
@@ -89,7 +89,7 @@
   }
   async function load(){
     const mount=document.getElementById('prelaunchReadinessSummary');if(!mount)return;
-    mount.innerHTML='<p class="small">Loading Release 467 Build 92 prelaunch decision and complete action queues…</p>';
+    mount.innerHTML='<p class="small">Loading current commercial acceptance action queues (separate from release CI)…</p>';
     try{
       const [startupResponse,externalResponse]=await Promise.all([
         apiFetch('/api/admin/startup-readiness',{method:'GET',cache:'no-store'}),
@@ -100,7 +100,7 @@
       if(!externalResponse.ok||!external?.ok)throw new Error(external?.error||`External Acceptance failed (${externalResponse.status}).`);
       render(startup,external);
     }catch(error){
-      mount.innerHTML=`<div class="prelaunch-summary-unavailable"><strong>Go-live decision: HOLD</strong><p>${esc(error?.message||'Current launch evidence is unavailable.')} No launch readiness is inferred when an authority cannot be read.</p><button class="btn" id="retryPrelaunchDecision" type="button">Manual retry</button></div>`;
+      mount.innerHTML=`<div class="prelaunch-summary-unavailable"><strong>Commercial acceptance: HOLD</strong><p>${esc(error?.message||'Current launch evidence is unavailable.')} No launch readiness is inferred when an authority cannot be read. Protected dev/main release CI is independent.</p><button class="btn" id="retryPrelaunchDecision" type="button">Manual retry</button></div>`;
       document.getElementById('retryPrelaunchDecision')?.addEventListener('click',load);
     }
   }
