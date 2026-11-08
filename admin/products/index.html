@@ -65,6 +65,19 @@
     .dd639-metric strong{display:block;font-size:1.6rem;font-variant-numeric:tabular-nums;margin:5px 0}
     .dd639-alert,.dd639-caution{padding:10px 12px;border-left:4px solid #c28c34;background:rgba(194,140,52,.10);border-radius:6px}
     .dd639-lots{overflow-wrap:anywhere;padding-left:22px}
+    .dd640-inbox{margin:14px 0;padding:16px;border:1px solid var(--border);border-radius:12px}
+    .dd640-inbox .dd640-actions{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+    .dd640-inbox .dd640-actions .btn{min-height:44px}
+    .dd640-scroll{overflow-x:auto;max-width:100%}
+    .dd640-scroll table{min-width:650px;width:100%;border-collapse:collapse}
+    .dd640-scroll td,.dd640-scroll th{padding:9px;border-bottom:1px solid var(--border);text-align:left;vertical-align:top}
+    .dd640-plan{padding:12px;margin:10px 0;border:1px solid var(--border);border-radius:9px}
+    .dd640-plan-fields{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,220px),1fr));gap:10px}
+    .dd640-plan-fields label{display:block;min-width:0;font-size:.9rem}
+    .dd640-plan-fields .input{width:100%;min-height:46px}
+    .dd640-note{grid-column:1/-1}
+    .dd640-copy{width:100%;min-height:120px;resize:vertical;font-family:ui-monospace,monospace;overflow-wrap:anywhere}
+    .dd640-inbox .dd640-warning{padding:10px;border-left:4px solid #c28c34;background:rgba(194,140,52,.10);margin:12px 0}
     @media(max-width:680px){
       .dd635-toolbar{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
       .dd635-toolbar label,.dd635-toolbar label:first-child{grid-column:1/-1;min-width:0}
@@ -96,7 +109,7 @@
 
     <header class="hero compact-hero dd-products-compact-head">
       <div>
-        <p class="eyebrow">Release 467 • Build 637</p>
+        <p class="eyebrow">Release 467 • Build 640</p>
         <h1>Products</h1>
         <p>Find a Product and move straight into Product or image editing. A normal page load now performs one bounded Product query only; missing fallback photos are recovered only when you explicitly request one.</p>
       </div>
@@ -106,6 +119,22 @@
     <section class="card dd-products-browser-card">
       <div class="dd-products-browser-heading"><div><h2>Product Browser</h2><p class="small">Eight compact rows by default. Search by Product name, SKU, slug or category, then sort across the matching catalog. Previous/revisited pages reuse this browser session. Featured image authority comes from the Product row; when a Product has no featured image, use Recover photo to check that Product's existing gallery/media references explicitly.</p></div></div>
       <details class="dd-low-read-details"><summary>Low-read mode / image-recovery details</summary><div class="dd-low-read-note small"><strong>Build 166 foundation, Build 168 session reuse, Build 170 explicit photo recovery:</strong> one bounded Product query for a fresh page. Automatic secondary image recovery reads are zero. Featured image authority comes from that same Product row. Only pressing <strong>Recover photo</strong> may read secondary image authorities, and that request is limited to one Product. Previous/revisited pages may reuse this session at zero D1 cost; Refresh deliberately returns to live authority. R2 is never listed, there are no timers, and failed reads do not loop.</div></details>
+      <section class="dd640-inbox" id="dd640ExceptionPanel" aria-labelledby="dd640Heading">
+        <h3 id="dd640Heading">Stock Exception Inbox &amp; Restock Planning</h3>
+        <p class="small">Scan only when we ask. Each click reviews at most 20 tracked physical active/draft Products against qualifying post-cutover order commitments. Severity is ranked <strong>only within the Products actually scanned</strong>. Other Products, older orders and offsite reservations may need review.</p>
+        <p class="dd640-warning small">A planning suggestion is not stock, a purchase order or permission to sell. Never add original lot quantities to Product stock. Correct stock only through a separate, physically verified Restock or Count / History action.</p>
+        <div class="dd640-actions"><button class="btn" id="dd640Scan" type="button">Start fresh exception scan (20 Products)</button><button class="btn" id="dd640Next" type="button" disabled>Scan next 20</button></div>
+        <p id="dd640Status" role="status" aria-live="polite">Nothing has been scanned. No database read until we choose Start.</p>
+        <p id="dd640Scope" class="small">No current verified inbox.</p>
+        <div id="dd640Rows"><p class="small">Exceptions will appear after a deliberate scan.</p></div>
+        <h4>Owner draft restock worksheet (not saved)</h4>
+        <p class="small">Choose Add to draft on an exception, enter planned whole units, possible source and a factual note. This stays in the current browser memory; copy it before leaving the page. It never changes supplier purchases, stock, orders or external channels.</p>
+        <div id="dd640Draft"><p class="small">No Product selected for planning.</p></div>
+        <div class="dd640-actions"><button class="btn" id="dd640Prepare" type="button" disabled>Prepare review text</button><button class="btn" id="dd640Copy" type="button" disabled>Copy reviewed text</button><button class="btn" id="dd640Reset" type="button" disabled>Clear draft</button></div>
+        <p id="dd640DraftStatus" role="status" aria-live="polite">Draft plans are not stored.</p>
+        <label class="small" for="dd640Preview">Review/copy text (read-only; does not publish or save)</label>
+        <textarea class="input dd640-copy" id="dd640Preview" rows="6" readonly placeholder="After preparing the draft, our review text appears here."></textarea>
+      </section>
       <form id="productBrowserSearchForm" class="dd-product-toolbar dd635-toolbar">
         <label><span class="small">Find a Product</span><input class="input" id="productBrowserQuery" type="search" placeholder="ID, product no., name, SKU or category" autocomplete="off"/></label>
         <label><span class="small">Category</span><select class="input" id="productBrowserCategory"><option value="">All categories</option><option value="Jewelry">Jewelry</option><option value="Earrings">Earrings</option><option value="Rings">Rings</option><option value="Necklaces">Necklaces</option><option value="Other">Other</option></select></label>
@@ -210,5 +239,6 @@
   <script src="/public/js/admin-product-stock-visibility-639.js?v=639"></script>
 <script src="/public/js/admin-product-zero-price-review-v390.js?v=390"></script>
 <script src="/public/js/admin-product-price-source-review-v394.js?v=394"></script>
+<script src="/public/js/admin-product-stock-exceptions-640.js?v=640"></script>
 </body>
 </html>
