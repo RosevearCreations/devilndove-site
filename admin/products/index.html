@@ -201,6 +201,28 @@
           <textarea class="input dd640-copy" id="dd645Preview" rows="9" readonly placeholder="Choose dated reviews and explicitly prepare a handoff digest."></textarea>
           <p class="dd640-warning small">A handoff digest is a dated, potentially stale private planning snapshot, not an inventory count, receipt, order reservation, purchase approval, or permission to publish. Downloaded files and copied text leave this private admin view only when we deliberately share them.</p>
         </div>
+        <div class="dd640-plan" id="dd646Workshop" aria-labelledby="dd646Heading">
+          <h4 id="dd646Heading">Workshop Handoff Checklist &amp; Owner Acknowledgement</h4>
+          <p class="small">First prepare a private digest above. Then explicitly load that digest here, review the safety checklist and record who will follow up. This is a local, unsigned acknowledgement, not proof that physical work was completed.</p>
+          <div class="dd640-actions"><button class="btn" id="dd646Load" type="button" disabled>Review prepared digest</button><button class="btn secondary" id="dd646Reset" type="button" disabled>Clear workshop acknowledgement</button></div>
+          <p id="dd646Status" role="status" aria-live="polite">No prepared owner digest has been accepted for workshop review.</p>
+          <fieldset id="dd646Checklist" disabled>
+            <legend>Owner review checklist — checking records understanding, not completion</legend>
+            <label class="dd640-plan small"><input type="checkbox" data-dd646-check="source"> I reviewed the selected dated outcomes and their source version.</label>
+            <label class="dd640-plan small"><input type="checkbox" data-dd646-check="stock"> A handoff does not verify physical quantities or reserve inventory; a separate count is needed before acting.</label>
+            <label class="dd640-plan small"><input type="checkbox" data-dd646-check="supplier"> Supplier availability, prices, orders and payments require separate authorized checks.</label>
+            <label class="dd640-plan small"><input type="checkbox" data-dd646-check="authority"> This acknowledgement does not change stock, authorize manufacturing, or publish listings.</label>
+            <div class="dd640-plan-fields">
+              <label>Next owner follow-up action (8–180 characters)<textarea id="dd646Action" class="input" rows="2" minlength="8" maxlength="180" autocomplete="off" placeholder="e.g. Count copper wire stock with Ree at the bench"></textarea></label>
+              <label>Target follow-up date<input id="dd646Due" class="input" type="date"></label>
+            </div>
+            <label class="small"><input id="dd646Confirm" type="checkbox"> I acknowledge this private workshop review record as the current owner session; it is not a signature or a supplier instruction.</label>
+            <div class="dd640-actions"><button class="btn" id="dd646Prepare" type="button" disabled>Prepare local acknowledgement</button><button class="btn" id="dd646Copy" type="button" disabled>Copy acknowledgement</button><button class="btn" id="dd646Download" type="button" disabled>Download private .txt</button></div>
+            <label class="small" for="dd646Preview">Local owner acknowledgement receipt (not saved or transmitted)</label>
+            <textarea id="dd646Preview" class="input dd640-copy" rows="8" readonly placeholder="Complete the review checklist, next action and date, then prepare an acknowledgement."></textarea>
+          </fieldset>
+          <p class="dd640-warning small">Private browser-session record only. A prepared receipt is erased when the owner, plan, source digest, checklist or follow-up details change. Copy or download is an explicit owner action; this does not create a server-side audit record.</p>
+        </div>
         <p class="dd640-warning small">Review notes document recommendations only. Neither a completed review nor a recommended action verifies physical stock or authorizes purchasing, order changes, manufacturing or marketplace publication.</p>
       </section>
       <form id="productBrowserSearchForm" class="dd-product-toolbar dd635-toolbar">
@@ -313,5 +335,6 @@
 <script src="/public/js/admin-owner-restock-reviews-643.js?v=643"></script>
 <script src="/public/js/admin-owner-restock-search-644.js?v=644"></script>
 <script src="/public/js/admin-owner-restock-digest-645.js?v=645"></script>
+<script src="/public/js/admin-workshop-handoff-646.js?v=646"></script>
 </body>
 </html>
