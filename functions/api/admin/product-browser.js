@@ -43,9 +43,11 @@ export async function onRequestGet(context){
   const limit=clampLimit(url.searchParams.get('limit'));
   const sort=String(url.searchParams.get('sort')||'newest').trim();
   const photoFilter=String(url.searchParams.get('photos')||'all').trim();
+  const stockFilter=String(url.searchParams.get('stock')||'all').trim();
   const category=cleanText(url.searchParams.get('category'),80);
-  if(!Object.hasOwn(SORTS,sort)||!['all','featured-missing'].includes(photoFilter))
-    return json({ok:false,error:'Unsupported Product sort or image filter.',code:'invalid_browser_filter'},400);
+  if(!Object.hasOwn(SORTS,sort)||!['all','featured-missing'].includes(photoFilter)||
+    !['all','attention','low','out','tracked','untracked'].includes(stockFilter))
+    return json({ok:false,error:'Unsupported Product sort, image or stock filter.',code:'invalid_browser_filter'},400);
   let cursor;try{cursor=parseCursor635(String(url.searchParams.get('cursor')||''),sort);}
   catch{return json({ok:false,error:'Product page position is invalid for this sort. Start a new search.',code:'invalid_cursor'},400);}
   const q=cleanText(url.searchParams.get('q'),100);
@@ -59,6 +61,11 @@ export async function onRequestGet(context){
   }
   if(category){clauses.push('product_category = ? COLLATE NOCASE');binds.push(category);}
   if(photoFilter==='featured-missing')clauses.push("TRIM(COALESCE(featured_image_url,'')) = ''");
+  if(stockFilter==='attention')clauses.push('inventory_tracking = 1 AND COALESCE(inventory_quantity,0) <= 2');
+  if(stockFilter==='low')clauses.push('inventory_tracking = 1 AND COALESCE(inventory_quantity,0) BETWEEN 1 AND 2');
+  if(stockFilter==='out')clauses.push('inventory_tracking = 1 AND COALESCE(inventory_quantity,0) <= 0');
+  if(stockFilter==='tracked')clauses.push('inventory_tracking = 1');
+  if(stockFilter==='untracked')clauses.push('COALESCE(inventory_tracking,0) != 1');
   if(q){
     const numericId=Number(q);
     if(Number.isInteger(numericId)&&numericId>0){clauses.push('(product_id = ? OR product_number = ?)');binds.push(numericId,numericId);}
@@ -81,7 +88,7 @@ export async function onRequestGet(context){
     const nextCursor=hasMore&&last?(sort==='newest'?Number(last.product_id||0):
       JSON.stringify({sort,key:rowKey635(last,sort),id:Number(last.product_id||0)})):null;
     const rowsRead=measuredRows(result);
-    return json({ok:true,products,next_cursor:nextCursor,has_more:hasMore,limit,query:q||null,sort,category:category||null,photos:photoFilter,delivery:'product-browser-v162',read_policy:'single_products_page_query',d1_rows_read:rowsRead},200,rowsRead==null?{}:{'X-DD-D1-Rows-Read':String(rowsRead)});
+    return json({ok:true,products,next_cursor:nextCursor,has_more:hasMore,limit,query:q||null,sort,category:category||null,photos:photoFilter,stock:stockFilter,delivery:'product-browser-v162',read_policy:'single_products_page_query',d1_rows_read:rowsRead},200,rowsRead==null?{}:{'X-DD-D1-Rows-Read':String(rowsRead)});
   }catch(error){
     const message=String(error?.message||'Product browser read failed.');
     const quota=/rows read|daily|limit|quota|7500/i.test(message);
