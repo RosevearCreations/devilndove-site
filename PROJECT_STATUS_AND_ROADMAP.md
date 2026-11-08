@@ -1,4 +1,12 @@
-# Release 467 Build 648 — Workshop Follow-Up Outcome Review & Source-Linked Closure Checklist (Production candidate)
+# Release 467 Build 649 — Workshop Follow-Up Closure History & Owner Decision Continuity (Production candidate)
+
+Admin → Products now includes **on-demand, authenticated private owner review-note history** for an explicitly selected saved plan. Owners can inspect an exact, bounded dated-review timeline (ten notes per deliberate request, up to fifty), filter by recorded outcomes, and compare a currently prepared unsigned Build 648 closure worksheet only when owner, plan, source-version and review-timeline identities match. A private decision-note draft can be prepared and manually copied to the existing Build 643 editor, where a separate authenticated Save remains mandatory. Reopening the original owner-plan editor likewise never automatically saves a status or alters physical stock. The historical Build 232 Product correction helper, with no active runtime reference, is preserved outside runtime; current correction navigation remains active through the workspaces module, maintaining the unchanged performance budget. [Build 649 operator guide](docs/operations/RELEASE_467_BUILD_649_WORKSHOP_CLOSURE_HISTORY.md).
+
+**Next proposed Build 650 — Workshop Decision Review Summaries, Saved Timeline Freshness & Guided Owner Follow-Up** (a clear owner-view of verified dated changes and next-step guidance without automatic stock, supplier or status authority).
+
+---
+
+## Previous release — Build 648
 
 Admin → Products now provides a **private, owner-prepared workshop follow-up closure worksheet** linked to the saved plan and a deliberately prepared, source-verified dated-review digest. The owner selects a review outcome, adds a stated evidence note and next action, acknowledges four distinct stock/supplier/status boundaries, then deliberately prepares an unsigned local preview for manual copy or download. Changes in source, owner, plan or inputs invalidate it. **No plan status, inventory, purchasing, supplier, payment or publication change occurs**; only the original editor can separately Save a planning status. The unused historical Build 220 offers helper is preserved in operations documentation after its active references were checked, maintaining the existing runtime budget. [Build 648 owner instructions](docs/operations/RELEASE_467_BUILD_648_WORKSHOP_CLOSURE_REVIEW.md).
 

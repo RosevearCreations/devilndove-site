@@ -271,6 +271,24 @@
           </fieldset>
           <p class="dd640-warning small">A closure candidate is NOT a completed stock count, receipt, supplier order or completed owner-plan status. The original owner editor controls every deliberate status update; never infer completion or automatically share this private worksheet.</p>
         </details>
+        <details class="dd640-plan" id="dd649History" aria-labelledby="dd649Heading">
+          <summary id="dd649Heading"><strong>Workshop Closure History &amp; Owner Decision Continuity</strong></summary>
+          <p class="small">Load the signed-in owner's saved, dated review notes on demand. Compare them with an explicitly prepared Build 648 closure worksheet, then copy a decision-note draft for a separate manual save in the review editor above. These are planning recommendations, not stock movements or completed jobs.</p>
+          <div class="dd640-plan-fields">
+            <label>Saved owner plan<select class="input" id="dd649Plan" disabled><option value="">Load private owner plans above first</option></select></label>
+            <label>Show saved outcomes<select class="input" id="dd649Filter" disabled><option value="all">All recorded reviews</option><option value="needs_physical_count">Physical count needed</option><option value="needs_supplier_review">Supplier review needed</option><option value="needs_workshop_review">Workshop review needed</option><option value="follow_up_scheduled">Follow-up scheduled</option><option value="no_change_recommended">No stock change recommended</option><option value="separate_action_recommended">Separate action recommended</option></select></label>
+          </div>
+          <div class="dd640-actions"><button type="button" class="btn" id="dd649Load" disabled>Load saved decision history</button><button type="button" class="btn" id="dd649More" disabled>Load earlier saved reviews</button><button type="button" class="btn secondary" id="dd649Clear" disabled>Clear private history</button></div>
+          <p id="dd649Status" role="status" aria-live="polite">Load owner plans, choose a saved plan, then request its private review history. No background reads or writes occur.</p>
+          <p id="dd649Summary" class="small">No verified saved review timeline yet.</p>
+          <div id="dd649Rows"><p class="small">No saved history loaded.</p></div>
+          <div class="dd640-actions"><button type="button" class="btn" id="dd649Link" disabled>Compare current prepared closure worksheet</button><button type="button" class="btn" id="dd649Reopen" disabled>Reopen original owner plan</button></div>
+          <p id="dd649Compare" class="small">No Build 648 worksheet has been deliberately linked. A local recommendation is never a saved decision.</p>
+          <div class="dd640-actions"><button type="button" class="btn" id="dd649Draft" disabled>Prepare manual decision-note draft</button><button type="button" class="btn" id="dd649Copy" disabled>Copy draft for separate review Save</button></div>
+          <label class="small" for="dd649Preview">Private, unsigned manual review-note draft (not stored or transmitted)</label>
+          <textarea class="input dd640-copy" id="dd649Preview" rows="5" readonly placeholder="Load history and explicitly compare a current prepared worksheet to draft a review note."></textarea>
+          <p class="dd640-warning small">Only a separately authenticated, deliberate Save in the dated review editor can persist a note. Review-note outcomes do not prove stock counts, supplier replies, orders, completed workshop work or plan closure. A saved plan status still changes only in its original editor.</p>
+        </details>
         <p class="dd640-warning small">Review notes document recommendations only. Neither a completed review nor a recommended action verifies physical stock or authorizes purchasing, order changes, manufacturing or marketplace publication.</p>
       </section>
       <form id="productBrowserSearchForm" class="dd-product-toolbar dd635-toolbar">
@@ -386,5 +404,6 @@
 <script src="/public/js/admin-workshop-handoff-646.js?v=646"></script>
 <script src="/public/js/admin-workshop-followup-647.js?v=647"></script>
 <script src="/public/js/admin-workshop-closure-648.js?v=648"></script>
+<script src="/public/js/admin-workshop-history-649.js?v=649"></script>
 </body>
 </html>

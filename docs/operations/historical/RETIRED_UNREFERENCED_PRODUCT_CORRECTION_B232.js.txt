@@ -1,4 +1,4 @@
-// File: /public/js/admin-product-correction.js
+// Historical source: formerly /public/js/admin-product-correction.js, now retired from runtime.
 // Build 232: resource-aware correction preflight and safe Cloudflare/non-JSON errors.
 // Visible correction workflow for a loaded product. It shows linked raw inventory,
 // lets an admin explicitly release reservations and/or return physically unused raw
