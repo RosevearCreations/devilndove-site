@@ -190,6 +190,17 @@
           <div id="dd644Summary"><p class="small">The owner decision summary appears after a verified search.</p></div>
           <div id="dd644Results"><p class="small">No review-note search has been requested.</p></div>
         </div>
+        <div class="dd640-plan" id="dd645Handoff" aria-labelledby="dd645Heading">
+          <h4 id="dd645Heading">Private Restock Review Handoff Digest</h4>
+          <p class="small">After an explicit verified search above, choose which dated reviews to include in a workshop follow-up summary. Review the text before copying or downloading. Nothing is sent to suppliers or another application automatically.</p>
+          <p id="dd645Status" role="status" aria-live="polite">Search saved reviews above to choose dated entries. No export has been prepared.</p>
+          <div id="dd645Choices" role="group" aria-label="Choose dated owner reviews for private handoff"><p class="small">No verified review entries available.</p></div>
+          <label class="small"><input type="checkbox" id="dd645IncludeNotes" disabled> Include full private note bodies (off by default)</label>
+          <div class="dd640-actions"><button class="btn" type="button" id="dd645Prepare" disabled>Prepare selected digest</button><button class="btn" type="button" id="dd645Copy" disabled>Copy reviewed digest</button><button class="btn" type="button" id="dd645Download" disabled>Download private .txt</button><button class="btn secondary" type="button" id="dd645Clear" disabled>Clear digest</button></div>
+          <label class="small" for="dd645Preview">Owner-reviewed handoff text (not transmitted)</label>
+          <textarea class="input dd640-copy" id="dd645Preview" rows="9" readonly placeholder="Choose dated reviews and explicitly prepare a handoff digest."></textarea>
+          <p class="dd640-warning small">A handoff digest is a dated, potentially stale private planning snapshot, not an inventory count, receipt, order reservation, purchase approval, or permission to publish. Downloaded files and copied text leave this private admin view only when we deliberately share them.</p>
+        </div>
         <p class="dd640-warning small">Review notes document recommendations only. Neither a completed review nor a recommended action verifies physical stock or authorizes purchasing, order changes, manufacturing or marketplace publication.</p>
       </section>
       <form id="productBrowserSearchForm" class="dd-product-toolbar dd635-toolbar">
@@ -301,5 +312,6 @@
 <script src="/public/js/admin-owner-restock-priority-642.js?v=642"></script>
 <script src="/public/js/admin-owner-restock-reviews-643.js?v=643"></script>
 <script src="/public/js/admin-owner-restock-search-644.js?v=644"></script>
+<script src="/public/js/admin-owner-restock-digest-645.js?v=645"></script>
 </body>
 </html>

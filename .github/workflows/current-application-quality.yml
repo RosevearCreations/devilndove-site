@@ -57,6 +57,8 @@ jobs:
         run: node --test scripts/release467_build643_owner_restock_review_timeline.test.mjs
       - name: Build 644 private review search, outcome counts, bounded paging, source isolation and accessible read-only UI
         run: node --test scripts/release467_build644_restock_review_search.test.mjs
+      - name: Build 645 owner-selected private handoff digest, note opt-in and zero-automatic-transmission regression
+        run: node --test scripts/release467_build645_restock_handoff_digest.test.mjs
       - name: Current help, search, H1, responsive, Packaging, Grey Hair CAIP, Content Studio review/execution boundary, authority restart integrity, I.T. truth and release provenance quality
         run: python scripts/current_application_quality_gate.py
       - name: Preserve password-hash compatibility and current-write security

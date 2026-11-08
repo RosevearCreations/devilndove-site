@@ -18,6 +18,7 @@
   const sync=()=>{search.disabled=busy||!maySearch();more.disabled=busy||!loaded||!cursor;clear.disabled=busy;};
   function invalidate(message='Choose Search saved reviews to refresh this owner-only view.'){
     revision++;loaded=false;events=[];cursor=null;timelineVersion=0;activePlan='';activeQuery='';activeOutcome='';
+    window.DD645RestockDigest?.invalidate?.();
     summary.textContent='No current owner decision summary has been verified for this selection.';
     results.textContent='No matching review notes loaded; no background request was made.';
     say(message);sync();
@@ -84,6 +85,11 @@
       const seen=new Set(events.map(event=>event.event_id));
       for(const event of data.events)if(!seen.has(event.event_id)){events.push(event);seen.add(event.event_id);}
       cursor=data.next_cursor;loaded=true;displaySummary(data.summary,data.matched_total);displayEvents(data.matched_total);
+      window.DD645RestockDigest?.receive?.({ready:true,private:true,read_only:true,
+        owner_user_id:data.owner_user_id,plan_id:id,plan_version:data.plan_version,
+        timeline_version:data.timeline_version,search:{q, outcome:filter},
+        matched_total:data.matched_total,summary:data.summary,events:[...events],
+        complete:cursor===null,verified_at:new Date().toISOString()});
     }catch(error){invalidate(`HOLD — ${error.message||'Unable to verify private reviews.'} No automatic retry.`);}
     finally{busy=false;sync();}
   }
