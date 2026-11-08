@@ -36,6 +36,15 @@
   <link rel="stylesheet" href="/css/admin-product-editor-540.css?v=540"/>
   <link rel="stylesheet" href="/css/admin-product-editor-543.css?v=543"/>
   <link rel="stylesheet" href="/css/admin-interface-foundation-556.css?v=556"/>
+  <style>
+    .dd632-save-confidence{margin:8px 0 0;padding:8px 10px;border-inline-start:4px solid #a9b4ce;border-radius:6px;background:rgba(114,125,160,.12);font-weight:650;max-width:66ch}
+    .dd632-save-confidence[data-state="unsaved"],.dd632-save-confidence[data-state="partial"]{border-color:#e0b45e;background:rgba(224,180,94,.12)}
+    .dd632-save-confidence[data-state="saving"],.dd632-save-confidence[data-state="loading"]{border-color:#92b3d8}
+    .dd632-save-confidence[data-state="saved"],.dd632-save-confidence[data-state="loaded"]{border-color:#62c79d;background:rgba(98,199,157,.11)}
+    .dd632-save-confidence[data-state="hold"],.dd632-save-confidence[data-state="invalid"],.dd632-save-confidence[data-state="blocked"]{border-color:#f39b91;background:rgba(243,155,145,.12)}
+    #dd632ReviewSave{margin-top:8px;min-height:44px}
+    #dd632ReviewSave[hidden]{display:none!important}
+  </style>
 </head>
 <body data-admin-page="product-editor-v563" class="dd540-finished-product dd557-entry dd556-admin-root" data-dd-acceptance-v567="product-entry">
   <a class="dd556-skip" href="#productEditorForm">Skip to Product entry</a>
@@ -134,7 +143,7 @@
         <button class="btn dd-editor-tab" id="dd567TabDestinations" type="button" role="tab" aria-controls="dd557DestinationArea" data-editor-tab="publishing" aria-selected="false">4 · Destinations</button>
       </div>
       <div class="dd557-legacy-tab-hooks" hidden aria-hidden="true"><button type="button" data-editor-tab="basics">Basics</button><button type="button" data-editor-tab="pricing">Pricing</button><button type="button" data-editor-tab="description">Description</button><button type="button" data-editor-tab="seo">Tags</button></div>
-      <div class="dd540-primary-toolbar dd557-save-bar"><div><strong>Save our Product</strong><p class="small" id="dd540ToolbarStatus" role="status" aria-live="polite">Local save only. Etsy and all other destinations remain unchanged.</p></div><button class="btn primary" id="dd540SaveProduct" type="button">Save Product</button></div>
+      <div class="dd540-primary-toolbar dd557-save-bar"><div><strong>Save our Product</strong><p class="small" id="dd540ToolbarStatus" role="status" aria-live="polite">Local save only. Etsy and all other destinations remain unchanged.</p><p class="small dd632-save-confidence" id="dd632SaveConfidence" data-state="loading" role="status" aria-live="polite" aria-atomic="true">Checking the Product save state…</p><button class="btn" id="dd632ReviewSave" type="button" hidden aria-controls="dd521SaveReview">Review unconfirmed Save (no repeat)</button></div><button class="btn primary" id="dd540SaveProduct" type="button" aria-describedby="dd632SaveConfidence">Save Product</button></div>
       <p class="dd557-panel-guide" id="dd557PanelGuide" role="status" aria-live="polite">Start with the name, price, description and tags. Additional fields are available under More Product fields.</p>
       <details class="dd527-more-tools" id="dd527MoreTools">
         <summary>Optional settings, quality checks &amp; troubleshooting</summary>
@@ -1031,7 +1040,7 @@
     </form>
   </div>
   <script src="/public/js/auth.js?v=440"></script>
-  <script src="/public/js/admin-product-channel-intent-v405.js?v=527"></script><script src="/public/js/admin-product-creation-flow-471.js?v=527"></script><script src="/public/js/admin-product-distribution-v406.js?v=533"></script><script src="/public/js/admin-listing-sync-v408.js?v=436"></script><script src="/public/js/admin-recovery-policy-468.js?v=467b468"></script><script src="/public/js/admin-product-editor-v163.js?v=527&b390=1"></script>
+  <script src="/public/js/admin-product-channel-intent-v405.js?v=527"></script><script src="/public/js/admin-product-creation-flow-471.js?v=527"></script><script src="/public/js/admin-product-distribution-v406.js?v=533"></script><script src="/public/js/admin-listing-sync-v408.js?v=436"></script><script src="/public/js/admin-recovery-policy-468.js?v=467b468"></script><script src="/public/js/admin-product-editor-v163.js?v=632&b390=1"></script>
   <script src="/public/js/admin-product-marketplace-drafts-v438.js?v=496"></script>
   <script src="/public/js/admin-product-image-inline-v495.js?v=533"></script>
   <script src="/public/js/admin-product-unified-publishing-v443.js?v=496"></script>
