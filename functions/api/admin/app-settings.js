@@ -14,6 +14,7 @@ export async function onRequestGet(context) {
   const rows = normalizeResults(await db.prepare(`
     SELECT setting_key, setting_value, is_public, updated_at
     FROM app_settings
+    WHERE setting_key NOT LIKE 'site.admin.owner_restock_plans.v641.%'
     ORDER BY setting_key ASC
   `).all());
   return json({ ok: true, settings: rows.map((row) => ({
@@ -32,6 +33,10 @@ export async function onRequestPost(context) {
   let body = {};
   try { body = await request.json(); } catch { return json({ ok: false, error: 'Invalid JSON body.' }, 400); }
   const settingKey = normalizeText(body.setting_key);
+  // Build 641 owner-only plan documents must never be viewed or overwritten by
+  // the general settings editor, even by another authenticated administrator.
+  if (settingKey.startsWith('site.admin.owner_restock_plans.v641.'))
+    return json({ ok: false, error: 'Owner restock plans require their dedicated owner-scoped workflow.' }, 403);
   const settingValue = typeof body.setting_value === 'string' ? body.setting_value : JSON.stringify(body.setting_value ?? '');
   const isPublic = Number(body.is_public) === 1 ? 1 : 0;
   if (!settingKey) return json({ ok: false, error: 'setting_key is required.' }, 400);

@@ -1,4 +1,12 @@
-# Release 467 Build 640 — Stock Exception Inbox & Restock Planning (Production candidate)
+# Release 467 Build 641 — Saved Restock Plan Drafts & Owner Follow-Up Tracking (Production candidate)
+
+Admin → Products now supports deliberate, private per-owner D1 saving of reviewed Build 640 restock worksheets, reopening those saved drafts, optional follow-up dates, status and notes. It rechecks the live Product and qualified commitments when first saving a draft; subsequent status edits preserve original snapshot line items and cannot be mistaken for current stock. Optimistic version compare-and-swap prevents silent concurrent overwrites; owner identity comes only from the verified admin session; generic app-settings GET/POST cannot disclose or overwrite the reserved owner-plan documents. Every confirmed write is read back and attempts a limited admin audit entry. Plans never create a stock movement, supplier order or external channel action. [Build 641 operator guidance](docs/operations/RELEASE_467_BUILD_641_OWNER_RESTOCK_FOLLOWUP.md).
+
+**Next proposed Build 642 — Restock Follow-Up Priority Board & Due-Date Review Shortcuts** (overdue and upcoming owner plan visibility, explicit review navigation, no automatic supplier/stock action).
+
+---
+
+# Release 467 Build 640 — Stock Exception Inbox & Restock Planning
 
 Admin → Products now includes an explicit **Stock Exception Inbox** reading one bounded 20-Product tracked physical active/draft cohort at a time, with source-backed qualifying order commitments. It labels source-invalid stock as HOLD, prioritizes overcommitted, unavailable and low remaining units within **only scanned pages**, and offers a browser-only reviewed replenishment worksheet. Suggested units seek three remaining after recorded orders, but are arithmetic prompts, never permissions to produce, purchase, publish or change stock. Drafts require a note and owner review before they can be copied; they are not saved in the database or browser storage. A failing canonical commitment read clears the inbox instead of inferring zero holds. Nine security, pagination, arithmetic, negative-path and UI tests accompany the change. [Build 640 owner guidance](docs/operations/RELEASE_467_BUILD_640_STOCK_EXCEPTION_INBOX.md).
 
