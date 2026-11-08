@@ -4,12 +4,26 @@
 (() => {
   'use strict';
   const form=document.getElementById('productEditorForm'),status=document.getElementById('productEditorStatus'),title=document.getElementById('productEditorTitle'),identity=document.getElementById('productEditorIdentity');
-  const mediaStatus=document.getElementById('productEditorMediaStatus'),mediaStrip=document.getElementById('productEditorMediaStrip'),saveButton=document.getElementById('productEditorSave');
+  const mediaStatus=document.getElementById('productEditorMediaStatus'),mediaStrip=document.getElementById('productEditorMediaStrip'),saveButton=document.getElementById('productEditorSave'),
+    saveConfidence632=document.getElementById('dd632SaveConfidence'),reviewShortcut632=document.getElementById('dd632ReviewSave');
   const saveReview521=document.getElementById('dd521SaveReview'),reviewStatus521=document.getElementById('dd521SaveReviewStatus'),
     reviewDifferences521=document.getElementById('dd521SaveDifferences'),keepServer521=document.getElementById('dd521KeepServer'),restoreBrowser521=document.getElementById('dd521RestoreBrowser');
   const qaStatus=document.getElementById('productEditorQaStatus'),qaResults=document.getElementById('productEditorQaResults'),qaRun=document.getElementById('productEditorQaRun');
   if(!form||!status||!window.DDAuth)return;
   const params=new URLSearchParams(location.search);const rawId=Number(params.get('product_id')||0);const state={productId:Number.isInteger(rawId)&&rawId>0?rawId:0,product:null,inFlight:false,quotaStop:false,saveNeedsReview:false,pendingSaveCheck:null,lastSubmitted521:null,review521:null,mediaLoaded:false,mediaLoading:false,images:[],authorityLoaded:false,qaRunning:false,qaData:null};
+  const showSaveConfidence632=(stateName,message)=>{
+    if(saveConfidence632&&(saveConfidence632.dataset.state!==stateName||saveConfidence632.textContent!==message)){
+      saveConfidence632.dataset.state=stateName;saveConfidence632.textContent=message;
+    }
+    if(reviewShortcut632)reviewShortcut632.hidden=stateName!=='hold'||!state.productId;
+  };
+  reviewShortcut632?.addEventListener('click',()=>{
+    if(!state.saveNeedsReview)return;
+    const review=document.getElementById('dd521SaveReview');if(!review||review.hidden)return;
+    review.scrollIntoView({block:'start'});
+    document.getElementById('dd521ReviewServer')?.focus();
+  });
+  showSaveConfidence632('loading',state.productId?'Waiting for verified saved Product…':'New Product — not saved yet.');
   form.dataset.productId=String(state.productId);
   const uncertainSaveKey521=state.productId?`dnd:product:uncertain-save:521:${state.productId}`:null;
   const clearUncertainSave521=()=>{if(uncertainSaveKey521)try{sessionStorage.removeItem(uncertainSaveKey521);}catch{}};
@@ -58,7 +72,11 @@
   let baseline='',leavingAfterSave=false;
   const fingerprint=()=>JSON.stringify([...form.elements].filter(el=>el.name&&!['button','submit','reset','file'].includes(el.type)).map(el=>[el.name,el.value]));
   const markClean=()=>{baseline=fingerprint();form.dataset.productDirty='0';};
-  function refreshDirty(){form.dataset.productDirty=baseline&&fingerprint()!==baseline?'1':'0';}
+  function refreshDirty(){form.dataset.productDirty=baseline&&fingerprint()!==baseline?'1':'0';
+    if(state.inFlight||state.saveNeedsReview)return;
+    if(form.dataset.productDirty==='1')showSaveConfidence632('unsaved','Unsaved browser edits. Press Save Product when ready; no destination has been updated.');
+    else if(state.authorityLoaded)showSaveConfidence632(state.productId?'loaded':'new',state.productId?'Saved server copy loaded; no unsaved edits.':'New Product — not saved yet.');
+  }
   // Build 443: local browser-session recovery, never an unsanctioned server autosave.
   const recoveryKey=state.productId?`dnd:product-editor:recovery:443:${state.productId}`:null;
   const recoveryBox=document.getElementById('dd443Recovery');let pendingRecovery=null;
@@ -97,6 +115,7 @@
     if(state.review521?.reviewed){state.saveNeedsReview=false;state.review521=null;state.lastSubmitted521=null;clearUncertainSave521();setSaveReady(true);
       if(saveReview521)saveReview521.hidden=false;if(reviewStatus521)reviewStatus521.textContent='Browser edits restored after comparing with the saved server copy. Review every changed field before deliberately pressing Save Product. Nothing was resent.';
       if(keepServer521)keepServer521.hidden=true;if(restoreBrowser521)restoreBrowser521.hidden=true;}
+    showSaveConfidence632('unsaved','Recovered browser edits need review and an explicit Save; nothing was resent.');
     setStatus('Unsaved browser edits restored for review. Press Save Product only when the fields are correct. No server or marketplace write occurred.','warn');
   }
   document.getElementById('dd443RecoveryRestore')?.addEventListener('click',restoreRecoveryEdits);
@@ -207,10 +226,11 @@
     else if(isDetails&&id!=='details'&&id!=='basics')document.querySelector(`[data-editor-panel="${id}"]`)?.scrollIntoView({block:'start'});
   }
   async function load(){
-    if(!state.productId){set('inventory_quantity',1);title.textContent='Create Product';identity.textContent='New Product';setSaveReady(true);setStatus('New Product mode. No Product list was loaded.','ok');syncSeo(true);markClean();renderQa();return;}
+    if(!state.productId){set('inventory_quantity',1);title.textContent='Create Product';identity.textContent='New Product';setSaveReady(true);setStatus('New Product mode. No Product list was loaded.','ok');syncSeo(true);markClean();showSaveConfidence632('new','New Product — not saved yet.');renderQa();return;}
     if(state.inFlight||state.quotaStop)return;
     if(form.dataset.productDirty==='1'&&!window.confirm('Unsaved Product edits are in this browser. Reload the server copy and offer Restore?'))return;
     snapshotEdits();state.inFlight=true;form.dataset.productAuthority='loading';setSaveReady(false);
+    showSaveConfidence632('loading','Loading one saved Product before editing is enabled…');
     if(!browserSeed())setStatus('Loading one authoritative Product only…');
     try{
       const response=await window.DDAuth.apiFetch(`/api/admin/product-editor-detail?product_id=${encodeURIComponent(state.productId)}`,{method:'GET',cache:'no-store'});
@@ -250,22 +270,27 @@
           if(restoreBrowser521)restoreBrowser521.hidden=verdict.savedMatch||!verdict.reviewed||(!pendingRecovery&&!state.lastSubmitted521);
           state.saveNeedsReview=!verdict.savedMatch;
           if(verdict.savedMatch){clearRecovery();clearUncertainSave521();state.review521=null;state.lastSubmitted521=null;setSaveReady(true);
+            showSaveConfidence632('saved','Previous Save verified against every returned Product field. No repeat needed.');
             setStatus(`STEP 1 VERIFIED — Product #${state.productId}'s complete submitted record matches the saved server copy. No repeat Save needed. Etsy remains a separate, deliberate step.`,'ok');
           }else{state.authorityLoaded=true;form.dataset.productAuthority='review';if(saveButton)saveButton.disabled=true;
+            showSaveConfidence632('hold','Save outcome needs review. Compare the saved Product and browser copy; do not press Save again.');
             setStatus(`HOLD — Product #${state.productId}'s saved record differs in ${verdict.different.length} fields; ${verdict.unavailable.length} values were unavailable. Choose which copy to keep after review. Nothing was re-sent to Etsy.`,'warn');}
         }catch(error){state.saveNeedsReview=true;state.authorityLoaded=true;form.dataset.productAuthority='review';if(saveButton)saveButton.disabled=true;
+          showSaveConfidence632('hold','Save outcome unconfirmed. Review the saved Product before any new write.');
           if(saveReview521)saveReview521.hidden=false;
           if(reviewStatus521)reviewStatus521.textContent='HOLD — Could not compare the server copy safely: '+String(error?.message||'comparison unavailable').slice(0,170)+'. Preserve the browser edits; no Save was repeated.';
           setStatus('HOLD — Server detail loaded, but the previous uncertain Save could not be reconciled. Do not resend it.','error');}
       }else if(state.review521?.reviewed){
         state.saveNeedsReview=true;state.authorityLoaded=true;form.dataset.productAuthority='review';if(saveButton)saveButton.disabled=true;
+        showSaveConfidence632('hold','Saved server copy loaded, but the earlier uncertain Save still needs an owner decision.');
         if(saveReview521)saveReview521.hidden=false;
         if(reviewStatus521)reviewStatus521.textContent='The saved server copy was refreshed, but our prior uncertain Save still needs a deliberate Keep server or Restore browser choice. Nothing was submitted.';
         setStatus('HOLD — We have not chosen which Product copy to keep after the uncertain Save. Use the review controls below; another reload does not approve a retry.','warn');
-      }else setStatus(`Product authority loaded. Compare any recovered browser edits before another Save. Optional gallery, scoring, pricing and QA remain unloaded until requested.${rowsText(data)}`,'ok');
+      }else{showSaveConfidence632('loaded','Saved server copy loaded; no unsaved edits.');setStatus(`Product authority loaded. Compare any recovered browser edits before another Save. Optional gallery, scoring, pricing and QA remain unloaded until requested.${rowsText(data)}`,'ok');}
       if(currentTab()==='media')loadMedia();
     }catch(error){
       setSaveReady(false);form.dataset.productAuthority='failed';if(quota(error))state.quotaStop=true;
+      showSaveConfidence632('blocked','Could not verify the saved Product. Save is disabled; use Reload saved Product after recovery.');
       setStatus(incidentMessage(error,'load')+' No Etsy control may operate from this failed load. Your existing saved Product has not been erased. Use Retry load after the service recovers.','error');
       document.dispatchEvent(new CustomEvent('dd:product-load-failed',{detail:{product_id:state.productId,reason:incident(error,'load').category}}));
     }finally{state.inFlight=false;}
@@ -325,22 +350,24 @@
   form.addEventListener('submit',async(event)=>{
     event.preventDefault();
     if(state.inFlight||state.quotaStop||state.saveNeedsReview){
+      if(state.saveNeedsReview)showSaveConfidence632('hold','Save outcome unconfirmed. Review the saved server copy; no repeat write is allowed.');
       setStatus('Another Product save is blocked. Review the last outcome and reload the saved Product before attempting another write.','error');return;
     }
     if(state.productId&&!state.authorityLoaded){setStatus('Product authority has not loaded. Save is blocked to prevent stale edits.','error');return;}
-    if(!get('name')){setStatus('Product name is required.','error');field('name')?.focus();return;}
+    if(!get('name')){showSaveConfidence632('invalid','Product name is required. Nothing was saved.');setStatus('Product name is required.','error');field('name')?.focus();return;}
     let body,channelSnapshot;
     try{body=payload();channelSnapshot=window.DDProductChannels405?.captureForProductSave?.()||{changed:false};}
-    catch(error){setStatus(error.message,'error');if(/consent/i.test(error.message))document.getElementById('productChannel471Consent')?.focus();else field('price')?.focus();return;}
+    catch(error){showSaveConfidence632('invalid',String(error.message||'Correct the Product fields before saving.').slice(0,220));setStatus(error.message,'error');if(/consent/i.test(error.message))document.getElementById('productChannel471Consent')?.focus();else field('price')?.focus();return;}
     if(body.price_cents===0){
       if(!window.confirm('This Product is priced at $0.00. Save it as a deliberately FREE Product? Cancel to correct the price.')){
-        setStatus('Save cancelled. Enter the intended CAD price before saving.','warn');field('price')?.focus();return;
+        showSaveConfidence632('unsaved','Save cancelled. No Product write occurred.');setStatus('Save cancelled. Enter the intended CAD price before saving.','warn');field('price')?.focus();return;
       }
       body.confirm_zero_price=true;
     }
     refreshDirty();snapshotEdits();
     const submittedFingerprint=fingerprint();
     state.inFlight=true;const unlockFields=freezeFields();
+    showSaveConfidence632('saving','Saving one Product request. Wait for confirmation; no automatic retry is scheduled.');
     if(saveButton){saveButton.disabled=true;saveButton.textContent='Saving…';}
     setStatus('One explicit Product write is in progress. Controls are temporarily locked; no automatic retry will run.');
     const endpoint=state.productId?'/api/admin/product-editor-save':'/api/admin/create-product';
@@ -389,6 +416,10 @@
         product_id:savedId,etsy_preference_saved:etsyPreferenceSaved,destinations_confirmed:destinationsSaved,
         newer_edits:newerEdits}}));
       if(saveButton)saveButton.textContent=newerEdits?'Newer edits unsaved':destinationsSaved?'Saved ✓':'Product saved; destinations pending';
+      showSaveConfidence632(newerEdits?'unsaved':destinationsSaved?'saved':'partial',
+        newerEdits?'Product saved, but newer browser edits remain unsaved.':
+        destinationsSaved?'Saved ✓ Product fields and CAD price confirmed. Etsy and Meta publishing remain separate.':
+        'Product saved; destination preference is unconfirmed. Review destinations separately—do not repeat Product Save.');
       setStatus(newerEdits?'Product saved, but newer browser edits remain unsaved. Review before another Save.':
         !destinationsSaved?'Product saved and CAD price verified, but destination choices were NOT confirmed. Reconcile destinations separately; do not repeat Product Save.':
         `Saved ✓ CAD price verified as ${(Number(body.price_cents)/100).toFixed(2)}. Schema introspection reads: ${Number(data?.schema_introspection_reads||0)}. QA remains manual.${rowsText(data)}`,newerEdits||!destinationsSaved?'warn':'ok');
@@ -410,6 +441,10 @@
         if(keepServer521)keepServer521.hidden=true;if(restoreBrowser521)restoreBrowser521.hidden=true;
       }
       refreshDirty();snapshotEdits();
+      showSaveConfidence632(state.saveNeedsReview?'hold':noWriteStarted?'invalid':'blocked',
+        state.saveNeedsReview?'Save outcome unconfirmed. Review saved server data before attempting another write.':
+        noWriteStarted?'Save did not begin. Correct the highlighted issue, then choose Save once.':
+        'Product Save failed. Read the error and check the saved server copy before retrying.');
       setStatus(noWriteStarted?
         `Product Save did not begin: ${String(error.message||'check the saved Product options').slice(0,240)}. Our browser edits are preserved. Correct the issue, then deliberately press Save Product once; nothing was sent to Etsy.`:
         `STEP 1 — Save Product #${state.productId||'new'}: ${incidentMessage(error,'save')} The error is from the local Product server, not from Etsy photos or tags. ${state.productId?'Click Review server copy first; we will identify any saved fields that differ.':'Check Products for an existing new Product before creating another.'}`,
@@ -435,6 +470,7 @@
     keepServer521.hidden=true;if(restoreBrowser521)restoreBrowser521.hidden=true;
     if(reviewStatus521)reviewStatus521.textContent='We kept the current authoritative server Product. The earlier uncertain Save was not repeated; browser recovery was deliberately discarded.';
     setStatus('Current saved Product kept after a read-only comparison. No Product or Etsy write was performed.','ok');
+    showSaveConfidence632('loaded','Kept the saved server version after review. No repeat Product Save or Etsy write.');
   });
   restoreBrowser521?.addEventListener('click',restoreRecoveryEdits);
   document.querySelectorAll('[data-editor-tab]').forEach((button)=>button.addEventListener('click',()=>openTab(button.dataset.editorTab||'basics')));

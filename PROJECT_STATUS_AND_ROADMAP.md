@@ -1,3 +1,9 @@
+# Release 467 Build 632 — Product Editor Save Confidence & Error Recovery (Production candidate)
+
+The main Product Editor Save bar now continuously distinguishes unsaved browser edits, an in-flight Product request, a confirmed saved Product, an incomplete destination preference, an unsaved new Product, an unavailable saved record and an uncertain write outcome. The visible **Review unconfirmed Save** shortcut opens the existing read-only server comparison without repeating a POST. Validation failures name the field to correct, while verified no-write rejection stays a manual correction. No new API, schema, provider call, autosave or cross-user entitlement is introduced. The canonical 152-route Admin inventory source length is refreshed, and the fail-closed runtime byte budget cap is explicitly reviewed with a bounded 5,000-byte adjustment. [Build 632 acceptance](docs/operations/RELEASE_467_BUILD_632_PRODUCT_EDITOR_SAVE_CONFIDENCE.md).
+
+**Next proposed Build 633 — Product Form Guided Validation and Mobile Entry Polish** (reduce form friction, make required fields clearer, and preserve all existing permission and marketplace gates).
+
 # Release 467 Build 631 — Admin Workspace Finder (Production candidate)
 
 Return to everyday Devil n Dove usability: the Admin Home now has a labeled, keyboard-accessible workspace finder that filters the existing workspace cards by name and description. It announces match counts, supports `/` to focus, Enter to focus the first matched card, Escape and Clear to reset, and does not store searches or make network requests. Existing admin permissions, on-demand Seller snapshot, orders, customers, Etsy and Meta provider actions are unchanged. The performance source byte cap receives a documented, bounded 4,000-byte increase to cover this static feature; all other limits stay unchanged. See [Build 631 implementation and acceptance](docs/operations/RELEASE_467_BUILD_631_ADMIN_WORKSPACE_FINDER.md).
