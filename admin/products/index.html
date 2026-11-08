@@ -44,6 +44,18 @@
     .dd637-stock-badge[data-stock="out"]{color:#bc3434}
     .dd637-stock-badge[data-stock="low"]{color:#b16a03}
     .dd637-stock-badge[data-stock="healthy"]{color:#027a48}
+    .dd638-count-panel{margin:14px 0;padding:16px;border:1px solid var(--border);border-radius:12px}
+    .dd638-count-panel[hidden]{display:none}
+    .dd638-count-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,220px),1fr));gap:12px}
+    .dd638-count-grid label{display:block;min-width:0}
+    .dd638-count-grid input{width:100%;min-height:46px}
+    .dd638-count-actions{display:flex;flex-wrap:wrap;gap:8px;margin:12px 0}
+    .dd638-count-actions .btn{min-height:46px}
+    .dd638-count-ack{display:block;margin:12px 0;padding:12px;border:1px solid var(--border);border-radius:9px;line-height:1.5}
+    .dd638-count-ack input{width:19px;height:19px;vertical-align:middle;margin-right:8px}
+    .dd638-history{overflow-x:auto;max-width:100%}
+    .dd638-history table{min-width:580px;width:100%;border-collapse:collapse}
+    .dd638-history th,.dd638-history td{text-align:left;padding:8px;vertical-align:top;border-bottom:1px solid var(--border)}
     @media(max-width:680px){
       .dd635-toolbar{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
       .dd635-toolbar label,.dd635-toolbar label:first-child{grid-column:1/-1;min-width:0}
@@ -105,6 +117,25 @@
           <tbody id="productBrowserBody"><tr><td colspan="4" class="dd-empty">Loading one compact Product page…</td></tr></tbody>
         </table>
       </div>
+      <section class="dd638-count-panel" id="dd638CountPanel" aria-labelledby="dd638CountHeading" hidden>
+        <h3 id="dd638CountHeading">Finished inventory — count &amp; recorded history</h3>
+        <p id="dd638CountProduct" role="status" aria-live="polite">Select Count / History on a Product above.</p>
+        <p class="small"><strong>History is partial:</strong> this view lists recorded stock-related admin audit actions, not a complete inventory ledger. Older edits, missing audit records, sales and untracked changes may not appear. Never derive the actual physical count from this list.</p>
+        <div class="dd638-count-actions"><button class="btn" type="button" id="dd638HistoryRefresh">Refresh actual stock &amp; history</button><button class="btn" type="button" id="dd638CountClose">Close</button></div>
+        <p id="dd638HistoryStatus" role="status" aria-live="polite">History has not been loaded.</p>
+        <div id="dd638HistoryRows" class="dd638-history">No history loaded.</div>
+        <h4>Compare a physical count</h4>
+        <p class="small">Check the real finished Products on hand. A correction below committed orders is blocked; we do not change lot provenance, supplier inventory, prices or external channels.</p>
+        <div class="dd638-count-grid">
+          <label><span class="small">Actually counted finished units (0–1,000,000)</span><input id="dd638CountedQuantity" class="input" type="number" min="0" max="1000000" step="1" inputmode="numeric"/></label>
+          <label><span class="small">Factual count/discrepancy note (required)</span><input id="dd638CountNote" class="input" type="text" maxlength="240" placeholder="e.g. Physical count of rings on 8 Nov"/></label>
+        </div>
+        <div class="dd638-count-actions"><button class="btn" type="button" id="dd638CountPreview" disabled>Preview saved vs counted</button></div>
+        <p id="dd638CountStatus" role="status" aria-live="polite">No stock correction has been prepared.</p>
+        <div id="dd638CountComparison" aria-live="polite">Preview a fresh server count before confirming any change.</div>
+        <label class="dd638-count-ack"><input id="dd638CountOwnerConfirmed" type="checkbox" disabled/>We physically counted this Product, verified the before/after quantities and reviewed the existing order-commitment and storefront warnings. Authorize only this one count correction.</label>
+        <button class="btn primary" id="dd638CountApply" type="button" disabled>Confirm reviewed stock correction</button>
+      </section>
       <section class="dd637-restock" id="dd637RestockPanel" aria-labelledby="dd637RestockHeading" hidden>
         <h3 id="dd637RestockHeading">Restock one finished Product — verify first</h3>
         <p id="dd637RestockProduct" role="status" aria-live="polite">Choose Restock on a tracked Product above.</p>
@@ -158,7 +189,8 @@
   </div>
 
   <script src="/public/js/auth.js?v=440"></script>\n  <script src="/public/js/admin-route-usage.js?v=249"></script>
-  <script src="/public/js/admin-products-browser-v162.js?v=170&b635=1&b636=1&b637=1"></script>
+  <script src="/public/js/admin-products-browser-v162.js?v=170&b635=1&b636=1&b637=1&b638=1"></script>
+  <script src="/public/js/admin-product-count-history-638.js?v=638"></script>
 <script src="/public/js/admin-product-zero-price-review-v390.js?v=390"></script>
 <script src="/public/js/admin-product-price-source-review-v394.js?v=394"></script>
 </body>
