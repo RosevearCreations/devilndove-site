@@ -260,6 +260,7 @@
       const stock=tracked?String(qty):'not tracked';
       const stockState=tracked?(qty<=0?'out':qty<=2?'low':'healthy'):'untracked';
       const stockLabel=stockState==='out'?'OUT OF STOCK':stockState==='low'?'LOW STOCK (1–2)':stockState==='healthy'?'Tracked stock OK':'Not tracked';
+      const canInspectStock=tracked&&String(p.product_type||'').toLowerCase()==='physical';
       const canRestock=tracked&&String(p.product_type||'').toLowerCase()==='physical'&&['draft','active'].includes(String(p.status||'').toLowerCase());
       let source='';let photoAction='';
       if(!featured){
@@ -274,7 +275,7 @@
         <td class="dd-product-image-cell"><img class="dd-product-thumb" loading="lazy" data-product-image-candidates='${esc(JSON.stringify(candidates))}' alt="${esc(p.name||'Product image')}"></td>
         <td><strong>${esc(p.name||`Product #${id}`)}</strong><div class="small">#${id}${p.product_number?` • No. ${esc(p.product_number)}`:''}${p.sku?` • ${esc(p.sku)}`:''}${p.product_category?` • ${esc(p.product_category)}`:''}</div><div class="dd-product-meta"><span>${esc(p.status||'draft')}</span><span>${esc(p.review_status||'pending')}</span></div><label class="dd636-bulk-choose"><input type="checkbox" data-dd636-select-id="${id}" data-dd636-eligible="${String(p.status||'').toLowerCase()==='draft'?'true':'false'}" ${String(p.status||'').toLowerCase()==='draft'?'':'disabled'} ${bulkSelection636.has(id)?'checked':''}/> ${String(p.status||'').toLowerCase()==='draft'?'Select draft for bulk review':'Not draft — bulk edit unavailable'}</label><div class="dd635-photo-label" data-ready="${photoReady?'set':'missing'}">${photoLabel}</div><div class="dd635-photo-note">Alt text / image rights: not checked in this list.</div><div class="small dd-product-photo-source">${source}</div></td>
         <td><strong>${money(p.price_cents,p.currency)}</strong><div class="small">Stock: ${esc(stock)}</div><span class="dd637-stock-badge" data-stock="${stockState}">${stockLabel}</span></td>
-        <td class="dd-product-actions"><a class="btn" data-product-edit-id="${id}" href="${edit}">Edit</a>${canRestock?`<button class="btn" type="button" data-dd637-restock-id="${id}">Restock</button><button class="btn" type="button" data-dd638-count-id="${id}">Count / History</button>`:''}<a class="btn" href="${media}">Images</a>${photoAction}${publicLink?`<a class="btn" href="${publicLink}" target="_blank" rel="noopener">View</a>`:''}</td>
+        <td class="dd-product-actions"><a class="btn" data-product-edit-id="${id}" href="${edit}">Edit</a>${canInspectStock?`<button class="btn" type="button" data-dd639-stock-id="${id}">Availability</button>`:''}${canRestock?`<button class="btn" type="button" data-dd637-restock-id="${id}">Restock</button><button class="btn" type="button" data-dd638-count-id="${id}">Count / History</button>`:''}<a class="btn" href="${media}">Images</a>${photoAction}${publicLink?`<a class="btn" href="${publicLink}" target="_blank" rel="noopener">View</a>`:''}</td>
       </tr>`;
     }).join('');
     body.querySelectorAll('[data-product-edit-id]').forEach((link)=>link.addEventListener('click',()=>rememberEditorSeed(byId.get(Number(link.dataset.productEditId||0)))));
@@ -284,6 +285,7 @@
     }));
     body.querySelectorAll('[data-dd637-restock-id]').forEach(button=>button.addEventListener('click',()=>openRestock637(byId.get(Number(button.dataset.dd637RestockId||0)))));
     body.querySelectorAll('[data-dd638-count-id]').forEach(button=>button.addEventListener('click',()=>window.DD638CountHistory?.open(byId.get(Number(button.dataset.dd638CountId||0)))));
+    body.querySelectorAll('[data-dd639-stock-id]').forEach(button=>button.addEventListener('click',()=>window.DD639StockVisibility?.open(byId.get(Number(button.dataset.dd639StockId||0)))));
     armImages();
     syncBulkControls636();
     syncRestock637();

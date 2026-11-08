@@ -45,6 +45,8 @@ jobs:
         run: node --test scripts/release467_build637_low_stock_restock.test.mjs
       - name: Build 638 bounded audit history, physical count, commitment and owner-confirmed correction regression
         run: node --test scripts/release467_build638_inventory_count_history.test.mjs
+      - name: Build 639 Product stock, qualifying order commitments, serialized sources and read-only UI regression
+        run: node --test scripts/release467_build639_stock_commitments.test.mjs
       - name: Current help, search, H1, responsive, Packaging, Grey Hair CAIP, Content Studio review/execution boundary, authority restart integrity, I.T. truth and release provenance quality
         run: python scripts/current_application_quality_gate.py
       - name: Preserve password-hash compatibility and current-write security
