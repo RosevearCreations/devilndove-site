@@ -178,6 +178,18 @@
         <div class="dd640-actions"><button type="button" class="btn" id="dd643Load" disabled>Load recent 10 reviews</button><button type="button" class="btn" id="dd643Save" disabled>Record private review note</button><button type="button" class="btn" id="dd643More" disabled>Load earlier reviews</button></div>
         <p id="dd643Status" role="status" aria-live="polite">Load the owner plans above, select one and choose Load recent reviews. No automatic history request is made.</p>
         <div id="dd643Entries"><p class="small">Dated review notes appear after an explicit load.</p></div>
+        <div id="dd644ReviewSearch" aria-labelledby="dd644Heading" class="dd640-plan">
+          <h4 id="dd644Heading">Find Review Notes &amp; Owner Decision Summary</h4>
+          <p class="small">Search up to 50 private reviews of the selected saved owner plan above. The outcome summary covers that plan's full bounded timeline even if the search matches only a few entries. This is a recommendation history, not proof of actual restocking.</p>
+          <div class="dd640-plan-fields">
+            <label>Find a note (2–80 characters, or blank)<input type="search" class="input" id="dd644Query" maxlength="80" autocomplete="off" placeholder="e.g. bench count, wire supplier"/></label>
+            <label>Review outcome<select class="input" id="dd644Outcome"><option value="">All outcomes</option><option value="needs_physical_count">Physical count needed</option><option value="needs_supplier_review">Supplier review needed</option><option value="needs_workshop_review">Workshop review needed</option><option value="follow_up_scheduled">Follow-up scheduled</option><option value="no_change_recommended">No stock change recommended</option><option value="separate_action_recommended">Separate action recommended</option></select></label>
+          </div>
+          <div class="dd640-actions"><button type="button" class="btn" id="dd644Search" disabled>Search saved reviews</button><button type="button" class="btn secondary" id="dd644Clear">Clear filters</button><button type="button" class="btn" id="dd644More" disabled>Load next matching 10</button></div>
+          <p id="dd644Status" role="status" aria-live="polite">Select a saved owner plan and choose Search saved reviews; no background search runs.</p>
+          <div id="dd644Summary"><p class="small">The owner decision summary appears after a verified search.</p></div>
+          <div id="dd644Results"><p class="small">No review-note search has been requested.</p></div>
+        </div>
         <p class="dd640-warning small">Review notes document recommendations only. Neither a completed review nor a recommended action verifies physical stock or authorizes purchasing, order changes, manufacturing or marketplace publication.</p>
       </section>
       <form id="productBrowserSearchForm" class="dd-product-toolbar dd635-toolbar">
@@ -288,5 +300,6 @@
 <script src="/public/js/admin-owner-restock-plans-641.js?v=641"></script>
 <script src="/public/js/admin-owner-restock-priority-642.js?v=642"></script>
 <script src="/public/js/admin-owner-restock-reviews-643.js?v=643"></script>
+<script src="/public/js/admin-owner-restock-search-644.js?v=644"></script>
 </body>
 </html>
