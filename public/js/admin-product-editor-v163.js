@@ -330,13 +330,59 @@
       document.dispatchEvent(new CustomEvent('dd:product-load-failed',{detail:{product_id:state.productId,reason:incident(error,'load').category}}));
     }finally{state.inFlight=false;}
   }
+  // Build 634: a photo review operates only on the canonical gallery already
+  // loaded on explicit Photos navigation plus the original Product authority's
+  // featured reference. Review does not write, crop, upload or approve rights.
+  const reviewDialog634=document.getElementById('dd634GalleryReview');
+  const reviewCount634=document.getElementById('dd634GalleryCount');
+  const reviewImage634=document.getElementById('dd634ReviewImage');
+  const reviewDescription634=document.getElementById('dd634ReviewDescription');
+  const reviewPrevious634=document.getElementById('dd634ReviewPrevious');
+  const reviewNext634=document.getElementById('dd634ReviewNext');
+  let reviewRows634=[],reviewIndex634=0;
+  function showReview634(index){
+    if(!reviewDialog634||!reviewImage634||!reviewRows634.length||!Number.isInteger(index)||index<0||index>=reviewRows634.length)return;
+    reviewIndex634=index;const row=reviewRows634[index];
+    const canonical=Number(row.product_image_id||0)>0;
+    const alt=String(row.alt_text||'').trim();
+    armMediaImage(reviewImage634,row.image_url);
+    reviewImage634.alt=alt||'Product photo with no saved alternative text';
+    if(reviewDescription634)reviewDescription634.textContent=`Photo ${index+1} of ${reviewRows634.length} • ${canonical?'Canonical gallery image':'Existing featured-only Product reference'} • ${alt?'Saved alt text: '+alt:'Alt text missing; review in Image Editor'} • Image rights are not verified in this preview.`;
+    if(reviewPrevious634)reviewPrevious634.disabled=index===0;
+    if(reviewNext634)reviewNext634.disabled=index===reviewRows634.length-1;
+    if(!reviewDialog634.open&&typeof reviewDialog634.showModal==='function')reviewDialog634.showModal();
+  }
+  reviewPrevious634?.addEventListener('click',()=>showReview634(reviewIndex634-1));
+  reviewNext634?.addEventListener('click',()=>showReview634(reviewIndex634+1));
+  document.getElementById('dd634ReviewClose')?.addEventListener('click',()=>reviewDialog634?.close());
   function renderMedia(){
-    if(!mediaStrip)return;if(!state.productId){mediaStrip.innerHTML='<p class="small">Save the new Product first, then add images.</p>';return;}
-    if(!state.mediaLoaded){mediaStrip.innerHTML='';return;}
-    const rows=editorMediaRows();
+    if(!mediaStrip)return;
+    reviewRows634=[];
+    if(!state.productId){mediaStrip.innerHTML='<p class="small">Save the new Product first, then add images.</p>';if(reviewCount634)reviewCount634.textContent='No saved Product gallery yet.';return;}
+    if(!state.mediaLoaded){mediaStrip.innerHTML='';if(reviewCount634)reviewCount634.textContent='Open Photos to load the saved Product gallery.';return;}
+    const rows=editorMediaRows();reviewRows634=rows;
+    if(reviewCount634)reviewCount634.textContent=`${state.images.length} saved gallery photo${state.images.length===1?'':'s'}${rows.length>state.images.length?' plus an existing featured-only reference':''}. Select any photo to enlarge it; image rights are not verified here.`;
     if(!rows.length){mediaStrip.innerHTML='<p class="small">No canonical gallery image or featured Product reference was found. Open Media &amp; Image Editor to add one.</p>';return;}
-    const featured=String(get('featured_image_url')||'').trim();mediaStrip.innerHTML=rows.map((row,index)=>{const isFeatured=featured&&featured===String(row.image_url||'').trim();const canonical=Number(row.product_image_id||0)>0;const source=String(row.source|| (canonical?'gallery':'recovered reference'));return `<article class="dd-editor-media-card${isFeatured?' is-featured':''}"><img loading="lazy" data-media-raw="${esc(row.image_url||'')}" alt="${esc(row.alt_text||get('name')||'Product image')}"><div><strong>${isFeatured?'Featured':'Image '+(index+1)}</strong><div class="small">${esc(row.alt_text||'No alt text yet')}</div><div class="small">Source: ${esc(source)}${canonical?'':' • recovered existing reference'}</div></div><div class="dd-product-actions"><button class="btn" type="button" data-use-featured-url="${esc(row.image_url||'')}" ${isFeatured?'disabled':''}>Use as featured</button><button class="btn" type="button" data-dd495-jump-media="${Number(row.product_image_id||0)}">${canonical?'Complete image requirements here':'Review shared Product images'}</button></div></article>`;}).join('');
+    const featuredKey=mediaKey(get('featured_image_url'));
+    mediaStrip.innerHTML=rows.map((row,index)=>{
+      const isFeatured=Boolean(featuredKey)&&featuredKey===mediaKey(row.image_url);
+      const canonical=Number(row.product_image_id||0)>0;
+      const source=String(row.source||(canonical?'gallery':'recovered reference'));
+      const alt=String(row.alt_text||'').trim();
+      return `<article class="dd-editor-media-card${isFeatured?' is-featured':''}">
+        <button class="dd634-review-photo" type="button" data-dd634-review-index="${index}" aria-label="Enlarge Product photo ${index+1}${isFeatured?', currently featured':''}">
+          <img loading="lazy" data-media-raw="${esc(row.image_url||'')}" alt="${esc(alt||'Product photo with no saved alternative text')}">
+        </button>
+        <div><strong>Photo ${index+1}</strong>${isFeatured?' <span class="dd634-featured-label">Featured draft</span>':''}
+          <div class="small">${esc(alt||'Alt text missing — review in Image Editor')}</div>
+          <div class="small">${esc(source)}${canonical?'':' • existing featured-only reference'}</div></div>
+        <div class="dd-product-actions">
+          <button class="btn" type="button" data-use-featured-url="${esc(row.image_url||'')}" aria-pressed="${isFeatured?'true':'false'}" ${isFeatured?'disabled':''}>${isFeatured?'Currently featured':'Use as featured'}</button>
+          <button class="btn" type="button" data-dd495-jump-media="${Number(row.product_image_id||0)}">${canonical?'Edit image details':'Review shared Product images'}</button>
+        </div></article>`;
+    }).join('');
     mediaStrip.querySelectorAll('img[data-media-raw]').forEach((img)=>armMediaImage(img,img.dataset.mediaRaw||''));
+    mediaStrip.querySelectorAll('[data-dd634-review-index]').forEach((button)=>button.addEventListener('click',()=>showReview634(Number(button.dataset.dd634ReviewIndex))));
     mediaStrip.querySelectorAll('[data-use-featured-url]').forEach((button)=>button.addEventListener('click',()=>setFeaturedDraft(button.dataset.useFeaturedUrl||'')));
     mediaStrip.querySelectorAll('[data-dd495-jump-media]').forEach(button=>button.addEventListener('click',()=>{
       const id=Number(button.dataset.dd495JumpMedia||0),section=document.getElementById('productDistribution406');
