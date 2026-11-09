@@ -88,6 +88,12 @@ jobs:
           node --check functions/api/admin/module-acceptance-656.js
           node --check public/js/admin-module-acceptance-656.js
           node --test scripts/release467_build656_module_evidence_owner_signoff.test.mjs
+      - name: Build 657 source-linked Creative Project production, private QA, rework and salvage safety
+        run: |
+          node --check functions/api/_lib/workshopLifecycle657.mjs
+          node --check functions/api/admin/workshop-production-657.js
+          node --check public/js/admin-workshop-production-657.js
+          node --test scripts/release467_build657_workshop_production_lifecycle.test.mjs
       - name: Current help, search, H1, responsive, Packaging, Grey Hair CAIP, Content Studio review/execution boundary, authority restart integrity, I.T. truth and release provenance quality
         run: python scripts/current_application_quality_gate.py
       - name: Preserve password-hash compatibility and current-write security

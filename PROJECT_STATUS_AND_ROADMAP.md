@@ -1,4 +1,14 @@
-# Release 467 Build 656 — Evidence-Based Module Completion Tracking, Device Acceptance & Owner Signoff (Production candidate)
+# Release 467 Build 657 — Workshop Production Lifecycle, Job Progress, QA & Rework Evidence (Production candidate)
+
+Devil n Dove Creators now includes a [private workshop production and QA review workspace](/admin/workshop-production/) connected to actual `creative_work_projects`, their latest **40 active timeline events** and latest **40 output records**. Authenticated Admins explicitly inspect an existing project, review source-backed work phases, record owner-estimated progress and a factual QA/rework/salvage/private-learning decision, and cite an actual active source event for all observed work beyond a zero-progress planning review. Two Admins share one private project decision history with exact source-revision drift detection, per-project compare-and-swap revisions, append-only receipts and original-request recovery. Existing project status, material inventory, Product sales candidacy, publication and Comms/Master Shell endpoints are never changed by these reviews. [Build 657 owner guide](docs/operations/RELEASE_467_BUILD_657_WORKSHOP_PRODUCTION_QA_GUIDE.md).
+
+**Evidence truth:** A successful owner-reviewed terminal step (`100%` estimated, valid private-learning result or QA pass) reflects **only the private decision journal**, not an independently certified production completion or real Product release. An original project still marked idea/planning cannot be claimed terminal through this journal. No sale is required for therapeutic/private work, failed experiments or salvaged samples. The Build 656 module denominator and independent Master Shell percentage stay UNKNOWN / HOLD; original Comms trust remains DISCONNECTED / HOLD. The release adds 14 deterministic negative-access, source-drift and owner-history regressions. Four formerly unused, unreferenced historical banner clients are preserved byte-for-byte in `docs/operations/historical/` outside the protected active runtime budget.
+
+**Next proposed Build 658 — Inventory, Supplies, Tools & Physical Stock Reconciliation**, preserving Inventory-owned physical stock authority and requiring explicit original counts and correction acceptance.
+
+---
+
+## Previous release — Build 656
 
 The I.T. / maker owner workspace now offers [private, authenticated module evidence review](/admin/module-acceptance/) for **38 stable proposed acceptance checkpoints** covering customer, worker and administrator desktop/tablet/mobile journeys plus 20 workshop, commerce, security and financial domains. An actual Admin can explicitly record an observed evidence link, device/browser, factual note and HOLD, rejected or locally accepted decision. Owner-scoped D1 records use same-origin writes, compare-and-swap revisions, original-request receipt lookup, readback and append-only decision history. No background write, automatic retry, customer message, inventory mutation or new Comms/AI Data Platform transport is introduced. [Build 656 owner guide](docs/operations/RELEASE_467_BUILD_656_MODULE_ACCEPTANCE_OWNER_GUIDE.md).
 
