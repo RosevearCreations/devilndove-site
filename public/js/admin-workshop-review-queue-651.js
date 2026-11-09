@@ -25,6 +25,7 @@
   const dayDelta=(due,now)=>due?Math.round((Date.parse(`${due}T00:00:00Z`)-
     Date.parse(`${dayKey(now)}T00:00:00Z`))/86400000):null;
   let source=null,rows=[],selected='',draft='',scanning=false,epoch=0;
+  const listeners=new Set();
   const status=text=>{ui.Status.textContent=text};
   function normalize(s){
     if(s?.loaded!==true||!integer(s.owner_user_id)||s.owner_user_id<1||
@@ -45,6 +46,16 @@
   }
   const current=()=>!!source&&JSON.stringify(source)===
     JSON.stringify(normalize(window.DD641OwnerPlans.snapshot()));
+  function snapshot(){
+    if(!current())return null;
+    return {owner:source.owner,version:source.version,total:source.plans.length,
+      selected,scanning,checked:rows.map(({id,title,status,due,reviewCount,timeline,latest,at,checkedAt})=>
+        ({id,title,status,due,reviewCount,timeline,latest,at,checkedAt}))};
+  }
+  function publish(){
+    const view=snapshot();
+    for(const fn of listeners)try{fn(view);}catch{}
+  }
   const chosen=()=>rows.find(x=>x.id===selected)||null;
   function resetDraft(){draft='';ui.Preview.value='';ui.Copy.disabled=true;
     ui.Prepare.disabled=!chosen();}
@@ -56,6 +67,7 @@
     ui.Scan.disabled=!source?.plans.length;ui.Restart.disabled=!source?.plans.length;
     ui.Clear.disabled=!source;ui.History.disabled=true;ui.Reopen.disabled=true;
     ui.Filter.value='all';ui.Filter.disabled=true;status(message);
+    publish();
   }
   function check(data,plan,now){
     const s=data?.summary,events=data?.events;
@@ -140,6 +152,7 @@
         `${focus.latest?outcomes[focus.latest][1]:'Use the original dated-review editor to record a factual decision.'} `+
         'No inventory or plan status change has been made.';
     }else ui.Selection.textContent='Select a verified scanned plan for manual follow-up.';
+    publish();
   }
   async function scan(restart=false){
     if(scanning||!current()||!source?.plans.length)return;
@@ -149,6 +162,7 @@
     if(!group.length)return;
     scanning=true;ui.Scan.disabled=true;ui.Restart.disabled=true;ui.Clear.disabled=true;
     ui.History.disabled=true;ui.Reopen.disabled=true;resetDraft();ui.Prepare.disabled=true;
+    publish();
     status(`Checking ${group.length} saved plan(s) with one authenticated GET per plan, sequentially…`);
     try{
       for(const p of group){
@@ -170,7 +184,7 @@
     }catch(error){
       if(ticket===epoch)reset(`HOLD — ${error.message} No partial decisions retained. Reload owner plans and start over; no automatic retry.`);
     }finally{if(ticket===epoch){scanning=false;ui.Scan.disabled=rows.length>=source.plans.length;
-      ui.Restart.disabled=!source.plans.length;ui.Clear.disabled=false;}}
+      ui.Restart.disabled=!source.plans.length;ui.Clear.disabled=false;publish();}}
   }
   ui.Scan.addEventListener('click',()=>void scan());
   ui.Restart.addEventListener('click',()=>void scan(true));
@@ -219,6 +233,10 @@
       if(ui.Preview.value===draft&&current())status('Copied private unsigned handoff. Any actual action still needs its own verified editor/approval.');
     }catch{status('Clipboard blocked. Select draft text manually; nothing was saved or sent.');}
   });
+  window.DD651Queue={snapshot,subscribe(fn){if(typeof fn!=='function')return()=>{};
+    listeners.add(fn);try{fn(snapshot());}catch{}return()=>listeners.delete(fn);},
+    select(id){if(!current()||!rows.some(r=>r.id===id)||scanning)return false;
+      selected=id;resetDraft();render();return true;}};
   window.DD641OwnerPlans.subscribe(s=>{
     const next=normalize(s),changed=JSON.stringify(next)!==JSON.stringify(source);
     source=next;

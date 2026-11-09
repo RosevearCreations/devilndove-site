@@ -55,7 +55,7 @@ function fixture({plans=[plan(1)],buildReply=p=>reply(p),request}={}){
   const filter=value=>{els.dd651Filter.value=value;els.dd651Filter.events.change();};
   const choose=id=>{els.dd651Rows.events.click({target:{closest:()=>({dataset:{dd651Plan:id}})}});};
   const change=next=>{snapshot=next;subscription(next);};
-  return {els,calls,reopened,copied,scan,filter,choose,change,plans,snapshot};
+  return {els,calls,reopened,copied,scan,filter,choose,change,plans,snapshot,win};
 }
 
 test('651 reads no private plans on mount; explicitly scans up to five, sequentially',async()=>{
@@ -140,6 +140,21 @@ test('651 restart invalidates previous drafts and scans from first plan again',a
   assert.equal(f.calls.length,2);
   assert.equal(f.els.dd651Preview.value,'');
   assert.equal(f.els.dd651Copy.disabled,true);
+});
+
+test('651 publishes a safe scoped read-only checked-queue bridge for Build 652',async()=>{
+  const f=fixture();
+  assert.equal(f.win.DD651Queue.snapshot().checked.length,0);
+  await f.scan();
+  const evidence=f.win.DD651Queue.snapshot();
+  assert.equal(evidence.owner,7);
+  assert.equal(evidence.checked.length,1);
+  assert.equal(evidence.checked[0].id,uuid(1));
+  assert.equal(Object.hasOwn(evidence.checked[0],'note'),false);
+  assert.equal(f.win.DD651Queue.select(uuid(1)),true);
+  assert.equal(f.win.DD651Queue.snapshot().selected,uuid(1));
+  f.change({...f.snapshot,owner_user_id:8});
+  assert.equal(f.win.DD651Queue.snapshot()?.checked.length,0);
 });
 
 test('651 HTML/CI wire up only safe read paths and preserve two historical scripts',()=>{
