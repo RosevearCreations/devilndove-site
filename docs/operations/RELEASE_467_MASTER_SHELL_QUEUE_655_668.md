@@ -6,7 +6,7 @@ This is a dependency-aware **proposed** queue, not a statement that future featu
 
 | Build | Priority and scope | Acceptance boundary |
 | --- | --- | --- |
-| **655** | **IN PROGRESS** — Master Shell Source Readiness Register, Evidence Freshness Ownership & Approved Event Schema Preparation | Local source evidence only; original connection HOLD and event publishers disabled |
+| **655** | Master Shell Source Readiness Register, Evidence Freshness Ownership & Approved Event Schema Preparation | Local source evidence only; original connection HOLD and event publishers disabled. Release status must be verified from protected `main`, not this planning table |
 | **656** | Evidence-based Module Completion Tracking, Device Acceptance & Owner Signoff | Stable requirement IDs, owner-approved weights/denominator, mobile/tablet/desktop evidence; no inferred percentages |
 | **657** | Workshop Production Lifecycle, Job Progress, QA & Rework Evidence | Real maker work evidence including private/therapeutic, failed/salvage paths; no forced sale or stock writes |
 | **658** | Inventory, Supplies, Tools & Physical Stock Reconciliation | Verified physical counts/lot custody and independently authorized corrections |
