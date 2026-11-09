@@ -1,4 +1,14 @@
-# Release 467 Build 652 — Workshop Follow-Up Queue Saved Views, Explicit Action Priority Explanations & Review Continuity (Production candidate)
+# Release 467 Build 653 — Workshop Review Follow-Up Bookmarks, Filter Recovery & Owner Decision Traceability (Production candidate)
+
+Admin → Products now includes **up to five page-only owner review bookmarks** for plans previously checked through the explicit Build 651 scan. Each bookmark shows its dated saved-plan version, owner decision timeline and source check, with **fail-closed validation** after a plan/timeline/owner change. Owners can deliberately continue the verified plan or open the original Build 649 history selector, with a separate explicit authenticated history Load. An owner-only browser-tab preference remembers **only the selected queue filter**, never plan identifiers or private notes; recovery and forgetting are explicit. No automatic API reads, updates, supplier actions or stock changes occur. [Build 653 operator guide](docs/operations/RELEASE_467_BUILD_653_WORKSHOP_REVIEW_BOOKMARKS.md).
+
+The unchanged source-performance ceiling is preserved by documenting a previously unreferenced historical Build 197 category-selector client in `docs/operations/historical/` instead of shipping dormant code. The [Build 652 module-readiness estimate](docs/operations/RELEASE_467_BUILD_652_MODULE_READINESS_BASELINE.md) remains a separate, provisional baseline: GREEN source deployment does not certify unverified business workflows.
+
+**Next proposed Build 654 — Workshop Decision Trace Comparison, Bookmark Freshness Explanations & Accessible Review Handoff** (clearer side-by-side dated-source context and owner-approved manual follow-up without automatic writes).
+
+---
+
+## Previous release — Build 652
 
 Admin → Products now offers **session-saved owner filter presets** (up to five named filters per owner in this browser tab, no private note bodies, plan IDs or queue results persisted), **source-backed priority explanations** for only the plans explicitly checked through Build 651, and **continue review** shortcuts to the same verified owner/plan source without triggering new reads or writes. The Build 651 queue shares a narrowly scoped, sanitized, read-only checked-plan snapshot; new Build 652 controls never bypass owner/source drift invalidation. No live physical completion, supplier confirmation, inventory action, status Save or automated provider execution is inferred. [Build 652 operator guide](docs/operations/RELEASE_467_BUILD_652_WORKSHOP_SAVED_VIEWS.md).
 
