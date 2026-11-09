@@ -366,6 +366,17 @@
           <p id="dd653Status" role="status" aria-live="polite">Load and check owner plans first.</p>
           <p class="dd640-warning small">Bookmarks expire when source facts change. Decision versions are planning evidence, not signed proof or completed work. Use original history Load and editor Save separately.</p>
         </details>
+        <details class="dd640-plan" id="dd654Review" aria-labelledby="dd654Heading">
+          <summary id="dd654Heading"><strong>Workshop Decision Trace Comparison &amp; Accessible Handoff</strong></summary>
+          <p class="small">Compare a Build 653 bookmark with the manually checked queue. Changed or unseen facts stay on HOLD.</p>
+          <h5>Source comparison</h5>
+          <p id="dd654Comparison" class="small">Select a verified bookmark above.</p>
+          <p id="dd654Freshness" role="status" aria-live="polite">No checked comparison.</p>
+          <div class="dd640-actions"><button id="dd654History" type="button" class="btn" disabled>Review original decision history</button><button id="dd654Prepare" type="button" class="btn secondary" disabled>Prepare unsigned handoff</button><button id="dd654Copy" type="button" class="btn secondary" disabled>Copy reviewed handoff</button></div>
+          <label class="small" for="dd654Preview">Unsigned handoff (manual copy)</label>
+          <textarea id="dd654Preview" class="input dd640-copy" rows="6" readonly placeholder="Verify a bookmark, then prepare a handoff."></textarea>
+          <p class="dd640-warning small">No automatic history, Comms messages or stock changes. Load original history separately. Master Shell trust remains independent.</p>
+        </details>
         <p class="dd640-warning small">Review notes document recommendations only. Neither a completed review nor a recommended action verifies physical stock or authorizes purchasing, order changes, manufacturing or marketplace publication.</p>
       </section>
       <form id="productBrowserSearchForm" class="dd-product-toolbar dd635-toolbar">
@@ -485,6 +496,6 @@
 <script src="/public/js/admin-workshop-decision-summary-650.js?v=650"></script>
 <script src="/public/js/admin-workshop-review-queue-651.js?v=651"></script>
 <script src="/public/js/admin-workshop-saved-views-652.js?v=652"></script>
-<script src="/public/js/admin-workshop-bookmarks-653.js?v=653"></script>
+<script src="/public/js/admin-workshop-bookmarks-653.js?v=654"></script>
 </body>
 </html>
