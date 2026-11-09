@@ -354,6 +354,18 @@
           <div class="dd640-actions"><button type="button" class="btn" id="dd652Continue" disabled>Return to selected owner follow-up</button></div>
           <p class="dd640-warning small">Priorities describe only the checked planning evidence. A saved view persists filter preferences in this tab session—not private plan identities, notes, statuses or work completion. Rescan explicitly after a refresh. Physical work, purchasing, stock and plan changes retain separate approvals.</p>
         </details>
+        <details class="dd640-plan" id="dd653Bookmarks" aria-labelledby="dd653Heading">
+          <summary id="dd653Heading"><strong>Workshop Follow-Up Bookmarks, Filter Recovery &amp; Decision Traceability</strong></summary>
+          <p class="small">Bookmark five checked plans in page memory. Recover a prior filter explicitly; no private plans are stored or loaded automatically.</p>
+          <div class="dd640-actions"><button type="button" class="btn" id="dd653Save" disabled>Bookmark selected checked plan</button><button type="button" class="btn secondary" id="dd653Clear" disabled>Clear all bookmarks</button></div>
+          <label>Page-only review bookmark<select class="input" id="dd653Saved" disabled><option value="">Choose a bookmark</option></select></label>
+          <div class="dd640-actions"><button type="button" class="btn secondary" id="dd653Remove" disabled>Remove bookmark</button><button type="button" class="btn" id="dd653Continue" disabled>Continue verified review</button><button type="button" class="btn" id="dd653History" disabled>Open original decision history</button></div>
+          <p id="dd653Trace" class="small">No verified bookmark.</p>
+          <h5>Filter recovery</h5><p id="dd653Recovery" class="small">No owner source.</p>
+          <div class="dd640-actions"><button type="button" class="btn" id="dd653Recover" disabled>Recover previous filter</button><button type="button" class="btn secondary" id="dd653Forget" disabled>Forget filter preference</button></div>
+          <p id="dd653Status" role="status" aria-live="polite">Load and check owner plans first.</p>
+          <p class="dd640-warning small">Bookmarks expire when source facts change. Decision versions are planning evidence, not signed proof or completed work. Use original history Load and editor Save separately.</p>
+        </details>
         <p class="dd640-warning small">Review notes document recommendations only. Neither a completed review nor a recommended action verifies physical stock or authorizes purchasing, order changes, manufacturing or marketplace publication.</p>
       </section>
       <form id="productBrowserSearchForm" class="dd-product-toolbar dd635-toolbar">
@@ -473,5 +485,6 @@
 <script src="/public/js/admin-workshop-decision-summary-650.js?v=650"></script>
 <script src="/public/js/admin-workshop-review-queue-651.js?v=651"></script>
 <script src="/public/js/admin-workshop-saved-views-652.js?v=652"></script>
+<script src="/public/js/admin-workshop-bookmarks-653.js?v=653"></script>
 </body>
 </html>
