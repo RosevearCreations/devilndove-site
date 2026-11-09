@@ -8,7 +8,7 @@
  const lock=()=>{ids.forEach(id=>$(id).disabled=busy||
    (id==='s658Inspect'?!selectedId:id==='s658Check'?!pending:
     id==='s658SaveCount'?!inspected:id==='s658SaveReview'?!inspected?.latest?.count||
-       Boolean(inspected?.latest?.review)));};
+       Boolean(inspected?.latest?.review):false));};
  function clear(message='Inspect actual source stock before continuing.'){
    inspected=null;$('s658Facts').textContent=message;$('s658Latest').textContent='No fresh count source loaded.';
    $('s658Marker').textContent='No approved correction reference.';
