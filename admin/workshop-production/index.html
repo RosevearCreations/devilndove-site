@@ -1,0 +1,43 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex,nofollow"><title>Workshop Production &amp; QA Evidence — Devil n Dove</title>
+<link href="/css/styles.css?v=467" rel="stylesheet"><link href="/public/css/admin-shell-467.css?v=467b467" rel="stylesheet">
+<style>
+body{color:#f6ecff;background:#131525}.dd657{width:94%;max-width:1150px;margin:2rem auto 5rem}.dd657 a{color:#e9c6ff}
+.dd657 .panel{background:#25243c;border:1px solid #7d779f;border-radius:16px;padding:1rem 1.3rem;margin:1.2rem 0}
+.dd657 .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(235px,1fr));gap:.7rem}
+.dd657 label{display:grid;gap:.4rem;margin:.55rem 0;font-weight:600}.dd657 input,.dd657 select,.dd657 textarea{background:#101224;color:#fff;border:1px solid #aca1d1;border-radius:8px;padding:.7rem;box-sizing:border-box;width:100%}
+.dd657 button{background:#7848a0;color:#fff;border:1px solid #d7aceb;border-radius:8px;padding:.65rem 1rem;cursor:pointer;margin:.35rem .35rem .35rem 0}
+.dd657 button:disabled{opacity:.55;cursor:not-allowed}.dd657 .check{display:flex;align-items:flex-start;gap:.65rem;font-weight:500}.dd657 .check input{width:1.4rem;height:1.4rem;flex:none;margin:.2rem 0}
+.dd657 .hold{color:#ffe0a0}.dd657 .success{color:#b9ffca}.dd657 .error{color:#ffb4b4}.dd657 .muted{color:#dcd3ed}.dd657 li{padding:.4rem 0;overflow-wrap:anywhere}
+.dd657 :is(a,button,input,select,textarea):focus-visible{outline:3px solid #ffe49e;outline-offset:3px}
+</style></head><body data-admin-module="creators" data-admin-page="workshop-production-657">
+<main class="dd657"><p><a href="/admin/">Admin</a> · <a href="/admin/creative-process/">Creative Process</a> · <a href="/admin/module-acceptance/">Module evidence</a></p>
+<h1>Workshop production, progress, QA &amp; rework evidence</h1>
+<p>Build 657 — Review actual Creative Process projects and timeline events. This workspace records <strong>private owner-estimated progress and QA/rework decisions</strong>. It does not change the original project status, inventory, sales, Product, media publication or Master Shell completion.</p>
+<section class="panel"><h2>1. Inspect existing workshop projects</h2>
+<button id="dd657LoadProjects" type="button">Load genuine Creative Projects</button>
+<label for="dd657Project">Original Creative Project<select id="dd657Project"><option value="">Load projects first</option></select></label>
+<button id="dd657LoadSource" type="button" disabled>Inspect selected source &amp; existing QA history</button>
+<p id="dd657Status" role="status" aria-live="polite">No private source has been requested.</p>
+<p id="dd657Source" class="muted">The real project status and review evidence are not loaded.</p>
+<ul id="dd657Outputs" aria-label="Actual source output status"></ul></section>
+<section class="panel"><h2>2. Record one workshop progress or QA review</h2>
+<form id="dd657Form"><div class="grid">
+<label>Actual work phase<select id="dd657Stage" required><option value="planning">Planning</option><option value="preparing">Preparing</option><option value="making">Making / experiment</option><option value="qa_review">QA review</option><option value="rework">Rework</option><option value="salvage">Salvage / reuse</option><option value="finished_private">Finished privately / therapeutic</option><option value="completed">QA-passed production completion</option><option value="paused">Paused</option></select></label>
+<label>Owner-estimated progress (0–100; not certified)<input id="dd657Progress" type="number" min="0" max="100" step="1" value="0" required></label>
+<label>Work purpose<select id="dd657Purpose" required><option value="personal_learning">Personal learning / therapy</option><option value="private_experiment">Private experiment</option><option value="business_internal">Internal workshop work</option><option value="client_commission">Client commission</option><option value="sale_candidate">Potential sale (not a listing)</option></select></label>
+<label>Observed QA outcome<select id="dd657Qa" required><option value="not_reviewed">Not reviewed / HOLD</option><option value="passed">Observed pass</option><option value="failed">Observed failure</option><option value="rework_required">Rework required</option><option value="salvage_review">Salvage / reuse assessment</option><option value="not_applicable">Private-learning QA not applicable</option></select></label>
+<label>Original active timeline event<select id="dd657Event"><option value="0">None — planning / no progress only</option></select></label>
+<label>Actual observation date/time<input id="dd657Observed" type="datetime-local" required></label></div>
+<label>Factual process, progress, inspection, repair or salvage notes<textarea id="dd657Note" rows="5" minlength="30" maxlength="480" required placeholder="Explain the actual observed result or failure, remaining work and evidence. Do not enter customer private details or unverified claims."></textarea></label>
+<label class="check"><input id="dd657Personal" type="checkbox" required>I personally observed the selected project, original event and stated QA/progress fact.</label>
+<label class="check"><input id="dd657Confirm" type="checkbox" required>I am an authorized Admin intentionally recording this private source-linked review; it is not independent QA certification or a stock/product/publishing instruction.</label>
+<p><button id="dd657Save" type="submit" disabled>Save one private workshop review</button><button id="dd657Check" type="button" disabled>Check uncertain original receipt</button></p></form>
+<p class="hold">A 100% owner estimate requires a real result and a valid finished-private or QA-passed outcome. Failed experiments, salvage and personal-learning work do not need a sale. An uncertain save is never retried automatically.</p></section>
+<section class="panel"><h2>3. Review source-linked decision history</h2>
+<p id="dd657Latest" class="muted">No current review confirmed. Missing or stale evidence remains HOLD.</p>
+<ol id="dd657History" aria-label="Private workshop decision history"></ol>
+<p><a href="/admin/creative-process/">Open canonical Creative Process to record a real timeline event</a>. This review journal never creates one for us.</p>
+</section></main>
+<script defer src="/public/js/auth.js?v=467"></script><script defer src="/public/js/admin-workshop-production-657.js?v=657"></script><script type="module" src="/public/js/admin-shell-467.js?v=467b467"></script>
+</body></html>
