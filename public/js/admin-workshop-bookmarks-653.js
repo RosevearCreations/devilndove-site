@@ -4,10 +4,12 @@
   if(!el('Bookmarks')||!window.DD651Queue?.subscribe||!window.DD651Queue?.select)return;
   const ui=Object.fromEntries(['Save','Saved','Remove','Clear','Trace','Continue','History',
     'Recover','Forget','Recovery','Status'].map(n=>[n,el(n)]));
+  const compare=Object.fromEntries(['Comparison','Freshness','Prepare','Copy','Preview','History']
+    .map(n=>[n,document.getElementById('dd654'+n)]));
   const filter=document.getElementById('dd651Filter'),history=document.getElementById('dd651History');
   if(!filter||!history)return;
   const filters=new Set(['all','attention','due','aging','unreviewed','recent']);
-  let state=null,owner=null,bookmarks=[],remembered=null;
+  let state=null,owner=null,bookmarks=[],remembered=null,prepared='';
   const key=id=>`dnd653.owner-filter-recovery.v1.${id}`;
   const status=s=>{ui.Status.textContent=s;};
   const selected=()=>state?.checked.find(x=>x.id===state.selected)||null;
@@ -60,7 +62,7 @@
       `${row.reviewCount} recorded decision(s) · latest ${row.latest||'none'} `+
       `at ${row.at||'no recorded review'} · checked ${new Date(row.checkedAt).toISOString()}. `+
       'This is a dated planning pointer, not a signed audit receipt, current stock proof or completed job.';
-    renderRecovery();
+    renderRecovery();renderComparison();
   }
   ui.Save.addEventListener('click',()=>{
     const r=selected();if(!r||state.scanning)return;
@@ -104,10 +106,69 @@
     try{window.sessionStorage?.removeItem(key(owner));}catch{}
     remembered=null;renderRecovery();status('Forgot the previous filter preference for this owner.');
   });
+  function evidence(mark,row){
+    return `plan v${mark.version}, timeline v${row?row.timeline:mark.timeline}, `+
+      `${row?row.reviewCount:mark.reviewCount} reviews, ${row?row.latest:mark.latest||'none'}, `+
+      `${row?row.status:mark.status}, due ${row?row.due:mark.due||'undated'}`;
+  }
+  function comparison(){
+    const mark=bookmarks.find(b=>b.id===ui.Saved.value);
+    if(!mark||!state)return {mark:null,row:null,reasons:['Select a verified bookmark.']};
+    const row=state.checked.find(r=>r.id===mark.id),reasons=[];
+    if(!row)reasons.push('Plan not in current scan.');
+    if(state.version!==mark.version)reasons.push('Plan revision changed.');
+    if(row&&row.timeline!==mark.timeline)reasons.push('Decision timeline changed.');
+    if(row&&row.reviewCount!==mark.reviewCount)reasons.push('Review count changed.');
+    if(row&&row.latest!==mark.latest)reasons.push('Latest outcome changed.');
+    if(row&&(row.status!==mark.status||row.due!==mark.due))reasons.push('Status/date changed.');
+    if(state.scanning)reasons.push('Scan in progress.');
+    if(row&&(row.checkedAt>Date.now()+300000||Date.now()-row.checkedAt>7*86400000))
+      reasons.push('Checked source older than seven days or future-dated.');
+    return {mark,row,reasons};
+  }
+  function renderComparison(){
+    if(!compare.Comparison)return;
+    const {mark,row,reasons}=comparison();
+    compare.Comparison.textContent=!mark||!row?'No current source comparison.':
+      `Bookmark: ${evidence(mark,null)}. Checked: ${evidence(mark,row)}, ${new Date(row.checkedAt).toISOString()}.`;
+    compare.Freshness.textContent=reasons.length?`HOLD — ${reasons.join(' ')} Rescan and rebookmark changed facts.`:
+      'MATCH — dated planning evidence only; not physical proof or a signed receipt.';
+    const valid=!!mark&&!!row&&!reasons.length;
+    compare.Prepare.disabled=!valid;compare.History.disabled=!valid;
+    if(prepared){prepared='';compare.Preview.value='';}
+    compare.Copy.disabled=true;
+  }
+  if(compare.Comparison){
+    compare.Prepare.addEventListener('click',()=>{
+      const {mark,row,reasons}=comparison();if(!mark||!row||reasons.length)return;
+      prepared=['DEVIL N DOVE — UNSIGNED MANUAL OWNER REVIEW HANDOFF',
+        `Shell: devilndove | Plan: ${row.title} | ID: ${row.id}`,
+        `Bookmark: ${evidence(mark,null)}`,
+        `Checked source: ${evidence(mark,row)}`,
+        `Checked at: ${new Date(row.checkedAt).toISOString()}`,
+        'Next: open original history; explicitly Load latest decisions.',
+        'Unsigned planning only; no stock, message, purchase or status Save.'
+      ].join('\n');
+      compare.Preview.value=prepared;compare.Copy.disabled=false;
+      compare.Freshness.textContent='Unsigned handoff prepared locally. Review before copying.';
+    });
+    compare.Copy.addEventListener('click',async()=>{
+      if(!prepared||compare.Preview.value!==prepared||comparison().reasons.length)return;
+      try{await window.navigator.clipboard.writeText(prepared);
+        if(compare.Preview.value===prepared)compare.Freshness.textContent='Copied unsigned handoff. Original history and Save remain separate.';
+      }catch{compare.Freshness.textContent='Clipboard blocked. Nothing sent or saved.';}
+    });
+    compare.History.addEventListener('click',()=>{
+      if(comparison().reasons.length)return;
+      ui.History.click();
+      compare.Freshness.textContent='Click Load in history for a fresh GET.';
+    });
+  }
   window.DD651Queue.subscribe(next=>{
     if(next?.owner!==owner){owner=next?.owner??null;bookmarks=[];
       remembered=owner?recall(owner):null;
-    }else if(next&&state&&next.version!==state.version){bookmarks=[];}
+    }else if(next&&state&&next.version!==state.version){bookmarks=[];
+    }
     state=next;render();
   });
 })();
