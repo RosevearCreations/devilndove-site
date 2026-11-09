@@ -150,6 +150,7 @@ const FINANCIAL_ADMIN_PAGES = Object.freeze([
 ]);
 
 const IT_ADMIN_PAGES = Object.freeze([
+  '/admin/module-acceptance',
   '/admin/it-platform',
   '/admin/application-sanity',
   '/admin/deploy-readiness',
@@ -265,6 +266,7 @@ const FINANCIAL_ADMIN_APIS = Object.freeze([
 ]);
 
 const IT_ADMIN_APIS = Object.freeze([
+  '/api/admin/module-acceptance-656',
   '/api/admin/infrastructure-readiness',
   '/api/admin/payment-provider-testing-blockers',
   '/api/admin/payment-provider-obstacle-probe',

@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex,nofollow"><title>Module Evidence &amp; Owner Signoff — Devil n Dove</title>
+<link href="/css/styles.css?v=467" rel="stylesheet"><link href="/public/css/admin-shell-467.css?v=467b467" rel="stylesheet">
+<style>
+body{background:#151321;color:#f7efff}.dd656{max-width:1100px;width:94%;margin:2rem auto 5rem}.dd656 a{color:#f0d0ff}
+.dd656 .panel{background:#282139;border:1px solid #89749f;border-radius:16px;padding:1.1rem 1.35rem;margin:1rem 0}
+.dd656 .columns{display:grid;grid-template-columns:repeat(auto-fit,minmax(235px,1fr));gap:.9rem}
+.dd656 label{display:grid;gap:.4rem;margin:.6rem 0;font-weight:600}.dd656 :is(input,select,textarea){background:#141220;color:#fff;border:1px solid #b69bd0;border-radius:8px;padding:.7rem;width:100%;box-sizing:border-box}
+.dd656 button{color:#fff;background:#8250ab;border:1px solid #e3c2f3;border-radius:8px;padding:.65rem 1rem;cursor:pointer;margin:.35rem .4rem .35rem 0}
+.dd656 button:disabled{opacity:.55}.dd656 .check{display:flex;align-items:flex-start;gap:.65rem;font-weight:500}.dd656 .check input{width:1.4rem;height:1.4rem;flex:none;margin:.3rem 0}
+.dd656 .muted{color:#e4d8ef}.dd656 .hold{color:#ffdc96}.dd656 .success{color:#acffc4}.dd656 .error{color:#ffb4b4}.dd656 li{padding:.4rem 0;overflow-wrap:anywhere}
+.dd656 :is(button,input,select,textarea,a):focus-visible{outline:3px solid #ffe49e;outline-offset:3px}
+</style></head><body data-admin-module="it" data-admin-page="module-acceptance-656">
+<main class="dd656"><p><a href="/admin/">Admin Dashboard</a> · <a href="/admin/it/">I.T. Workspace</a> · <a href="/admin/maker-owner-trials/">Maker Trials</a></p>
+<h1>Evidence-based module reviews &amp; owner signoff</h1>
+<p>Build 656 — Devil n Dove only. Reviews are private, authenticated Admin attestations. They do <strong>not</strong> create approved Master Shell completion percentages, independently verify an external device, activate Comms or change products, inventory, orders or providers.</p>
+<section class="panel"><h2>1. Load our private requirement checklist</h2>
+<button id="dd656Load" type="button">Load current owner reviews</button>
+<p id="dd656Status" role="status" aria-live="polite">No private source read has been requested.</p>
+<p id="dd656Summary">Accepted checkpoints remain unknown until verified owner records load. Missing acceptance stays HOLD.</p>
+<ul id="dd656Modules" aria-label="Module review coverage"></ul></section>
+<section class="panel"><h2>2. Record one factual review</h2>
+<form id="dd656Form"><div class="columns">
+<label>Source requirement<select id="dd656Requirement" required><option value="">Load owner requirements first</option></select></label>
+<label>Review decision<select id="dd656Decision" required><option value="hold">HOLD — no sufficient evidence</option><option value="accepted">Owner observed — accepted locally</option><option value="rejected">Rejected — actual evidence failed</option></select></label>
+<label>Observation date/time<input id="dd656Observed" type="datetime-local"></label>
+<label>Actual device and browser<input id="dd656Device" maxlength="120" placeholder="Example: Android tablet, Firefox"></label>
+<label>Original evidence reference<input id="dd656Evidence" maxlength="240" placeholder="docs/... or urn:rosevear:evidence:..."></label></div>
+<label>Factual note, observation or explicit HOLD reason<textarea id="dd656Note" rows="4" minlength="20" maxlength="360" required placeholder="Explain what we personally checked and what remains unverified. Never include customer details, passwords or private keys."></textarea></label>
+<label class="check"><input type="checkbox" id="dd656Personal">I personally observed the selected requirement and source evidence (needed for acceptance).</label>
+<label class="check"><input type="checkbox" id="dd656Confirm" required>I am the authorized signed-in owner/admin intentionally recording a local review. This is not an independent certification, signed Master Shell event or customer/provider action.</label>
+<p><button type="submit" id="dd656Save" disabled>Record private owner review</button><button type="button" id="dd656CheckReceipt" disabled>Check uncertain original receipt</button></p></form>
+<p class="hold">Owner scope is limited to this signed-in Admin. A different owner account has separate private reviews. A Save is never retried automatically.</p></section>
+<section class="panel"><h2>3. Local review history</h2><p class="muted">Latest authenticated owner receipts only; an updated decision supersedes but never deletes the original. The denominator is a proposed checklist until the owners approve its final requirements and weights.</p>
+<ol id="dd656History"></ol></section>
+</main><script defer src="/public/js/auth.js?v=467"></script><script defer src="/public/js/admin-module-acceptance-656.js?v=656"></script><script type="module" src="/public/js/admin-shell-467.js?v=467b467"></script></body></html>

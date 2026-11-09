@@ -7,7 +7,7 @@ This is a dependency-aware **proposed** queue, not a statement that future featu
 | Build | Priority and scope | Acceptance boundary |
 | --- | --- | --- |
 | **655** | Master Shell Source Readiness Register, Evidence Freshness Ownership & Approved Event Schema Preparation | Local source evidence only; original connection HOLD and event publishers disabled. Release status must be verified from protected `main`, not this planning table |
-| **656** | Evidence-based Module Completion Tracking, Device Acceptance & Owner Signoff | Stable requirement IDs, owner-approved weights/denominator, mobile/tablet/desktop evidence; no inferred percentages |
+| **656** | Evidence-based Module Completion Tracking, Device Acceptance & Owner Signoff | Local authenticated evidence/decision receipts for 38 proposed stable requirements and mobile/tablet/desktop role checks. Weights/denominators **still require separate owner ratification**, and independently certified percentages remain UNKNOWN/HOLD. Release status requires independent protected `main` proof |
 | **657** | Workshop Production Lifecycle, Job Progress, QA & Rework Evidence | Real maker work evidence including private/therapeutic, failed/salvage paths; no forced sale or stock writes |
 | **658** | Inventory, Supplies, Tools & Physical Stock Reconciliation | Verified physical counts/lot custody and independently authorized corrections |
 | **659** | Product Catalogue, Media, End Products & Dovlin Production Readiness | Rights, safety, real product samples, brand-approved Dovlin design, accessible owner review |
@@ -26,4 +26,4 @@ This is a dependency-aware **proposed** queue, not a statement that future featu
 - Source code, automated tests, real-device acceptance, live provider, authenticated integration and Production GREEN are independent axes. Do not call the combined module `100%` merely because `main` passed.
 - Builds **665–668** have external owner/contract dependencies; they cannot be promoted as an actual connected source while approvals are absent. A safe code-only readiness release may still be GREEN while operator CONNECTED remains HOLD.
 - Reuse the source's existing guarded QL-364/QL-336 code and its historical maker, inventory, accounting, storefront and customer workflows. Do not generate redundant signers or duplicate master dashboards.
-- The historical [Build 652 readiness estimates](RELEASE_467_BUILD_652_MODULE_READINESS_BASELINE.md) remain provisional; Build 656 will define measured acceptance evidence.
+- The historical [Build 652 readiness estimates](RELEASE_467_BUILD_652_MODULE_READINESS_BASELINE.md) remain provisional; [Build 656's private evidence record](RELEASE_467_BUILD_656_MODULE_ACCEPTANCE_OWNER_GUIDE.md) collects actual owner review observations but does **not** ratify the checklist, certify any module percentage or activate Master Shell ingestion.
