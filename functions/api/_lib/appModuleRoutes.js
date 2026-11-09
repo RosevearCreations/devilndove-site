@@ -99,6 +99,7 @@ export const SHARED_SERVICE_CONTRACTS = Object.freeze([
 ]);
 
 const STOREFRONT_ADMIN_PAGES = Object.freeze([
+  '/admin/physical-stock',
   '/admin/catalog',
   '/admin/catalog-media',
   '/admin/catalog-health',
@@ -216,6 +217,7 @@ const ETSY_OPERATOR_ADMIN_APIS = Object.freeze([
 ]);
 
 const STOREFRONT_ADMIN_APIS = Object.freeze([
+  '/api/admin/physical-stock-658',
   '/api/admin/catalog',
   '/api/admin/catalog-health',
   '/api/admin/product',
