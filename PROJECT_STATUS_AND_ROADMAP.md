@@ -1,4 +1,14 @@
-# Release 467 Build 657 — Workshop Production Lifecycle, Job Progress, QA & Rework Evidence (Production candidate)
+# Release 467 Build 658 — Inventory, Supplies, Tools & Physical Stock Reconciliation (Production candidate)
+
+The [physical stock review desk](/admin/physical-stock/) reads actual active Tool/Supply inventory and canonical base-unit balances, bounded real purchase lots, reservations, and original last-count timestamps on explicit owner request. An Admin records a personally observed base-unit count and storage location; a **different** active Storefront Admin can independently HOLD, require a recount or approve the count evidence using a private shared versioned journal. Source changes, stale journal versions, incomplete lot views, lot mismatch, purchase/base balance drift, and counts below existing reservations fail closed. Count receipts, original request keys and separate Admin decisions are durable and auditable. **No canonical stock quantity, lot, purchase order, Product, tax, accounting or Master Shell percentage is changed here**. A second account review is not cryptographic independent witness verification, and any proposed correction needs an additional real original Inventory transaction and proof. See [Build 658 owner guide](docs/operations/RELEASE_467_BUILD_658_PHYSICAL_STOCK_OWNER_GUIDE.md).
+
+**Next proposed Build 659 — Product Catalogue, Media, End Products & Dovlin Production Readiness** (real samples, rights and brand-approved Dovlin evidence without simulated product safety or sale readiness).
+
+---
+
+## Previous release — Build 657
+
+### Workshop Production Lifecycle, Job Progress, QA & Rework Evidence
 
 Devil n Dove Creators now includes a [private workshop production and QA review workspace](/admin/workshop-production/) connected to actual `creative_work_projects`, their latest **40 active timeline events** and latest **40 output records**. Authenticated Admins explicitly inspect an existing project, review source-backed work phases, record owner-estimated progress and a factual QA/rework/salvage/private-learning decision, and cite an actual active source event for all observed work beyond a zero-progress planning review. Two Admins share one private project decision history with exact source-revision drift detection, per-project compare-and-swap revisions, append-only receipts and original-request recovery. Existing project status, material inventory, Product sales candidacy, publication and Comms/Master Shell endpoints are never changed by these reviews. [Build 657 owner guide](docs/operations/RELEASE_467_BUILD_657_WORKSHOP_PRODUCTION_QA_GUIDE.md).
 

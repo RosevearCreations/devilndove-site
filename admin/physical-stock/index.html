@@ -1,0 +1,49 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex,nofollow"><title>Tool &amp; Supply Physical Stock — Devil n Dove</title>
+<link rel="stylesheet" href="/css/styles.css?v=467"><link rel="stylesheet" href="/public/css/admin-shell-467.css?v=467b467">
+<style>
+body{background:#151727;color:#f8f0ff}.stock658{width:94%;max-width:1100px;margin:2rem auto 5rem}.stock658 a{color:#efd0ff}
+.stock658 section{background:#292940;border:1px solid #8880a6;border-radius:16px;margin:1rem 0;padding:1rem 1.3rem}
+.stock658 .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:.7rem}
+.stock658 label{display:grid;gap:.35rem;font-weight:600;margin:.6rem 0}.stock658 input,.stock658 select,.stock658 textarea{box-sizing:border-box;width:100%;padding:.68rem;background:#101323;color:#fff;border:1px solid #afa6d7;border-radius:8px}
+.stock658 button{border:1px solid #dbc0ed;border-radius:8px;background:#7548a1;color:white;cursor:pointer;margin:.4rem .4rem .4rem 0;padding:.7rem 1rem}
+.stock658 button:disabled{opacity:.5;cursor:not-allowed}.stock658 .check{display:flex;align-items:flex-start;gap:.5rem;font-weight:500}.stock658 .check input{flex:none;width:1.4rem;height:1.4rem;margin:.2rem 0}
+.stock658 .hold{color:#ffe2a4}.stock658 .muted{color:#e2d8ed}.stock658 li{padding:.35rem 0;overflow-wrap:anywhere}
+.stock658 :is(a,button,select,textarea,input):focus-visible{outline:3px solid #ffdf97;outline-offset:3px}
+</style></head><body data-admin-module="storefront" data-admin-page="physical-stock-658">
+<main class="stock658"><p><a href="/admin/">Admin</a> · <a href="/admin/inventory-operations/">Original Inventory Operations</a> · <a href="/admin/workshop-production/">Workshop QA</a></p>
+<h1>Physical stock, supplies, tools &amp; lots</h1>
+<p>Build 658 — Count genuine workshop stock in <strong>canonical usable/base units</strong>, inspect original lots and reservations, and request a second, distinct Admin review. This private evidence journal <strong>never posts corrections, lot changes, purchase orders or financial transactions</strong>. Missing or changed evidence stays HOLD.</p>
+<section><h2>1. Inspect real source stock</h2><div class="grid">
+<label>Search actual item<input id="s658Search" maxlength="90" placeholder="Tool or supply name"></label>
+<label>Type<select id="s658Kind"><option value="">Tools and supplies</option><option value="supply">Supplies</option><option value="tool">Tools</option></select></label>
+</div><button id="s658List" type="button">Load up to 80 original items</button>
+<label>Original Tool or Supply<select id="s658Item"><option value="">Load items first</option></select></label>
+<button id="s658Inspect" type="button" disabled>Inspect selected stock, lots &amp; private review</button>
+<p id="s658Status" role="status" aria-live="polite">Nothing has been read yet.</p>
+<p id="s658Facts" class="muted">Real base balance, reserved quantity, lot custody and original count time are uninspected.</p>
+<ul id="s658Lots" aria-label="Actual bounded source purchase lots"></ul></section>
+<section><h2>2. Record an observed physical count</h2><form id="s658CountForm"><div class="grid">
+<label>Physically counted usable/base units<input id="s658Qty" type="number" min="0" max="1000000000" step="0.0001" required></label>
+<label>Original lot inspected (optional)<select id="s658Lot"><option value="0">All stock / not lot-specific</option></select></label>
+<label>Where did we physically count it?<input id="s658Location" minlength="3" maxlength="160" required placeholder="Workshop shelf, storage bin, CNC station..."></label>
+<label>Observed date &amp; time<input id="s658Observed" type="datetime-local" required></label></div>
+<label>Actual count details, tool condition, variance or lot custody observations<textarea id="s658CountNote" minlength="24" maxlength="480" rows="3" required></textarea></label>
+<label class="check"><input id="s658ObservedCheck" type="checkbox" required>I personally counted this actual stock at the stated place and time.</label>
+<label class="check"><input id="s658Confirm" type="checkbox" required>I am an authorized Admin recording factual private count evidence; no stock changes are authorized by this form.</label>
+<button id="s658SaveCount" type="submit" disabled>Save one physical count</button></form></section>
+<section><h2>3. Independent review by a different Admin</h2>
+<p id="s658Latest" class="muted">Inspect original history to see whether a second Admin review is needed.</p>
+<form id="s658ReviewForm"><label>Second Admin decision<select id="s658Decision"><option value="hold">HOLD — investigate</option><option value="recount">Recount required</option><option value="approve">Approve count evidence (no stock posting)</option></select></label>
+<label>Factual independent review notes<textarea id="s658ReviewNote" minlength="24" maxlength="480" rows="3" required></textarea></label>
+<label class="check"><input id="s658Independent" type="checkbox" required>I am a different authorized Admin from the original counter and personally checked the submitted evidence.</label>
+<label class="check"><input id="s658ReviewConfirm" type="checkbox" required>Approval only records a private decision. A separate actual Inventory posting, original movement and independent reconciliation are still required.</label>
+<button id="s658SaveReview" type="submit" disabled>Record independent review</button></form>
+<p class="hold">Lot inconsistencies, unreviewed older lots and counts below reserved stock block approval. Distinct Admin account review is not cryptographic owner/witness certification. For a real adjustment, use <a href="/admin/inventory-operations/">Original Inventory Operations</a> after approval, record the source-linked receipt ID in its movement note and recheck original balances separately.</p></section>
+<section><h2>4. Private history &amp; uncertain-save recovery</h2>
+<button id="s658Check" type="button" disabled>Check original uncertain receipt</button><p id="s658Marker" class="muted">No approved correction reference.</p>
+<ol id="s658History" aria-label="Bounded private physical count and independent review history"></ol>
+<p class="hold">No automatic re-count, stock write, supplier action, product release, accounting entry, Master Shell completion claim or outbound message.</p></section>
+</main><script defer src="/public/js/auth.js?v=467"></script>
+<script defer src="/public/js/admin-physical-stock-658.js?v=658"></script>
+<script type="module" src="/public/js/admin-shell-467.js?v=467b467"></script></body></html>
