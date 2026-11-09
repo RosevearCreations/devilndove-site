@@ -1,8 +1,16 @@
-# Release 467 Build 659 — Product Catalogue, Media, End Products & Dovlin Production Readiness (Production candidate)
+# Release 467 Build 660 — Customer Storefront, Checkout, Shipping & Returns Acceptance (Production candidate)
+
+The [Customer Storefront Acceptance Desk](/admin/storefront-acceptance/) offers clear links to original Shop/Cart/Checkout/Terms/customer-care experiences, reads the existing **eight relevant Build 656 customer device/storefront/shipping owner checkpoints** only on request, and allows an Admin to inspect one real canonical Order's safe, redacted line items, payment and refund rows without submitting a transaction. Original CA/CAD policy, saved payment/refund status, evidence bounds, SHA-256 source revision and HOLD explanations are visible. **No checkout order, card capture, shipment, refund, address export, provider simulation, customer message or Master Shell completion percentage is generated.** Local owner acceptance cannot prove actual payment settlement, real customer-device usability, carrier service or return closure. See [Build 660 owner's guide](docs/operations/RELEASE_467_BUILD_660_CUSTOMER_CHECKOUT_SHIPPING_RETURNS_OWNER_GUIDE.md).
+
+**Next proposed Build 661 — Customer Commissions, Invoicing, Job Costs & Profitability** (actual source-linked commission/invoice/cost evidence, no assumed provider settlement or bookkeeping submission).
+
+---
+
+## Previous release — Build 659
 
 The [Admin Product Browser evidence desk](/admin/products/) adds one-Product **explicit original catalogue, gallery/annotation, posted production-run and finished-lot inspection**. An authenticated owner may save a private versioned decision against the exact SHA-256 revision of those source facts. Source changes, bounded data and blocked permissions remain HOLD; request-key lookup and compare-and-swap prevent uncertain duplicate receipts. The UI never changes Product status, media rights, lot/stock quantity or marketplace publication. Real physical samples, original Dovlin approved 8-inch character artwork, actual rights documents and age-appropriate plush/material safety evidence remain **outside independent verification**; a local attestation is **not** product safety or permission-to-sell certification. The provisional Master Shell module score remains UNKNOWN/HOLD. See the [Build 659 guide](docs/operations/RELEASE_467_BUILD_659_PRODUCT_MEDIA_DOVLIN_OWNER_GUIDE.md).
 
-**Next proposed Build 660 — Customer Storefront, Checkout, Shipping & Returns Acceptance** (real device/carrier/payment acceptance, Canada-only requirements, accessible user flows, no simulated transaction approval).
+**Build 660 follows** with explicit customer, Checkout, Canada shipping and returns evidence, retaining original provider and carrier authorization outside any locally recorded signoff.
 
 ---
 

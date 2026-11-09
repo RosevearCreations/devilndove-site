@@ -105,6 +105,11 @@ jobs:
           node --check functions/api/admin/product-finish-review-659.js
           node --check public/js/admin-product-finish-review-659.js
           node --test scripts/release467_build659_product_finish_review.test.mjs
+      - name: Build 660 original customer storefront, CA checkout, payment/refund source and device HOLD
+        run: |
+          node --check functions/api/admin/storefront-acceptance-660.js
+          node --check public/js/admin-storefront-acceptance-660.js
+          node --test scripts/release467_build660_customer_checkout_shipping_returns.test.mjs
       - name: Current help, search, H1, responsive, Packaging, Grey Hair CAIP, Content Studio review/execution boundary, authority restart integrity, I.T. truth and release provenance quality
         run: python scripts/current_application_quality_gate.py
       - name: Preserve password-hash compatibility and current-write security
