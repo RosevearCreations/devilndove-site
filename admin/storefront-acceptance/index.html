@@ -1,0 +1,42 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex,nofollow"><title>Customer Journey Acceptance — Devil n Dove Admin</title>
+<link rel="stylesheet" href="/css/styles.css?v=467"><link rel="stylesheet" href="/public/css/admin-shell-467.css?v=467b467">
+<style>
+body{background:#151727;color:#faf0ff}.a660{max-width:1100px;width:94%;margin:2rem auto 5rem}.a660 a{color:#f5d1ff}
+.a660 section{background:#292940;border:1px solid #8880a6;border-radius:16px;margin:1rem 0;padding:1rem 1.3rem}
+.a660 .links{display:flex;gap:1rem;flex-wrap:wrap}.a660 .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:1rem}
+.a660 input{box-sizing:border-box;width:100%;padding:.7rem;background:#101323;color:white;border:1px solid #afa6d7;border-radius:8px}
+.a660 label{display:block;font-weight:600;margin:.5rem 0}.a660 button{border:1px solid #e9c1fc;border-radius:8px;background:#7648a1;color:white;cursor:pointer;padding:.75rem 1rem;margin:.3rem .5rem .3rem 0}
+.a660 button:disabled{opacity:.5}.a660 .hold{color:#ffe2a4}.a660 li{margin:.5rem 0;overflow-wrap:anywhere}
+.a660 :is(a,button,input):focus-visible{outline:3px solid #ffdf97;outline-offset:3px}.a660 table{border-collapse:collapse;width:100%}.a660 th,.a660 td{border-bottom:1px solid #706989;text-align:left;padding:.7rem .5rem;vertical-align:top}
+.a660 .scroll{overflow-x:auto}
+</style></head><body data-admin-module="storefront" data-admin-page="storefront-acceptance-660">
+<main class="a660"><nav class="links" aria-label="Admin navigation"><a href="/admin/">Admin</a><a href="/admin/storefront/">Storefront Workspace</a><a href="/admin/module-acceptance/">Owner Device Evidence</a><a href="/admin/orders/">Orders</a></nav>
+<h1>Customer Storefront, Checkout, Shipping &amp; Returns Acceptance</h1>
+<p>Build 660 · Customer desktop, tablet and mobile evidence. On request only, inspect original orders, payments, refunds and owner device receipts. No test purchase, charge, shipping action or refund is created. Unverified outcomes remain HOLD.</p>
+<section><h2>1. Walk through actual customer journeys</h2><div class="grid">
+<div><h3>Browse &amp; cart</h3><p>On a real device inspect price, media, stock and cart controls.</p><a href="/shop/">Shop</a> · <a href="/shop/product/">Product</a> · <a href="/cart/">Cart</a></div>
+<div><h3>Checkout &amp; Canada</h3><p>Review addresses, pickup, CAD totals and payment recovery. Never submit an unauthorized purchase.</p><a href="/checkout/">Checkout</a></div>
+<div><h3>Returns &amp; aftercare</h3><p>Review actual sale terms, refunds and owner handling. Carrier proof is separate.</p><a href="/terms/">Terms</a> · <a href="/admin/order-fulfillment-care/">Customer Care</a></div>
+</div></section>
+<section><h2>2. Owner field acceptance · role × device evidence</h2>
+<p>Reuses the existing Build 656 private requirement register. A locally accepted checkpoint records only what an owner personally observed; this does <strong>not</strong> certify an independent end-to-end payment, carrier, refund, Master Shell percentage or customer-device acceptance.</p>
+<button id="a660Load" type="button">Load my current owner checkpoints</button>
+<p id="a660OwnerStatus" role="status" aria-live="polite">No private owner records loaded.</p>
+<div id="a660Matrix" class="scroll"></div><p><a href="/admin/module-acceptance/">Record a genuine device/browser observation using the protected owner review form</a></p>
+</section>
+<section><h2>3. Inspect one actual order — no transaction</h2>
+<p>Only enter an existing canonical Order ID. This read excludes customer names, email, addresses, provider reference IDs and private notes. It shows bounded saved line items, payment records and refund states—not external settlement or carrier proof.</p>
+<label for="a660Id">Original Order ID</label><input id="a660Id" type="number" min="1" step="1" placeholder="Existing numeric Order ID" style="max-width:360px">
+<p><button id="a660Inspect" type="button">Inspect original saved order</button></p>
+<p id="a660OrderStatus" role="status" aria-live="polite">No original Order read.</p><div id="a660Order"></div>
+</section>
+<section><h2>4. What still needs independent acceptance?</h2><ul>
+<li>Real device, browser, date and role observations.</li>
+<li>Actual provider settlement/refusal evidence beyond database status.</li>
+<li>Carrier rates, service and delivery acceptance.</li>
+<li>Authorized customer returns/refunds and original receipts.</li>
+<li>Independent Master Shell source/actor acceptance; no automatic 100%.</li>
+</ul><p class="hold">No synthetic transactions, payment capture/refund, external shipping action, personal-data export or automatic Master Shell event is performed by this desk.</p></section>
+</main><script defer src="/public/js/auth.js?v=467"></script><script defer src="/public/js/admin-storefront-acceptance-660.js?v=660"></script>
+<script type="module" src="/public/js/admin-shell-467.js?v=467b467"></script></body></html>
