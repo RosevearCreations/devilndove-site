@@ -1620,10 +1620,10 @@
       "reference_screen": "Product Management",
       "reason": "Existing compact Product browser and low-read recovery were previously revamped; preserve behavior and styling.",
       "evidence": {
-        "byte_length": 61121,
+        "byte_length": 65052,
         "stylesheets": 2,
-        "scripts": 21,
-        "forms": 1,
+        "scripts": 22,
+        "forms": 2,
         "has_viewport": true
       },
       "owner_visual_acceptance": "PENDING"

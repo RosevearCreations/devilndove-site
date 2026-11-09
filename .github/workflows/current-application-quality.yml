@@ -100,6 +100,11 @@ jobs:
           node --check functions/api/admin/physical-stock-658.js
           node --check public/js/admin-physical-stock-658.js
           node --test scripts/release467_build658_physical_stock_reconciliation.test.mjs
+      - name: Build 659 Product/media and actual finished-lot owner evidence, Dovlin safety/design HOLD
+        run: |
+          node --check functions/api/admin/product-finish-review-659.js
+          node --check public/js/admin-product-finish-review-659.js
+          node --test scripts/release467_build659_product_finish_review.test.mjs
       - name: Current help, search, H1, responsive, Packaging, Grey Hair CAIP, Content Studio review/execution boundary, authority restart integrity, I.T. truth and release provenance quality
         run: python scripts/current_application_quality_gate.py
       - name: Preserve password-hash compatibility and current-write security
