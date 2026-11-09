@@ -1,4 +1,14 @@
-# Release 467 Build 655 — Master Shell Source Readiness Register, Evidence Freshness Ownership & Approved Event Schema Preparation (Production candidate)
+# Release 467 Build 656 — Evidence-Based Module Completion Tracking, Device Acceptance & Owner Signoff (Production candidate)
+
+The I.T. / maker owner workspace now offers [private, authenticated module evidence review](/admin/module-acceptance/) for **38 stable proposed acceptance checkpoints** covering customer, worker and administrator desktop/tablet/mobile journeys plus 20 workshop, commerce, security and financial domains. An actual Admin can explicitly record an observed evidence link, device/browser, factual note and HOLD, rejected or locally accepted decision. Owner-scoped D1 records use same-origin writes, compare-and-swap revisions, original-request receipt lookup, readback and append-only decision history. No background write, automatic retry, customer message, inventory mutation or new Comms/AI Data Platform transport is introduced. [Build 656 owner guide](docs/operations/RELEASE_467_BUILD_656_MODULE_ACCEPTANCE_OWNER_GUIDE.md).
+
+**Important distinction:** the checklist is **proposed**, not ratified; a signed-in Admin decision is a **local attestation**, not an independent owner source signature or independently witnessed physical device test. The UI discloses locally accepted review coverage, but **official module completion percentages remain UNKNOWN / HOLD** until weights, evidence, actor custody and Master Shell receipt requirements are owner-approved and independently verified. Existing Build 655 source integration remains **DISCONNECTED / HOLD**. Eleven regression tests cover protected access, device evidence, owner isolation, readback, version races and failure modes; the active runtime budget remains below the protected ceiling.
+
+**Next proposed Build 657 — Workshop Production Lifecycle, Job Progress, QA & Rework Evidence** (actual maker workflow, including therapeutic/private work, failure and salvage outcomes, without assuming a sale or automatic stock adjustment).
+
+---
+
+## Previous release — Build 655
 
 Devil n Dove now has an **offline, source-owned Master Shell readiness register** with the exact `devilndove` shell/repository identity, historical Build 654 independently protected release references, named custodians for seven evidence categories, and an explicit status for **all 18 required AI Data Platform V1 registry fields**. Eleven of those fields are correctly held pending original trust, current source signatures, owner audience grants or independent verification. The register names all eight V1 event families with redacted source payload allowlists, but every proposed publication remains **HOLD**. No new endpoint, key, database schema, webhook, background poll or cross-app access was created. [Build 655 source register and owner guide](docs/operations/RELEASE_467_BUILD_655_MASTER_SHELL_SOURCE_READINESS.md).
 
