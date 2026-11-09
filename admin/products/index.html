@@ -334,6 +334,26 @@
           <textarea class="input dd640-copy" id="dd651Preview" rows="7" readonly placeholder="Choose one verified checked plan and prepare a manual handoff."></textarea>
           <p class="dd640-warning small">Outcome and aging labels describe saved owner planning records only. Even a recent review cannot verify physical counts, workshop completion, supplier orders, purchasing approval or publication. Every actual change requires its separate original-source workflow.</p>
         </details>
+        <details class="dd640-plan" id="dd652Views" aria-labelledby="dd652Heading">
+          <summary id="dd652Heading"><strong>Workshop Saved Filter Views &amp; Action Priority Explanations</strong></summary>
+          <p class="small">Save up to five named queue filters in this browser tab session (filter names only, never private decisions). Then review why each explicitly checked owner plan needs attention and return to a selected follow-up without automatically loading, saving or changing records.</p>
+          <div class="dd640-plan-fields">
+            <label>View name (2–30 characters)<input id="dd652Name" class="input" type="text" maxlength="30" placeholder="e.g. Overdue workshop follow-ups" autocomplete="off"></label>
+            <label>Session-saved filter<select id="dd652Saved" class="input" disabled><option value="">Choose a saved filter</option></select></label>
+          </div>
+          <div class="dd640-actions">
+            <button type="button" class="btn" id="dd652Save" disabled>Save current Build 651 filter</button>
+            <button type="button" class="btn secondary" id="dd652Apply" disabled>Apply saved filter</button>
+            <button type="button" class="btn secondary" id="dd652Delete" disabled>Delete selected filter</button>
+          </div>
+          <p id="dd652Status" role="status" aria-live="polite">Load private saved plans, then deliberately scan in Build 651. Saved filters never load source records automatically.</p>
+          <h5>Explainable priorities within checked plans</h5>
+          <div id="dd652Priorities"><p class="small">No verified checked plans yet.</p></div>
+          <h5>Continue source-linked review</h5>
+          <p id="dd652Detail" class="small">Select a checked plan in Build 651 for its latest planning-priority explanation.</p>
+          <div class="dd640-actions"><button type="button" class="btn" id="dd652Continue" disabled>Return to selected owner follow-up</button></div>
+          <p class="dd640-warning small">Priorities describe only the checked planning evidence. A saved view persists filter preferences in this tab session—not private plan identities, notes, statuses or work completion. Rescan explicitly after a refresh. Physical work, purchasing, stock and plan changes retain separate approvals.</p>
+        </details>
         <p class="dd640-warning small">Review notes document recommendations only. Neither a completed review nor a recommended action verifies physical stock or authorizes purchasing, order changes, manufacturing or marketplace publication.</p>
       </section>
       <form id="productBrowserSearchForm" class="dd-product-toolbar dd635-toolbar">
@@ -452,5 +472,6 @@
 <script src="/public/js/admin-workshop-history-649.js?v=649"></script>
 <script src="/public/js/admin-workshop-decision-summary-650.js?v=650"></script>
 <script src="/public/js/admin-workshop-review-queue-651.js?v=651"></script>
+<script src="/public/js/admin-workshop-saved-views-652.js?v=652"></script>
 </body>
 </html>

@@ -1,4 +1,14 @@
-# Release 467 Build 651 — Workshop Follow-Up Review Queue, Decision Aging Filters & Owner Action Handoff (Production candidate)
+# Release 467 Build 652 — Workshop Follow-Up Queue Saved Views, Explicit Action Priority Explanations & Review Continuity (Production candidate)
+
+Admin → Products now offers **session-saved owner filter presets** (up to five named filters per owner in this browser tab, no private note bodies, plan IDs or queue results persisted), **source-backed priority explanations** for only the plans explicitly checked through Build 651, and **continue review** shortcuts to the same verified owner/plan source without triggering new reads or writes. The Build 651 queue shares a narrowly scoped, sanitized, read-only checked-plan snapshot; new Build 652 controls never bypass owner/source drift invalidation. No live physical completion, supplier confirmation, inventory action, status Save or automated provider execution is inferred. [Build 652 operator guide](docs/operations/RELEASE_467_BUILD_652_WORKSHOP_SAVED_VIEWS.md).
+
+The owner-requested [module completion baseline](docs/operations/RELEASE_467_BUILD_652_MODULE_READINESS_BASELINE.md) separately estimates implementation maturity by module and device, with transparent scoring assumptions and missing external/owner acceptance. A GREEN production release proves the source deployment, **not 100% completion of every business module**.
+
+**Next proposed Build 653 — Workshop Review Follow-Up Bookmarks, Filter Recovery & Owner Decision Traceability** (explicit session-level continuity and more accessible factual source links, without automatic writes).
+
+---
+
+## Previous release — Build 651
 
 Admin → Products includes a **deliberate owner workshop follow-up queue** built from current saved owner plans and per-plan private dated Build 643 reviews. Owners explicitly scan at most five plans per click, sequentially, with no background reads. Each result checks owner/plan/version/timeline evidence and labels partial coverage; the queue filters due/overdue, decisions aged over seven days, plans without dated decisions, recent decisions, and owner-recommended attention. Selecting a verified plan opens safe manual actions: select that plan in Build 649's private history for its own explicit read, reopen the original saved-plan editor (separate Save), or prepare/copy an **unsigned, local, note-body-free follow-up handoff**. Any source change or failed result clears the queue; no provider, inventory, purchasing, supplier or status writes are authorized. Two historical orphaned Product JS modules are preserved as documentation-only archives to stay below the unchanged performance budget. [Build 651 owner guide](docs/operations/RELEASE_467_BUILD_651_WORKSHOP_REVIEW_QUEUE.md).
 
