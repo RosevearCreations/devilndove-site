@@ -1,4 +1,14 @@
-# Release 467 Build 653 — Workshop Review Follow-Up Bookmarks, Filter Recovery & Owner Decision Traceability (Production candidate)
+# Release 467 Build 654 — Workshop Decision Trace Comparison, Bookmark Freshness Explanations & Accessible Review Handoff (Production candidate)
+
+Admin → Products compares the current **Build 653 page-only bookmark** with the **latest deliberately checked Build 651 source facts**: saved-plan revision, dated owner decision timeline, review count, latest outcome, follow-up status/date and check freshness. Explicit HOLD reasons prevent an unsigned handoff if source facts change, are unscanned, scan is in progress, or evidence is older than seven days. For a verified current match, owners can manually select original Build 649 history or prepare and explicitly copy a **private, unsigned review handoff**, with zero hidden API calls or mutations. [Build 654 operator guide](docs/operations/RELEASE_467_BUILD_654_WORKSHOP_DECISION_COMPARISON.md).
+
+The owners' [Rosevear Suite Master Shell assessment](docs/operations/RELEASE_467_BUILD_654_MASTER_SHELL_ASSESSMENT.md) now maps Devil n Dove's exact existing source identity/QL-364 handler, provisional module baseline, guarded shell endpoints and missing requirements for Master Intelligence/Monitoring and Comms. It proposes an owner-controlled staged onboarding plan, **without altering shared contracts or claiming private integration `CONNECTED`**. The historical Release 466 unused I.T. client was archived outside the runtime budget, with a syntax check redirected to the current I.T. screen; protected source budget remains unchanged.
+
+**Next proposed Build 655 — Master Shell Source Readiness Register, Evidence Freshness Ownership & Approved Event Schema Preparation** (read-only registry/report planning after AI Data/Comms contract decisions, no automatic connections).
+
+---
+
+## Previous release — Build 653
 
 Admin → Products now includes **up to five page-only owner review bookmarks** for plans previously checked through the explicit Build 651 scan. Each bookmark shows its dated saved-plan version, owner decision timeline and source check, with **fail-closed validation** after a plan/timeline/owner change. Owners can deliberately continue the verified plan or open the original Build 649 history selector, with a separate explicit authenticated history Load. An owner-only browser-tab preference remembers **only the selected queue filter**, never plan identifiers or private notes; recovery and forgetting are explicit. No automatic API reads, updates, supplier actions or stock changes occur. [Build 653 operator guide](docs/operations/RELEASE_467_BUILD_653_WORKSHOP_REVIEW_BOOKMARKS.md).
 

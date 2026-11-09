@@ -133,7 +133,7 @@ test('653 HTML, protected test, budget and unreferenced archive preserve safe bo
   for(const n of ['Bookmarks','Heading','Save','Saved','Remove','Clear','Trace','Continue',
     'History','Recover','Forget','Recovery','Status'])
     assert.match(html,new RegExp(`id="dd653${n}"`));
-  assert.match(html,/admin-workshop-bookmarks-653\.js\?v=653/);
+  assert.match(html,/admin-workshop-bookmarks-653\.js\?v=65[34]/);
   assert.match(workflow,/release467_build653_workshop_bookmarks\.test\.mjs/);
   assert.doesNotMatch(js,/(?:apiFetch|fetch\(|XMLHttpRequest|method:['"]POST|localStorage|setInterval|setTimeout)/);
   const archived=read('docs/operations/historical/RETIRED_UNREFERENCED_ADMIN_CATALOG_OPTIONS.js.txt');

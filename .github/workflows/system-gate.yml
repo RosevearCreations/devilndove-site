@@ -140,7 +140,7 @@ jobs:
           node --check public/js/admin-inventory-creator-intelligence.js
           node --check public/js/admin-business-health.js
           node --check public/js/admin-month-end-cockpit.js
-          node --check public/js/admin-it-platform.js
+          node --check public/js/admin-it-control-tower.js
           node --check public/js/admin-caip-production-pipeline.js
           node --check public/js/admin-caip-content-handoff.js
           node --check public/js/admin-content-studio.js
