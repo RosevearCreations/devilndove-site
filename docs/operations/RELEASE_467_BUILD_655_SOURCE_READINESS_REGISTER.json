@@ -1,0 +1,86 @@
+{
+  "format": "devilndove.master-shell.source-readiness.v1",
+  "build": 655,
+  "classification": "LOCAL_SOURCE_ASSESSMENT_NOT_AN_ENROLLED_MASTER_REGISTRY_RECORD",
+  "source": {
+    "sourceId": "devilndove",
+    "shellId": "devilndove",
+    "repository": "RosevearCreations/devilndove-site",
+    "tenancyModel": "owned-business-shell",
+    "manifestPath": ".well-known/rosevear-integration-manifest.json",
+    "existingQl364Handler": "functions/api/_lib/ql364-source-health.mjs",
+    "existingShellGate": "functions/api/_lib/ql336-owned-shell.mjs",
+    "lastIndependentlyPromotedRelease": {
+      "build": 654,
+      "mainCommit": "5868e39299dd45d10063d98231c0528f824a7fad",
+      "tree": "d8d871c244a4c77e195dcec23d4a4b0501fee249",
+      "pullRequest": "https://github.com/RosevearCreations/devilndove-site/pull/795"
+    }
+  },
+  "referenceContract": {
+    "custodian": "ai-data-platform",
+    "contractVersion": "1.0.0",
+    "eventSchema": "rosevear.master-shell.event.v1",
+    "immutableDocumentation": "https://github.com/RosevearCreations/ai-data-platform/blob/af06517da3ca712d4851a3f4fd710fb1194b7023/docs/BUILD_335_MASTER_SHELL_CONTRACT_V1_CORRELATION_EVENT_ENVELOPE.md",
+    "registrySchemaPath": "docs/contracts/rosevear-master-shell-registry-v1.schema.json",
+    "eventSchemaPath": "docs/contracts/rosevear-master-shell-event-v1.schema.json",
+    "approvedForDevilNDovePublication": false
+  },
+  "connection": {
+    "state": "DISCONNECTED / HOLD",
+    "authenticated": false,
+    "originalSourceSignerEnrolled": false,
+    "originalIssuerAndWitnessAccepted": false,
+    "oneUsePrivateTestVerified": false,
+    "persistentAudienceGrantApproved": false,
+    "eventPublishingEnabled": false,
+    "commsCustomerMessagingEnabled": false,
+    "crossAppWritesEnabled": false
+  },
+  "registryFieldReadiness": [
+    {"field":"sourceId","value":"devilndove","custodian":"Devil n Dove owners","state":"SOURCE_OBSERVED","evidence":".well-known/rosevear-integration-manifest.json"},
+    {"field":"repository","value":"RosevearCreations/devilndove-site","custodian":"Devil n Dove owners","state":"SOURCE_OBSERVED","evidence":".well-known/rosevear-integration-manifest.json"},
+    {"field":"environment","value":null,"custodian":"Master Shell contract owners","state":"HOLD","reason":"No owner-approved production registry submission"},
+    {"field":"shellBoundary","value":"devilndove","custodian":"Devil n Dove owners","state":"SOURCE_OBSERVED","evidence":"functions/api/_lib/ql336-owned-shell.mjs"},
+    {"field":"productOwner","value":"Ree and Jack Rosevear","custodian":"Ree and Jack Rosevear","state":"SOURCE_REPORTED","evidence":"docs/operations/RELEASE_467_BUILD_654_MASTER_SHELL_ASSESSMENT.md"},
+    {"field":"manifestURI","value":null,"custodian":"Devil n Dove / Master Shell owners","state":"HOLD","reason":"Public path is known but approved absolute URI and signed origin are not"},
+    {"field":"immutableRevision","value":null,"custodian":"Devil n Dove release owner","state":"HOLD","reason":"Build 654 commit is historical; Build 655 must be pinned only after verified promotion"},
+    {"field":"capabilityVersion","value":null,"custodian":"AI Data and Comms contract owners","state":"HOLD","reason":"Current shell capabilities are not approved as Master Shell V1 capability version"},
+    {"field":"contractVersion","value":"1.0.0","custodian":"AI Data Platform","state":"REFERENCE_ONLY","evidence":"docs/operations/RELEASE_467_BUILD_654_MASTER_SHELL_ASSESSMENT.md"},
+    {"field":"approvedOrigin","value":null,"custodian":"Ree and Jack / original signer custodian","state":"HOLD","reason":"No approved source origin signed in original QL-364 evidence"},
+    {"field":"signerKeyId","value":null,"custodian":"Original source signer custodian","state":"HOLD","reason":"Source Ed25519 signer enrollment remains independent and unverified"},
+    {"field":"signerFingerprint","value":null,"custodian":"Original source signer custodian","state":"HOLD","reason":"No independently verified registered signer fingerprint"},
+    {"field":"status","value":"DISCONNECTED","custodian":"Devil n Dove source owner","state":"SOURCE_OBSERVED","evidence":"functions/api/_lib/ql336-owned-shell.mjs"},
+    {"field":"statusObservedAt","value":null,"custodian":"Independent source-health verifier","state":"HOLD","reason":"No current source-signed original health observation"},
+    {"field":"statusExpiresAt","value":null,"custodian":"Independent source-health verifier","state":"HOLD","reason":"No signed observation exists from which a valid TTL may be derived"},
+    {"field":"lastVerifiedEvidenceURI","value":null,"custodian":"Independent source-health verifier","state":"HOLD","reason":"Protected release checks are not original private connection acceptance"},
+    {"field":"rolesAllowed","value":null,"custodian":"Master Sysop and source role owners","state":"HOLD","reason":"No new cross-app role/audience grants approved"},
+    {"field":"tenancyModel","value":"owned-business-shell","custodian":"Devil n Dove source owner","state":"SOURCE_OBSERVED","evidence":"functions/api/_lib/ql336-owned-shell.mjs"}
+  ],
+  "evidenceOwnership": [
+    {"id":"release.654.protected-promotion","custodian":"Devil n Dove release owner","scope":"historical-release","evidence":"https://github.com/RosevearCreations/devilndove-site/pull/795","observedAt":null,"independentlyVerifiedAt":null,"maxAgeHours":24,"verificationState":"HISTORICAL_REFERENCE","nextAction":"Obtain exact protected Build 655 main CI and independent live deployment proof before claiming its release state"},
+    {"id":"source.manifest.identity","custodian":"Devil n Dove owners","scope":"source-identity","evidence":".well-known/rosevear-integration-manifest.json","observedAt":null,"independentlyVerifiedAt":null,"maxAgeHours":168,"verificationState":"SOURCE_OBSERVED","nextAction":"Reconcile stale manifest revision, missing signer and origin with original issuer before any registry acceptance"},
+    {"id":"source.ql364.private-health","custodian":"Original issuer, source signer and independent witness","scope":"source-trust","evidence":"functions/api/_lib/ql364-source-health.mjs","observedAt":null,"independentlyVerifiedAt":null,"maxAgeHours":1,"verificationState":"HOLD","nextAction":"Independently enroll and verify the original signer, owner consent and one-use signed TEST receipt"},
+    {"id":"module.requirements.acceptance","custodian":"Devil n Dove owners and AI Data evidence reviewer","scope":"module-completion","evidence":"docs/operations/RELEASE_467_BUILD_652_MODULE_READINESS_BASELINE.md","observedAt":null,"independentlyVerifiedAt":null,"maxAgeHours":168,"verificationState":"PROVISIONAL","nextAction":"Approve stable requirement IDs, device coverage, weights and genuine owner acceptance before computing percentages"},
+    {"id":"workshop.owner-decision-chain","custodian":"Devil n Dove workshop owner","scope":"workshop-review","evidence":"docs/operations/RELEASE_467_BUILD_654_WORKSHOP_DECISION_COMPARISON.md","observedAt":null,"independentlyVerifiedAt":null,"maxAgeHours":168,"verificationState":"SOURCE_OBSERVED","nextAction":"Collect actual owner/device review acceptance; no automatic purchasing, inventory or provider actions"},
+    {"id":"customer.worker.admin.device-acceptance","custodian":"Ree and Jack / assigned device reviewer","scope":"device-uat","evidence":"docs/operations/RELEASE_467_BUILD_652_MODULE_READINESS_BASELINE.md","observedAt":null,"independentlyVerifiedAt":null,"maxAgeHours":168,"verificationState":"HOLD","nextAction":"Capture genuine mobile, desktop and tablet results by role without treating responsive CI as field acceptance"},
+    {"id":"master.event-publisher-authorization","custodian":"AI Data, Comms and Ree/Jack","scope":"integration","evidence":"docs/operations/RELEASE_467_BUILD_654_MASTER_SHELL_ASSESSMENT.md","observedAt":null,"independentlyVerifiedAt":null,"maxAgeHours":1,"verificationState":"HOLD","nextAction":"Approve exact schema, per-audience fields, signer, replay receipts, retention and owner consent before any transport"}
+  ],
+  "eventProposals": [
+    {"eventType":"source.health.reported","audience":["ai-data-platform"],"custodian":"Devil n Dove original source-health owner","payloadAllowlist":["healthState","sourceCommit","observedAt","expiresAt"],"state":"HOLD","reason":"No original source signer, verified TTL or event publication grant"},
+    {"eventType":"release.promoted","audience":["ai-data-platform"],"custodian":"Devil n Dove release owner","payloadAllowlist":["mainCommit","treeSha","checksEvidenceURI","liveProofURI"],"state":"HOLD","reason":"No approved publication, sourceSequence and signed evidence envelope"},
+    {"eventType":"module.readiness.changed","audience":["ai-data-platform"],"custodian":"Devil n Dove module owner","payloadAllowlist":["requirementId","roleDevice","acceptedWeight","totalWeight","reviewEvidenceURI"],"state":"HOLD","reason":"No owner-approved denominator or independently accepted module evidence"},
+    {"eventType":"workflow.status.changed","audience":["ai-data-platform","rosevear-comms-hub"],"custodian":"Devil n Dove workshop owner","payloadAllowlist":["redactedReference","state","decisionObservedAt","evidenceURI"],"state":"HOLD","reason":"Comms audience, consent, minimal fields and delivery contract not approved"},
+    {"eventType":"incident.opened","audience":["rosevear-comms-hub"],"custodian":"Devil n Dove source incident owner","payloadAllowlist":["incidentReference","severity","observedAt","evidenceURI"],"state":"HOLD","reason":"Incident ID, redaction, dedupe and routing ownership not approved"},
+    {"eventType":"incident.updated","audience":["rosevear-comms-hub"],"custodian":"Devil n Dove source incident owner","payloadAllowlist":["incidentReference","state","observedAt","evidenceURI"],"state":"HOLD","reason":"Same approval and signer boundary as incident.opened"},
+    {"eventType":"audit.evidence.recorded","audience":["ai-data-platform"],"custodian":"Devil n Dove evidence owner","payloadAllowlist":["evidenceReference","sha256","reviewerReference"],"state":"HOLD","reason":"Retention, evidence access and authenticated source custody not approved"},
+    {"eventType":"consent.changed","audience":["rosevear-comms-hub"],"custodian":"Devil n Dove privacy owner","payloadAllowlist":["consentReference","scope","decisionObservedAt"],"state":"HOLD","reason":"No approved consent authority, customer-safe minimization or live event release"}
+  ],
+  "privacy": {
+    "noCustomerRecords": true,
+    "noPrivateNotes": true,
+    "noCredentialsOrPrivateKeys": true,
+    "noTenantImpersonation": true,
+    "noLivePublisherOrBackgroundPolling": true
+  }
+}

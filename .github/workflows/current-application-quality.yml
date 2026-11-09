@@ -77,6 +77,11 @@ jobs:
         run: node --test scripts/release467_build653_workshop_bookmarks.test.mjs
       - name: Build 654 owner decision comparison, freshness holds and accessible manual handoff regression
         run: node --test scripts/release467_build654_workshop_trace_comparison.test.mjs
+      - name: Build 655 Master Shell local source readiness, evidence freshness and V1 event preparation HOLD
+        run: |
+          node --check scripts/release467_build655_master_shell_source_readiness.mjs
+          node --test scripts/release467_build655_master_shell_source_readiness.test.mjs
+          node scripts/release467_build655_master_shell_source_readiness.mjs --check
       - name: Current help, search, H1, responsive, Packaging, Grey Hair CAIP, Content Studio review/execution boundary, authority restart integrity, I.T. truth and release provenance quality
         run: python scripts/current_application_quality_gate.py
       - name: Preserve password-hash compatibility and current-write security
