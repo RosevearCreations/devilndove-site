@@ -1,4 +1,14 @@
-# Release 467 Build 654 — Workshop Decision Trace Comparison, Bookmark Freshness Explanations & Accessible Review Handoff (Production candidate)
+# Release 467 Build 655 — Master Shell Source Readiness Register, Evidence Freshness Ownership & Approved Event Schema Preparation (Production candidate)
+
+Devil n Dove now has an **offline, source-owned Master Shell readiness register** with the exact `devilndove` shell/repository identity, historical Build 654 independently protected release references, named custodians for seven evidence categories, and an explicit status for **all 18 required AI Data Platform V1 registry fields**. Eleven of those fields are correctly held pending original trust, current source signatures, owner audience grants or independent verification. The register names all eight V1 event families with redacted source payload allowlists, but every proposed publication remains **HOLD**. No new endpoint, key, database schema, webhook, background poll or cross-app access was created. [Build 655 source register and owner guide](docs/operations/RELEASE_467_BUILD_655_MASTER_SHELL_SOURCE_READINESS.md).
+
+The deterministic source-readiness validator checks source identity and manifest matches, local evidence paths, missing registry fields, independent freshness TTL, audience allowlists and fail-closed attempts to fabricate `CONNECTED`. Ten regression tests and the protected quality workflow cover this evidence-only implementation. The Build 652 module percentages remain provisional, and the Comms source remains **DISCONNECTED / HOLD** until the independent original owner/signer/witness chain is completed.
+
+**Next proposed Build 656 — Evidence-Based Module Completion Tracking, Device Acceptance & Owner Signoff** (stable requirement IDs and customer/worker/admin mobile, tablet, desktop owner evidence). The [revised 655–668 Master Shell queue](docs/operations/RELEASE_467_MASTER_SHELL_QUEUE_655_668.md) prioritizes actual shop functionality after this evidence foundation and defers real cross-app connections until coordinated approval.
+
+---
+
+## Previous release — Build 654
 
 Admin → Products compares the current **Build 653 page-only bookmark** with the **latest deliberately checked Build 651 source facts**: saved-plan revision, dated owner decision timeline, review count, latest outcome, follow-up status/date and check freshness. Explicit HOLD reasons prevent an unsigned handoff if source facts change, are unscanned, scan is in progress, or evidence is older than seven days. For a verified current match, owners can manually select original Build 649 history or prepare and explicitly copy a **private, unsigned review handoff**, with zero hidden API calls or mutations. [Build 654 operator guide](docs/operations/RELEASE_467_BUILD_654_WORKSHOP_DECISION_COMPARISON.md).
 
