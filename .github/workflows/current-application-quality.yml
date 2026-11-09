@@ -69,6 +69,8 @@ jobs:
         run: node --test scripts/release467_build649_workshop_closure_history.test.mjs
       - name: Build 650 owner decision summaries, saved timeline freshness and manual follow-up safety
         run: node --test scripts/release467_build650_workshop_decision_summary.test.mjs
+      - name: Build 651 bounded manual owner follow-up queue, decision aging and safe handoff regression
+        run: node --test scripts/release467_build651_workshop_review_queue.test.mjs
       - name: Current help, search, H1, responsive, Packaging, Grey Hair CAIP, Content Studio review/execution boundary, authority restart integrity, I.T. truth and release provenance quality
         run: python scripts/current_application_quality_gate.py
       - name: Preserve password-hash compatibility and current-write security

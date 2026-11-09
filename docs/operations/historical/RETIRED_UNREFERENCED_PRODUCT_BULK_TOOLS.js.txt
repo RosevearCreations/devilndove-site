@@ -1,4 +1,4 @@
-// File: /public/js/admin-product-bulk-tools.js
+// Historical source formerly at /public/js/admin-product-bulk-tools.js; no active runtime reference.
 // Brief description: Adds safer bulk product workflow tools to the admin dashboard. It lets
 // admins update selected items, an entire category, or the full catalog, including controlled
 // price adjustments for tariffs, packaging changes, and other broad selling-price revisions.

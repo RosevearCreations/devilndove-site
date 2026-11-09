@@ -306,6 +306,34 @@
           <div class="dd640-actions"><button type="button" class="btn" id="dd650Reopen" disabled>Reopen original owner plan for separate Save</button></div>
           <p class="dd640-warning small">A fresh review read verifies only the saved owner-note record at that moment. It does not verify workbench completion, physical count, supplier availability, payment, marketplace publication or a live inventory balance. The original editor requires a separate deliberate Save.</p>
         </details>
+        <details class="dd640-plan" id="dd651Queue" aria-labelledby="dd651Heading">
+          <summary id="dd651Heading"><strong>Workshop Follow-Up Review Queue &amp; Owner Action Handoff</strong></summary>
+          <p class="small">Deliberately check up to five of our saved owner plans at a time. The queue uses owner-only dated recommendations, saved follow-up dates and clear aging filters. Unscanned plans are never represented as reviewed.</p>
+          <div class="dd640-actions">
+            <button type="button" class="btn" id="dd651Scan" disabled>Review next five saved plans</button>
+            <button type="button" class="btn secondary" id="dd651Restart" disabled>Refresh queue from first plan</button>
+            <button type="button" class="btn secondary" id="dd651Clear" disabled>Clear private queue</button>
+          </div>
+          <label class="small">Show checked plans<select class="input" id="dd651Filter" disabled>
+            <option value="all">All checked plans</option><option value="attention">Owner attention recommended</option>
+            <option value="due">Follow-up due / overdue</option><option value="aging">Last recorded decision older than seven days</option>
+            <option value="unreviewed">No saved dated decisions</option><option value="recent">Recorded decision within seven days</option>
+          </select></label>
+          <p id="dd651Status" role="status" aria-live="polite">Load private owner plans, then deliberately scan five at a time.</p>
+          <p id="dd651Coverage" class="small">No saved owner plans inspected yet.</p>
+          <div id="dd651Rows"><p class="small">No private decisions checked. Start a deliberate five-plan scan.</p></div>
+          <h5>Selected owner follow-up</h5>
+          <p id="dd651Selection" class="small">Select a verified scanned plan for manual follow-up.</p>
+          <div class="dd640-actions">
+            <button type="button" class="btn" id="dd651History" disabled>Open in private dated-review history</button>
+            <button type="button" class="btn" id="dd651Reopen" disabled>Reopen original owner plan</button>
+            <button type="button" class="btn secondary" id="dd651Prepare" disabled>Prepare unsigned owner handoff</button>
+            <button type="button" class="btn secondary" id="dd651Copy" disabled>Copy handoff manually</button>
+          </div>
+          <label class="small" for="dd651Preview">Session-only, unsigned follow-up summary (not sent or saved)</label>
+          <textarea class="input dd640-copy" id="dd651Preview" rows="7" readonly placeholder="Choose one verified checked plan and prepare a manual handoff."></textarea>
+          <p class="dd640-warning small">Outcome and aging labels describe saved owner planning records only. Even a recent review cannot verify physical counts, workshop completion, supplier orders, purchasing approval or publication. Every actual change requires its separate original-source workflow.</p>
+        </details>
         <p class="dd640-warning small">Review notes document recommendations only. Neither a completed review nor a recommended action verifies physical stock or authorizes purchasing, order changes, manufacturing or marketplace publication.</p>
       </section>
       <form id="productBrowserSearchForm" class="dd-product-toolbar dd635-toolbar">
@@ -423,5 +451,6 @@
 <script src="/public/js/admin-workshop-closure-648.js?v=648"></script>
 <script src="/public/js/admin-workshop-history-649.js?v=649"></script>
 <script src="/public/js/admin-workshop-decision-summary-650.js?v=650"></script>
+<script src="/public/js/admin-workshop-review-queue-651.js?v=651"></script>
 </body>
 </html>
