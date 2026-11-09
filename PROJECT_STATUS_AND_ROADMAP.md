@@ -1,8 +1,16 @@
-# Release 467 Build 658 — Inventory, Supplies, Tools & Physical Stock Reconciliation (Production candidate)
+# Release 467 Build 659 — Product Catalogue, Media, End Products & Dovlin Production Readiness (Production candidate)
+
+The [Admin Product Browser evidence desk](/admin/products/) adds one-Product **explicit original catalogue, gallery/annotation, posted production-run and finished-lot inspection**. An authenticated owner may save a private versioned decision against the exact SHA-256 revision of those source facts. Source changes, bounded data and blocked permissions remain HOLD; request-key lookup and compare-and-swap prevent uncertain duplicate receipts. The UI never changes Product status, media rights, lot/stock quantity or marketplace publication. Real physical samples, original Dovlin approved 8-inch character artwork, actual rights documents and age-appropriate plush/material safety evidence remain **outside independent verification**; a local attestation is **not** product safety or permission-to-sell certification. The provisional Master Shell module score remains UNKNOWN/HOLD. See the [Build 659 guide](docs/operations/RELEASE_467_BUILD_659_PRODUCT_MEDIA_DOVLIN_OWNER_GUIDE.md).
+
+**Next proposed Build 660 — Customer Storefront, Checkout, Shipping & Returns Acceptance** (real device/carrier/payment acceptance, Canada-only requirements, accessible user flows, no simulated transaction approval).
+
+---
+
+## Previous release — Build 658
 
 The [physical stock review desk](/admin/physical-stock/) reads actual active Tool/Supply inventory and canonical base-unit balances, bounded real purchase lots, reservations, and original last-count timestamps on explicit owner request. An Admin records a personally observed base-unit count and storage location; a **different** active Storefront Admin can independently HOLD, require a recount or approve the count evidence using a private shared versioned journal. Source changes, stale journal versions, incomplete lot views, lot mismatch, purchase/base balance drift, and counts below existing reservations fail closed. Count receipts, original request keys and separate Admin decisions are durable and auditable. **No canonical stock quantity, lot, purchase order, Product, tax, accounting or Master Shell percentage is changed here**. A second account review is not cryptographic independent witness verification, and any proposed correction needs an additional real original Inventory transaction and proof. See [Build 658 owner guide](docs/operations/RELEASE_467_BUILD_658_PHYSICAL_STOCK_OWNER_GUIDE.md).
 
-**Next proposed Build 659 — Product Catalogue, Media, End Products & Dovlin Production Readiness** (real samples, rights and brand-approved Dovlin evidence without simulated product safety or sale readiness).
+**Build 659 follows** the Build 658 physical-stock evidence review with Product and finished-piece review; it does not apply a stock correction or certify physical sample safety.
 
 ---
 
