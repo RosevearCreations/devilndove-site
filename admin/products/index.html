@@ -116,6 +116,32 @@
       <div class="dd-product-actions"><a class="btn" href="/admin/product-editor/">Create Product</a><a class="btn" href="/admin/catalog-media/">Image Editor</a><a class="btn" href="/admin/catalog-health/">Catalog Health</a></div>
     </header>
 
+    <section class="card dd-products-browser-card" aria-labelledby="dd659Heading" id="dd659Desk">
+      <h2 id="dd659Heading">Build 659 · Finished Product, Media &amp; Dovlin Evidence Desk</h2>
+      <p class="small">Select a real Product ID from the browser below. <strong>Inspect original evidence</strong> reads one current Product, bounded gallery/rights annotations, production runs and finished lots. No data is read here on page load. Photos and stock records do not, by themselves, prove original rights, safety, physical samples or approval to sell.</p>
+      <div class="dd640-plan-fields">
+        <label>Original Product ID<input class="input" id="dd659ProductId" type="number" min="1" step="1" placeholder="e.g. 53" /></label>
+        <div><button class="btn" type="button" id="dd659Inspect">Inspect original evidence</button></div>
+      </div>
+      <p id="dd659Status" role="status" aria-live="polite">No original Product has been inspected.</p>
+      <div id="dd659Original" class="small"></div>
+      <form id="dd659Review" hidden>
+        <h3>Private owner evidence review · not a release approval</h3>
+        <p class="small">Choose only evidence personally reviewed. Missing original artwork, provenance, material safety or age-appropriate Dovlin plush testing must remain on HOLD. The approved Dovlin design may not be changed except colours; no new character artwork is generated here.</p>
+        <div class="dd640-plan-fields">
+          <label>Actual finished sample<select class="input" id="dd659Sample"><option value="not_verified">Not personally verified</option><option value="observed_real_sample">I observed an actual finished sample</option></select></label>
+          <label>Original media rights<select class="input" id="dd659Rights"><option value="not_verified">Rights not verified</option><option value="original_permission_seen">I inspected the original rights/permission evidence</option></select></label>
+          <label>Safety / material documents<select class="input" id="dd659Safety"><option value="not_verified">Documentation not verified</option><option value="original_document_seen">I inspected actual product-appropriate documents</option></select></label>
+          <label>Dovlin original approved design<select class="input" id="dd659Art"><option value="not_verified">Original approved artwork not compared</option><option value="approved_original_compared">I compared the physical sample with the approved original artwork</option></select></label>
+          <label><input id="dd659Dovlin" type="checkbox"/> Apply original Dovlin character/age 3+ evidence requirements to this Product</label>
+          <label>Disposition<select class="input" id="dd659Decision"><option value="hold">Hold for missing proof / next action</option><option value="owner_review_only">Record my review only — external acceptance remains pending</option></select></label>
+          <label style="grid-column:1/-1">Factual note and next action (20–500 characters)<textarea class="input" id="dd659Note" rows="3" minlength="20" maxlength="500" required placeholder="What physical sample or original file did we check? What must happen next?"></textarea></label>
+        </div>
+        <p class="small"><label><input type="checkbox" id="dd659Ack" required/> I understand this saves an internal source-bound owner receipt only. It never changes inventory, publishes a Product, certifies toy safety, verifies external rights or reports completion to the Master Shell.</label></p>
+        <div class="dd640-actions"><button class="btn" type="submit" id="dd659Save">Record private owner review</button><button class="btn" type="button" id="dd659FindKey" disabled>Inspect last request key</button></div>
+        <p id="dd659SaveStatus" role="status" aria-live="polite">No owner receipt recorded.</p>
+      </form>
+    </section>
     <section class="card dd-products-browser-card">
       <div class="dd-products-browser-heading"><div><h2>Product Browser</h2><p class="small">Eight compact rows by default. Search by Product name, SKU, slug or category, then sort across the matching catalog. Previous/revisited pages reuse this browser session. Featured image authority comes from the Product row; when a Product has no featured image, use Recover photo to check that Product's existing gallery/media references explicitly.</p></div></div>
       <details class="dd-low-read-details"><summary>Low-read mode / image-recovery details</summary><div class="dd-low-read-note small"><strong>Build 166 foundation, Build 168 session reuse, Build 170 explicit photo recovery:</strong> one bounded Product query for a fresh page. Automatic secondary image recovery reads are zero. Featured image authority comes from that same Product row. Only pressing <strong>Recover photo</strong> may read secondary image authorities, and that request is limited to one Product. Previous/revisited pages may reuse this session at zero D1 cost; Refresh deliberately returns to live authority. R2 is never listed, there are no timers, and failed reads do not loop.</div></details>
@@ -497,5 +523,6 @@
 <script src="/public/js/admin-workshop-review-queue-651.js?v=651"></script>
 <script src="/public/js/admin-workshop-saved-views-652.js?v=652"></script>
 <script src="/public/js/admin-workshop-bookmarks-653.js?v=654"></script>
+<script src="/public/js/admin-product-finish-review-659.js?v=659"></script>
 </body>
 </html>
