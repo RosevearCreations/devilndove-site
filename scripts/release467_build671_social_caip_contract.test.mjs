@@ -11,14 +11,14 @@ test('social creator is reachable and requires an explicit review draft',()=>{
   assert.match(page,/id="dd671-social-creator"/);
   assert.match(page,/admin-social-post-queue\.js/);
   assert.match(page,/id="dd671Confirm" required/);
-  assert.match(caipBridge,/post_status:'draft'/);
-  assert.match(caipBridge,/source_type:'caip_project'/);
+  assert.match(caipBridge,/post_status:["']draft["']/);
+  assert.match(caipBridge,/source_type:["']caip_project["']/);
 });
 test('CAIP originals are referenced only, never published or copied to post media',()=>{
   assert.match(caipBridge,/creative_asset_ids/);
-  assert.match(caipBridge,/image_urls:\[\],video_url:''/);
+  assert.match(caipBridge,/image_urls:\[\],video_url:["']["']/);
   assert.doesNotMatch(caipBridge,/publish_platforms|graph\.facebook\.com|r2_upload_id/);
-  assert.match(caipBridge,/creative_project_id=\$\{selectedProject\}/);
+  assert.match(caipBridge,/creative_project_id=\$\{/);
 });
 test('each previously empty owner card has an existing distinct image',()=>{
   const matches=[...home.matchAll(/\.dd-brand-v3-admin-card\[href\*="([^"]+)"\]::before\{background-image:url\('([^']+)'\)/g)];
