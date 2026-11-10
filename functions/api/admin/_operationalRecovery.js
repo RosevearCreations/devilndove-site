@@ -5,7 +5,7 @@ function approvedRecoveryUrl(value) {
   const clean=text(value); if (!clean) return '';
   try {
     const url=new URL(clean); const host=url.hostname.toLowerCase();
-    const allowed=url.protocol==='https:' && (host==='devilndove.com'||host==='www.devilndove.com'||host==='assets.devilndove.com'||host.endsWith('.devilndove-site.pages.dev'));
+    const allowed=url.protocol==='https:' && !url.username && !url.password && !url.search && !url.hash && !url.port && (host==='devilndove.com'||host==='www.devilndove.com'||host==='assets.devilndove.com'||host.endsWith('.devilndove-site.pages.dev'));
     return allowed ? url.toString() : '';
   } catch { return ''; }
 }

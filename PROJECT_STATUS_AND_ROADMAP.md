@@ -1,4 +1,14 @@
-# Release 467 Build 663 — Accounting, Canadian Sales Tax & Payroll Readiness (Production candidate)
+# Release 467 Build 664 — Security, Privacy, Tenant Isolation, Backup & Recovery Verification (Production candidate)
+
+The existing authenticated [Security Overview](/admin/operations/) now offers an explicit privacy/tenant/backup/restore readiness panel. Its Admin-only counts use both supported D1 bindings, return private/no-store headers, and fail closed without SQL diagnostic disclosure. Build 664 adds automated anonymous/worker/inactive/expired denials, shell-child impersonation and unsigned TEST HOLD assertions, and rejects recovery probe URLs containing embedded credentials, queries, fragments or alternate ports. An R2 object `HEAD`, software PASS or Production GREEN is **not** a D1/R2 backup restore: original owner/witness, isolated restore, privacy, tenant/device acceptance and Master Shell connection remain **UNKNOWN/HOLD**. See the [Build 664 owner guide](docs/operations/RELEASE_467_BUILD_664_SECURITY_PRIVACY_RECOVERY_OWNER_GUIDE.md).
+
+**Next proposed Build 665 — Etsy, Meta, Social Publishing & Advertising Readiness** (owner/provider-controlled channel HOLD until independently approved).
+
+---
+
+## Previous release — Build 663
+
+### Accounting, Canadian Sales Tax & Payroll Readiness
 
 The existing [Accounting source workspace](/admin/accounting/) now includes a read-only Canadian accounting and GST/HST/Payroll readiness card. A verified Admin can explicitly inspect genuine Accounting Order totals and a period-specific source sales-tax worksheet without exposing customer information or creating a second ledger. Missing original schema returns UNKNOWN/HOLD; CRA registration, tax filing, staff employment classification, payroll program account, deductions and remittance remain outside approval. This release also documents Devil n Dove as an independently owned business-source shell reporting to the AI Data/Comms Master control planes, with the original manifest's unsigned DISCONNECTED / HOLD still explicit. See the [Build 663 owner and Master Shell guide](docs/operations/RELEASE_467_BUILD_663_ACCOUNTING_CRA_PAYROLL_MASTER_SHELL_GUIDE.md).
 

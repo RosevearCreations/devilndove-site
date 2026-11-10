@@ -115,6 +115,12 @@ document.addEventListener("DOMContentLoaded", () => {
       </div>
 
       <div class="card" style="margin-top:12px">
+        <h4 style="margin:0">Privacy, tenant &amp; recovery verification</h4>
+        <p id="security664Readiness" class="small" role="status">Independent backup, restore and tenant acceptance have not been verified.</p>
+        <p class="small">A successful security summary is not proof of a restored backup or a live Master Shell connection.</p>
+      </div>
+
+      <div class="card" style="margin-top:12px">
         <div class="small">Bootstrap Status</div>
         <div id="securityBootstrapStatus" style="font-size:1.1rem;font-weight:700;margin-top:4px">—</div>
       </div>
@@ -141,10 +147,10 @@ document.addEventListener("DOMContentLoaded", () => {
       throw new Error(data?.error || "Failed to load security summary.");
     }
 
-    return { summary: data.summary || {}, controls: data.security_controls || {} };
+    return { summary: data.summary || {}, controls: data.security_controls || {}, readiness: data.security_readiness || {} };
   }
 
-  function renderSummary(summary, controls = {}) {
+  function renderSummary(summary, controls = {}, readiness = {}) {
     setValue("securityTotalUsers", formatCount(summary.total_users));
     setValue("securityActiveUsers", formatCount(summary.active_users));
     setValue("securityInactiveUsers", formatCount(summary.inactive_users));
@@ -166,6 +172,10 @@ document.addEventListener("DOMContentLoaded", () => {
       "securityBootstrapStatus",
       summary.bootstrap_required ? "Bootstrap Still Open" : "Bootstrap Locked"
     );
+    setValue("security664Readiness", `Tenant boundary: ${readiness.tenant_isolation || "UNKNOWN"} • ` +
+      `Privacy review: ${readiness.privacy_export || "UNKNOWN"} • ` +
+      `Backup: ${readiness.backup_snapshot || "UNKNOWN"} • ` +
+      `Restore: ${readiness.restore_witness || "UNKNOWN"}`);
   }
 
   async function loadSummary() {
@@ -185,7 +195,7 @@ document.addEventListener("DOMContentLoaded", () => {
       }
 
       const result = await fetchSummary();
-      renderSummary(result.summary, result.controls);
+      renderSummary(result.summary, result.controls, result.readiness);
       setMessage("Security overview loaded.");
     } catch (error) {
       setMessage(error.message || "Failed to load security overview.", true);

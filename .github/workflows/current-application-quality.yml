@@ -126,6 +126,12 @@ jobs:
           node --check functions/api/admin/accounting-sales-tax-filing.js
           node --check public/js/admin-accounting-operations.js
           node --test scripts/release467_build663_accounting_tax_payroll.test.mjs
+      - name: Build 664 Admin privacy, tenant denials, recovery URL safety and independent backup HOLD
+        run: |
+          node --check functions/api/admin/security-summary.js
+          node --check functions/api/admin/_operationalRecovery.js
+          node --check public/js/admin-security-summary.js
+          node --test scripts/release467_build664_security_privacy_tenant_recovery.test.mjs
       - name: Current help, search, H1, responsive, Packaging, Grey Hair CAIP, Content Studio review/execution boundary, authority restart integrity, I.T. truth and release provenance quality
         run: python scripts/current_application_quality_gate.py
       - name: Preserve password-hash compatibility and current-write security
