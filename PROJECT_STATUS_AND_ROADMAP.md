@@ -1,4 +1,12 @@
-# Release 467 Build 666 — AI Data Platform V1 Source Reporting, Evidence Freshness & Integration Receipts (Production candidate)
+# Release 467 Build 667 — Comms Hub Authorized Notifications, Workshop Status & Incident Handoff (Production candidate)
+
+The original source-owned [Comms handoff preview contract](docs/operations/RELEASE_467_BUILD_667_COMMS_HANDOFF_PREVIEW_CONTRACT.json) now maps authentic workshop status/QA and incident open/update to tightly scoped proposed event families; a notification-review intent maps to **no** Comms event or delivery. A new offline, non-sending preview validates source revision/age, original Build 657 workshop statuses and Build 666 source HOLD; refuses unknown fields/PII, unsanctioned status, sender/recipient details, stale source, false signer and receiver claims. The original Devil n Dove Admin outbox retains its independent permissions; QL-364 and QL-365D original two-owner TEST are unchanged and **DISCONNECTED/HOLD**. No real customer contact, cross-tenant data, Comms incident route, event transport or notification is performed. See [Build 667 owner guide](docs/operations/RELEASE_467_BUILD_667_COMMS_WORKSHOP_INCIDENT_OWNER_GUIDE.md).
+
+**Next proposed Build 668 — Master Shell Cross-Application Pilot, Independent Acceptance & Recovery** (one-source read-only owner-supervised pilot, explicit negative cases and original signed receipts).
+
+---
+
+## Prior Build 666 — AI Data Platform V1 Source Reporting, Evidence Freshness & Integration Receipts
 
 An offline [AI Data source report contract](docs/operations/RELEASE_467_BUILD_666_AI_DATA_SOURCE_REPORT_CONTRACT.json) and source-side `scripts/release467_build666_ai_data_source_report.mjs` now reconcile existing Build 655 registry and original source manifest with current local Git revision, SHA-256 structural fingerprint, evidence age, eighteen V1 registry fields, eight disabled proposed event families, and Build 665 provider HOLD. The read model **cannot** claim an independently signed source receipt, original owner/witness, approved Master audience or module completion percentage. A stale static manifest remains visibly **STALE**, and the QL-364 signed one-GET endpoint is unchanged and fail closed. No customer records, events, other-tenant data or network connection are sent. See [Build 666 owner guide](docs/operations/RELEASE_467_BUILD_666_AI_DATA_SOURCE_REPORT_OWNER_GUIDE.md).
 
