@@ -1,8 +1,16 @@
-# Release 467 Build 661 — Customer Commissions, Invoicing, Job Costs & Profitability (Production candidate)
+# Release 467 Build 662 — Worker Roles, Task Handoffs, Time Tracking & Mobile/Tablet Usability (Production candidate)
+
+The protected [Work Order field desk](/admin/project-work-orders/) reuses original Creative Process tasks, dependencies, actual recorded minutes, milestone links and actor audit. Build 662 corrects the missing browser idempotency write receipt, retains the exact key/body on uncertain saves, and adds touch-friendly phone/tablet task cards, state filters, and documented pause/resume handoff guidance. The existing page and API now route explicitly through the Creators module and verified active Admin authority. Worker/customer writes, actual distinct staffing, work assignment, payroll, material movement and independent phone/tablet worker acceptance remain **HOLD**. See [Build 662 owner guide](docs/operations/RELEASE_467_BUILD_662_WORKER_HANDOFF_TIME_MOBILE_OWNER_GUIDE.md).
+
+**Next proposed Build 663 — Accounting, Canadian Sales Tax & Payroll Readiness** (real accountant/regulator and actual staffing prerequisites; no invented filing or live payroll).
+
+---
+
+## Previous release — Build 661
 
 The protected [Commission Finance Acceptance Desk](/admin/commission-finance/) brings original Custom Request/quote, payment request draft, active Order link, issued/voided invoice and credit note, saved payment/refund, maker Project Cost projection and Finance revenue reference into one explicit owner review. The GET-only read uses Financials Admin middleware, excludes customer contact/provider identifiers, detects incomplete/truncated source evidence, and reuses **Build 656's three authentic commission/invoice/margin owner checkpoints**. Quote and payment drafts are never booked as sales; a recorded invoice is not cash; current-cost scenarios, missing material/labour and source Finance references do **not** certify realized profit. No invoice, provider payment, refund, ledger, tax, inventory, communications or Master Shell mutation is performed. See the [Build 661 owner guide](docs/operations/RELEASE_467_BUILD_661_CUSTOMER_COMMISSION_FINANCE_OWNER_GUIDE.md).
 
-**Next proposed Build 662 — Worker Roles, Task Handoffs, Time Tracking & Mobile/Tablet Usability** (original worker/role evidence, isolated field acceptance and actual task/time review).
+**Build 662 follows** with original work-order actor/role boundary, pause/resume notes, real time receipts and responsive field review.
 
 ---
 

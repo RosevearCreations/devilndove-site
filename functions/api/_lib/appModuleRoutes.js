@@ -128,6 +128,7 @@ const STOREFRONT_ADMIN_PAGES = Object.freeze([
 ]);
 
 const CREATOR_ADMIN_PAGES = Object.freeze([
+  '/admin/project-work-orders',
   '/admin/workshop-production',
   '/admin/creative-project',
   '/admin/creative-process',
@@ -246,6 +247,7 @@ const STOREFRONT_ADMIN_APIS = Object.freeze([
 ]);
 
 const CREATOR_ADMIN_APIS = Object.freeze([
+  '/api/admin/project-work-orders',
   '/api/admin/workshop-production-657',
   '/api/admin/creative',
   '/api/admin/caip',
