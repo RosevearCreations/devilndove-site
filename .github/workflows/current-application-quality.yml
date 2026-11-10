@@ -110,6 +110,11 @@ jobs:
           node --check functions/api/admin/storefront-acceptance-660.js
           node --check public/js/admin-storefront-acceptance-660.js
           node --test scripts/release467_build660_customer_checkout_shipping_returns.test.mjs
+      - name: Build 661 original commissions, issued invoices, maker costs and Finance/owner HOLD
+        run: |
+          node --check functions/api/admin/commission-finance-661.js
+          node --check public/js/admin-commission-finance-661.js
+          node --test scripts/release467_build661_commissions_invoicing_profitability.test.mjs
       - name: Current help, search, H1, responsive, Packaging, Grey Hair CAIP, Content Studio review/execution boundary, authority restart integrity, I.T. truth and release provenance quality
         run: python scripts/current_application_quality_gate.py
       - name: Preserve password-hash compatibility and current-write security

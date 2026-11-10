@@ -1,8 +1,16 @@
-# Release 467 Build 660 — Customer Storefront, Checkout, Shipping & Returns Acceptance (Production candidate)
+# Release 467 Build 661 — Customer Commissions, Invoicing, Job Costs & Profitability (Production candidate)
+
+The protected [Commission Finance Acceptance Desk](/admin/commission-finance/) brings original Custom Request/quote, payment request draft, active Order link, issued/voided invoice and credit note, saved payment/refund, maker Project Cost projection and Finance revenue reference into one explicit owner review. The GET-only read uses Financials Admin middleware, excludes customer contact/provider identifiers, detects incomplete/truncated source evidence, and reuses **Build 656's three authentic commission/invoice/margin owner checkpoints**. Quote and payment drafts are never booked as sales; a recorded invoice is not cash; current-cost scenarios, missing material/labour and source Finance references do **not** certify realized profit. No invoice, provider payment, refund, ledger, tax, inventory, communications or Master Shell mutation is performed. See the [Build 661 owner guide](docs/operations/RELEASE_467_BUILD_661_CUSTOMER_COMMISSION_FINANCE_OWNER_GUIDE.md).
+
+**Next proposed Build 662 — Worker Roles, Task Handoffs, Time Tracking & Mobile/Tablet Usability** (original worker/role evidence, isolated field acceptance and actual task/time review).
+
+---
+
+## Previous release — Build 660
 
 The [Customer Storefront Acceptance Desk](/admin/storefront-acceptance/) offers clear links to original Shop/Cart/Checkout/Terms/customer-care experiences, reads the existing **eight relevant Build 656 customer device/storefront/shipping owner checkpoints** only on request, and allows an Admin to inspect one real canonical Order's safe, redacted line items, payment and refund rows without submitting a transaction. Original CA/CAD policy, saved payment/refund status, evidence bounds, SHA-256 source revision and HOLD explanations are visible. **No checkout order, card capture, shipment, refund, address export, provider simulation, customer message or Master Shell completion percentage is generated.** Local owner acceptance cannot prove actual payment settlement, real customer-device usability, carrier service or return closure. See [Build 660 owner's guide](docs/operations/RELEASE_467_BUILD_660_CUSTOMER_CHECKOUT_SHIPPING_RETURNS_OWNER_GUIDE.md).
 
-**Next proposed Build 661 — Customer Commissions, Invoicing, Job Costs & Profitability** (actual source-linked commission/invoice/cost evidence, no assumed provider settlement or bookkeeping submission).
+**Build 661 follows** with original commission/issued invoice/cost source comparison and explicit financial HOLDs.
 
 ---
 

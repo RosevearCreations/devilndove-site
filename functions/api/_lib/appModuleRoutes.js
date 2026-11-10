@@ -149,6 +149,7 @@ const SOCIAL_ADMIN_PAGES = Object.freeze([
 ]);
 
 const FINANCIAL_ADMIN_PAGES = Object.freeze([
+  '/admin/commission-finance',
   '/admin/accounting',
 ]);
 
@@ -266,6 +267,7 @@ const SOCIAL_ADMIN_APIS = Object.freeze([
 ]);
 
 const FINANCIAL_ADMIN_APIS = Object.freeze([
+  '/api/admin/commission-finance-661',
   '/api/admin/accounting',
   '/api/admin/payment',
   '/api/payment-providers',
