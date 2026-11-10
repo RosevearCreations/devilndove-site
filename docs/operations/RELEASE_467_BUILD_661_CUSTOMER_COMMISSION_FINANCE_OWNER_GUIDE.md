@@ -1,7 +1,7 @@
 # Devil n Dove — Build 661 Commission, Invoice & Profit Evidence
 
-**Operator route:** `/admin/commission-finance/`  
-**Source endpoint:** Financials Admin `GET /api/admin/commission-finance-661?request_id=<original-id>`  
+**Operator route:** `/admin/commission-finance/`
+**Source endpoint:** Financials Admin `GET /api/admin/commission-finance-661?request_id=<original-id>`
 **Release intent:** source-only, read-only cross-authority commission finance acceptance. Production deployment does not itself certify actual financial accuracy, live payments or tax accounting.
 
 ## Source ownership, not a new money engine

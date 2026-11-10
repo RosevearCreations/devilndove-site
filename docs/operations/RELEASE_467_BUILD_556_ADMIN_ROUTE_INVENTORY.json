@@ -223,7 +223,7 @@
       "source": "admin/commission-finance/index.html",
       "decision": "REVIEW",
       "reference_screen": "Unassigned / contextual module",
-      "reason": "Build 661 new Finance source-acceptance desk; signed-in visual and owner field acceptance remain pending.",
+      "reason": "Not individually approved for a revamp; inspect actual signed-in UI and owner acceptance before changing.",
       "evidence": {
         "byte_length": 5175,
         "stylesheets": 2,
@@ -240,7 +240,7 @@
       "reference_screen": "Unassigned / contextual module",
       "reason": "Not individually approved for a revamp; inspect actual signed-in UI and owner acceptance before changing.",
       "evidence": {
-        "byte_length": 6364,
+        "byte_length": 6423,
         "stylesheets": 2,
         "scripts": 4,
         "forms": 0,
@@ -390,7 +390,7 @@
       "reference_screen": "Unassigned / contextual module",
       "reason": "Not individually approved for a revamp; inspect actual signed-in UI and owner acceptance before changing.",
       "evidence": {
-        "byte_length": 4645,
+        "byte_length": 4704,
         "stylesheets": 1,
         "scripts": 3,
         "forms": 0,
