@@ -37,6 +37,13 @@
       <a class="btn" href="/admin/release-preflight/">Release Preflight</a>
       <a class="btn" href="/admin/operations/">Operations</a>
     </nav>
+    <section class="card" id="dd671-social-creator" aria-labelledby="dd671-title">
+      <p class="eyebrow">Build 671 · Unified Socials creator</p><h2 id="dd671-title">Create a story from workshop media</h2>
+      <p>Choose an active or previous CAIP project, tag its existing uploaded assets, and create a private review draft. Original uploads stay in CAIP; tags are references, not public media links. A reviewed public derivative and verified account are required before direct posting.</p>
+      <div class="dd671-layout"><div><label for="dd671Project">CAIP project</label><select id="dd671Project" class="input"><option value="">Load projects first</option></select><div class="dd671-links"><a href="/admin/creative-assets/">Upload or review in CAIP</a><a href="/admin/caip-content-handoff/">Prepare Content Studio handoff</a></div><fieldset id="dd671Assets"><legend>Tag source media</legend><p class="small">Load a project to see its source assets.</p></fieldset></div><form id="dd671Form"><label for="dd671Title">Post title</label><input class="input" id="dd671Title" maxlength="140" required placeholder="What we made in the workshop"><label for="dd671Summary">Story / caption notes</label><textarea class="input" id="dd671Summary" rows="4" maxlength="1200" required placeholder="What happened, what we learned, or what went sideways..."></textarea><fieldset><legend>Target social channels</legend><div class="dd671-platforms"><label><input type="checkbox" value="facebook"> Facebook Page</label><label><input type="checkbox" value="instagram"> Instagram</label><label><input type="checkbox" value="pinterest"> Pinterest</label><label><input type="checkbox" value="tiktok"> TikTok</label><label><input type="checkbox" value="x"> X</label><label><input type="checkbox" value="youtube"> YouTube</label></div></fieldset><label class="dd671-confirm"><input type="checkbox" id="dd671Confirm" required> I will review rights, consent, captions and public media before any publication.</label><button class="btn primary" type="submit" id="dd671Create" disabled>Create review draft</button><p id="dd671Status" role="status" aria-live="polite">Load genuine CAIP projects to begin.</p></form></div>
+      <p class="small">This workflow never publishes when a draft is created. For explicit API publishing after approval, use the existing Social Post Queue below; unconfigured platforms remain manual-only.</p>
+    </section>
+    <style>.dd671-layout{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:20px}.dd671-layout label{display:block;margin:12px 0 6px}.dd671-layout .input{width:100%;box-sizing:border-box}.dd671-layout fieldset{margin:14px 0;padding:14px;border:1px solid #9b82b0;border-radius:12px}.dd671-layout fieldset label{display:flex;align-items:center;gap:8px}.dd671-links{display:flex;gap:12px;flex-wrap:wrap;margin:10px 0}.dd671-platforms{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:4px}.dd671-asset{display:flex!important;align-items:flex-start!important;gap:10px;margin:8px 0!important;padding:8px;border:1px solid #6d587c;border-radius:9px}.dd671-asset small{display:block;overflow-wrap:anywhere}.dd671-confirm{display:flex!important;align-items:start;gap:8px}@media(max-width:750px){.dd671-layout{grid-template-columns:1fr}}</style>
 
     <section class="card social-preflight-panel" id="social-platform-preflight">
       <div class="social-automation-heading">
@@ -88,6 +95,7 @@
     <div id="socialOAuthAcceptanceMount"></div>
     <div id="socialProductAutomationMount"></div>
     <div id="socialPostQueueAdminMount"></div>
+    <script defer src="/public/js/admin-social-caip-671.js?v=671"></script>
     <div id="socialMediaPrivacyGuardAdminMount"></div>
 
     <section id="setup-guide" class="card social-setup-guide">
