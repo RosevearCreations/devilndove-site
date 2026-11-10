@@ -5,7 +5,10 @@ function json(data, status = 200) {
   return new Response(JSON.stringify(data), {
     status,
     headers: {
-      "Content-Type": "application/json"
+      "Content-Type": "application/json",
+      "Cache-Control": "private, no-store",
+      "X-Content-Type-Options": "nosniff",
+      "Referrer-Policy": "no-referrer"
     }
   });
 }
@@ -24,12 +27,17 @@ async function getAdminUserFromRequest(request, env) {
   };
 }
 
-async function getSingleRow(env, sql) {
-  const row = await env.DB.prepare(sql).first();
+async function getSingleRow(db, sql) {
+  const row = await db.prepare(sql).first();
   return row || {};
 }
 
 export async function onRequestGet(context) {
+  try { return await readAdminSecuritySummary(context); }
+  catch { return json({ok:false,error:"Security verification unavailable."},503); }
+}
+
+async function readAdminSecuritySummary(context) {
   const { request, env } = context;
 
   const adminUser = await getAdminUserFromRequest(request, env);
@@ -38,7 +46,8 @@ export async function onRequestGet(context) {
     return json({ ok: false, error: "Unauthorized." }, 401);
   }
 
-  const userSummary = await getSingleRow(env, `
+  const db = env.DB || env.DD_DB;
+  const userSummary = await getSingleRow(db, `
     SELECT
       COUNT(*) AS total_users,
       SUM(CASE WHEN COALESCE(is_active, 0) = 1 THEN 1 ELSE 0 END) AS active_users,
@@ -52,7 +61,7 @@ export async function onRequestGet(context) {
     FROM users
   `);
 
-  const sessionSummary = await getSingleRow(env, `
+  const sessionSummary = await getSingleRow(db, `
     SELECT
       COUNT(*) AS total_sessions,
       SUM(CASE WHEN expires_at > datetime('now') THEN 1 ELSE 0 END) AS active_sessions,
@@ -95,6 +104,15 @@ export async function onRequestGet(context) {
       admin_session_cleanup_step_up: true,
       revoke_other_sessions_available: true,
       secret_values_logged: false
+    },
+    security_readiness: {
+      evidence_scope: "CODE_AND_CURRENT_ADMIN_COUNTS_NOT_FIELD_ACCEPTANCE",
+      tenant_isolation: "SOURCE_GATE_ONLY_FIELD_HOLD",
+      privacy_export: "HOLD_OWNER_REVIEW",
+      backup_snapshot: "UNKNOWN_NO_ORIGINAL_RECEIPT",
+      restore_witness: "HOLD_NO_INDEPENDENT_RESTORE",
+      production_restore_executed: false,
+      master_connection: "DISCONNECTED / HOLD"
     }
   });
 }
