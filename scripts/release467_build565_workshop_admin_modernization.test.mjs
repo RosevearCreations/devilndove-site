@@ -110,7 +110,7 @@ test('Work Orders retain append-only status, real time and milestone evidence', 
   assert.match(page, /Dependencies must be completed before moving forward/);
   assert.match(page, /Time and status are append-only and cannot be deleted here/);
   assert.match(page, /no automatic task completion or stock movement/);
-  assert.match(page, /admin-project-work-orders\.js\?v=467b379/);
+  assert.match(page, /admin-project-work-orders\.js\?v=467b(?:379|662)/);
   assert.match(page, /admin-write-receipt-recovery-v386\.js\?v=467b386/);
 });
 

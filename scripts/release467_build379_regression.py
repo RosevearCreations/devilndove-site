@@ -8,7 +8,7 @@ def req(v,msg):
 p=json.loads(read('current-development-authority.json'));req(p['build']>=379,'pointer')
 m=json.loads(read('migrations/canonical/manifest.json'));req(len(m['migrations'])>=31 and m['migrations'][30]['version']==31 and m['migrations'][30]['file']=='0031_release467_creative_work_order_execution_history.sql','Build 379 canonical migration remains immutable at version 31')
 api=read('functions/api/admin/project-work-orders.js')
-for t in ('getAdminUserFromRequest','Origin','STALE_OR_BLOCKED','auditAdminAction','actor_user_id','creative_work_event_id'):req(t in api,'api:'+t)
+for t in ('verifiedAdminFromModule','Origin','STALE_OR_BLOCKED','auditAdminAction','actor_user_id','creative_work_event_id'):req(t in api,'api:'+t)
 for path in ('functions/api/admin/project-work-orders.js','functions/api/admin/_lib/workOrderRules.js','public/js/admin-project-work-orders.js'):
  z=subprocess.run(['node','--check',str(r/path)],capture_output=True,text=True);req(z.returncode==0,path+' '+z.stderr[-150:])
 z=subprocess.run(['node','--test','scripts/release467_build379_rules.test.mjs'],cwd=r,capture_output=True,text=True);req(z.returncode==0,z.stdout[-250:])
