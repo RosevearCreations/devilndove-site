@@ -30,7 +30,7 @@
       "reference_screen": "Admin Dashboard",
       "reason": "Existing Admin dashboard already received a dedicated shell/hero modernization. Preserve until owner review.",
       "evidence": {
-        "byte_length": 20798,
+        "byte_length": 25311,
         "stylesheets": 5,
         "scripts": 12,
         "forms": 0,
@@ -2070,10 +2070,10 @@
       "reference_screen": "Settings & Configuration",
       "reason": "Existing social authorization and draft boundaries must remain intact; integration redesign is queued separately.",
       "evidence": {
-        "byte_length": 13647,
+        "byte_length": 16931,
         "stylesheets": 3,
         "scripts": 11,
-        "forms": 0,
+        "forms": 1,
         "has_viewport": true
       },
       "owner_visual_acceptance": "PENDING"
@@ -2355,7 +2355,7 @@
       "reference_screen": "Unassigned / contextual module",
       "reason": "Not individually approved for a revamp; inspect actual signed-in UI and owner acceptance before changing.",
       "evidence": {
-        "byte_length": 6547,
+        "byte_length": 9892,
         "stylesheets": 2,
         "scripts": 3,
         "forms": 1,
