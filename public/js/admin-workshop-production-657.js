@@ -28,6 +28,7 @@ function showSource(data){clearSource();source=data;version=data.version;
   for(const o of out)add($('dd657Outputs'),'li',(o.output_label||o.output_key)+
     ': '+o.output_status+' / approval '+o.approval_status+' (canonical; not changed here).');
   const latest=data.current_owner_review;
+  const reviewed=$('dd670Reviewed');if(reviewed)reviewed.textContent=latest?String(latest.progress_percent)+'%':'HOLD';
   $('dd657Latest').textContent=latest?'Latest local owner review: '+latest.stage+
     ', '+latest.progress_percent+'% estimated, QA '+latest.qa_decision+' (actor #'+latest.actor_user_id+
     ', '+latest.recorded_at+'). This does not independently certify readiness.':
@@ -41,6 +42,8 @@ $('dd657LoadProjects').addEventListener('click',async()=>{
   if(busy)return;busy=true;$('dd657LoadProjects').disabled=true;clearSource();status('Reading live source project identities…');
   try{const d=await call(API),select=$('dd657Project'),selected=select.value;select.replaceChildren();
     add(select,'option','Choose a real Creative Project').value='';
+    const total=$('dd670Total'),active=$('dd670Active');if(total)total.textContent=String((d.projects||[]).length);
+    if(active)active.textContent=String((d.projects||[]).filter(p=>/active|progress|making|open|started/i.test(String(p.project_status||''))).length);
     for(const p of d.projects||[]){const o=add(select,'option',p.project_title+' • '+p.project_key+
       ' • '+p.project_status+' • '+p.project_type);o.value=String(p.creative_work_project_id);}
     if((d.projects||[]).some(x=>String(x.creative_work_project_id)===selected))select.value=selected;
