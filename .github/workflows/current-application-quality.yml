@@ -132,6 +132,11 @@ jobs:
           node --check functions/api/admin/_operationalRecovery.js
           node --check public/js/admin-security-summary.js
           node --test scripts/release467_build664_security_privacy_tenant_recovery.test.mjs
+      - name: Build 665 Etsy Meta social publishing advertising owner-gated readiness
+        run: |
+          node --check scripts/release467_build665_channel_readiness.mjs
+          node --test scripts/release467_build665_channel_readiness.test.mjs
+          node scripts/release467_build665_channel_readiness.mjs --check
       - name: Current help, search, H1, responsive, Packaging, Grey Hair CAIP, Content Studio review/execution boundary, authority restart integrity, I.T. truth and release provenance quality
         run: python scripts/current_application_quality_gate.py
       - name: Preserve password-hash compatibility and current-write security
