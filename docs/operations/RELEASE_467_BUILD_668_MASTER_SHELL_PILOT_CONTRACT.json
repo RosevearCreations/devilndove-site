@@ -1,0 +1,44 @@
+{
+  "schema": "devilndove.master-shell.cross-app-pilot.v1",
+  "build": 668,
+  "source_id": "devilndove",
+  "source_role": "owned_business_shell",
+  "repository": "RosevearCreations/devilndove-site",
+  "scope": "ONE_SOURCE_OFFLINE_NEGATIVE_AND_READ_ONLY_PILOT",
+  "source_manifest": ".well-known/rosevear-integration-manifest.json",
+  "original_source_handler": "functions/api/_lib/ql364-source-health.mjs",
+  "reference": "https://github.com/RosevearCreations/rosevear-comms-hub/blob/main/docs/handoffs/QL365D_SIX_APP_COMMS_ATTACHMENT_VALIDATION_HANDOFF.md",
+  "master_planes": [
+    { "id": "ai-data-platform", "responsibility": "suite_intelligence_and_evidence" },
+    { "id": "rosevear-comms-hub", "responsibility": "communications_and_incident_operations" }
+  ],
+  "sources": [
+    { "id": "yw", "repository": "RosevearCreations/yw", "role": "platform_shell", "handler": "server/ql364-source-health.mjs" },
+    { "id": "icamp", "repository": "RosevearCreations/iCamp", "role": "platform_shell", "handler": "lib/integration-v1/ql364-source-health.mjs" },
+    { "id": "rosiedazzlers", "repository": "RosevearCreations/rosiedazzlers", "role": "owned_business_shell", "handler": "functions/api/_lib/ql364-source-health.mjs" },
+    { "id": "devilndove", "repository": "RosevearCreations/devilndove-site", "role": "owned_business_shell", "handler": "functions/api/_lib/ql364-source-health.mjs" },
+    { "id": "ai-data-platform", "repository": "RosevearCreations/ai-data-platform", "role": "suite_intelligence_master", "handler": "apps/web/lib/ql364-source-health.mjs" },
+    { "id": "rosevear-ai-hub", "repository": "RosevearCreations/rosevear-ai-hub", "role": "original_windows_support_source", "handler": "server/src/rosevear_ai_hub/api/ql364_source_health.py" }
+  ],
+  "checks": [
+    "source_identity", "manifest_revision", "source_handler_method", "child_tenant_denial",
+    "unsigned_get_denial", "external_peers_not_impersonated", "owner_signer_receipt",
+    "approved_comms_audience", "approved_ai_data_audience", "private_data_exclusion",
+    "backup_snapshot", "witnessed_isolated_restore", "rollback_authority"
+  ],
+  "owner_issuer_verified": false,
+  "independent_witness_verified": false,
+  "source_signer_enrolled": false,
+  "ql365d_signed_test_receipt_verified": false,
+  "durable_one_use_nonce_verified": false,
+  "ai_data_audience_granted": false,
+  "comms_audience_granted": false,
+  "master_connected": false,
+  "external_peer_probes_authorized": false,
+  "cross_tenant_access_enabled": false,
+  "backup_snapshot_independently_verified": false,
+  "isolated_restore_witnessed": false,
+  "rollback_approved_and_rehearsed": false,
+  "persistent_publishers_enabled": false,
+  "customer_information_included": false
+}

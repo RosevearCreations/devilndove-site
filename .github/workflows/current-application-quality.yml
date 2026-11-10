@@ -147,6 +147,11 @@ jobs:
           node --check scripts/release467_build667_comms_handoff_preview.mjs
           node --test scripts/release467_build667_comms_handoff_preview.test.mjs
           node scripts/release467_build667_comms_handoff_preview.mjs --check
+      - name: Build 668 Master Shell six-app source boundary, negative pilot and recovery HOLD
+        run: |
+          node --check scripts/release467_build668_cross_app_pilot.mjs
+          node --test scripts/release467_build668_cross_app_pilot.test.mjs
+          node scripts/release467_build668_cross_app_pilot.mjs --check
       - name: Current help, search, H1, responsive, Packaging, Grey Hair CAIP, Content Studio review/execution boundary, authority restart integrity, I.T. truth and release provenance quality
         run: python scripts/current_application_quality_gate.py
       - name: Preserve password-hash compatibility and current-write security

@@ -1,4 +1,12 @@
-# Release 467 Build 667 — Comms Hub Authorized Notifications, Workshop Status & Incident Handoff (Production candidate)
+# Release 467 Build 668 — Master Shell Cross-Application Pilot, Independent Acceptance & Recovery (Production candidate)
+
+Build 668 adds a [six-source Master Shell identity and local negative pilot contract](docs/operations/RELEASE_467_BUILD_668_MASTER_SHELL_PILOT_CONTRACT.json) and source-side, non-network `scripts/release467_build668_cross_app_pilot.mjs`. It reads original Build 655/666 source evidence and Build 667 Comms gates; verifies the *actual Devil n Dove QL-364 handler* refuses non-GET, child-tenant impersonation and unsigned private GET, and checks credential-bearing recovery targets are denied without performing a HEAD or restore. The exact Yard Workers, iCamp, Rosie Dazzlers, Devil n Dove, AI Data Platform and Rosevear AI Hub identities are reference-only; five external peers are **not** contacted or declared connected. Manifest drift, signer/owner approval, original signed receipts, audience grants, D1/R2 snapshots, witnessed isolated restore, rollback and all cross-application acceptance remain **STALE / HOLD** until original independent evidence exists. No new event publisher or customer/device transfer. See the [Build 668 owner guide](docs/operations/RELEASE_467_BUILD_668_MASTER_SHELL_PILOT_OWNER_GUIDE.md).
+
+**Next proposed Build 669 — Master Shell Owner Acceptance Casebook, Single-Source Trust Gaps & Recovery Follow-Up Queue** (only if owner priority confirms; no repeated speculative signers or re-runs of completed original-host work).
+
+---
+
+## Prior Build 667 — Comms Hub Authorized Notifications, Workshop Status & Incident Handoff
 
 The original source-owned [Comms handoff preview contract](docs/operations/RELEASE_467_BUILD_667_COMMS_HANDOFF_PREVIEW_CONTRACT.json) now maps authentic workshop status/QA and incident open/update to tightly scoped proposed event families; a notification-review intent maps to **no** Comms event or delivery. A new offline, non-sending preview validates source revision/age, original Build 657 workshop statuses and Build 666 source HOLD; refuses unknown fields/PII, unsanctioned status, sender/recipient details, stale source, false signer and receiver claims. The original Devil n Dove Admin outbox retains its independent permissions; QL-364 and QL-365D original two-owner TEST are unchanged and **DISCONNECTED/HOLD**. No real customer contact, cross-tenant data, Comms incident route, event transport or notification is performed. See [Build 667 owner guide](docs/operations/RELEASE_467_BUILD_667_COMMS_WORKSHOP_INCIDENT_OWNER_GUIDE.md).
 
