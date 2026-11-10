@@ -1,4 +1,12 @@
-# Release 467 Build 665 — Etsy, Meta, Social Publishing & Advertising Readiness (Production candidate)
+# Release 467 Build 666 — AI Data Platform V1 Source Reporting, Evidence Freshness & Integration Receipts (Production candidate)
+
+An offline [AI Data source report contract](docs/operations/RELEASE_467_BUILD_666_AI_DATA_SOURCE_REPORT_CONTRACT.json) and source-side `scripts/release467_build666_ai_data_source_report.mjs` now reconcile existing Build 655 registry and original source manifest with current local Git revision, SHA-256 structural fingerprint, evidence age, eighteen V1 registry fields, eight disabled proposed event families, and Build 665 provider HOLD. The read model **cannot** claim an independently signed source receipt, original owner/witness, approved Master audience or module completion percentage. A stale static manifest remains visibly **STALE**, and the QL-364 signed one-GET endpoint is unchanged and fail closed. No customer records, events, other-tenant data or network connection are sent. See [Build 666 owner guide](docs/operations/RELEASE_467_BUILD_666_AI_DATA_SOURCE_REPORT_OWNER_GUIDE.md).
+
+**Next proposed Build 667 — Comms Hub Authorized Notifications, Workshop Status & Incident Handoff** (original QL-365D TEST signer, authorized owner audience, source consent and one-use receipts remain HOLD).
+
+---
+
+## Prior Build 665 — Etsy, Meta, Social Publishing & Advertising Readiness
 
 Devil n Dove's original [Social Publishing screen](/admin/social-publishing/), Etsy/Meta OAuth acceptance, original social draft queue, and media privacy guard are reconciled with a [machine-checkable seven-channel readiness record](docs/operations/RELEASE_467_BUILD_665_CHANNEL_READINESS.json) and eight local source-truth tests. **Etsy remains PAUSED BY OWNER; Meta/Facebook/Instagram and other channels remain HOLD; advertising is NOT IMPLEMENTED/HOLD with no spend enabled.** CI validates original source boundaries without contacting platforms, leaking tokens, running advertisements, publishing posts or restarting paused Etsy listing drafts. Connection evidence, original owner consent, independent provider receipts, media/customer rights and Master Shell signer/audience remain outside local proof. See the [Build 665 owner guide](docs/operations/RELEASE_467_BUILD_665_ETSY_META_SOCIAL_ADVERTISING_READINESS.md).
 

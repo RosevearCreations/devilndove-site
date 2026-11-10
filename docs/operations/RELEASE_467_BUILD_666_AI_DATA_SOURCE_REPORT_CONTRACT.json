@@ -1,0 +1,23 @@
+{
+  "schema": "devilndove.ai-data.source-report-contract.v1",
+  "source_id": "devilndove",
+  "repository": "RosevearCreations/devilndove-site",
+  "source_role": "owned_business_shell",
+  "intended_consumer": "ai-data-platform",
+  "data_classification": "PUBLIC_STRUCTURAL_METADATA_ONLY",
+  "transport": "OFFLINE_OWNER_REVIEW_NO_EVENT_PUBLISHER",
+  "source_registry_path": "docs/operations/RELEASE_467_BUILD_655_SOURCE_READINESS_REGISTER.json",
+  "source_manifest_path": ".well-known/rosevear-integration-manifest.json",
+  "channel_readiness_path": "docs/operations/RELEASE_467_BUILD_665_CHANNEL_READINESS.json",
+  "allowed_report_fields": [
+    "schema", "sourceId", "repository", "sourceRole", "intendedConsumer", "environment", "sourceRevision",
+    "observedAt", "localEvidenceFingerprint", "manifest", "readiness", "evidence", "events", "receipt",
+    "privacy", "transport", "status"
+  ],
+  "blocked_payload_fields": ["customer", "email", "phone", "address", "payment", "card", "token", "password", "secret", "private_notes", "employee"],
+  "original_owner_signer_enrolled": false,
+  "approved_persistent_audience": false,
+  "verified_signed_receipt": false,
+  "event_publishing_enabled": false,
+  "completion_percentage_certified": false
+}
