@@ -1,0 +1,31 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex,nofollow"><title>Commission Finance Acceptance — Devil n Dove Admin</title>
+<link rel="stylesheet" href="/css/styles.css?v=467"><link rel="stylesheet" href="/public/css/admin-shell-467.css?v=467b467">
+<style>
+body{background:#151727;color:#faf0ff}.b661{max-width:1140px;width:94%;margin:2rem auto 5rem}
+.b661 a{color:#f5d1ff}.b661 section{background:#292940;border:1px solid #8880a6;border-radius:16px;margin:1rem 0;padding:1.1rem 1.4rem}
+.b661 .links{display:flex;gap:1rem;flex-wrap:wrap}.b661 .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:1rem}
+.b661 input{box-sizing:border-box;width:100%;max-width:390px;padding:.7rem;background:#101323;color:white;border:1px solid #afa6d7;border-radius:8px}
+.b661 label{display:block;font-weight:600;margin:.5rem 0}.b661 button{border:1px solid #e9c1fc;border-radius:8px;background:#7648a1;color:white;cursor:pointer;padding:.75rem 1rem;margin:.3rem .5rem .3rem 0}
+.b661 button:disabled{opacity:.5}.b661 .hold{color:#ffe2a4}.b661 li{margin:.5rem 0;overflow-wrap:anywhere}
+.b661 :is(a,button,input):focus-visible{outline:3px solid #ffdf97;outline-offset:3px}
+.b661 table{border-collapse:collapse;width:100%}.b661 th,.b661 td{border-bottom:1px solid #706989;text-align:left;padding:.65rem .5rem;vertical-align:top}
+.b661 .scroll{overflow-x:auto}.b661 .empty{color:#d8cadf}.b661 code{overflow-wrap:anywhere}
+</style></head><body data-admin-module="financials" data-admin-page="commission-finance-661">
+<main class="b661"><nav class="links" aria-label="Admin navigation"><a href="/admin/">Admin</a><a href="/admin/finance/">Finance</a><a href="/admin/commission-workbench/">Commission Workbench</a><a href="/admin/customer-documents/">Customer Documents</a><a href="/admin/module-acceptance/">Owner Signoff</a></nav>
+<h1>Customer Commissions, Invoicing, Job Costs &amp; Profitability</h1>
+<p>Build 661 · Original-source financial acceptance for one customer commission. Source quotes, deposits, invoices, shop orders, workshop costs, Finance and owner evidence remain under their original owners. This screen never issues an invoice, accepts a payment or posts an expense.</p>
+<section><h2>1. Find the original commission</h2><p>Enter a real Custom Request ID or load the latest 50 source IDs. No customer contact information is returned.</p>
+<label for="b661Id">Original Custom Request ID</label><input id="b661Id" type="number" min="1" step="1" placeholder="e.g. 42">
+<p><button id="b661Inspect" type="button">Inspect original commission</button><button id="b661Recent" type="button">List recent request IDs</button></p>
+<p id="b661Status" role="status" aria-live="polite">Nothing loaded. Select a genuine source request.</p><div id="b661RecentList" class="scroll"></div></section>
+<section><h2>2. Source-linked commission-to-cash review</h2><div id="b661Overview" class="grid"><p class="empty">Inspect one request to see quote, payment request, linked orders and issued invoice evidence.</p></div>
+<div id="b661Orders" class="scroll"></div></section>
+<section><h2>3. Workshop costs and profit evidence</h2><div id="b661Costs"><p class="empty">Original job and cost evidence will appear here only after a source request is selected.</p></div>
+<p>Cost estimates, booked accounting costs, proposed prices, invoices, and provider settlements are different records. This desk never adds overlapping material/time views together or calls an estimated margin a realized profit.</p></section>
+<section><h2>4. Owner review, gaps and next actions</h2><div id="b661Owner" class="scroll"></div><h3>Outstanding source evidence</h3><div id="b661Holds"><p class="hold">Source acceptance remains HOLD until reviewed.</p></div>
+<div class="links"><a href="/admin/custom-request/">Original Customer Requests &amp; Quote Editor</a><a href="/admin/commission-workbench/">Commission Lifecycle</a><a href="/admin/customer-documents/">Issue/View Original Invoices</a><a href="/admin/project-costs/">Project Cost Reviews</a><a href="/admin/cross-project-accounting/">Finance Reconciliation</a><a href="/admin/module-acceptance/">Record Owner Evidence</a></div></section>
+<section><h2>Safety and acceptance boundary</h2><p class="hold">A draft quote is not revenue. A deposit request is not payment. An issued invoice is not cash. A reviewed cost is an estimate until source expense/ledger evidence exists. Actual provider settlement, accountant signoff and Master Shell percentage are <strong>not independently verified</strong>.</p>
+<p>All reads require the original Financials Admin authority, are explicit and private, and exclude names, emails, addresses, tokens, private media and provider reference IDs. No invoice, customer message, tax filing, payroll, ledger, stock, payment or refund write is performed.</p></section>
+</main><script defer src="/public/js/auth.js?v=467"></script><script defer src="/public/js/admin-commission-finance-661.js?v=661"></script>
+<script type="module" src="/public/js/admin-shell-467.js?v=467b467"></script></body></html>
