@@ -1,7 +1,7 @@
 # Devil n Dove Build 664 — Security, Privacy, Tenant Isolation, Backup & Recovery Verification
 
-**Source:** `RosevearCreations/devilndove-site`, owned-business shell `devilndove`.  
-**Owner route:** `/admin/operations/` → Security Overview, using existing authenticated `/api/admin/security-summary` GET.  
+**Source:** `RosevearCreations/devilndove-site`, owned-business shell `devilndove`.
+**Owner route:** `/admin/operations/` → Security Overview, using existing authenticated `/api/admin/security-summary` GET.
 **Purpose:** preserve the original account, session, customer, workshop and media authorities while adding repeatable source-negative tests and honest recovery readiness. A source-code PASS or **Production GREEN** does not independently attest that backups exist, were restored, that real worker/customer devices passed, or that the Master Shell is CONNECTED.
 
 ## What Build 664 verifies in software
