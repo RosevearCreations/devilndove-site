@@ -1,0 +1,45 @@
+{
+  "schema": "release467-build665-channel-readiness-v1",
+  "source_id": "devilndove",
+  "repository": "RosevearCreations/devilndove-site",
+  "source_role": "owned_business_shell",
+  "assessment": "LOCAL_SOURCE_AUDIT_ONLY",
+  "provider_connection": "HOLD",
+  "master_shell_connection": "DISCONNECTED_HOLD",
+  "external_provider_receipt": null,
+  "verified_provider_revision": null,
+  "owner_approval_receipt": null,
+  "evidence_paths": [
+    "admin/social-publishing/index.html",
+    "functions/api/admin/social-oauth-acceptance.js",
+    "functions/api/admin/etsy-oauth-acceptance.js",
+    "functions/api/admin/product-meta-readiness-560.js",
+    "functions/api/admin/social-post-queue.js",
+    "functions/api/admin/social-media-privacy-guard.js",
+    "functions/api/_lib/socialPublishContracts.js"
+  ],
+  "channels": [
+    { "id": "etsy", "state": "PAUSED_BY_OWNER", "publication_authorized": false, "external_identity_verified": false, "original_owner_consent_verified": false, "original_provider_receipt": null },
+    { "id": "facebook_page", "state": "HOLD", "publication_authorized": false, "external_identity_verified": false, "original_owner_consent_verified": false, "original_provider_receipt": null },
+    { "id": "instagram_business", "state": "HOLD", "publication_authorized": false, "external_identity_verified": false, "original_owner_consent_verified": false, "original_provider_receipt": null },
+    { "id": "pinterest", "state": "HOLD", "publication_authorized": false, "external_identity_verified": false, "original_owner_consent_verified": false, "original_provider_receipt": null },
+    { "id": "x", "state": "HOLD", "publication_authorized": false, "external_identity_verified": false, "original_owner_consent_verified": false, "original_provider_receipt": null },
+    { "id": "tiktok", "state": "HOLD", "publication_authorized": false, "external_identity_verified": false, "original_owner_consent_verified": false, "original_provider_receipt": null },
+    { "id": "youtube", "state": "HOLD", "publication_authorized": false, "external_identity_verified": false, "original_owner_consent_verified": false, "original_provider_receipt": null }
+  ],
+  "advertising": {
+    "state": "NOT_IMPLEMENTED_HOLD",
+    "ad_account_verified": false,
+    "budget_approved": false,
+    "campaign_execution_authorized": false,
+    "spend_enabled": false,
+    "original_provider_receipt": null
+  },
+  "privacy": {
+    "customer_media_publication_allowed_by_this_record": false,
+    "tracking_consent_proves_publication_authority": false,
+    "original_media_rights_and_subject_consent_verified": false
+  },
+  "source_code_green_implies_provider_connected": false,
+  "requires_independent_owner_and_provider_acceptance": true
+}

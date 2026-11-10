@@ -1,4 +1,12 @@
-# Release 467 Build 664 — Security, Privacy, Tenant Isolation, Backup & Recovery Verification (Production candidate)
+# Release 467 Build 665 — Etsy, Meta, Social Publishing & Advertising Readiness (Production candidate)
+
+Devil n Dove's original [Social Publishing screen](/admin/social-publishing/), Etsy/Meta OAuth acceptance, original social draft queue, and media privacy guard are reconciled with a [machine-checkable seven-channel readiness record](docs/operations/RELEASE_467_BUILD_665_CHANNEL_READINESS.json) and eight local source-truth tests. **Etsy remains PAUSED BY OWNER; Meta/Facebook/Instagram and other channels remain HOLD; advertising is NOT IMPLEMENTED/HOLD with no spend enabled.** CI validates original source boundaries without contacting platforms, leaking tokens, running advertisements, publishing posts or restarting paused Etsy listing drafts. Connection evidence, original owner consent, independent provider receipts, media/customer rights and Master Shell signer/audience remain outside local proof. See the [Build 665 owner guide](docs/operations/RELEASE_467_BUILD_665_ETSY_META_SOCIAL_ADVERTISING_READINESS.md).
+
+**Next proposed Build 666 — AI Data Platform V1 Source Reporting, Evidence Freshness & Integration Receipts** (owner-gated original contract, signer, audience, retention, version and replay verification).
+
+---
+
+## Prior Build 664 — Security, Privacy, Tenant Isolation, Backup & Recovery Verification
 
 The existing authenticated [Security Overview](/admin/operations/) now offers an explicit privacy/tenant/backup/restore readiness panel. Its Admin-only counts use both supported D1 bindings, return private/no-store headers, and fail closed without SQL diagnostic disclosure. Build 664 adds automated anonymous/worker/inactive/expired denials, shell-child impersonation and unsigned TEST HOLD assertions, and rejects recovery probe URLs containing embedded credentials, queries, fragments or alternate ports. An R2 object `HEAD`, software PASS or Production GREEN is **not** a D1/R2 backup restore: original owner/witness, isolated restore, privacy, tenant/device acceptance and Master Shell connection remain **UNKNOWN/HOLD**. See the [Build 664 owner guide](docs/operations/RELEASE_467_BUILD_664_SECURITY_PRIVACY_RECOVERY_OWNER_GUIDE.md).
 
