@@ -1,0 +1,87 @@
+{
+  "schema": "devilndove.master-shell.owner-acceptance-casebook.v1",
+  "build": 669,
+  "source_id": "devilndove",
+  "source_role": "owned_business_shell",
+  "repository": "RosevearCreations/devilndove-site",
+  "mode": "SOURCE_LOCAL_EVIDENCE_TRIAGE_ONLY",
+  "source_of_truth": [
+    "docs/operations/RELEASE_467_BUILD_655_SOURCE_READINESS_REGISTER.json",
+    "docs/operations/RELEASE_467_BUILD_666_AI_DATA_SOURCE_REPORT_CONTRACT.json",
+    "docs/operations/RELEASE_467_BUILD_667_COMMS_HANDOFF_PREVIEW_CONTRACT.json",
+    "docs/operations/RELEASE_467_BUILD_668_MASTER_SHELL_PILOT_CONTRACT.json"
+  ],
+  "master_planes": ["ai-data-platform", "rosevear-comms-hub"],
+  "allow_external_peer_probes": false,
+  "allow_provider_or_master_publication": false,
+  "allow_signer_or_receiver_enrollment": false,
+  "allow_signed_receipt_fabrication": false,
+  "allow_customer_or_tenant_records": false,
+  "allow_restore_or_rollback": false,
+  "allow_mutation_of_original_source": false,
+  "cases": [
+    {
+      "id": "DN669-01",
+      "title": "Original source revision and manifest continuity",
+      "owner_role": "devilndove_source_owner",
+      "priority": "P0",
+      "depends_on": [],
+      "evidence_needed": ["protected_main_commit", "deployed_origin_and_manifest_digest", "original_handler_digest"],
+      "next_owner_step": "Locate existing production release and manifest provenance; reconcile the deployed revision and exact handler without rerunning earlier scripts."
+    },
+    {
+      "id": "DN669-02",
+      "title": "Original owner issuer and independent witness",
+      "owner_role": "independent_evidence_reviewer",
+      "priority": "P0",
+      "depends_on": [],
+      "evidence_needed": ["existing_source_owner_issuer_receipt", "independent_witness_receipt", "original_public_key_fingerprints"],
+      "next_owner_step": "Review prior original-host public fingerprints and signed owner and witness records; never copy private keys, passwords or bearer tokens."
+    },
+    {
+      "id": "DN669-06",
+      "title": "Independent D1 and R2 recovery evidence",
+      "owner_role": "independent_recovery_reviewer",
+      "priority": "P0",
+      "depends_on": [],
+      "evidence_needed": ["original_d1_backup_receipt", "original_r2_backup_receipt", "witnessed_isolated_restore_record", "owner_approved_rollback_plan"],
+      "next_owner_step": "Review original backup inventories, retention, isolated restore and rollback receipts; do not restore production or treat a HEAD probe as recovery."
+    },
+    {
+      "id": "DN669-03",
+      "title": "One-source signed QL365D TEST and durable replay boundary",
+      "owner_role": "source_and_master_owner",
+      "priority": "P1",
+      "depends_on": ["DN669-01", "DN669-02"],
+      "evidence_needed": ["original_one_source_signed_test_receipt", "approved_exact_source_audience", "durable_one_use_nonce_result"],
+      "next_owner_step": "Reconcile previously approved one-source TEST receipt against the original source and receiver; seek supervised authorization only for evidence that is genuinely missing."
+    },
+    {
+      "id": "DN669-04",
+      "title": "AI Data Platform redacted monitoring audience",
+      "owner_role": "source_and_ai_data_owner",
+      "priority": "P1",
+      "depends_on": ["DN669-03"],
+      "evidence_needed": ["independently_approved_ai_data_audience", "redacted_source_health_contract", "owner_review_of_data_scope"],
+      "next_owner_step": "Review existing AI Data audience and source-health scope; do not infer permission to access orders, staff, payroll, customers or device actions."
+    },
+    {
+      "id": "DN669-05",
+      "title": "Comms consent, notifications and incident audience",
+      "owner_role": "source_and_comms_owner",
+      "priority": "P1",
+      "depends_on": ["DN669-03"],
+      "evidence_needed": ["independently_approved_comms_audience", "source_consent_for_event_family", "reviewed_incident_route_receipt"],
+      "next_owner_step": "Review the original Comms consent and incident route separately from AI Data monitoring; do not send or enable notifications."
+    },
+    {
+      "id": "DN669-07",
+      "title": "Independent single-source Master Shell acceptance",
+      "owner_role": "independent_evidence_reviewer",
+      "priority": "P2",
+      "depends_on": ["DN669-03", "DN669-04", "DN669-05", "DN669-06"],
+      "evidence_needed": ["signed_source_and_master_acceptance", "real_tenant_and_device_negative_results", "fresh_original_recovery_evidence"],
+      "next_owner_step": "Review a single actual Devil n Dove acceptance decision against all original receipts; leave other five applications to their own source owners."
+    }
+  ]
+}
