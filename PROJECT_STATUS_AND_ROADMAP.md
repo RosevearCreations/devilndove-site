@@ -1,8 +1,16 @@
-# Release 467 Build 662 — Worker Roles, Task Handoffs, Time Tracking & Mobile/Tablet Usability (Production candidate)
+# Release 467 Build 663 — Accounting, Canadian Sales Tax & Payroll Readiness (Production candidate)
+
+The existing [Accounting source workspace](/admin/accounting/) now includes a read-only Canadian accounting and GST/HST/Payroll readiness card. A verified Admin can explicitly inspect genuine Accounting Order totals and a period-specific source sales-tax worksheet without exposing customer information or creating a second ledger. Missing original schema returns UNKNOWN/HOLD; CRA registration, tax filing, staff employment classification, payroll program account, deductions and remittance remain outside approval. This release also documents Devil n Dove as an independently owned business-source shell reporting to the AI Data/Comms Master control planes, with the original manifest's unsigned DISCONNECTED / HOLD still explicit. See the [Build 663 owner and Master Shell guide](docs/operations/RELEASE_467_BUILD_663_ACCOUNTING_CRA_PAYROLL_MASTER_SHELL_GUIDE.md).
+
+**Next proposed Build 664 — Security, Privacy, Tenant Isolation, Backup & Recovery Verification** (independent role/tenant denials and witnessed recovery evidence).
+
+---
+
+## Previous release — Build 662
 
 The protected [Work Order field desk](/admin/project-work-orders/) reuses original Creative Process tasks, dependencies, actual recorded minutes, milestone links and actor audit. Build 662 corrects the missing browser idempotency write receipt, retains the exact key/body on uncertain saves, and adds touch-friendly phone/tablet task cards, state filters, and documented pause/resume handoff guidance. The existing page and API now route explicitly through the Creators module and verified active Admin authority. Worker/customer writes, actual distinct staffing, work assignment, payroll, material movement and independent phone/tablet worker acceptance remain **HOLD**. See [Build 662 owner guide](docs/operations/RELEASE_467_BUILD_662_WORKER_HANDOFF_TIME_MOBILE_OWNER_GUIDE.md).
 
-**Next proposed Build 663 — Accounting, Canadian Sales Tax & Payroll Readiness** (real accountant/regulator and actual staffing prerequisites; no invented filing or live payroll).
+**Build 663 follows** with source-backed accounting and GST/HST review and explicit real-employee/payroll HOLD.
 
 ---
 
