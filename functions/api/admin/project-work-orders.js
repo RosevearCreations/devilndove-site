@@ -1,13 +1,15 @@
 // Release 467 Build 379. All reads bounded; writes human initiated, append-only and audited.
-import {getAdminUserFromRequest,getDb,jsonResponse,auditAdminAction} from '../_lib/adminAudit.js';
+import {getDb,jsonResponse,auditAdminAction} from '../_lib/adminAudit.js';
+import {verifiedAdminFromModule} from '../_lib/verifiedAdmin398.mjs';
 import {NEXT,canTransition,positive,dateValid} from './_lib/workOrderRules.js';
 import {keyValid,payloadHash,readReceiptState,receiptInsert,atomicWriteReceipt} from './_lib/writeReceipts.js';
 const list=r=>Array.isArray(r?.results)?r.results:[];
 const out=(data,status=200)=>jsonResponse(data,status,{'Cache-Control':'no-store'});
 const clean=(x,max=900)=>String(x??'').trim().slice(0,max);
-const safety={automatic_completion:false,inventory_mutation:false,caip_media_mutation:false,finance_posting:false,provider_publication:false,request_time_schema_mutation:false};
+const safety={automatic_completion:false,inventory_mutation:false,caip_media_mutation:false,finance_posting:false,provider_publication:false,request_time_schema_mutation:false,worker_role_grant:false,payroll_posting:false,real_staff_assignment:false};
+const rolePolicy={source:'original_creative_work_order_events',admin_writes:true,worker_writes:false,customer_writes:false,assigned_worker_identity:'UNVERIFIED',distinct_worker_device_acceptance:'HOLD',handoff:'documented_pause_then_authorized_resume',master_completion_percent:null};
 async function access(ctx) {
- const admin=await getAdminUserFromRequest(ctx.request,ctx.env);
+ const admin=verifiedAdminFromModule(ctx);
  if(!admin)return {error:out({ok:false,error:'Admin access required',code:'AUTH_REQUIRED'},401)};
  const db=getDb(ctx.env);
  if(!db)return {error:out({ok:false,error:'Database unavailable',code:'DB_UNAVAILABLE'},503)};
@@ -29,8 +31,8 @@ async function snapshot(db,id){
  db.prepare(`SELECT d.creative_project_operation_id,d.predecessor_operation_id,d.dependency_type
  FROM creative_project_operation_dependencies d JOIN creative_project_operations o ON o.creative_project_operation_id=d.creative_project_operation_id
  WHERE o.creative_work_project_id=? ORDER BY d.creative_project_operation_id,d.predecessor_operation_id LIMIT 301`).bind(id).all(),
- db.prepare(`SELECT creative_work_order_event_id,creative_project_operation_id,event_kind,from_status,to_status,minutes_worked,work_date,event_title,notes,creative_work_event_id,actor_user_id,created_at
- FROM creative_work_order_events WHERE creative_work_project_id=? ORDER BY creative_work_order_event_id DESC LIMIT 101`).bind(id).all()
+ db.prepare(`SELECT e.creative_work_order_event_id,e.creative_project_operation_id,e.event_kind,e.from_status,e.to_status,e.minutes_worked,e.work_date,e.event_title,e.notes,e.creative_work_event_id,e.actor_user_id,e.created_at,LOWER(u.role) actor_role
+ FROM creative_work_order_events e LEFT JOIN users u ON u.user_id=e.actor_user_id WHERE e.creative_work_project_id=? ORDER BY e.creative_work_order_event_id DESC LIMIT 101`).bind(id).all()
  ]);
  if(list(ops).length>80||list(deps).length>300)return {error:'Project plan too large for bounded work-order view',code:'SCOPE_TOO_LARGE'};
  return {project:p,operations:list(ops),dependencies:list(deps),history:list(hist).slice(0,100),history_has_more:list(hist).length>100};
@@ -40,11 +42,11 @@ export async function onRequestGet(ctx) {
  const raw=new URL(ctx.request.url).searchParams.get('project_id');
  try{
   if(!raw){const p=list(await a.db.prepare("SELECT creative_work_project_id,project_key,project_title FROM creative_work_projects WHERE COALESCE(project_status,'active')<>'archived' ORDER BY creative_work_project_id LIMIT 101").all());
-   return out({ok:true,build:379,projects:p.slice(0,100),projects_truncated:p.length>100,safety});}
+   return out({ok:true,build:379,projects:p.slice(0,100),projects_truncated:p.length>100,safety,role_policy:rolePolicy});}
   if(!positive(raw)||String(positive(raw))!==raw)return out({ok:false,error:'Invalid project ID'},400);
   const d=await snapshot(a.db,positive(raw));
   if(!d)return out({ok:false,error:'Project not found'},404);
-  return out(d.error?{ok:false,...d}:{ok:true,build:379,...d,safety},d.error?409:200);
+  return out(d.error?{ok:false,...d}:{ok:true,build:662,...d,safety,role_policy:rolePolicy,authenticated_actor_user_id:a.admin.user_id},d.error?409:200);
  }catch(e){console.error('WORK_ORDER_READ',e?.name);return out({ok:false,error:'Work orders unavailable',code:'READ_FAILED'},503)}
 }
 export async function onRequestPost(ctx){
@@ -109,6 +111,6 @@ export async function onRequestPost(ctx){
   if(!receipt.replayed)await auditAdminAction(ctx.env,ctx.request,a.admin,{action_type:'creative_work_order_'+action,target_type:'creative_project_operation',target_id:id,
     target_key:String(p),details:{project_id:p,operation_id:id,actor_user_id:actor,automatic_completion:false,inventory_mutation:false}});
   return out({ok:true,build:386,...receipt,event_id:receipt.source_record_id,
-   message:receipt.replayed?'OK — original work action already committed.':'OK — work action saved with permanent receipt.',...(await snapshot(a.db,p)),safety});
+   message:receipt.replayed?'OK — original work action already committed.':'OK — work action saved with permanent receipt.',...(await snapshot(a.db,p)),safety,role_policy:rolePolicy,authenticated_actor_user_id:actor});
  }catch(e){console.error('WORK_ORDER_WRITE',e?.name);return out({ok:false,error:'Update could not be verified',code:'WRITE_FAILED'},503)}
 }

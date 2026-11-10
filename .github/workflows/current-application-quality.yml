@@ -115,6 +115,12 @@ jobs:
           node --check functions/api/admin/commission-finance-661.js
           node --check public/js/admin-commission-finance-661.js
           node --test scripts/release467_build661_commissions_invoicing_profitability.test.mjs
+      - name: Build 662 original Admin worker roles, handoff, time receipts and mobile/tablet acceptance HOLD
+        run: |
+          node --check functions/api/admin/project-work-orders.js
+          node --check public/js/admin-project-work-orders.js
+          node --test scripts/release467_build662_worker_handoff_mobile.test.mjs
+          python scripts/release467_build379_regression.py
       - name: Current help, search, H1, responsive, Packaging, Grey Hair CAIP, Content Studio review/execution boundary, authority restart integrity, I.T. truth and release provenance quality
         run: python scripts/current_application_quality_gate.py
       - name: Preserve password-hash compatibility and current-write security
