@@ -21,4 +21,13 @@ assert.match(api,/verify_product_cost_679/);
 assert.match(api,/owner_net_signoff_679/);
 assert.match(html,/dd679-net/);
 assert.match(browser,/dd679Signoff/);
-console.log('BUILD 679 independent cost, source net and Master HOLD contract: PASS');
+for(const marker of [/async function finance680/,/stale_or_future_dated_cost_evidence/,/AI_DATA_MASTER_ACK_PUBLIC_KEY/,
+  /crypto\.subtle\.verify/,/Master ACK nonce already admitted/,/profit_exception_open_680/,
+  /HOLD_INDEPENDENT_RUNTIME_TRANSPORT_AND_MASTER_ADMISSION/,/profitability_certified:false/])
+  assert.match(core,marker);
+assert.match(api,/financial680:await finance680/);
+assert.match(api,/master_ack_680/);
+assert.match(api,/owner_profit_exception_680/);
+assert.match(html,/dd680-ops/);
+assert.match(browser,/dd680Exception/);
+console.log('BUILD 679/680 source financial controls and Master HOLD: PASS');

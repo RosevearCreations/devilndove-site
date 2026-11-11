@@ -1,3 +1,42 @@
+// Build 680 — owner-supervised profitability exceptions and freshness review.
+(()=>{'use strict';const $=id=>document.getElementById(id);
+async function call(payload,id){
+ if(!window.DDAuth?.apiFetch)throw Error('Admin login required');
+ const url='/api/admin/social-post-queue'+(!payload&&id?'?campaign_queue_id='+encodeURIComponent(id):'');
+ const r=await window.DDAuth.apiFetch(url,payload?{method:'POST',body:JSON.stringify(payload)}:undefined);
+ const d=await r.json();if(!r.ok||!d.ok)throw Error(d.error||'Financial evidence unavailable');return d;
+}
+async function load(){
+ const id=Number($('dd680Campaign').value);
+ if(!id){$('dd680Status').textContent='HOLD · Choose a campaign.';return;}
+ try{const f=(await call(null,id)).financial680||{};
+ $('dd680Status').textContent='Campaign: '+(f.campaign||'—')+' · Master ACK: '+(f.ack||'HOLD')+
+ ' · Connection: '+(f.connection||'HOLD')+' · Source records: '+(f.evidence_count||0)+
+ ' · Stale: '+(f.stale_count||0)+' · Open exceptions: '+(f.exceptions||[]).map(x=>x.reference).join(', ')+
+ ' · Blockers: '+(f.blockers||[]).join(', ')+' · Independent profit certification: HOLD';
+ }catch(e){$('dd680Status').textContent='HOLD · '+e.message;}
+}
+document.addEventListener('DOMContentLoaded',()=>{
+ if(!$('dd680-ops'))return;
+ (async()=>{try{const d=await call(),names=new Set();
+ for(const q of d.queue||[])if(q.utm_campaign&&!names.has(q.utm_campaign)){
+ names.add(q.utm_campaign);$('dd680Campaign').add(new Option(q.utm_campaign+' · #'+q.social_post_queue_id,q.social_post_queue_id));
+ }}catch(e){$('dd680Status').textContent='HOLD · '+e.message;}})();
+ $('dd680Campaign').addEventListener('change',()=>void load());
+ $('dd680Refresh').addEventListener('click',()=>void load());
+ $('dd680Exception').addEventListener('submit',async e=>{
+ e.preventDefault();$('dd680Result').textContent='Recording owner decision…';
+ try{const d=await call({action:'owner_profit_exception_680',social_post_queue_id:Number($('dd680Campaign').value),
+ exception_reference:$('dd680Ref').value.trim(),kind:$('dd680Kind').value,
+ reason:$('dd680Kind').value==='open'?$('dd680Reason').value.trim():'',
+ resolution:$('dd680Kind').value==='resolve'?$('dd680Reason').value.trim():'',
+ owner_reviewed:$('dd680Owner').checked});
+ $('dd680Result').textContent=(d.result?.status||'Saved')+' · Independent certification still HOLD.';
+ $('dd680Owner').checked=false;await load();
+ }catch(e){$('dd680Result').textContent='HOLD · '+e.message;}
+ });
+});})();
+
 // Build 679 — independently signed order costs and source-level net contribution.
 (() => {
   'use strict';

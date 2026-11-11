@@ -61,6 +61,20 @@
       <div id="dd676Status" aria-live="polite">Certification: HOLD</div>
       <div class="table-scroll" tabindex="0"><table><thead><tr><th>Campaign</th><th>Evidence</th><th>Source reference</th><th>CAD</th><th>Recorded</th><th>Certification</th></tr></thead><tbody id="dd676Rows"></tbody></table></div>
     </section>
+    <section class="card" id="dd680-ops"><p class="eyebrow">Build 680 · Owner financial exception control</p>
+      <h2>Evidence freshness &amp; Master ACK review</h2>
+      <p>Read-only finance status must stay HOLD for stale evidence, open exceptions or an unmatched signed Master ACK. A signed ACK alone never proves live integration.</p>
+      <label>Campaign<select id="dd680Campaign" class="input"><option value="">Choose campaign</option></select></label>
+      <button id="dd680Refresh" class="btn" type="button">Refresh source and ACK status</button>
+      <p id="dd680Status" role="status" aria-live="polite">Select a campaign to review.</p>
+      <form id="dd680Exception"><label>Exception reference<input class="input" id="dd680Ref" required pattern="[A-Za-z0-9_-]{6,80}"></label>
+        <label>Action<select id="dd680Kind"><option value="open">Open issue</option><option value="resolve">Resolve existing issue</option></select></label>
+        <label>Reason / resolution<textarea class="input" id="dd680Reason" rows="2" required></textarea></label>
+        <label><input type="checkbox" id="dd680Owner" required> Owner reviewed the financial exception.</label>
+        <button class="btn primary" type="submit">Save supervised decision</button></form>
+      <p id="dd680Result" role="status" aria-live="polite">No owner exception saved.</p>
+      <p class="small">Independent Master ACK admission requires an approved signed verifier integration; the public form does not accept or generate Master signatures.</p>
+    </section>
     <section class="card" id="dd679-net" aria-labelledby="dd679-title">
       <p class="eyebrow">Build 679 · Source-verified financial evidence</p>
       <h2 id="dd679-title">Product costs &amp; campaign net-contribution review</h2>
