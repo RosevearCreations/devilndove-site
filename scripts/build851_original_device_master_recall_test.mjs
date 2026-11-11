@@ -32,4 +32,5 @@ const currentAck={kind:'receiver_ack',device_nonce:record.nonce,revision:sha,obs
 assert.equal(scopedClosure851({consent,platforms:['facebook'],deviceReceipts:currentReceipts,ackReceipt:currentAck,expectedRevision:sha,now}).decision,'SCOPED_LOCAL_CLOSURE_ALLOWED');
 assert.equal(scopedClosure851({consent,platforms:['facebook'],deviceReceipts:currentReceipts,ackReceipt:currentAck,expectedRevision:'b'.repeat(40),now}).decision,'HOLD');
 assert.equal(scopedClosure851({consent,platforms:['facebook'],deviceReceipts:currentReceipts,ackReceipt:currentAck,expectedRevision:sha,windowComplete:false,now}).decision,'HOLD');
+assert.equal(scopedClosure851({consent,platforms:['facebook'],deviceReceipts:currentReceipts,ackReceipt:currentAck,expectedRevision:sha,laterLiveReceipts:[{platform_key:'facebook',attempted_at:new Date(now+1000).toISOString()}],now}).decision,'HOLD');
 console.log('Devil n Dove 851 signed witness, independent Master ACK, revoked consent and scoped review tests passed.');
