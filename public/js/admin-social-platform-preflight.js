@@ -1,3 +1,26 @@
+// Build 674 — owner campaign calendar and source-grounded cross-channel command centre.
+(() => {
+  'use strict';
+  const $=id=>document.getElementById(id),add=(row,values)=>{for(const v of values){const c=document.createElement('td');c.textContent=String(v??'—');row.append(c);}};
+  let queue=[],receipts=[];
+  const request=async body=>{const res=await window.DDAuth.apiFetch('/api/admin/social-post-queue',body?{method:'POST',body:JSON.stringify(body)}:undefined);const json=await res.json();if(!res.ok||!json.ok)throw Error(json.error||'Campaign data unavailable');return json;};
+  function render(){
+    const month=$('dd674Month').value,campaign=$('dd674Campaign').value,body=$('dd674Calendar');body.replaceChildren();
+    const selected=queue.filter(q=>(!campaign||(q.utm_campaign||'')===campaign)&&String(q.scheduled_at||q.created_at||'').slice(0,7)===month);
+    for(const q of selected){const row=document.createElement('tr');add(row,[String(q.scheduled_at||q.created_at||'').slice(0,16),q.utm_campaign||'Unattributed', (q.target_platforms||[]).join(', '),q.approval_status+' / '+q.post_status]);row.children[1].append(document.createTextNode(' · '+(q.title||'')));body.append(row);}
+    if(!selected.length){const r=document.createElement('tr');add(r,['No matching scheduled or created drafts.','','','']);body.append(r);}
+    const byChannel=new Map();
+    for(const r of receipts){const name=r.platform_key||'unknown',s=byChannel.get(name)||{ack:0,verified:0,failed:0,hold:0};if(r.attempt_status==='api_posted')s.ack++;if(r.attempt_status==='receipt_verified')s.verified++;if(r.attempt_status==='api_failed')s.failed++;if(['blocked_account_unverified','recovery_requested'].includes(r.attempt_status))s.hold++;byChannel.set(name,s);}
+    const channelBody=$('dd674Channels');channelBody.replaceChildren();for(const [name,s] of byChannel){const row=document.createElement('tr');add(row,[name,s.ack,s.verified,s.failed,s.hold]);channelBody.append(row);}
+    $('dd674Summary').textContent=`${selected.length} visible posts · ${new Set(selected.map(q=>q.utm_campaign).filter(Boolean)).size} named campaigns · ${receipts.length} recent channel outcomes. Results are recorded evidence only; no inferred reach.`;
+  }
+  async function load(){try{const data=await request();queue=data.queue||[];receipts=data.receipts673?.channels||[];const campaigns=[...new Set(queue.map(q=>q.utm_campaign).filter(Boolean))].sort();const selector=$('dd674Campaign'),prior=selector.value;selector.replaceChildren(new Option('All campaigns',''));for(const c of campaigns)selector.add(new Option(c,c));selector.value=campaigns.includes(prior)?prior:'';const draft=$('dd674Queue');draft.replaceChildren(new Option('Choose a draft',''));for(const q of queue.filter(q=>q.post_status!=='posted'&&q.post_status!=='archived'))draft.add(new Option('#'+q.social_post_queue_id+' · '+(q.title||'Draft').slice(0,60),q.social_post_queue_id));render();}catch(e){$('dd674Message').textContent='HOLD · '+e.message;}}
+  document.addEventListener('DOMContentLoaded',()=>{if(!$('dd674-marketing'))return;$('dd674Month').value=new Date().toISOString().slice(0,7);$('dd674Month').addEventListener('change',render);$('dd674Campaign').addEventListener('change',render);
+    $('dd674Schedule').addEventListener('submit',async event=>{event.preventDefault();const id=Number($('dd674Queue').value),date=new Date($('dd674Date').value);if(!id||!Number.isFinite(date.getTime()))return;$('dd674Message').textContent='Saving owner-review schedule…';
+      try{await request({action:'campaign_schedule_674',social_post_queue_id:id,campaign_name:$('dd674Name').value.trim(),scheduled_at:date.toISOString(),schedule_timezone:Intl.DateTimeFormat().resolvedOptions().timeZone});$('dd674Message').textContent='Campaign schedule saved as draft; approval reset to needs review. No post published.';await load();}catch(e){$('dd674Message').textContent='HOLD · '+e.message;}});
+    void load();
+  });
+})();
 // Build 673 — per-channel receipt status, independently checked evidence and one-channel recovery.
 (() => {
   'use strict';
