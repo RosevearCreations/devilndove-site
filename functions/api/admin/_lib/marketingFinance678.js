@@ -52,13 +52,17 @@ export async function expenseAttestation678(db,env,admin,payload,record) {
     external_post_id:ref,response:{...claim,provenance:'external_ed25519_expense_verifier',
       source_cost_attempt_id:cost.social_post_attempt_id,verifier_signature:sig,roi_certified:false},
     notes:'Signature checked against separately configured independent verifier public key; no owner-only certification.'});
+  const saved=await db.prepare(`SELECT social_post_attempt_id FROM social_post_attempts WHERE
+    platform_key='campaign_cost_verifier' AND attempt_status='independent_expense_verified'
+    AND external_post_id=? AND social_post_queue_id=? LIMIT 1`).bind(ref,id).first();
+  if(!saved)throw Error('Independent verification could not be durably recorded. HOLD.');
   return {status:'independent_expense_verified',receipt_reference:ref,roi_certified:false,publication_performed:false};
 }
 async function reconciledCampaign(db,id){
   const post=await db.prepare('SELECT utm_campaign FROM social_post_queue WHERE social_post_queue_id=?').bind(id).first();
   if(!post?.utm_campaign)throw Error('Named campaign not found.');
   // Include every same-named queue item, not just the selected post; do not truncate expense scan.
-  const attempts=rows(await db.prepare(`SELECT a.social_post_queue_id,a.platform_key,a.attempt_status,a.external_post_id,a.response_json
+  const attempts=rows(await db.prepare(`SELECT a.social_post_attempt_id,a.social_post_queue_id,a.platform_key,a.attempt_status,a.external_post_id,a.response_json
     FROM social_post_attempts a JOIN social_post_queue q ON q.social_post_queue_id=a.social_post_queue_id
     WHERE q.utm_campaign=? AND a.attempt_status IN
     ('campaign_cost_recorded','independent_expense_verified','campaign_revenue_bound','campaign_roi_owner_accepted')`).bind(post.utm_campaign).all());
@@ -74,7 +78,7 @@ async function reconciledCampaign(db,id){
     seenCost.add(ref);
     const signed=signatures.find(a=>a.external_post_id===ref && a.social_post_queue_id===item.social_post_queue_id);
     const evidence=parse(signed?.response_json);
-    if(!signed||evidence.source_cost_attempt_id!==undefined && !positiveId(evidence.source_cost_attempt_id)){
+    if(!signed||Number(evidence.source_cost_attempt_id)!==Number(item.social_post_attempt_id)){
       blockers.push('unverified_expense');continue;
     }
     if(evidence.amount_cents!==d.cost_cents||evidence.campaign!==post.utm_campaign||!money(d.cost_cents)){
@@ -124,6 +128,10 @@ export async function ownerSignoff678(db,admin,payload,record){
     external_post_id:ref,response:{fingerprint,metrics:view.metrics,campaign:view.campaign,
       owner_user_id:admin.user_id,profitability_certified:false},
     notes:'Owner accepts verified ad-spend/gross-order marketing return only. Net profit and independently certified ROI remain HOLD.'});
+  const saved=await db.prepare(`SELECT social_post_attempt_id FROM social_post_attempts WHERE
+    platform_key='campaign_roi' AND attempt_status='campaign_roi_owner_accepted'
+    AND external_post_id=? LIMIT 1`).bind(ref).first();
+  if(!saved)throw Error('Owner signoff could not be durably recorded. HOLD.');
   return {status:'owner_accepted_marketing_return',...view,publication_performed:false};
 }
 export async function financialSummary678(db,id){
