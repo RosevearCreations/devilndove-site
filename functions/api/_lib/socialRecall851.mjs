@@ -38,6 +38,7 @@ export function scopedClosure851({consent,platforms=[],deviceReceipts=[],ackRece
  if(!windowComplete)blockers.push('SOURCE_EVIDENCE_WINDOW_INCOMPLETE');
  if(!/^[a-f0-9]{40}$/.test(expectedRevision||'')||deviceReceipts.some(r=>r.revision!==expectedRevision)||ackReceipt?.revision!==expectedRevision)blockers.push('EXACT_CURRENT_SOURCE_REVISION_MISMATCH');
  if(!consent?.ok)blockers.push('CONSENT_GATE_HOLD');
+ if(deviceReceipts.some(r=>!freshness(r.observed_at,now)))blockers.push('DEVICE_WITNESS_OBSERVATION_STALE_OR_MISSING');
  if(!Array.isArray(laterLiveReceipts)||laterLiveReceipts.some(l=>deviceReceipts.some(d=>d.platform===l.platform_key&&Number.isFinite(date(l.attempted_at))&&date(l.attempted_at)>date(d.observed_at))))blockers.push('LATER_PROVIDER_LIVE_AFTER_REMOVAL_REOPEN_HOLD');
  if(deviceReceipts.length<platforms.length||platforms.some(p=>!deviceReceipts.some(r=>r.platform===p&&r.kind==='device_witness'&&r.signed_verified===1)))blockers.push('INDEPENDENT_REMOVAL_WITNESS_MISSING');
  if(!ackReceipt||ackReceipt.kind!=='receiver_ack'||ackReceipt.signed_verified!==1)blockers.push('DURABLE_INDEPENDENT_MASTER_ACK_MISSING');
