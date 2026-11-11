@@ -1047,6 +1047,8 @@ jobs:
           if-no-files-found: warn
           retention-days: 30
 
+      - name: Build 678 signed marketing expense and ROI HOLD regression
+        run: node scripts/build678_independent_marketing_roi_contract.mjs
       - name: JavaScript syntax
         run: |
           node --check functions/_middleware.js

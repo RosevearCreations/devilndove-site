@@ -18,3 +18,5 @@ assert.match(admin, /Number\(payment\.settled_cents\)<Number\(order\.total_cents
 assert.match(admin, /HOLD_VENDOR_COST_VERIFICATION/);
 assert.match(finance, /item\.attribution_verified\?'Order\/session matched/);
 console.log('BUILD 677 checkout campaign binding and ROI HOLD contract: PASS');
+
+await import('./build678_independent_marketing_roi_contract.mjs');
