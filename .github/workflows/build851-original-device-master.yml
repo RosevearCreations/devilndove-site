@@ -1,0 +1,29 @@
+name: Build 851 Original Device and Master Recall
+on:
+  pull_request:
+    paths:
+      - 'functions/api/_lib/socialRecall851.mjs'
+      - 'functions/api/admin/social-recall-witness-851.js'
+      - 'scripts/build851_original_device_master_recall_test.mjs'
+      - '.github/workflows/build851-original-device-master.yml'
+  push:
+    branches: [dev, main]
+    paths:
+      - 'functions/api/_lib/socialRecall851.mjs'
+      - 'functions/api/admin/social-recall-witness-851.js'
+      - 'scripts/build851_original_device_master_recall_test.mjs'
+      - '.github/workflows/build851-original-device-master.yml'
+permissions:
+  contents: read
+jobs:
+  signed-recall-regression:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: node --check functions/api/_lib/socialRecall851.mjs
+      - run: node --check functions/api/admin/social-recall-witness-851.js
+      - run: node scripts/build851_original_device_master_recall_test.mjs
