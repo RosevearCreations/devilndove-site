@@ -27,7 +27,7 @@ assert.equal(consentGate851([{consent_status:'granted',public_use_allowed:1,soci
 assert.equal(scopedClosure851({consent,platforms:['facebook']}).decision,'HOLD');
 assert.equal(scopedClosure851({consent,platforms:['facebook'],deviceReceipts:[{kind:'device_witness',platform:'facebook',nonce:record.nonce,signed_verified:1}],ackReceipt:{kind:'receiver_ack',device_nonce:record.nonce,observed_at,signed_verified:1},now}).decision,'HOLD');
 assert.equal(scopedClosure851({consent,platforms:['facebook','instagram'],deviceReceipts:[{kind:'device_witness',platform:'facebook',nonce:record.nonce,signed_verified:1}],ackReceipt:{kind:'receiver_ack',device_nonce:record.nonce,observed_at,signed_verified:1},now}).decision,'HOLD');
-const currentReceipts=[{kind:'device_witness',platform:'facebook',nonce:record.nonce,revision:sha,signed_verified:1}];
+const currentReceipts=[{kind:'device_witness',platform:'facebook',nonce:record.nonce,revision:sha,observed_at,signed_verified:1}];
 const currentAck={kind:'receiver_ack',device_nonce:record.nonce,revision:sha,observed_at,signed_verified:1};
 assert.equal(scopedClosure851({consent,platforms:['facebook'],deviceReceipts:currentReceipts,ackReceipt:currentAck,expectedRevision:sha,now}).decision,'SCOPED_LOCAL_CLOSURE_ALLOWED');
 assert.equal(scopedClosure851({consent,platforms:['facebook'],deviceReceipts:currentReceipts,ackReceipt:currentAck,expectedRevision:'b'.repeat(40),now}).decision,'HOLD');
