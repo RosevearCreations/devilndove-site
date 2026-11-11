@@ -27,7 +27,7 @@ async function evidence(db,queueId){
  const truncated=receipts.length>=100;
  return {post,platforms,consent,receipts,truncated};
 }
-const safeResult=(o)=>({ok:true,build:851,queue_id:o.post.social_post_queue_id,consent_gate:o.consent,platform_count:o.platforms.length,receipt_count:o.receipts.length,ledger_truncated:o.truncated,closure:scopedClosure851({consent:o.consent,platforms:o.platforms,deviceReceipts:o.receipts.filter(r=>r.kind==='device_witness'),ackReceipt:o.receipts.find(r=>r.kind==='receiver_ack')}),master_connection:'HOLD',publication_performed:false,provider_mutation_performed:false,master_events_emitted:0});
+const safeResult=(o,expectedRevision)=>({ok:true,build:851,queue_id:o.post.social_post_queue_id,consent_gate:o.consent,platform_count:o.platforms.length,receipt_count:o.receipts.length,ledger_truncated:o.truncated,closure:scopedClosure851({consent:o.consent,platforms:o.platforms,deviceReceipts:o.receipts.filter(r=>r.kind==='device_witness'),ackReceipt:o.receipts.find(r=>r.kind==='receiver_ack'),expectedRevision,windowComplete:!o.truncated}),master_connection:'HOLD',publication_performed:false,provider_mutation_performed:false,master_events_emitted:0});
 export async function onRequest({request,env}){
  if(!['GET','POST'].includes(request.method))return reply(summary('Method not allowed.'),405);
  const admin=await getAdminUserFromRequest(request,env),db=getDb(env);
@@ -41,7 +41,7 @@ export async function onRequest({request,env}){
   await setup(db);
   const snapshot=await evidence(db,queueId);
   if(!snapshot)return reply(summary('Original source post not found.'),404);
-  if(request.method==='GET')return reply(safeResult(snapshot));
+  if(request.method==='GET')return reply(safeResult(snapshot,env?.CF_PAGES_COMMIT_SHA));
   if(snapshot.truncated||!snapshot.consent.ok)return reply({...summary('Current source evidence is incomplete or revoked-consent gate failed.'),blockers:snapshot.consent.blockers},409);
   const action=body?.action,record=body?.receipt,signature=body?.signature;
   if(!record||typeof record!=='object'||typeof signature!=='string')return reply(summary('Exact signed receipt required.'),400);
@@ -65,6 +65,6 @@ export async function onRequest({request,env}){
    if(result?.meta?.changes!==1)return reply(summary('Duplicate receiver ACK nonce or uncertain durable insert.'),409);
   }else return reply(summary('Only independent device-witness and receiver-ACK admissions are supported.'),400);
   const after=await evidence(db,queueId);
-  return reply({...safeResult(after),receipt_recorded:true,contract:CONTRACT_851});
+  return reply({...safeResult(after,env?.CF_PAGES_COMMIT_SHA),receipt_recorded:true,contract:CONTRACT_851});
  }catch{return reply(summary('Private evidence verification failed; no acceptance can be inferred.'),503);}
 }
