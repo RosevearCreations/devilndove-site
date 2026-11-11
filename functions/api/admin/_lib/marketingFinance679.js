@@ -141,7 +141,9 @@ export async function ownerNetSignoff679(db,admin,payload,record){
   if(payload.owner_reviewed!==true||payload.confirm_scope!==true)throw Error('Explicit scoped owner approval required.');
   const v=await campaignNet679(db,payload.social_post_queue_id);
   if(v.blockers?.length||!v.financial)throw Error('Unverified source cost or paid order. Net signoff HOLD.');
-  const ref='net679:'+v.campaign+':'+v.fingerprint;
+  const sha=new Uint8Array(await crypto.subtle.digest('SHA-256',new TextEncoder().encode(v.fingerprint)));
+  const digest=Array.from(sha,b=>b.toString(16).padStart(2,'0')).join('');
+  const ref='net679:'+digest;
   const prior=await db.prepare(`SELECT social_post_attempt_id FROM social_post_attempts WHERE
     attempt_status='net_campaign_owner_accepted_679' AND external_post_id=? LIMIT 1`).bind(ref).first();
   if(prior)return {status:'already_owner_accepted',master_handoff:v.master_handoff,publication_performed:false};
