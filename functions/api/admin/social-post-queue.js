@@ -1703,8 +1703,9 @@ return {status,exception_reference:ref,profitability_certified:false,publication
 }
 
 
+const parseUtc681=x=>{const v=String(x??'');return Date.parse(/^\d{4}-\d\d-\d\d \d\d:\d\d:\d\d$/.test(v)?v.replace(' ','T')+'Z':v);};
 export function exceptionSla681(e,now=Date.now()){
- const opened=Date.parse(e.opened_at),ack=Date.parse(e.ack_at),closed=Date.parse(e.resolved_at);
+ const opened=parseUtc681(e.opened_at),ack=parseUtc681(e.ack_at),closed=parseUtc681(e.resolved_at);
  return {...e,age_hours:Number.isFinite(opened)?Math.max(0,Math.floor((now-opened)/3600000)):null,
   acknowledgement_due_at:Number.isFinite(opened)?new Date(opened+24*3600000).toISOString():null,
   resolution_due_at:Number.isFinite(opened)?new Date(opened+72*3600000).toISOString():null,
@@ -1729,15 +1730,15 @@ async function finance681(db,env,id){
   if(a.attempt_status==='profit_exception_open_680')issues.set(key,{reference:a.external_post_id,queue_id:a.social_post_queue_id,reason:d.reason||'',opened_at:a.attempted_at,ack_at:null,resolved_at:null});
   if(a.attempt_status==='owner_exception_acknowledged_681'){
    const e=issues.get(key);if(e&&!e.resolved_at)e.ack_at=a.attempted_at;
-   history.push({kind:'exception_acknowledgement',recorded_at:a.attempted_at});
+   history.push({receipt_id:Number(a.social_post_attempt_id),kind:'exception_acknowledgement',recorded_at:a.attempted_at});
   }
   if(a.attempt_status==='profit_exception_resolved_680'){const e=issues.get(key);if(e)e.resolved_at=a.attempted_at;}
   if(['campaign_roi_owner_accepted','net_campaign_owner_accepted_679'].includes(a.attempt_status))
-   history.push({kind:a.attempt_status,recorded_at:a.attempted_at});
+   history.push({receipt_id:Number(a.social_post_attempt_id),kind:a.attempt_status,recorded_at:a.attempted_at});
   if(a.attempt_status==='master_signed_ack_680'){
    const t=Date.parse(d.ack_at),same=d.fingerprint===source.fingerprint&&
     d.source_revision===normalizeText(env?.DEVILNDOVE_SOURCE_REVISION);
-   masters.push({recorded_at:a.attempted_at,master_revision:d.master_revision||null,
+   masters.push({receipt_id:Number(a.social_post_attempt_id),recorded_at:a.attempted_at,master_revision:d.master_revision||null,
     source_revision:d.source_revision||null,
     state:!same?'SUPERSEDED_OR_SOURCE_MISMATCH':!Number.isFinite(t)||now-t>86400000||t>now+300000?'EXPIRED_OR_INVALID_TIME':'SIGNED_AT_INTAKE_RECEIPT_ONLY'});
   }
@@ -1763,13 +1764,16 @@ async function ownerExceptionAck681(db,user,p){
  if(!earlier.scan_complete)throw Error('Audit window incomplete; owner review HOLD.');
  const match=earlier.exceptions?.find(e=>e.queue_id===id&&e.reference===ref&&!e.resolved_at);
  if(!match||match.ack_at)throw Error('Exception acknowledgement already recorded or no open episode.');
+ const prior=await db.prepare(`SELECT COALESCE(MAX(social_post_attempt_id),0) AS last_id
+ FROM social_post_attempts WHERE social_post_queue_id=? AND platform_key='profit_exception_review_681'
+ AND external_post_id=?`).bind(id,ref).first();
  await recordApiAttempt(db,user,id,'profit_exception_review_681','owner_exception_acknowledged_681',{
   external_post_id:ref,response:{campaign:source.campaign,owner_user_id:user.user_id,decision:'acknowledged_for_review',
   profitability_certified:false},notes:'Owner acknowledgement only, not resolution or Master acceptance.'});
  const saved=await db.prepare(`SELECT social_post_attempt_id FROM social_post_attempts
  WHERE social_post_queue_id=? AND platform_key='profit_exception_review_681'
  AND external_post_id=? AND attempt_status='owner_exception_acknowledged_681'
- ORDER BY social_post_attempt_id DESC LIMIT 1`).bind(id,ref).first();
+ AND social_post_attempt_id>? ORDER BY social_post_attempt_id DESC LIMIT 1`).bind(id,ref,Number(prior?.last_id||0)).first();
  if(!saved)throw Error('Owner acceptance history was not durably saved. HOLD.');
  return {status:'owner_exception_acknowledged_681',connection:'HOLD',publication_performed:false};
 }

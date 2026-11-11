@@ -49,4 +49,7 @@ assert.equal(exceptionSla681({...incident,ack_at:'2026-11-08T07:00:00.000Z'},clo
 assert.equal(exceptionSla681({...incident,resolved_at:'2026-11-08T08:00:00.000Z'},clock).sla,'RESOLVED');
 assert.equal(exceptionSla681({...incident,opened_at:'2026-11-11T10:00:00.000Z'},clock).sla,'AWAITING_ACK');
 assert.equal(exceptionSla681({...incident,opened_at:'not-a-date'},clock).sla,'HOLD_INVALID_CLOCK');
+assert.equal(exceptionSla681({...incident,opened_at:'2026-11-08 06:00:00'},clock).sla,'ACK_AND_RESOLUTION_OVERDUE');
+assert.match(core,/social_post_attempt_id>\?/);
+assert.match(core,/parseUtc681/);
 console.log('BUILD 679–681 source financial, SLA and Master HOLD: PASS');
