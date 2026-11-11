@@ -1,3 +1,61 @@
+// Build 673 — per-channel receipt status, independently checked evidence and one-channel recovery.
+(() => {
+  'use strict';
+  const el=id=>document.getElementById(id);
+  const call=async (action,values={})=>{
+    if(!window.DDAuth?.apiFetch)throw Error('Authenticated admin session required.');
+    const response=await window.DDAuth.apiFetch('/api/admin/social-post-queue',action
+      ?{method:'POST',body:JSON.stringify({action,...values})}:undefined);
+    const data=await response.json();
+    if(!response.ok||!data.ok)throw Error(data.error||'Social evidence unavailable.');
+    return data;
+  };
+  const cell=(row,value)=>{const td=document.createElement('td');td.textContent=String(value??'—');row.append(td);return td;};
+  const load=async()=>{
+    const area=el('dd673Rows');if(!area)return;
+    try{
+      const data=await call();const view=data.receipts673||{channels:[],totals:{}};
+      const counts=view.totals;
+      el('dd673Totals').textContent=`Provider acknowledged: ${counts.provider_acknowledged||0} · Independently verified: ${counts.independently_verified||0} · Failed: ${counts.failed||0} · HOLD: ${counts.on_hold||0} · Manual records: ${counts.manually_recorded||0}. Counts reflect the latest 150 recorded attempts, not audience reach.`;
+      area.replaceChildren();
+      for(const entry of view.channels){
+        const row=document.createElement('tr');
+        cell(row,`#${entry.social_post_queue_id} · ${entry.title||''}`);
+        cell(row,entry.platform_key);cell(row,entry.attempt_status);
+        const idCell=cell(row,entry.external_post_id||'Not recorded');
+        if(entry.external_post_url?.startsWith('https://')){
+          const link=document.createElement('a');link.href=entry.external_post_url;link.target='_blank';link.rel='noopener noreferrer';link.textContent=' · Open provider link';idCell.append(link);
+        }
+        cell(row,entry.attempted_at);const actions=cell(row,'');
+        if(['api_posted','receipt_verified'].includes(entry.attempt_status)){
+          const button=document.createElement('button');button.type='button';button.className='btn secondary';button.textContent='Verify provider receipt';
+          button.addEventListener('click',()=>run(button,'verify_publication_673',entry));actions.append(button);
+        }else if(entry.attempt_status==='api_failed'){
+          const label=document.createElement('label'),check=document.createElement('input');check.type='checkbox';
+          label.append(check,document.createTextNode(' Checked provider: no duplicate'));
+          const button=document.createElement('button');button.type='button';button.className='btn secondary';button.textContent='Retry failed channel';
+          button.addEventListener('click',()=>{if(!check.checked){el('dd673Result').textContent='HOLD · Confirm the destination was checked for an existing post.';return;}
+            run(button,'retry_failed_673',entry,{owner_checked_no_duplicate:true});});
+          actions.append(label,button);
+        }
+        area.append(row);
+      }
+      if(!view.channels.length)area.append(Object.assign(document.createElement('tr'),{textContent:'No recorded deliveries yet.'}));
+    }catch(error){el('dd673Totals').textContent='HOLD · '+error.message;}
+  };
+  async function run(button,action,entry,extra={}){
+    button.disabled=true;el('dd673Result').textContent='Checking the selected channel…';
+    try{const data=await call(action,{social_post_queue_id:entry.social_post_queue_id,platform_key:entry.platform_key,...extra});
+      const result=data.result||{};
+      el('dd673Result').textContent=result.verified?'VERIFIED · Provider confirms the same publication ID.':
+        result.status&&!result.verified?`HOLD · ${result.status}; no new post created.`:
+        'Recovery request completed. Inspect the latest channel status below; no other channels were retried.';
+      await load();
+    }catch(error){el('dd673Result').textContent='HOLD · '+error.message;}
+    finally{button.disabled=false;}
+  }
+  document.addEventListener('DOMContentLoaded',()=>{if(!el('dd673-receipts'))return;el('dd673Refresh')?.addEventListener('click',load);void load();});
+})();
 // Build 672 — read-only account identity and exact public derivative owner approval.
 (() => {
   'use strict';
