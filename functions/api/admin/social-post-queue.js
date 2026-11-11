@@ -958,6 +958,11 @@ async function publishQueuedPost(context, db, adminUser, payload = {}) {
   const images = safeJson(row.image_urls_json, []).map(safeUrl).filter(Boolean);
   const readiness = getPlatformReadiness(context.env);
   const results = [];
+  // Build 673: a successful provider acknowledgement belongs to its channel.
+  // Force and partial-channel retries cannot publish that channel a second time.
+  const priorSuccess = rows(await db.prepare(`SELECT DISTINCT platform_key FROM social_post_attempts
+    WHERE social_post_queue_id=? AND attempt_status IN ('api_posted','receipt_verified','posted_manual')`).bind(id).all().catch(()=>({results:[]})));
+  const alreadyPublished = new Set(priorSuccess.map(item=>item.platform_key));
 
   // Build 672: a tagged CAIP original is not a public derivative. Never let
   // force=true bypass the per-URL, per-project owner approval for this source.
@@ -1007,6 +1012,10 @@ async function publishQueuedPost(context, db, adminUser, payload = {}) {
 
   const verified672 = row.source_type === 'caip_project' ? await verifyAccounts672(context.env) : [];
   for (const platform of selected) {
+    if (alreadyPublished.has(platform)) {
+      results.push({platform,status:'already_published',notes:'An earlier provider receipt exists; duplicate publishing is blocked.'});
+      continue;
+    }
     if (row.approval_status !== 'approved' && (row.source_type === 'caip_project' || payload.force !== true)) {
       const blocked = { platform, status: 'blocked_needs_approval', notes: 'Approve/ready the queue item before API publishing.' };
       await recordApiAttempt(db, adminUser, id, platform, 'blocked_needs_approval', blocked);
@@ -1056,14 +1065,83 @@ async function publishQueuedPost(context, db, adminUser, payload = {}) {
       results.push(failure);
     }
   }
-  const postedCount = results.filter((row) => row.status === 'api_posted').length;
+  if(results.length && results.every(item=>item.status==='already_published')) {
+    return {social_post_queue_id:id,attempted_platforms:selected,results,publication_performed:false};
+  }
+  const postedCount = results.filter((row) => ['api_posted','already_published'].includes(row.status)).length;
   const failedCount = results.filter((row) => row.status === 'api_failed').length;
-  const terminal = postedCount && !failedCount && results.every((row) => ['api_posted', 'manual_pending'].includes(row.status)) ? 'posted' : postedCount ? 'ready' : failedCount ? 'failed' : 'ready';
+  const terminal = postedCount && !failedCount && results.every((row) => ['api_posted', 'already_published', 'manual_pending'].includes(row.status)) ? 'posted' : postedCount ? 'ready' : failedCount ? 'failed' : 'ready';
   await db.prepare(`UPDATE social_post_queue
     SET post_status = ?, published_at = CASE WHEN ?='posted' THEN COALESCE(published_at,CURRENT_TIMESTAMP) ELSE published_at END,
         updated_by_user_id = ?, updated_at = CURRENT_TIMESTAMP
     WHERE social_post_queue_id = ?`).bind(terminal, terminal, adminUser.user_id, id).run().catch(() => null);
   return { social_post_queue_id: id, attempted_platforms: selected, results };
+}
+
+// Build 673: receipts are provider acknowledgements until a separate read-only
+// provider lookup independently confirms the same published ID.
+async function receipts673(db) {
+  const records=rows(await db.prepare(`SELECT a.social_post_attempt_id,a.social_post_queue_id,a.platform_key,
+    a.attempt_status,a.external_post_id,a.external_post_url,a.attempted_at,a.notes,q.title
+    FROM social_post_attempts a JOIN social_post_queue q ON q.social_post_queue_id=a.social_post_queue_id
+    WHERE a.attempt_status IN ('api_posted','receipt_verified','api_failed','blocked_account_unverified','posted_manual','recovery_requested')
+    ORDER BY a.social_post_attempt_id DESC LIMIT 150`).all().catch(()=>({results:[]})));
+  const latest=new Map();
+  for(const item of records){const key=item.social_post_queue_id+':'+item.platform_key;if(!latest.has(key))latest.set(key,item);}
+  const channels=[...latest.values()];
+  return {channels,totals:{
+    provider_acknowledged:channels.filter(x=>x.attempt_status==='api_posted').length,
+    independently_verified:channels.filter(x=>x.attempt_status==='receipt_verified').length,
+    failed:channels.filter(x=>x.attempt_status==='api_failed').length,
+    on_hold:channels.filter(x=>['blocked_account_unverified','recovery_requested'].includes(x.attempt_status)).length,
+    manually_recorded:channels.filter(x=>x.attempt_status==='posted_manual').length
+  },interpretation:'Latest recorded channel outcome, not a provider-wide reach or engagement measurement.'};
+}
+async function verifyPublication673(context,db,adminUser,payload){
+  const id=Number(payload.social_post_queue_id),platform=slugKey(payload.platform_key||'');
+  if(!Number.isSafeInteger(id)||id<1||!['facebook','instagram','pinterest','x'].includes(platform))throw Error('Select a valid queue and supported social channel.');
+  const receipt=await db.prepare(`SELECT * FROM social_post_attempts WHERE social_post_queue_id=? AND platform_key=?
+    AND attempt_status IN ('api_posted','receipt_verified') AND COALESCE(external_post_id,'')<>''
+    ORDER BY social_post_attempt_id DESC LIMIT 1`).bind(id,platform).first();
+  if(!receipt)throw Error('No provider-acknowledged receipt exists. HOLD.');
+  const idOnProvider=String(receipt.external_post_id);
+  const env=context.env;
+  const provider=platform==='facebook'
+    ? {url:`https://graph.facebook.com/${envText(env,'META_GRAPH_API_VERSION')||'v22.0'}/${encodeURIComponent(idOnProvider)}?fields=id,permalink_url`,token:envText(env,'FACEBOOK_PAGE_ACCESS_TOKEN','META_PAGE_ACCESS_TOKEN')}
+    : platform==='instagram'
+    ? {url:`https://graph.facebook.com/${envText(env,'META_GRAPH_API_VERSION')||'v22.0'}/${encodeURIComponent(idOnProvider)}?fields=id,permalink`,token:envText(env,'INSTAGRAM_ACCESS_TOKEN','META_PAGE_ACCESS_TOKEN','FACEBOOK_PAGE_ACCESS_TOKEN')}
+    : platform==='pinterest'
+    ? {url:`https://api.pinterest.com/v5/pins/${encodeURIComponent(idOnProvider)}`,token:envText(env,'PINTEREST_ACCESS_TOKEN')}
+    : {url:`https://api.x.com/2/tweets/${encodeURIComponent(idOnProvider)}`,token:envText(env,'X_USER_ACCESS_TOKEN','TWITTER_USER_ACCESS_TOKEN')};
+  if(!provider.token)return {verified:false,status:'provider_credentials_missing',publication_performed:false};
+  try{
+    const res=await fetch(provider.url,{headers:{Authorization:`Bearer ${provider.token}`},signal:AbortSignal.timeout(6000)});
+    const body=await res.json().catch(()=>({}));
+    const returned=String((body.data||body).id||'');
+    if(!res.ok||returned!==idOnProvider)return {verified:false,status:'provider_lookup_hold',publication_performed:false};
+    await recordApiAttempt(db,adminUser,id,platform,'receipt_verified',{
+      external_post_id:idOnProvider,external_post_url:receipt.external_post_url,
+      notes:'Independent read-only provider ID lookup matched prior acknowledgement.',
+      response:{verified_at:new Date().toISOString(),provider_id:idOnProvider,http_status:res.status}
+    });
+    return {verified:true,status:'receipt_verified',platform,provider_id:idOnProvider,publication_performed:false};
+  }catch{return {verified:false,status:'provider_lookup_unavailable',publication_performed:false};}
+}
+async function retryFailed673(context,db,adminUser,payload){
+  const id=Number(payload.social_post_queue_id),platform=slugKey(payload.platform_key||'');
+  if(!Number.isSafeInteger(id)||id<1||!['facebook','instagram','pinterest','x'].includes(platform))throw Error('Select one supported failed channel.');
+  if(payload.owner_checked_no_duplicate!==true)throw Error('Owner must independently check the destination for an existing post before retry.');
+  const attempt=await db.prepare(`SELECT attempt_status FROM social_post_attempts
+    WHERE social_post_queue_id=? AND platform_key=? ORDER BY social_post_attempt_id DESC LIMIT 1`).bind(id,platform).first();
+  if(attempt?.attempt_status!=='api_failed')throw Error('Only a channel whose latest attempt failed may be retried.');
+  const success=await db.prepare(`SELECT social_post_attempt_id FROM social_post_attempts WHERE social_post_queue_id=?
+    AND platform_key=? AND attempt_status IN ('api_posted','receipt_verified','posted_manual')
+    LIMIT 1`).bind(id,platform).first();
+  if(success)throw Error('Existing publication receipt; retry blocked.');
+  const queue=await db.prepare('SELECT approval_status FROM social_post_queue WHERE social_post_queue_id=?').bind(id).first();
+  if(queue?.approval_status!=='approved')throw Error('Queue no longer has publication approval.');
+  await recordApiAttempt(db,adminUser,id,platform,'recovery_requested',{notes:'Owner attested manual duplicate check before one-channel retry.'});
+  return publishQueuedPost(context,db,adminUser,{social_post_queue_id:id,platform_keys:[platform],force:false});
 }
 
 // Read-only account identity check. A configured token alone is not a verified account.
@@ -1112,7 +1190,7 @@ export async function onRequestGet(context) {
   if (!db) return jsonResponse({ ok: false, error: 'Database binding is not configured.' }, 500);
   try {
     const data = await summarize(db, context.env);
-    return jsonResponse({ ok: true, ...data, queue: data.queue.map(normalizeQueueRow), mode: 'review_first_api_when_configured' }, 200, { 'Cache-Control': 'no-store' });
+    return jsonResponse({ ok: true, ...data, receipts673:await receipts673(db), queue: data.queue.map(normalizeQueueRow), mode: 'review_first_api_when_configured' }, 200, { 'Cache-Control': 'no-store' });
   } catch (error) {
     await captureRuntimeIncident(context.env, context.request, {
       incident_scope: 'admin_social',
@@ -1150,6 +1228,8 @@ export async function onRequestPost(context) {
     else if (action === 'publish_platforms') result = await publishQueuedPost(context, db, adminUser, payload);
     else if (action === 'verify_accounts_672') result = {accounts:await verifyAccounts672(context.env),verified_at:new Date().toISOString(),publication_performed:false};
     else if (action === 'approve_caip_derivative_672') result = await approveCaipDerivative672(db,adminUser,payload);
+    else if (action === 'verify_publication_673') result = await verifyPublication673(context,db,adminUser,payload);
+    else if (action === 'retry_failed_673') result = await retryFailed673(context,db,adminUser,payload);
     else throw new Error(`Unsupported social queue action: ${action}`);
 
     await auditAdminAction(context.env, context.request, adminUser, {
