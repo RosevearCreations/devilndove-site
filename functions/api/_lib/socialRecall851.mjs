@@ -5,7 +5,7 @@ const FIELDS_DEVICE=['version','kind','source','revision','queue_id','platform',
 const FIELDS_ACK=['version','kind','source','revision','queue_id','contract','consumer','receiver_id','device_nonce','decision','verifier_id','observed_at','nonce'];
 const channels=new Set(['facebook','instagram','pinterest','x']);
 const id=v=>Number.isSafeInteger(Number(v))&&Number(v)>0?Number(v):0;
-const safe=v=>typeof v==='string'&&/^[a-zA-Z0-9_.-]{5,100}$/.test(v);
+const safe=v=>typeof v==='string'&&/^[a-zA-Z0-9_.@:-]{5,100}$/.test(v);
 const date=v=>{const n=Date.parse(v||'');return Number.isFinite(n)?n:NaN;};
 function decode(s,length){if(typeof s!=='string'||!/^[A-Za-z0-9_-]+$/.test(s))return null;try{const t=s.replace(/-/g,'+').replace(/_/g,'/')+'='.repeat((4-s.length%4)%4);const x=Uint8Array.from(atob(t),c=>c.charCodeAt(0));return x.length===length?x:null;}catch{return null;}}
 const digest=async data=>[...new Uint8Array(await crypto.subtle.digest('SHA-256',new TextEncoder().encode(data)))].map(x=>x.toString(16).padStart(2,'0')).join('');
@@ -33,8 +33,10 @@ export function consentGate851(consents=[],platforms=[]){
  if(Array.isArray(consents)&&consents.some(c=>!['revoked','blocked'].includes(c.consent_status)||Number(c.public_use_allowed)!==0||Number(c.social_use_allowed)!==0))blockers.push('CONSENT_NOT_REVOKED_OR_PERMISSION_RESTORED');
  return {ok:!blockers.length,blockers};
 }
-export function scopedClosure851({consent,platforms=[],deviceReceipts=[],ackReceipt,now=Date.now()}={}){
+export function scopedClosure851({consent,platforms=[],deviceReceipts=[],ackReceipt,expectedRevision,windowComplete=true,now=Date.now()}={}){
  const blockers=[...(consent?.blockers||[])];
+ if(!windowComplete)blockers.push('SOURCE_EVIDENCE_WINDOW_INCOMPLETE');
+ if(expectedRevision&&(!/^[a-f0-9]{40}$/.test(expectedRevision)||deviceReceipts.some(r=>r.revision!==expectedRevision)||ackReceipt?.revision!==expectedRevision))blockers.push('EXACT_CURRENT_SOURCE_REVISION_MISMATCH');
  if(!consent?.ok)blockers.push('CONSENT_GATE_HOLD');
  if(deviceReceipts.length<platforms.length||platforms.some(p=>!deviceReceipts.some(r=>r.platform===p&&r.kind==='device_witness'&&r.signed_verified===1)))blockers.push('INDEPENDENT_REMOVAL_WITNESS_MISSING');
  if(!ackReceipt||ackReceipt.kind!=='receiver_ack'||ackReceipt.signed_verified!==1)blockers.push('DURABLE_INDEPENDENT_MASTER_ACK_MISSING');
