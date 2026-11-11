@@ -3,6 +3,7 @@
 // This is review-first. It prepares platform-ready captions and records manual/API posting status,
 // but does not auto-post until official OAuth/API keys are configured and approved for each platform.
 
+import { verifyCost679, campaignNet679, ownerNetSignoff679 } from './_lib/marketingFinance679.js';
 import { expenseAttestation678, ownerSignoff678, financialSummary678 } from './_lib/marketingFinance678.js';
 import { auditAdminAction, captureRuntimeIncident, getAdminUserFromRequest, getDb, jsonResponse, normalizeText } from '../_lib/adminAudit.js';
 
@@ -1311,7 +1312,7 @@ export async function onRequestGet(context) {
   if (!db) return jsonResponse({ ok: false, error: 'Database binding is not configured.' }, 500);
   try {
     const data = await summarize(db, context.env);
-    return jsonResponse({ ok: true, ...data, receipts673:await receipts673(db),engagement675:await engagement675(db),financial676:await financial676(db), financial678:await financialSummary678(db,context.request.headers.get('x-campaign-queue-id')||new URL(context.request.url).searchParams.get('campaign_queue_id')), queue: data.queue.map(normalizeQueueRow), mode: 'review_first_api_when_configured' }, 200, { 'Cache-Control': 'no-store' });
+    return jsonResponse({ ok: true, ...data, receipts673:await receipts673(db),engagement675:await engagement675(db),financial676:await financial676(db), financial678:await financialSummary678(db,context.request.headers.get('x-campaign-queue-id')||new URL(context.request.url).searchParams.get('campaign_queue_id')), financial679:await campaignNet679(db,new URL(context.request.url).searchParams.get('campaign_queue_id')), queue: data.queue.map(normalizeQueueRow), mode: 'review_first_api_when_configured' }, 200, { 'Cache-Control': 'no-store' });
   } catch (error) {
     await captureRuntimeIncident(context.env, context.request, {
       incident_scope: 'admin_social',
@@ -1354,6 +1355,8 @@ export async function onRequestPost(context) {
     else if (action === 'campaign_schedule_674') result = await scheduleCampaign674(db,adminUser,payload);
     else if (action === 'verify_engagement_675') result = await verifyEngagement675(context,db,adminUser,payload);
     else if (action === 'financial_evidence_676') result = await recordFinancialEvidence676(db,adminUser,payload);
+    else if (action === 'verify_product_cost_679') result = await verifyCost679(db,context.env,adminUser,payload,recordApiAttempt);
+    else if (action === 'owner_net_signoff_679') result = await ownerNetSignoff679(db,adminUser,payload,recordApiAttempt);
     else if (action === 'expense_attestation_678') result = await expenseAttestation678(db,context.env,adminUser,payload,recordApiAttempt);
     else if (action === 'owner_marketing_signoff_678') result = await ownerSignoff678(db,adminUser,payload,recordApiAttempt);
     else throw new Error(`Unsupported social queue action: ${action}`);

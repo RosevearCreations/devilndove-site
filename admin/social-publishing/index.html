@@ -61,6 +61,31 @@
       <div id="dd676Status" aria-live="polite">Certification: HOLD</div>
       <div class="table-scroll" tabindex="0"><table><thead><tr><th>Campaign</th><th>Evidence</th><th>Source reference</th><th>CAD</th><th>Recorded</th><th>Certification</th></tr></thead><tbody id="dd676Rows"></tbody></table></div>
     </section>
+    <section class="card" id="dd679-net" aria-labelledby="dd679-title">
+      <p class="eyebrow">Build 679 · Source-verified financial evidence</p>
+      <h2 id="dd679-title">Product costs &amp; campaign net-contribution review</h2>
+      <p>Record a separately verified original cost allocation for each attributed paid order. Required categories: product materials/labour, fulfillment, payment processing and overhead. Zero-dollar amounts need independent evidence too. Taxes collected are excluded from net receipts. The result is not an audited financial statement.</p>
+      <form id="dd679CostForm" class="dd671-layout">
+        <div><label>Campaign<select id="dd679Campaign" class="input" required><option value="">Choose campaign</option></select></label>
+        <label>Source order ID<input id="dd679Order" class="input" type="number" min="1" required></label>
+        <label>Cost category<select id="dd679Axis" class="input"><option value="product_cogs">Product materials, manufacturing and labour</option><option value="shipping_fulfilment">Shipping / fulfillment cost</option><option value="payment_processing">Payment processing fees</option><option value="overhead_allocated">Verified overhead allocation</option></select></label>
+        <label>CAD amount<input id="dd679Amount" class="input" type="number" min="0" step=".01" required></label>
+        <label>Original cost receipt ID<input id="dd679Reference" class="input" maxlength="100" required></label></div>
+        <div><label>Independent source issuer<input id="dd679Issuer" class="input" maxlength="120" required></label>
+        <label>Original document SHA-256<input id="dd679Digest" class="input" pattern="[0-9A-Fa-f]{64}" required></label>
+        <label>Verifier observation (UTC ISO timestamp)<input id="dd679Observed" class="input" required placeholder="2026-11-11T19:00:00.000Z"></label>
+        <label>Independent Ed25519 signature (base64)<textarea id="dd679Signature" class="input" rows="3" required></textarea></label>
+        <label class="dd671-confirm"><input type="checkbox" id="dd679OwnerReview" required> We checked the source document and matching paid order.</label>
+        <button class="btn primary" type="submit">Record independently verified cost</button></div>
+      </form>
+      <p id="dd679CostStatus" role="status" aria-live="polite">No product-cost verification performed.</p>
+      <button class="btn secondary" id="dd679Reconcile" type="button">Reconcile source net contribution</button>
+      <p id="dd679Summary" role="status" aria-live="polite">Choose a campaign. Missing signed costs or unsettled orders remain HOLD.</p>
+      <form id="dd679Signoff"><label class="dd671-confirm"><input id="dd679Reviewed" type="checkbox" required> We reviewed each independently signed source cost and current order settlement.</label>
+      <label class="dd671-confirm"><input id="dd679Scope" type="checkbox" required> We accept source-level net contribution only; AI Data Platform admission and independent financial audit remain separate gates.</label>
+      <button class="btn primary" type="submit">Owner signoff on source net contribution</button></form>
+      <p id="dd679SignoffStatus" role="status" aria-live="polite">Signoff HOLD pending complete evidence.</p>
+    </section>
     <section class="card" id="dd678-finance" aria-labelledby="dd678-title">
       <p class="eyebrow">Build 678 · Independent expense verification</p><h2 id="dd678-title">Campaign financial acceptance</h2>
       <p>Marketing expense records require a real original receipt and an Ed25519 signature from a separately enrolled independent verifier. The signature must cover the exact campaign, queue ID, receipt reference, vendor, CAD amount, original document SHA-256 and verification time. No private verifier key is entered here. This acceptance is <strong>gross attributed order receipts minus verified advertising costs</strong>, not net business profit.</p>
