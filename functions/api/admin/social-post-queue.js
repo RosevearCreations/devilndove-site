@@ -1695,6 +1695,10 @@ await recordApiAttempt(db,user,id,'profit_exception_680',status,{
 external_post_id:ref,response:{campaign:source.campaign,reason:reason||null,
 resolution:resolution||null,owner_user_id:user.user_id,profitability_certified:false},
 notes:'Owner exception record only; no independent financial certification.'});
+const saved=await db.prepare(`SELECT social_post_attempt_id FROM social_post_attempts
+WHERE platform_key='profit_exception_680' AND external_post_id=? AND social_post_queue_id=? AND attempt_status=?
+ORDER BY social_post_attempt_id DESC LIMIT 1`).bind(ref,id,status).first();
+if(!saved)throw Error('Owner exception evidence was not durably saved. HOLD.');
 return {status,exception_reference:ref,profitability_certified:false,publication_performed:false};
 }
 
