@@ -1,8 +1,6 @@
 import { getBundleDetails, resolveUnitPrice } from './_lib/productOffers.js';
 import { requireGiftCardSchema } from './_lib/giftCardSchemaReadiness.js';
 import { validateCommerceEnvelope } from '../../public/js/commerce-policy-core.js';
-// Release 467 Build 78 — idempotent, server-authoritative checkout order creation.
-// Storefront request handling remains schema-read-only; schema ownership belongs to migrations.
 
 function json(data, status = 200) {
   return new Response(JSON.stringify(data), { status, headers: { "Content-Type": "application/json" } });
@@ -27,6 +25,28 @@ function normalizeCheckoutRequestKey(value) {
   const key = normalizeText(value).slice(0, 96);
   if (!key) return "";
   return /^[A-Za-z0-9._:-]{12,96}$/.test(key) ? key : "";
+}
+
+async function bindCampaignAtCheckout677(db, body, orderId) {
+  const token = normalizeText(body.browser_session_token);
+  const visitor = normalizeText(body.visitor_token);
+  if (!/^[A-Za-z0-9-]{16,96}$/.test(token) || !/^[A-Za-z0-9-]{16,96}$/.test(visitor)) return;
+  try {
+    await db.prepare(`INSERT INTO social_post_attempts
+      (social_post_queue_id,platform_key,attempt_status,external_post_id,response_json,attempted_at,notes)
+      SELECT q.social_post_queue_id,'checkout_attribution','checkout_session_bound',?,
+        json_object('order_id',?,'site_visitor_session_id',s.site_visitor_session_id,
+          'campaign',s.utm_campaign,'utm_source',s.utm_source,'utm_medium',s.utm_medium,
+          'provenance','server_observed_utm_session','roi_certified',0),CURRENT_TIMESTAMP,
+          'First-party UTM checkout session; not independently verified ad conversion.'
+      FROM site_visitor_sessions s
+      JOIN site_visitors v ON v.site_visitor_id=s.site_visitor_id
+      JOIN social_post_queue q ON q.social_post_queue_id=(
+        SELECT MIN(q2.social_post_queue_id) FROM social_post_queue q2 WHERE q2.utm_campaign=s.utm_campaign)
+      WHERE s.session_token=? AND v.visitor_token=? AND COALESCE(s.utm_campaign,'')<>''
+        AND s.last_seen_at>=datetime('now','-30 days')
+      LIMIT 1`).bind(String(orderId),orderId,token,visitor).run();
+  } catch { /* Nonblocking analytics. */ }
 }
 
 function orderNumberForRequestKey(key) {
@@ -340,6 +360,7 @@ export async function onRequestPost(context) {
   const order_id = Number(insertOrder?.meta?.last_row_id || 0);
   if (!order_id) return json({ ok: false, error: "Order could not be created." }, 500);
 
+
   for (const item of orderItems) {
     try{
       await db.prepare(`INSERT INTO order_items (order_id,product_id,sku,product_name,product_type,unit_price_cents,quantity,line_subtotal_cents,taxable,tax_class_code,requires_shipping,digital_file_url,created_at) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,CURRENT_TIMESTAMP)`).bind(order_id,item.product_id,item.sku || null,item.product_name,item.product_type,item.unit_price_cents,item.quantity,item.line_subtotal_cents,item.taxable,item.tax_class_code || null,item.requires_shipping,item.digital_file_url || null).run();
@@ -376,5 +397,6 @@ export async function onRequestPost(context) {
     FROM orders WHERE order_id=? LIMIT 1
   `).bind(order_id).first();
 
+  await bindCampaignAtCheckout677(db, body, order_id);
   return json(successPayload({ order: createdOrder, items: orderItems, gift: createdGiftCard, idempotentReplay: false }));
 }

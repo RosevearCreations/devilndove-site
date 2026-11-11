@@ -53,7 +53,7 @@
 
     <section class="card" id="dd676-finance" aria-labelledby="dd676-title">
       <p class="eyebrow">Build 676 · Financial attribution evidence</p><h2 id="dd676-title">Campaign costs, paid-order review &amp; ROI certification</h2>
-      <p>We can record a CAD expense receipt and independently verify whether a named order has settled payment. The current checkout does not bind an order directly to a campaign, so paid-order attribution and financial ROI remain HOLD until that proof is available.</p>
+      <p>Build 677 binds new orders to observed campaign sessions. Paid orders need matching session and settlement evidence. Vendor cost verification is still required to certify ROI; older unbound orders remain HOLD.</p>
       <form id="dd676Form" class="dd671-layout">
         <div><label>Campaign-linked social item<select class="input" id="dd676Queue" required><option value="">Choose campaign</option></select></label><label>Evidence type<select class="input" id="dd676Kind"><option value="cost">Marketing expense receipt</option><option value="revenue">Paid-order attribution candidate</option></select></label></div>
         <div><label>Cost in CAD<input class="input" id="dd676Cost" type="number" min="0.01" step="0.01" placeholder="e.g. 24.50"></label><label>Expense receipt reference<input class="input" id="dd676Reference" maxlength="100" placeholder="Vendor invoice or receipt ID"></label><label>Order ID<input class="input" id="dd676Order" type="number" min="1" placeholder="For paid-order candidate"></label><label class="dd671-confirm"><input type="checkbox" id="dd676Confirm" required> Owner reviewed the original evidence; this is not a certified ROI claim.</label><button class="btn primary" type="submit">Record evidence</button></div>

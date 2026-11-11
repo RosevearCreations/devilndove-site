@@ -1,6 +1,4 @@
 // File: /public/js/checkout.js
-// Release 467 Build 78: resilient cart/checkout flow with pickup, persisted attempts,
-// idempotent order retries, authoritative-server revalidation, and payment recovery.
 
 document.addEventListener("DOMContentLoaded", () => {
   const form = document.getElementById("checkoutForm");
@@ -295,6 +293,8 @@ document.addEventListener("DOMContentLoaded", () => {
         const payload = {
           ...formData,
           checkout_request_key: attempt.request_key,
+          browser_session_token: window.DDAnalytics?.browser_session_token || '',
+          visitor_token: window.DDAnalytics?.visitor_token || '',
           fulfillment_method: summary.fulfillment_method,
           items: normalizeCartForApi(cartItems),
           shipping_cents: summary.shipping_cents,

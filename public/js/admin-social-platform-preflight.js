@@ -13,9 +13,9 @@
       queue.value=old;
       const finance=data.financial676||{},tbody=$('dd676Rows');tbody.replaceChildren();
       for(const item of finance.items||[]){const row=document.createElement('tr');
-        const values=[item.campaign,item.kind,item.reference,(Number(item.amount_cents||0)/100).toFixed(2),item.observed_at,'HOLD'];
+        const values=[item.campaign,item.kind,item.reference,(Number(item.amount_cents||0)/100).toFixed(2),item.observed_at,item.attribution_verified?'Order/session matched · ROI HOLD':'HOLD'];
         for(const value of values){const cell=document.createElement('td');cell.textContent=String(value??'—');row.append(cell);}tbody.append(row);}
-      $('dd676Status').textContent='Financial ROI: HOLD · No authoritative order-to-campaign binding. Expense receipts are owner-attested; paid orders are settlement-checked but marketing attribution is unverified.';
+      $('dd676Status').textContent='Financial ROI: '+(finance.certification||'HOLD')+' · Checkout sessions can now bind paid orders to first-party campaign evidence. Expense receipts remain owner-attested, not independently vendor-verified. No certified ROI claim.';
     }catch(error){$('dd676Status').textContent='HOLD · '+error.message;}
   }
   document.addEventListener('DOMContentLoaded',()=>{
