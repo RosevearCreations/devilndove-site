@@ -28,7 +28,7 @@ async function evidence(db,queueId){
  const truncated=receipts.length>=100||liveRows.length>=101;
  return {post,platforms,consent,receipts,liveRows,truncated};
 }
-const safeResult=(o,expectedRevision)=>({ok:true,build:851,queue_id:o.post.social_post_queue_id,consent_gate:o.consent,platform_count:o.platforms.length,receipt_count:o.receipts.length,ledger_truncated:o.truncated,closure:scopedClosure851({consent:o.consent,platforms:o.platforms,deviceReceipts:o.receipts.filter(r=>r.kind==='device_witness'),ackReceipt:o.receipts.find(r=>r.kind==='receiver_ack'),laterLiveReceipts:o.liveRows,expectedRevision,windowComplete:!o.truncated}),master_connection:'HOLD',publication_performed:false,provider_mutation_performed:false,master_events_emitted:0});
+const safeResult=(o,expectedRevision)=>({ok:true,build:851,queue_id:o.post.social_post_queue_id,consent_gate:o.consent,platform_count:o.platforms.length,receipt_count:o.receipts.length,ledger_truncated:o.truncated,closure:scopedClosure851({consent:o.consent,platforms:o.platforms,deviceReceipts:o.receipts.filter((r,i,all)=>r.kind==='device_witness'&&all.findIndex(x=>x.kind==='device_witness'&&x.platform===r.platform)===i),ackReceipt:o.receipts.find(r=>r.kind==='receiver_ack'),laterLiveReceipts:o.liveRows,expectedRevision,windowComplete:!o.truncated}),master_connection:'HOLD',publication_performed:false,provider_mutation_performed:false,master_events_emitted:0});
 export async function onRequest({request,env}){
  if(!['GET','POST'].includes(request.method))return reply(summary('Method not allowed.'),405);
  const admin=await getAdminUserFromRequest(request,env),db=getDb(env);
@@ -59,6 +59,8 @@ export async function onRequest({request,env}){
   }else if(action==='admit_master_receiver_ack'){
    const device=snapshot.receipts.find(r=>r.kind==='device_witness'&&r.nonce===record.device_nonce);
    if(!device)return reply(summary('Exact independently verified original-device witness must already be durable.'),409);
+   const deviceTime=Date.parse(device.observed_at||'');
+   if(device.revision!==env?.CF_PAGES_COMMIT_SHA||!Number.isFinite(deviceTime)||deviceTime>Date.now()+300000||Date.now()-deviceTime>600000)return reply(summary('Original device receipt is stale or belongs to a different deployed revision.'),409);
    const checked=await verifyMasterAck851(env,record,signature,{queueId,deviceNonce:device.nonce,ownerEmail:admin.email});
    if(!checked.ok)return reply(summary(checked.reason),409);
    const result=await db.prepare("INSERT OR IGNORE INTO social_recall_evidence_851 (queue_id,kind,platform,external_post_id,device_nonce,nonce,receipt_sha256,revision,observed_at,verifier_id,signed_verified,actor_user_id) VALUES (?,'receiver_ack',NULL,NULL,?,?,?,?,?,?,1,?)")
