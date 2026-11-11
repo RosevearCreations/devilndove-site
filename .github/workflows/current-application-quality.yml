@@ -1049,6 +1049,8 @@ jobs:
 
       - name: Build 678 signed marketing expense and ROI HOLD regression
         run: node scripts/build678_independent_marketing_roi_contract.mjs
+      - name: Build 679 verified product costs and master HOLD contract
+        run: node scripts/build679_verified_campaign_net_contract.mjs
       - name: JavaScript syntax
         run: |
           node --check functions/_middleware.js

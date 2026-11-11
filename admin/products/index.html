@@ -1,15 +1,15 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="utf-8"/>
-  <meta name="viewport" content="width=device-width,initial-scale=1"/>
-  <meta data-dd-products-static-platform="1" name="dd-product-admin-architecture" content="product-browser-v162"/>
-  <title>Products — Devil n Dove Admin</title>
-  <meta name="description" content="Compact Devil n Dove Product browser with one bounded Product read and operator-triggered fallback photo recovery."/>
-  <link rel="icon" href="/assets/mark.png" type="image/png"/>
-  <link rel="stylesheet" href="/css/styles.css?v=440"/>
-  <link rel="stylesheet" href="/css/admin-product-v162.css?v=168"/>
-  <style>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<meta data-dd-products-static-platform="1" name="dd-product-admin-architecture" content="product-browser-v162"/>
+<title>Products — Devil n Dove Admin</title>
+<meta name="description" content="Compact Devil n Dove Product browser with one bounded Product read and operator-triggered fallback photo recovery."/>
+<link rel="icon" href="/assets/mark.png" type="image/png"/>
+<link rel="stylesheet" href="/css/styles.css?v=440"/>
+<link rel="stylesheet" href="/css/admin-product-v162.css?v=168"/>
+<style>
     .dd635-toolbar{align-items:end}
     .dd635-toolbar label{min-width:145px;flex:1 1 160px}
     .dd635-toolbar label:first-child{flex:2 1 250px}
@@ -98,415 +98,415 @@
   </style>
 </head>
 <body data-admin-page="product-browser-v166">
-  <div class="container admin-shell dd-product-shell">
-    <nav class="nav" aria-label="Admin navigation">
-      <div class="brand">
-        <img alt="Devil n Dove logo" src="/assets/logo-clear-nav.webp"/>
-        <div><div style="font-weight:800">Devil n Dove</div><div class="small">Admin / Products</div></div>
-      </div>
-      <div class="links"><a href="/admin/">Dashboard</a><a href="/admin/product-editor/">New Product</a><a href="/admin/catalog-media/">Images</a><a href="/admin/inventory-operations/">Inventory</a><a href="/admin/catalog-health/">Health</a></div>
-    </nav>
+<div class="container admin-shell dd-product-shell">
+<nav class="nav" aria-label="Admin navigation">
+<div class="brand">
+<img alt="Devil n Dove logo" src="/assets/logo-clear-nav.webp"/>
+<div><div style="font-weight:800">Devil n Dove</div><div class="small">Admin / Products</div></div>
+</div>
+<div class="links"><a href="/admin/">Dashboard</a><a href="/admin/product-editor/">New Product</a><a href="/admin/catalog-media/">Images</a><a href="/admin/inventory-operations/">Inventory</a><a href="/admin/catalog-health/">Health</a></div>
+</nav>
 
-    <header class="hero compact-hero dd-products-compact-head">
-      <div>
-        <p class="eyebrow">Release 467 • Build 640</p>
-        <h1>Products</h1>
-        <p>Find a Product and move straight into Product or image editing. A normal page load now performs one bounded Product query only; missing fallback photos are recovered only when you explicitly request one.</p>
-      </div>
-      <div class="dd-product-actions"><a class="btn" href="/admin/product-editor/">Create Product</a><a class="btn" href="/admin/catalog-media/">Image Editor</a><a class="btn" href="/admin/catalog-health/">Catalog Health</a></div>
-    </header>
+<header class="hero compact-hero dd-products-compact-head">
+<div>
+<p class="eyebrow">Release 467 • Build 640</p>
+<h1>Products</h1>
+<p>Find a Product and move straight into Product or image editing. A normal page load now performs one bounded Product query only; missing fallback photos are recovered only when you explicitly request one.</p>
+</div>
+<div class="dd-product-actions"><a class="btn" href="/admin/product-editor/">Create Product</a><a class="btn" href="/admin/catalog-media/">Image Editor</a><a class="btn" href="/admin/catalog-health/">Catalog Health</a></div>
+</header>
 
-    <section class="card dd-products-browser-card" aria-labelledby="dd659Heading" id="dd659Desk">
-      <h2 id="dd659Heading">Build 659 · Finished Product, Media &amp; Dovlin Evidence Desk</h2>
-      <p class="small">Select a real Product ID from the browser below. <strong>Inspect original evidence</strong> reads one current Product, bounded gallery/rights annotations, production runs and finished lots. No data is read here on page load. Photos and stock records do not, by themselves, prove original rights, safety, physical samples or approval to sell.</p>
-      <div class="dd640-plan-fields">
-        <label>Original Product ID<input class="input" id="dd659ProductId" type="number" min="1" step="1" placeholder="e.g. 53" /></label>
-        <div><button class="btn" type="button" id="dd659Inspect">Inspect original evidence</button></div>
-      </div>
-      <p id="dd659Status" role="status" aria-live="polite">No original Product has been inspected.</p>
-      <div id="dd659Original" class="small"></div>
-      <form id="dd659Review" hidden>
-        <h3>Private owner evidence review · not a release approval</h3>
-        <p class="small">Choose only evidence personally reviewed. Missing original artwork, provenance, material safety or age-appropriate Dovlin plush testing must remain on HOLD. The approved Dovlin design may not be changed except colours; no new character artwork is generated here.</p>
-        <div class="dd640-plan-fields">
-          <label>Actual finished sample<select class="input" id="dd659Sample"><option value="not_verified">Not personally verified</option><option value="observed_real_sample">I observed an actual finished sample</option></select></label>
-          <label>Original media rights<select class="input" id="dd659Rights"><option value="not_verified">Rights not verified</option><option value="original_permission_seen">I inspected the original rights/permission evidence</option></select></label>
-          <label>Safety / material documents<select class="input" id="dd659Safety"><option value="not_verified">Documentation not verified</option><option value="original_document_seen">I inspected actual product-appropriate documents</option></select></label>
-          <label>Dovlin original approved design<select class="input" id="dd659Art"><option value="not_verified">Original approved artwork not compared</option><option value="approved_original_compared">I compared the physical sample with the approved original artwork</option></select></label>
-          <label><input id="dd659Dovlin" type="checkbox"/> Apply original Dovlin character/age 3+ evidence requirements to this Product</label>
-          <label>Disposition<select class="input" id="dd659Decision"><option value="hold">Hold for missing proof / next action</option><option value="owner_review_only">Record my review only — external acceptance remains pending</option></select></label>
-          <label style="grid-column:1/-1">Factual note and next action (20–500 characters)<textarea class="input" id="dd659Note" rows="3" minlength="20" maxlength="500" required placeholder="What physical sample or original file did we check? What must happen next?"></textarea></label>
-        </div>
-        <p class="small"><label><input type="checkbox" id="dd659Ack" required/> I understand this saves an internal source-bound owner receipt only. It never changes inventory, publishes a Product, certifies toy safety, verifies external rights or reports completion to the Master Shell.</label></p>
-        <div class="dd640-actions"><button class="btn" type="submit" id="dd659Save">Record private owner review</button><button class="btn" type="button" id="dd659FindKey" disabled>Inspect last request key</button></div>
-        <p id="dd659SaveStatus" role="status" aria-live="polite">No owner receipt recorded.</p>
-      </form>
-    </section>
-    <section class="card dd-products-browser-card">
-      <div class="dd-products-browser-heading"><div><h2>Product Browser</h2><p class="small">Eight compact rows by default. Search by Product name, SKU, slug or category, then sort across the matching catalog. Previous/revisited pages reuse this browser session. Featured image authority comes from the Product row; when a Product has no featured image, use Recover photo to check that Product's existing gallery/media references explicitly.</p></div></div>
-      <details class="dd-low-read-details"><summary>Low-read mode / image-recovery details</summary><div class="dd-low-read-note small"><strong>Build 166 foundation, Build 168 session reuse, Build 170 explicit photo recovery:</strong> one bounded Product query for a fresh page. Automatic secondary image recovery reads are zero. Featured image authority comes from that same Product row. Only pressing <strong>Recover photo</strong> may read secondary image authorities, and that request is limited to one Product. Previous/revisited pages may reuse this session at zero D1 cost; Refresh deliberately returns to live authority. R2 is never listed, there are no timers, and failed reads do not loop.</div></details>
-      <section class="dd640-inbox" id="dd640ExceptionPanel" aria-labelledby="dd640Heading">
-        <h3 id="dd640Heading">Stock Exception Inbox &amp; Restock Planning</h3>
-        <p class="small">Scan only when we ask. Each click reviews at most 20 tracked physical active/draft Products against qualifying post-cutover order commitments. Severity is ranked <strong>only within the Products actually scanned</strong>. Other Products, older orders and offsite reservations may need review.</p>
-        <p class="dd640-warning small">A planning suggestion is not stock, a purchase order or permission to sell. Never add original lot quantities to Product stock. Correct stock only through a separate, physically verified Restock or Count / History action.</p>
-        <div class="dd640-actions"><button class="btn" id="dd640Scan" type="button">Start fresh exception scan (20 Products)</button><button class="btn" id="dd640Next" type="button" disabled>Scan next 20</button></div>
-        <p id="dd640Status" role="status" aria-live="polite">Nothing has been scanned. No database read until we choose Start.</p>
-        <p id="dd640Scope" class="small">No current verified inbox.</p>
-        <div id="dd640Rows"><p class="small">Exceptions will appear after a deliberate scan.</p></div>
-        <h4>Owner draft restock worksheet (temporary until saved)</h4>
-        <p class="small">Choose Add to draft on an exception, enter planned whole units, possible source and a factual note. First prepare the review text, then explicitly save a private owner draft below or copy it. Neither action changes supplier purchases, stock, orders or external channels.</p>
-        <div id="dd640Draft"><p class="small">No Product selected for planning.</p></div>
-        <div class="dd640-actions"><button class="btn" id="dd640Prepare" type="button" disabled>Prepare review text</button><button class="btn" id="dd640Copy" type="button" disabled>Copy reviewed text</button><button class="btn" id="dd640Reset" type="button" disabled>Clear draft</button></div>
-        <p id="dd640DraftStatus" role="status" aria-live="polite">Draft plans are not stored.</p>
-        <label class="small" for="dd640Preview">Review/copy text (read-only; does not publish or save)</label>
-        <textarea class="input dd640-copy" id="dd640Preview" rows="6" readonly placeholder="After preparing the draft, our review text appears here."></textarea>
-      </section>
-      <section class="dd640-inbox" id="dd642PriorityPanel" aria-labelledby="dd642Heading">
-        <h3 id="dd642Heading">Owner Restock Follow-Up Priority Board</h3>
-        <p class="small">A read-only view of the same private owner plans below. Choose <strong>Load my saved plans</strong> once to populate both sections. Due dates use this device's local calendar day; there are no automatic reminders, background reads, stock movements or supplier orders.</p>
-        <p id="dd642Status" role="status" aria-live="polite">Priority board waiting for an explicit owner plan load.</p>
-        <div class="dd640-actions" role="group" aria-label="Filter owner plan follow-ups">
-          <button class="btn" type="button" data-dd642-filter="all" aria-pressed="true" disabled>All plans</button>
-          <button class="btn" type="button" data-dd642-filter="overdue" aria-pressed="false" disabled>Overdue</button>
-          <button class="btn" type="button" data-dd642-filter="week" aria-pressed="false" disabled>Due within 7 days</button>
-          <button class="btn" type="button" data-dd642-filter="blocked" aria-pressed="false" disabled>Blocked</button>
-          <button class="btn" type="button" data-dd642-filter="undated" aria-pressed="false" disabled>Needs a date</button>
-          <button class="btn" type="button" data-dd642-filter="completed" aria-pressed="false" disabled>Completed review</button>
-        </div>
-        <p class="small" id="dd642Counts">No current owner plan evidence.</p>
-        <div id="dd642Rows"><p class="small">Load saved plans below to see follow-up priorities.</p></div>
-        <p class="dd640-warning small">Review plan opens its owner-only draft for a deliberate update. A completed follow-up does not prove Product stock, actual physical counts, offsite commitments or supplier availability.</p>
-      </section>
-      <section class="dd640-inbox" id="dd641PlansPanel" aria-labelledby="dd641Heading">
-        <h3 id="dd641Heading">Saved Owner Restock Plans &amp; Follow-Ups</h3>
-        <p class="small">Private to the signed-in admin owner. Saving a draft is an internal planning note only; it never restocks Products, reserves orders, purchases anything or publishes to marketplaces. Saved stock snapshots may be out of date when reopened.</p>
-        <div class="dd640-actions"><button type="button" class="btn" id="dd641Load">Load my saved plans</button><button type="button" class="btn" id="dd641New">Start new from reviewed worksheet</button></div>
-        <p class="small" id="dd641Status" role="status" aria-live="polite">No saved plans have been read. Choose Load my saved plans.</p>
-        <div id="dd641List"><p class="small">Open owner plans appear here after a deliberate read.</p></div>
-        <div class="dd640-plan-fields">
-          <label>Plan title (4–100 characters)<input class="input" id="dd641Title" maxlength="100" placeholder="e.g. Weekend rings replenishment"/></label>
-          <label>Follow-up date (optional)<input class="input" id="dd641Due" type="date"/></label>
-          <label>Status<select class="input" id="dd641State"><option value="draft">Draft</option><option value="follow_up">Owner follow-up</option><option value="blocked">Blocked / investigate</option><option value="completed">Reviewed / completed (no stock movement)</option></select></label>
-          <label class="dd640-note">Owner follow-up note (up to 500 characters)<textarea class="input" id="dd641Note" maxlength="500" rows="2" placeholder="What we checked; next owner action"></textarea></label>
-        </div>
-        <p class="small" id="dd641Items">For a new plan, first review the worksheet above. For an existing plan, select it from the saved list. To change Product quantities, create a fresh worksheet from current stock evidence.</p>
-        <div class="dd640-actions"><button type="button" class="btn" id="dd641Save" disabled>Save owner plan</button><button type="button" class="btn" id="dd641Cancel">Clear selection</button></div>
-        <p class="dd640-warning small">If another session updates these plans, we must reload and review before saving again. There is no automatic retry. Existing stock, supplier and purchase authorities remain separate.</p>
-      </section>
-      <section class="dd640-inbox" id="dd643ReviewPanel" aria-labelledby="dd643Heading">
-        <h3 id="dd643Heading">Owner Restock Review Notes &amp; Outcome Timeline</h3>
-        <p class="small">Record a factual owner decision against an existing saved plan. These private dated notes are separate from its status and Product stock. Earlier Build 641/642 status edits are not retroactively presented as review notes.</p>
-        <div class="dd640-plan-fields">
-          <label>Saved owner plan<select class="input" id="dd643Plan"><option value="">First load saved plans above</option></select></label>
-          <label>Review outcome<select class="input" id="dd643Outcome"><option value="needs_physical_count">Physical count still needed</option><option value="needs_supplier_review">Supplier review still needed</option><option value="needs_workshop_review">Workshop review still needed</option><option value="follow_up_scheduled">Next owner follow-up scheduled</option><option value="no_change_recommended">No stock change recommended</option><option value="separate_action_recommended">Separate controlled action recommended</option></select></label>
-          <label class="dd640-note">Factual review note (8–300 characters)<textarea class="input" id="dd643Note" rows="3" maxlength="300" placeholder="What we checked, what remains uncertain, and our next action"></textarea></label>
-        </div>
-        <div class="dd640-actions"><button type="button" class="btn" id="dd643Load" disabled>Load recent 10 reviews</button><button type="button" class="btn" id="dd643Save" disabled>Record private review note</button><button type="button" class="btn" id="dd643More" disabled>Load earlier reviews</button></div>
-        <p id="dd643Status" role="status" aria-live="polite">Load the owner plans above, select one and choose Load recent reviews. No automatic history request is made.</p>
-        <div id="dd643Entries"><p class="small">Dated review notes appear after an explicit load.</p></div>
-        <div id="dd644ReviewSearch" aria-labelledby="dd644Heading" class="dd640-plan">
-          <h4 id="dd644Heading">Find Review Notes &amp; Owner Decision Summary</h4>
-          <p class="small">Search up to 50 private reviews of the selected saved owner plan above. The outcome summary covers that plan's full bounded timeline even if the search matches only a few entries. This is a recommendation history, not proof of actual restocking.</p>
-          <div class="dd640-plan-fields">
-            <label>Find a note (2–80 characters, or blank)<input type="search" class="input" id="dd644Query" maxlength="80" autocomplete="off" placeholder="e.g. bench count, wire supplier"/></label>
-            <label>Review outcome<select class="input" id="dd644Outcome"><option value="">All outcomes</option><option value="needs_physical_count">Physical count needed</option><option value="needs_supplier_review">Supplier review needed</option><option value="needs_workshop_review">Workshop review needed</option><option value="follow_up_scheduled">Follow-up scheduled</option><option value="no_change_recommended">No stock change recommended</option><option value="separate_action_recommended">Separate action recommended</option></select></label>
-          </div>
-          <div class="dd640-actions"><button type="button" class="btn" id="dd644Search" disabled>Search saved reviews</button><button type="button" class="btn secondary" id="dd644Clear">Clear filters</button><button type="button" class="btn" id="dd644More" disabled>Load next matching 10</button></div>
-          <p id="dd644Status" role="status" aria-live="polite">Select a saved owner plan and choose Search saved reviews; no background search runs.</p>
-          <div id="dd644Summary"><p class="small">The owner decision summary appears after a verified search.</p></div>
-          <div id="dd644Results"><p class="small">No review-note search has been requested.</p></div>
-        </div>
-        <div class="dd640-plan" id="dd645Handoff" aria-labelledby="dd645Heading">
-          <h4 id="dd645Heading">Private Restock Review Handoff Digest</h4>
-          <p class="small">After an explicit verified search above, choose which dated reviews to include in a workshop follow-up summary. Review the text before copying or downloading. Nothing is sent to suppliers or another application automatically.</p>
-          <p id="dd645Status" role="status" aria-live="polite">Search saved reviews above to choose dated entries. No export has been prepared.</p>
-          <div id="dd645Choices" role="group" aria-label="Choose dated owner reviews for private handoff"><p class="small">No verified review entries available.</p></div>
-          <label class="small"><input type="checkbox" id="dd645IncludeNotes" disabled> Include full private note bodies (off by default)</label>
-          <div class="dd640-actions"><button class="btn" type="button" id="dd645Prepare" disabled>Prepare selected digest</button><button class="btn" type="button" id="dd645Copy" disabled>Copy reviewed digest</button><button class="btn" type="button" id="dd645Download" disabled>Download private .txt</button><button class="btn secondary" type="button" id="dd645Clear" disabled>Clear digest</button></div>
-          <label class="small" for="dd645Preview">Owner-reviewed handoff text (not transmitted)</label>
-          <textarea class="input dd640-copy" id="dd645Preview" rows="9" readonly placeholder="Choose dated reviews and explicitly prepare a handoff digest."></textarea>
-          <p class="dd640-warning small">A handoff digest is a dated, potentially stale private planning snapshot, not an inventory count, receipt, order reservation, purchase approval, or permission to publish. Downloaded files and copied text leave this private admin view only when we deliberately share them.</p>
-        </div>
-        <div class="dd640-plan" id="dd646Workshop" aria-labelledby="dd646Heading">
-          <h4 id="dd646Heading">Workshop Handoff Checklist &amp; Owner Acknowledgement</h4>
-          <p class="small">First prepare a private digest above. Then explicitly load that digest here, review the safety checklist and record who will follow up. This is a local, unsigned acknowledgement, not proof that physical work was completed.</p>
-          <div class="dd640-actions"><button class="btn" id="dd646Load" type="button" disabled>Review prepared digest</button><button class="btn secondary" id="dd646Reset" type="button" disabled>Clear workshop acknowledgement</button></div>
-          <p id="dd646Status" role="status" aria-live="polite">No prepared owner digest has been accepted for workshop review.</p>
-          <fieldset id="dd646Checklist" disabled>
-            <legend>Owner review checklist — checking records understanding, not completion</legend>
-            <label class="dd640-plan small"><input type="checkbox" data-dd646-check="source"> I reviewed the selected dated outcomes and their source version.</label>
-            <label class="dd640-plan small"><input type="checkbox" data-dd646-check="stock"> A handoff does not verify physical quantities or reserve inventory; a separate count is needed before acting.</label>
-            <label class="dd640-plan small"><input type="checkbox" data-dd646-check="supplier"> Supplier availability, prices, orders and payments require separate authorized checks.</label>
-            <label class="dd640-plan small"><input type="checkbox" data-dd646-check="authority"> This acknowledgement does not change stock, authorize manufacturing, or publish listings.</label>
-            <div class="dd640-plan-fields">
-              <label>Next owner follow-up action (8–180 characters)<textarea id="dd646Action" class="input" rows="2" minlength="8" maxlength="180" autocomplete="off" placeholder="e.g. Count copper wire stock with Ree at the bench"></textarea></label>
-              <label>Target follow-up date<input id="dd646Due" class="input" type="date"></label>
-            </div>
-            <label class="small"><input id="dd646Confirm" type="checkbox"> I acknowledge this private workshop review record as the current owner session; it is not a signature or a supplier instruction.</label>
-            <div class="dd640-actions"><button class="btn" id="dd646Prepare" type="button" disabled>Prepare local acknowledgement</button><button class="btn" id="dd646Copy" type="button" disabled>Copy acknowledgement</button><button class="btn" id="dd646Download" type="button" disabled>Download private .txt</button></div>
-            <label class="small" for="dd646Preview">Local owner acknowledgement receipt (not saved or transmitted)</label>
-            <textarea id="dd646Preview" class="input dd640-copy" rows="8" readonly placeholder="Complete the review checklist, next action and date, then prepare an acknowledgement."></textarea>
-          </fieldset>
-          <p class="dd640-warning small">Private browser-session record only. A prepared receipt is erased when the owner, plan, source digest, checklist or follow-up details change. Copy or download is an explicit owner action; this does not create a server-side audit record.</p>
-        </div>
-        <div class="dd640-plan" id="dd647FollowUp" aria-labelledby="dd647Heading">
-          <h4 id="dd647Heading">Workshop Follow-Up Status &amp; Reopen Guidance</h4>
-          <p class="small">Use the private saved-plan source above to review which workshop follow-ups are due, blocked or completed as planning notes. Reopen a saved plan for a deliberate owner edit; no status or inventory is changed from this panel.</p>
-          <div class="dd640-actions" role="group" aria-label="Workshop follow-up status filter">
-            <button type="button" class="btn" data-dd647-filter="open" aria-pressed="true" disabled>Open follow-ups</button>
-            <button type="button" class="btn secondary" data-dd647-filter="due" aria-pressed="false" disabled>Due or overdue</button>
-            <button type="button" class="btn secondary" data-dd647-filter="blocked" aria-pressed="false" disabled>Blocked</button>
-            <button type="button" class="btn secondary" data-dd647-filter="completed" aria-pressed="false" disabled>Reviewed complete</button>
-            <button type="button" class="btn secondary" data-dd647-filter="all" aria-pressed="false" disabled>All plans</button>
-          </div>
-          <p id="dd647Status" role="status" aria-live="polite">Load saved owner plans above before inspecting workshop follow-ups.</p>
-          <p id="dd647Counts" class="small">No verified owner follow-up counts yet.</p>
-          <div id="dd647Rows"><p class="small">No owner plan source has been loaded.</p></div>
-          <div class="dd640-plan" id="dd647Detail" aria-labelledby="dd647DetailHeading" hidden>
-            <h5 id="dd647DetailHeading">Selected workshop follow-up</h5>
-            <p id="dd647Guidance" class="small">Choose a saved plan above for source-checked guidance.</p>
-            <p id="dd647Receipt" class="small">An unsigned local acknowledgement has not been inspected.</p>
-            <div class="dd640-actions"><button type="button" class="btn" id="dd647Inspect" disabled>Inspect local acknowledgement</button><button type="button" class="btn" id="dd647Reopen" disabled>Reopen owner plan to review</button><button type="button" class="btn secondary" id="dd647Clear" disabled>Clear selection</button></div>
-          </div>
-          <p class="dd640-warning small">These are saved planning statuses, not evidence of actual stock, supplier confirmation, completed workshop work, purchase approval or publication. The local acknowledgement is unsigned and disappears after session/source changes; use the original owner editor for any explicit update.</p>
-        </div>
-        <details class="dd640-plan" id="dd648Closure" aria-labelledby="dd648Heading">
-          <summary id="dd648Heading"><strong>Workshop Follow-Up Outcome Review &amp; Source-Linked Closure Checklist</strong></summary>
-          <p class="small">Review dated owner evidence and document a proposed follow-up or closure decision. This is a private, local planning worksheet. No plan is marked completed until an owner separately reviews and saves the original plan.</p>
-          <div class="dd640-plan-fields">
-            <label>Saved owner plan<select id="dd648Plan" class="input" disabled><option value="">Load private owner plans above first</option></select></label>
-            <label>Proposed review outcome<select id="dd648Outcome" class="input" disabled><option value="keep_open">Keep follow-up open</option><option value="follow_up">Schedule another owner follow-up</option><option value="blocked">Recommend blocked review</option><option value="closure_candidate">Recommend manual closure review (not completion)</option></select></label>
-          </div>
-          <div class="dd640-actions"><button type="button" class="btn" id="dd648Link" disabled>Link currently prepared dated-review digest</button><button type="button" class="btn secondary" id="dd648Reset" disabled>Clear closure worksheet</button></div>
-          <p id="dd648Status" role="status" aria-live="polite">Load private owner plans, choose one and prepare its dated-review digest above. No evidence is linked automatically.</p>
-          <fieldset id="dd648Checklist" disabled>
-            <legend>Owner review confirmations (not proof of physical completion)</legend>
-            <label class="dd640-plan small"><input type="checkbox" data-dd648-check="source"> I compared the selected dated review outcomes with the current saved owner plan version.</label>
-            <label class="dd640-plan small"><input type="checkbox" data-dd648-check="stock"> I understand a physical count and qualified order commitments require separate actual-source verification.</label>
-            <label class="dd640-plan small"><input type="checkbox" data-dd648-check="supplier"> I understand supplier availability, purchase approvals and payments are separate controlled actions.</label>
-            <label class="dd640-plan small"><input type="checkbox" data-dd648-check="authority"> I am recording an owner planning recommendation; the checklist cannot itself complete, restock, manufacture or publish Products.</label>
-            <div class="dd640-plan-fields">
-              <label>Owner-supplied review evidence note (8–300 characters)<textarea id="dd648Evidence" class="input" rows="3" minlength="8" maxlength="300" placeholder="Which workbench record or actual count should we check separately?"></textarea></label>
-              <label>Suggested next step (8–180 characters)<textarea id="dd648Next" class="input" rows="3" minlength="8" maxlength="180" placeholder="What remains to do before any owner Save?"></textarea></label>
-              <label>Suggested follow-up date (optional)<input id="dd648Due" class="input" type="date"></label>
-            </div>
-            <label class="small"><input type="checkbox" id="dd648Confirm"> I confirm this is an unsigned, owner-reported planning assessment, not an independently verified closure.</label>
-            <div class="dd640-actions"><button type="button" class="btn" id="dd648Prepare" disabled>Prepare closure-review worksheet</button><button type="button" class="btn" id="dd648Copy" disabled>Copy private review</button><button type="button" class="btn" id="dd648Download" disabled>Download private .txt</button><button type="button" class="btn secondary" id="dd648Reopen" disabled>Reopen owner plan for separate Save</button></div>
-            <label for="dd648Preview" class="small">Read-only proposed review text (no server write)</label>
-            <textarea id="dd648Preview" class="input dd640-copy" rows="9" readonly placeholder="Link a current dated digest and explicitly complete each review acknowledgement to prepare a local worksheet."></textarea>
-          </fieldset>
-          <p class="dd640-warning small">A closure candidate is NOT a completed stock count, receipt, supplier order or completed owner-plan status. The original owner editor controls every deliberate status update; never infer completion or automatically share this private worksheet.</p>
-        </details>
-        <details class="dd640-plan" id="dd649History" aria-labelledby="dd649Heading">
-          <summary id="dd649Heading"><strong>Workshop Closure History &amp; Owner Decision Continuity</strong></summary>
-          <p class="small">Load the signed-in owner's saved, dated review notes on demand. Compare them with an explicitly prepared Build 648 closure worksheet, then copy a decision-note draft for a separate manual save in the review editor above. These are planning recommendations, not stock movements or completed jobs.</p>
-          <div class="dd640-plan-fields">
-            <label>Saved owner plan<select class="input" id="dd649Plan" disabled><option value="">Load private owner plans above first</option></select></label>
-            <label>Show saved outcomes<select class="input" id="dd649Filter" disabled><option value="all">All recorded reviews</option><option value="needs_physical_count">Physical count needed</option><option value="needs_supplier_review">Supplier review needed</option><option value="needs_workshop_review">Workshop review needed</option><option value="follow_up_scheduled">Follow-up scheduled</option><option value="no_change_recommended">No stock change recommended</option><option value="separate_action_recommended">Separate action recommended</option></select></label>
-          </div>
-          <div class="dd640-actions"><button type="button" class="btn" id="dd649Load" disabled>Load saved decision history</button><button type="button" class="btn" id="dd649More" disabled>Load earlier saved reviews</button><button type="button" class="btn secondary" id="dd649Clear" disabled>Clear private history</button></div>
-          <p id="dd649Status" role="status" aria-live="polite">Load owner plans, choose a saved plan, then request its private review history. No background reads or writes occur.</p>
-          <p id="dd649Summary" class="small">No verified saved review timeline yet.</p>
-          <div id="dd649Rows"><p class="small">No saved history loaded.</p></div>
-          <div class="dd640-actions"><button type="button" class="btn" id="dd649Link" disabled>Compare current prepared closure worksheet</button><button type="button" class="btn" id="dd649Reopen" disabled>Reopen original owner plan</button></div>
-          <p id="dd649Compare" class="small">No Build 648 worksheet has been deliberately linked. A local recommendation is never a saved decision.</p>
-          <div class="dd640-actions"><button type="button" class="btn" id="dd649Draft" disabled>Prepare manual decision-note draft</button><button type="button" class="btn" id="dd649Copy" disabled>Copy draft for separate review Save</button></div>
-          <label class="small" for="dd649Preview">Private, unsigned manual review-note draft (not stored or transmitted)</label>
-          <textarea class="input dd640-copy" id="dd649Preview" rows="5" readonly placeholder="Load history and explicitly compare a current prepared worksheet to draft a review note."></textarea>
-          <p class="dd640-warning small">Only a separately authenticated, deliberate Save in the dated review editor can persist a note. Review-note outcomes do not prove stock counts, supplier replies, orders, completed workshop work or plan closure. A saved plan status still changes only in its original editor.</p>
-        </details>
-        <details class="dd640-plan" id="dd650Review" aria-labelledby="dd650Heading">
-          <summary id="dd650Heading"><strong>Workshop Decision Summaries &amp; Saved Timeline Freshness</strong></summary>
-          <p class="small">Review one saved plan's owner-reported decision totals and most recent outcome. Each refresh is a deliberate authenticated, read-only check. No stock, supplier or plan status changes occur.</p>
-          <div class="dd640-plan-fields">
-            <label>Saved owner plan<select id="dd650Plan" class="input" disabled><option value="">Load verified owner plans first</option></select></label>
-          </div>
-          <div class="dd640-actions"><button type="button" class="btn" id="dd650Refresh" disabled>Review current saved decisions</button><button type="button" class="btn secondary" id="dd650Clear" disabled>Clear private summary</button></div>
-          <p id="dd650Status" role="status" aria-live="polite">Load saved owner plans, choose one and deliberately check its private decisions.</p>
-          <h5>Saved decisions (owner-reported, not physical stock)</h5>
-          <p id="dd650Summary" class="small">No current, verified owner decision summary.</p>
-          <h5>Source freshness</h5>
-          <p id="dd650Freshness" class="small">Not checked. Saved decisions may have changed.</p>
-          <h5>Guided owner follow-up</h5>
-          <p id="dd650Guidance" class="small">Choose a plan and explicitly review its private dated decisions.</p>
-          <div class="dd640-actions"><button type="button" class="btn" id="dd650Reopen" disabled>Reopen original owner plan for separate Save</button></div>
-          <p class="dd640-warning small">A fresh review read verifies only the saved owner-note record at that moment. It does not verify workbench completion, physical count, supplier availability, payment, marketplace publication or a live inventory balance. The original editor requires a separate deliberate Save.</p>
-        </details>
-        <details class="dd640-plan" id="dd651Queue" aria-labelledby="dd651Heading">
-          <summary id="dd651Heading"><strong>Workshop Follow-Up Review Queue &amp; Owner Action Handoff</strong></summary>
-          <p class="small">Deliberately check up to five of our saved owner plans at a time. The queue uses owner-only dated recommendations, saved follow-up dates and clear aging filters. Unscanned plans are never represented as reviewed.</p>
-          <div class="dd640-actions">
-            <button type="button" class="btn" id="dd651Scan" disabled>Review next five saved plans</button>
-            <button type="button" class="btn secondary" id="dd651Restart" disabled>Refresh queue from first plan</button>
-            <button type="button" class="btn secondary" id="dd651Clear" disabled>Clear private queue</button>
-          </div>
-          <label class="small">Show checked plans<select class="input" id="dd651Filter" disabled>
-            <option value="all">All checked plans</option><option value="attention">Owner attention recommended</option>
-            <option value="due">Follow-up due / overdue</option><option value="aging">Last recorded decision older than seven days</option>
-            <option value="unreviewed">No saved dated decisions</option><option value="recent">Recorded decision within seven days</option>
-          </select></label>
-          <p id="dd651Status" role="status" aria-live="polite">Load private owner plans, then deliberately scan five at a time.</p>
-          <p id="dd651Coverage" class="small">No saved owner plans inspected yet.</p>
-          <div id="dd651Rows"><p class="small">No private decisions checked. Start a deliberate five-plan scan.</p></div>
-          <h5>Selected owner follow-up</h5>
-          <p id="dd651Selection" class="small">Select a verified scanned plan for manual follow-up.</p>
-          <div class="dd640-actions">
-            <button type="button" class="btn" id="dd651History" disabled>Open in private dated-review history</button>
-            <button type="button" class="btn" id="dd651Reopen" disabled>Reopen original owner plan</button>
-            <button type="button" class="btn secondary" id="dd651Prepare" disabled>Prepare unsigned owner handoff</button>
-            <button type="button" class="btn secondary" id="dd651Copy" disabled>Copy handoff manually</button>
-          </div>
-          <label class="small" for="dd651Preview">Session-only, unsigned follow-up summary (not sent or saved)</label>
-          <textarea class="input dd640-copy" id="dd651Preview" rows="7" readonly placeholder="Choose one verified checked plan and prepare a manual handoff."></textarea>
-          <p class="dd640-warning small">Outcome and aging labels describe saved owner planning records only. Even a recent review cannot verify physical counts, workshop completion, supplier orders, purchasing approval or publication. Every actual change requires its separate original-source workflow.</p>
-        </details>
-        <details class="dd640-plan" id="dd652Views" aria-labelledby="dd652Heading">
-          <summary id="dd652Heading"><strong>Workshop Saved Filter Views &amp; Action Priority Explanations</strong></summary>
-          <p class="small">Save up to five named queue filters in this browser tab session (filter names only, never private decisions). Then review why each explicitly checked owner plan needs attention and return to a selected follow-up without automatically loading, saving or changing records.</p>
-          <div class="dd640-plan-fields">
-            <label>View name (2–30 characters)<input id="dd652Name" class="input" type="text" maxlength="30" placeholder="e.g. Overdue workshop follow-ups" autocomplete="off"></label>
-            <label>Session-saved filter<select id="dd652Saved" class="input" disabled><option value="">Choose a saved filter</option></select></label>
-          </div>
-          <div class="dd640-actions">
-            <button type="button" class="btn" id="dd652Save" disabled>Save current Build 651 filter</button>
-            <button type="button" class="btn secondary" id="dd652Apply" disabled>Apply saved filter</button>
-            <button type="button" class="btn secondary" id="dd652Delete" disabled>Delete selected filter</button>
-          </div>
-          <p id="dd652Status" role="status" aria-live="polite">Load private saved plans, then deliberately scan in Build 651. Saved filters never load source records automatically.</p>
-          <h5>Explainable priorities within checked plans</h5>
-          <div id="dd652Priorities"><p class="small">No verified checked plans yet.</p></div>
-          <h5>Continue source-linked review</h5>
-          <p id="dd652Detail" class="small">Select a checked plan in Build 651 for its latest planning-priority explanation.</p>
-          <div class="dd640-actions"><button type="button" class="btn" id="dd652Continue" disabled>Return to selected owner follow-up</button></div>
-          <p class="dd640-warning small">Priorities describe only the checked planning evidence. A saved view persists filter preferences in this tab session—not private plan identities, notes, statuses or work completion. Rescan explicitly after a refresh. Physical work, purchasing, stock and plan changes retain separate approvals.</p>
-        </details>
-        <details class="dd640-plan" id="dd653Bookmarks" aria-labelledby="dd653Heading">
-          <summary id="dd653Heading"><strong>Workshop Follow-Up Bookmarks, Filter Recovery &amp; Decision Traceability</strong></summary>
-          <p class="small">Bookmark five checked plans in page memory. Recover a prior filter explicitly; no private plans are stored or loaded automatically.</p>
-          <div class="dd640-actions"><button type="button" class="btn" id="dd653Save" disabled>Bookmark selected checked plan</button><button type="button" class="btn secondary" id="dd653Clear" disabled>Clear all bookmarks</button></div>
-          <label>Page-only review bookmark<select class="input" id="dd653Saved" disabled><option value="">Choose a bookmark</option></select></label>
-          <div class="dd640-actions"><button type="button" class="btn secondary" id="dd653Remove" disabled>Remove bookmark</button><button type="button" class="btn" id="dd653Continue" disabled>Continue verified review</button><button type="button" class="btn" id="dd653History" disabled>Open original decision history</button></div>
-          <p id="dd653Trace" class="small">No verified bookmark.</p>
-          <h5>Filter recovery</h5><p id="dd653Recovery" class="small">No owner source.</p>
-          <div class="dd640-actions"><button type="button" class="btn" id="dd653Recover" disabled>Recover previous filter</button><button type="button" class="btn secondary" id="dd653Forget" disabled>Forget filter preference</button></div>
-          <p id="dd653Status" role="status" aria-live="polite">Load and check owner plans first.</p>
-          <p class="dd640-warning small">Bookmarks expire when source facts change. Decision versions are planning evidence, not signed proof or completed work. Use original history Load and editor Save separately.</p>
-        </details>
-        <details class="dd640-plan" id="dd654Review" aria-labelledby="dd654Heading">
-          <summary id="dd654Heading"><strong>Workshop Decision Trace Comparison &amp; Accessible Handoff</strong></summary>
-          <p class="small">Compare a Build 653 bookmark with the manually checked queue. Changed or unseen facts stay on HOLD.</p>
-          <h5>Source comparison</h5>
-          <p id="dd654Comparison" class="small">Select a verified bookmark above.</p>
-          <p id="dd654Freshness" role="status" aria-live="polite">No checked comparison.</p>
-          <div class="dd640-actions"><button id="dd654History" type="button" class="btn" disabled>Review original decision history</button><button id="dd654Prepare" type="button" class="btn secondary" disabled>Prepare unsigned handoff</button><button id="dd654Copy" type="button" class="btn secondary" disabled>Copy reviewed handoff</button></div>
-          <label class="small" for="dd654Preview">Unsigned handoff (manual copy)</label>
-          <textarea id="dd654Preview" class="input dd640-copy" rows="6" readonly placeholder="Verify a bookmark, then prepare a handoff."></textarea>
-          <p class="dd640-warning small">No automatic history, Comms messages or stock changes. Load original history separately. Master Shell trust remains independent.</p>
-        </details>
-        <p class="dd640-warning small">Review notes document recommendations only. Neither a completed review nor a recommended action verifies physical stock or authorizes purchasing, order changes, manufacturing or marketplace publication.</p>
-      </section>
-      <form id="productBrowserSearchForm" class="dd-product-toolbar dd635-toolbar">
-        <label><span class="small">Find a Product</span><input class="input" id="productBrowserQuery" type="search" placeholder="ID, product no., name, SKU or category" autocomplete="off"/></label>
-        <label><span class="small">Category</span><select class="input" id="productBrowserCategory"><option value="">All categories</option><option value="Jewelry">Jewelry</option><option value="Earrings">Earrings</option><option value="Rings">Rings</option><option value="Necklaces">Necklaces</option><option value="Other">Other</option></select></label>
-        <label><span class="small">Sort all matching Products</span><select class="input" id="productBrowserSort"><option value="newest">Newest Product first</option><option value="updated">Recently updated</option><option value="name">Name A–Z</option><option value="price">Price low–high</option></select></label>
-        <label><span class="small">Photo status</span><select class="input" id="productBrowserPhotos"><option value="all">All photos</option><option value="featured-missing">Missing featured photo</option></select></label>
-        <label><span class="small">Finished stock</span><select class="input" id="productBrowserStock"><option value="all">All stock levels</option><option value="attention">Needs attention (0–2)</option><option value="low">Low stock (1–2)</option><option value="out">Out of stock (0)</option><option value="tracked">Tracked Products</option><option value="untracked">Not tracked</option></select></label>
-        <label class="dd-product-rows-label"><span class="small">Rows</span><select class="input" id="productBrowserPageSize"><option value="8" selected>8</option><option value="16">16</option><option value="24">24</option></select></label>
-        <button class="btn" type="submit">Search</button>
-        <button class="btn" id="productBrowserRefresh" type="button">Refresh</button>
-        <button class="btn" id="productBrowserClear" type="button">Clear filters</button>
-      </form>
-      <p class="small">Photo indicators use only the saved Product's featured-image field. Image descriptions, ownership rights and gallery completeness are <strong>not verified in this list</strong>; open <strong>Images</strong> on one Product to review them before external use. Filters and sorting never publish or update a Product.</p>
-      <div id="productBrowserStatus" class="dd-product-status small" aria-live="polite"></div>
+<section class="card dd-products-browser-card" aria-labelledby="dd659Heading" id="dd659Desk">
+<h2 id="dd659Heading">Build 659 · Finished Product, Media &amp; Dovlin Evidence Desk</h2>
+<p class="small">Select a real Product ID from the browser below. <strong>Inspect original evidence</strong> reads one current Product, bounded gallery/rights annotations, production runs and finished lots. No data is read here on page load. Photos and stock records do not, by themselves, prove original rights, safety, physical samples or approval to sell.</p>
+<div class="dd640-plan-fields">
+<label>Original Product ID<input class="input" id="dd659ProductId" type="number" min="1" step="1" placeholder="e.g. 53" /></label>
+<div><button class="btn" type="button" id="dd659Inspect">Inspect original evidence</button></div>
+</div>
+<p id="dd659Status" role="status" aria-live="polite">No original Product has been inspected.</p>
+<div id="dd659Original" class="small"></div>
+<form id="dd659Review" hidden>
+<h3>Private owner evidence review · not a release approval</h3>
+<p class="small">Choose only evidence personally reviewed. Missing original artwork, provenance, material safety or age-appropriate Dovlin plush testing must remain on HOLD. The approved Dovlin design may not be changed except colours; no new character artwork is generated here.</p>
+<div class="dd640-plan-fields">
+<label>Actual finished sample<select class="input" id="dd659Sample"><option value="not_verified">Not personally verified</option><option value="observed_real_sample">I observed an actual finished sample</option></select></label>
+<label>Original media rights<select class="input" id="dd659Rights"><option value="not_verified">Rights not verified</option><option value="original_permission_seen">I inspected the original rights/permission evidence</option></select></label>
+<label>Safety / material documents<select class="input" id="dd659Safety"><option value="not_verified">Documentation not verified</option><option value="original_document_seen">I inspected actual product-appropriate documents</option></select></label>
+<label>Dovlin original approved design<select class="input" id="dd659Art"><option value="not_verified">Original approved artwork not compared</option><option value="approved_original_compared">I compared the physical sample with the approved original artwork</option></select></label>
+<label><input id="dd659Dovlin" type="checkbox"/> Apply original Dovlin character/age 3+ evidence requirements to this Product</label>
+<label>Disposition<select class="input" id="dd659Decision"><option value="hold">Hold for missing proof / next action</option><option value="owner_review_only">Record my review only — external acceptance remains pending</option></select></label>
+<label style="grid-column:1/-1">Factual note and next action (20–500 characters)<textarea class="input" id="dd659Note" rows="3" minlength="20" maxlength="500" required placeholder="What physical sample or original file did we check? What must happen next?"></textarea></label>
+</div>
+<p class="small"><label><input type="checkbox" id="dd659Ack" required/> I understand this saves an internal source-bound owner receipt only. It never changes inventory, publishes a Product, certifies toy safety, verifies external rights or reports completion to the Master Shell.</label></p>
+<div class="dd640-actions"><button class="btn" type="submit" id="dd659Save">Record private owner review</button><button class="btn" type="button" id="dd659FindKey" disabled>Inspect last request key</button></div>
+<p id="dd659SaveStatus" role="status" aria-live="polite">No owner receipt recorded.</p>
+</form>
+</section>
+<section class="card dd-products-browser-card">
+<div class="dd-products-browser-heading"><div><h2>Product Browser</h2><p class="small">Eight compact rows by default. Search by Product name, SKU, slug or category, then sort across the matching catalog. Previous/revisited pages reuse this browser session. Featured image authority comes from the Product row; when a Product has no featured image, use Recover photo to check that Product's existing gallery/media references explicitly.</p></div></div>
+<details class="dd-low-read-details"><summary>Low-read mode / image-recovery details</summary><div class="dd-low-read-note small"><strong>Build 166 foundation, Build 168 session reuse, Build 170 explicit photo recovery:</strong> one bounded Product query for a fresh page. Automatic secondary image recovery reads are zero. Featured image authority comes from that same Product row. Only pressing <strong>Recover photo</strong> may read secondary image authorities, and that request is limited to one Product. Previous/revisited pages may reuse this session at zero D1 cost; Refresh deliberately returns to live authority. R2 is never listed, there are no timers, and failed reads do not loop.</div></details>
+<section class="dd640-inbox" id="dd640ExceptionPanel" aria-labelledby="dd640Heading">
+<h3 id="dd640Heading">Stock Exception Inbox &amp; Restock Planning</h3>
+<p class="small">Scan only when we ask. Each click reviews at most 20 tracked physical active/draft Products against qualifying post-cutover order commitments. Severity is ranked <strong>only within the Products actually scanned</strong>. Other Products, older orders and offsite reservations may need review.</p>
+<p class="dd640-warning small">A planning suggestion is not stock, a purchase order or permission to sell. Never add original lot quantities to Product stock. Correct stock only through a separate, physically verified Restock or Count / History action.</p>
+<div class="dd640-actions"><button class="btn" id="dd640Scan" type="button">Start fresh exception scan (20 Products)</button><button class="btn" id="dd640Next" type="button" disabled>Scan next 20</button></div>
+<p id="dd640Status" role="status" aria-live="polite">Nothing has been scanned. No database read until we choose Start.</p>
+<p id="dd640Scope" class="small">No current verified inbox.</p>
+<div id="dd640Rows"><p class="small">Exceptions will appear after a deliberate scan.</p></div>
+<h4>Owner draft restock worksheet (temporary until saved)</h4>
+<p class="small">Choose Add to draft on an exception, enter planned whole units, possible source and a factual note. First prepare the review text, then explicitly save a private owner draft below or copy it. Neither action changes supplier purchases, stock, orders or external channels.</p>
+<div id="dd640Draft"><p class="small">No Product selected for planning.</p></div>
+<div class="dd640-actions"><button class="btn" id="dd640Prepare" type="button" disabled>Prepare review text</button><button class="btn" id="dd640Copy" type="button" disabled>Copy reviewed text</button><button class="btn" id="dd640Reset" type="button" disabled>Clear draft</button></div>
+<p id="dd640DraftStatus" role="status" aria-live="polite">Draft plans are not stored.</p>
+<label class="small" for="dd640Preview">Review/copy text (read-only; does not publish or save)</label>
+<textarea class="input dd640-copy" id="dd640Preview" rows="6" readonly placeholder="After preparing the draft, our review text appears here."></textarea>
+</section>
+<section class="dd640-inbox" id="dd642PriorityPanel" aria-labelledby="dd642Heading">
+<h3 id="dd642Heading">Owner Restock Follow-Up Priority Board</h3>
+<p class="small">A read-only view of the same private owner plans below. Choose <strong>Load my saved plans</strong> once to populate both sections. Due dates use this device's local calendar day; there are no automatic reminders, background reads, stock movements or supplier orders.</p>
+<p id="dd642Status" role="status" aria-live="polite">Priority board waiting for an explicit owner plan load.</p>
+<div class="dd640-actions" role="group" aria-label="Filter owner plan follow-ups">
+<button class="btn" type="button" data-dd642-filter="all" aria-pressed="true" disabled>All plans</button>
+<button class="btn" type="button" data-dd642-filter="overdue" aria-pressed="false" disabled>Overdue</button>
+<button class="btn" type="button" data-dd642-filter="week" aria-pressed="false" disabled>Due within 7 days</button>
+<button class="btn" type="button" data-dd642-filter="blocked" aria-pressed="false" disabled>Blocked</button>
+<button class="btn" type="button" data-dd642-filter="undated" aria-pressed="false" disabled>Needs a date</button>
+<button class="btn" type="button" data-dd642-filter="completed" aria-pressed="false" disabled>Completed review</button>
+</div>
+<p class="small" id="dd642Counts">No current owner plan evidence.</p>
+<div id="dd642Rows"><p class="small">Load saved plans below to see follow-up priorities.</p></div>
+<p class="dd640-warning small">Review plan opens its owner-only draft for a deliberate update. A completed follow-up does not prove Product stock, actual physical counts, offsite commitments or supplier availability.</p>
+</section>
+<section class="dd640-inbox" id="dd641PlansPanel" aria-labelledby="dd641Heading">
+<h3 id="dd641Heading">Saved Owner Restock Plans &amp; Follow-Ups</h3>
+<p class="small">Private to the signed-in admin owner. Saving a draft is an internal planning note only; it never restocks Products, reserves orders, purchases anything or publishes to marketplaces. Saved stock snapshots may be out of date when reopened.</p>
+<div class="dd640-actions"><button type="button" class="btn" id="dd641Load">Load my saved plans</button><button type="button" class="btn" id="dd641New">Start new from reviewed worksheet</button></div>
+<p class="small" id="dd641Status" role="status" aria-live="polite">No saved plans have been read. Choose Load my saved plans.</p>
+<div id="dd641List"><p class="small">Open owner plans appear here after a deliberate read.</p></div>
+<div class="dd640-plan-fields">
+<label>Plan title (4–100 characters)<input class="input" id="dd641Title" maxlength="100" placeholder="e.g. Weekend rings replenishment"/></label>
+<label>Follow-up date (optional)<input class="input" id="dd641Due" type="date"/></label>
+<label>Status<select class="input" id="dd641State"><option value="draft">Draft</option><option value="follow_up">Owner follow-up</option><option value="blocked">Blocked / investigate</option><option value="completed">Reviewed / completed (no stock movement)</option></select></label>
+<label class="dd640-note">Owner follow-up note (up to 500 characters)<textarea class="input" id="dd641Note" maxlength="500" rows="2" placeholder="What we checked; next owner action"></textarea></label>
+</div>
+<p class="small" id="dd641Items">For a new plan, first review the worksheet above. For an existing plan, select it from the saved list. To change Product quantities, create a fresh worksheet from current stock evidence.</p>
+<div class="dd640-actions"><button type="button" class="btn" id="dd641Save" disabled>Save owner plan</button><button type="button" class="btn" id="dd641Cancel">Clear selection</button></div>
+<p class="dd640-warning small">If another session updates these plans, we must reload and review before saving again. There is no automatic retry. Existing stock, supplier and purchase authorities remain separate.</p>
+</section>
+<section class="dd640-inbox" id="dd643ReviewPanel" aria-labelledby="dd643Heading">
+<h3 id="dd643Heading">Owner Restock Review Notes &amp; Outcome Timeline</h3>
+<p class="small">Record a factual owner decision against an existing saved plan. These private dated notes are separate from its status and Product stock. Earlier Build 641/642 status edits are not retroactively presented as review notes.</p>
+<div class="dd640-plan-fields">
+<label>Saved owner plan<select class="input" id="dd643Plan"><option value="">First load saved plans above</option></select></label>
+<label>Review outcome<select class="input" id="dd643Outcome"><option value="needs_physical_count">Physical count still needed</option><option value="needs_supplier_review">Supplier review still needed</option><option value="needs_workshop_review">Workshop review still needed</option><option value="follow_up_scheduled">Next owner follow-up scheduled</option><option value="no_change_recommended">No stock change recommended</option><option value="separate_action_recommended">Separate controlled action recommended</option></select></label>
+<label class="dd640-note">Factual review note (8–300 characters)<textarea class="input" id="dd643Note" rows="3" maxlength="300" placeholder="What we checked, what remains uncertain, and our next action"></textarea></label>
+</div>
+<div class="dd640-actions"><button type="button" class="btn" id="dd643Load" disabled>Load recent 10 reviews</button><button type="button" class="btn" id="dd643Save" disabled>Record private review note</button><button type="button" class="btn" id="dd643More" disabled>Load earlier reviews</button></div>
+<p id="dd643Status" role="status" aria-live="polite">Load the owner plans above, select one and choose Load recent reviews. No automatic history request is made.</p>
+<div id="dd643Entries"><p class="small">Dated review notes appear after an explicit load.</p></div>
+<div id="dd644ReviewSearch" aria-labelledby="dd644Heading" class="dd640-plan">
+<h4 id="dd644Heading">Find Review Notes &amp; Owner Decision Summary</h4>
+<p class="small">Search up to 50 private reviews of the selected saved owner plan above. The outcome summary covers that plan's full bounded timeline even if the search matches only a few entries. This is a recommendation history, not proof of actual restocking.</p>
+<div class="dd640-plan-fields">
+<label>Find a note (2–80 characters, or blank)<input type="search" class="input" id="dd644Query" maxlength="80" autocomplete="off" placeholder="e.g. bench count, wire supplier"/></label>
+<label>Review outcome<select class="input" id="dd644Outcome"><option value="">All outcomes</option><option value="needs_physical_count">Physical count needed</option><option value="needs_supplier_review">Supplier review needed</option><option value="needs_workshop_review">Workshop review needed</option><option value="follow_up_scheduled">Follow-up scheduled</option><option value="no_change_recommended">No stock change recommended</option><option value="separate_action_recommended">Separate action recommended</option></select></label>
+</div>
+<div class="dd640-actions"><button type="button" class="btn" id="dd644Search" disabled>Search saved reviews</button><button type="button" class="btn secondary" id="dd644Clear">Clear filters</button><button type="button" class="btn" id="dd644More" disabled>Load next matching 10</button></div>
+<p id="dd644Status" role="status" aria-live="polite">Select a saved owner plan and choose Search saved reviews; no background search runs.</p>
+<div id="dd644Summary"><p class="small">The owner decision summary appears after a verified search.</p></div>
+<div id="dd644Results"><p class="small">No review-note search has been requested.</p></div>
+</div>
+<div class="dd640-plan" id="dd645Handoff" aria-labelledby="dd645Heading">
+<h4 id="dd645Heading">Private Restock Review Handoff Digest</h4>
+<p class="small">After an explicit verified search above, choose which dated reviews to include in a workshop follow-up summary. Review the text before copying or downloading. Nothing is sent to suppliers or another application automatically.</p>
+<p id="dd645Status" role="status" aria-live="polite">Search saved reviews above to choose dated entries. No export has been prepared.</p>
+<div id="dd645Choices" role="group" aria-label="Choose dated owner reviews for private handoff"><p class="small">No verified review entries available.</p></div>
+<label class="small"><input type="checkbox" id="dd645IncludeNotes" disabled> Include full private note bodies (off by default)</label>
+<div class="dd640-actions"><button class="btn" type="button" id="dd645Prepare" disabled>Prepare selected digest</button><button class="btn" type="button" id="dd645Copy" disabled>Copy reviewed digest</button><button class="btn" type="button" id="dd645Download" disabled>Download private .txt</button><button class="btn secondary" type="button" id="dd645Clear" disabled>Clear digest</button></div>
+<label class="small" for="dd645Preview">Owner-reviewed handoff text (not transmitted)</label>
+<textarea class="input dd640-copy" id="dd645Preview" rows="9" readonly placeholder="Choose dated reviews and explicitly prepare a handoff digest."></textarea>
+<p class="dd640-warning small">A handoff digest is a dated, potentially stale private planning snapshot, not an inventory count, receipt, order reservation, purchase approval, or permission to publish. Downloaded files and copied text leave this private admin view only when we deliberately share them.</p>
+</div>
+<div class="dd640-plan" id="dd646Workshop" aria-labelledby="dd646Heading">
+<h4 id="dd646Heading">Workshop Handoff Checklist &amp; Owner Acknowledgement</h4>
+<p class="small">First prepare a private digest above. Then explicitly load that digest here, review the safety checklist and record who will follow up. This is a local, unsigned acknowledgement, not proof that physical work was completed.</p>
+<div class="dd640-actions"><button class="btn" id="dd646Load" type="button" disabled>Review prepared digest</button><button class="btn secondary" id="dd646Reset" type="button" disabled>Clear workshop acknowledgement</button></div>
+<p id="dd646Status" role="status" aria-live="polite">No prepared owner digest has been accepted for workshop review.</p>
+<fieldset id="dd646Checklist" disabled>
+<legend>Owner review checklist — checking records understanding, not completion</legend>
+<label class="dd640-plan small"><input type="checkbox" data-dd646-check="source"> I reviewed the selected dated outcomes and their source version.</label>
+<label class="dd640-plan small"><input type="checkbox" data-dd646-check="stock"> A handoff does not verify physical quantities or reserve inventory; a separate count is needed before acting.</label>
+<label class="dd640-plan small"><input type="checkbox" data-dd646-check="supplier"> Supplier availability, prices, orders and payments require separate authorized checks.</label>
+<label class="dd640-plan small"><input type="checkbox" data-dd646-check="authority"> This acknowledgement does not change stock, authorize manufacturing, or publish listings.</label>
+<div class="dd640-plan-fields">
+<label>Next owner follow-up action (8–180 characters)<textarea id="dd646Action" class="input" rows="2" minlength="8" maxlength="180" autocomplete="off" placeholder="e.g. Count copper wire stock with Ree at the bench"></textarea></label>
+<label>Target follow-up date<input id="dd646Due" class="input" type="date"></label>
+</div>
+<label class="small"><input id="dd646Confirm" type="checkbox"> I acknowledge this private workshop review record as the current owner session; it is not a signature or a supplier instruction.</label>
+<div class="dd640-actions"><button class="btn" id="dd646Prepare" type="button" disabled>Prepare local acknowledgement</button><button class="btn" id="dd646Copy" type="button" disabled>Copy acknowledgement</button><button class="btn" id="dd646Download" type="button" disabled>Download private .txt</button></div>
+<label class="small" for="dd646Preview">Local owner acknowledgement receipt (not saved or transmitted)</label>
+<textarea id="dd646Preview" class="input dd640-copy" rows="8" readonly placeholder="Complete the review checklist, next action and date, then prepare an acknowledgement."></textarea>
+</fieldset>
+<p class="dd640-warning small">Private browser-session record only. A prepared receipt is erased when the owner, plan, source digest, checklist or follow-up details change. Copy or download is an explicit owner action; this does not create a server-side audit record.</p>
+</div>
+<div class="dd640-plan" id="dd647FollowUp" aria-labelledby="dd647Heading">
+<h4 id="dd647Heading">Workshop Follow-Up Status &amp; Reopen Guidance</h4>
+<p class="small">Use the private saved-plan source above to review which workshop follow-ups are due, blocked or completed as planning notes. Reopen a saved plan for a deliberate owner edit; no status or inventory is changed from this panel.</p>
+<div class="dd640-actions" role="group" aria-label="Workshop follow-up status filter">
+<button type="button" class="btn" data-dd647-filter="open" aria-pressed="true" disabled>Open follow-ups</button>
+<button type="button" class="btn secondary" data-dd647-filter="due" aria-pressed="false" disabled>Due or overdue</button>
+<button type="button" class="btn secondary" data-dd647-filter="blocked" aria-pressed="false" disabled>Blocked</button>
+<button type="button" class="btn secondary" data-dd647-filter="completed" aria-pressed="false" disabled>Reviewed complete</button>
+<button type="button" class="btn secondary" data-dd647-filter="all" aria-pressed="false" disabled>All plans</button>
+</div>
+<p id="dd647Status" role="status" aria-live="polite">Load saved owner plans above before inspecting workshop follow-ups.</p>
+<p id="dd647Counts" class="small">No verified owner follow-up counts yet.</p>
+<div id="dd647Rows"><p class="small">No owner plan source has been loaded.</p></div>
+<div class="dd640-plan" id="dd647Detail" aria-labelledby="dd647DetailHeading" hidden>
+<h5 id="dd647DetailHeading">Selected workshop follow-up</h5>
+<p id="dd647Guidance" class="small">Choose a saved plan above for source-checked guidance.</p>
+<p id="dd647Receipt" class="small">An unsigned local acknowledgement has not been inspected.</p>
+<div class="dd640-actions"><button type="button" class="btn" id="dd647Inspect" disabled>Inspect local acknowledgement</button><button type="button" class="btn" id="dd647Reopen" disabled>Reopen owner plan to review</button><button type="button" class="btn secondary" id="dd647Clear" disabled>Clear selection</button></div>
+</div>
+<p class="dd640-warning small">These are saved planning statuses, not evidence of actual stock, supplier confirmation, completed workshop work, purchase approval or publication. The local acknowledgement is unsigned and disappears after session/source changes; use the original owner editor for any explicit update.</p>
+</div>
+<details class="dd640-plan" id="dd648Closure" aria-labelledby="dd648Heading">
+<summary id="dd648Heading"><strong>Workshop Follow-Up Outcome Review &amp; Source-Linked Closure Checklist</strong></summary>
+<p class="small">Review dated owner evidence and document a proposed follow-up or closure decision. This is a private, local planning worksheet. No plan is marked completed until an owner separately reviews and saves the original plan.</p>
+<div class="dd640-plan-fields">
+<label>Saved owner plan<select id="dd648Plan" class="input" disabled><option value="">Load private owner plans above first</option></select></label>
+<label>Proposed review outcome<select id="dd648Outcome" class="input" disabled><option value="keep_open">Keep follow-up open</option><option value="follow_up">Schedule another owner follow-up</option><option value="blocked">Recommend blocked review</option><option value="closure_candidate">Recommend manual closure review (not completion)</option></select></label>
+</div>
+<div class="dd640-actions"><button type="button" class="btn" id="dd648Link" disabled>Link currently prepared dated-review digest</button><button type="button" class="btn secondary" id="dd648Reset" disabled>Clear closure worksheet</button></div>
+<p id="dd648Status" role="status" aria-live="polite">Load private owner plans, choose one and prepare its dated-review digest above. No evidence is linked automatically.</p>
+<fieldset id="dd648Checklist" disabled>
+<legend>Owner review confirmations (not proof of physical completion)</legend>
+<label class="dd640-plan small"><input type="checkbox" data-dd648-check="source"> I compared the selected dated review outcomes with the current saved owner plan version.</label>
+<label class="dd640-plan small"><input type="checkbox" data-dd648-check="stock"> I understand a physical count and qualified order commitments require separate actual-source verification.</label>
+<label class="dd640-plan small"><input type="checkbox" data-dd648-check="supplier"> I understand supplier availability, purchase approvals and payments are separate controlled actions.</label>
+<label class="dd640-plan small"><input type="checkbox" data-dd648-check="authority"> I am recording an owner planning recommendation; the checklist cannot itself complete, restock, manufacture or publish Products.</label>
+<div class="dd640-plan-fields">
+<label>Owner-supplied review evidence note (8–300 characters)<textarea id="dd648Evidence" class="input" rows="3" minlength="8" maxlength="300" placeholder="Which workbench record or actual count should we check separately?"></textarea></label>
+<label>Suggested next step (8–180 characters)<textarea id="dd648Next" class="input" rows="3" minlength="8" maxlength="180" placeholder="What remains to do before any owner Save?"></textarea></label>
+<label>Suggested follow-up date (optional)<input id="dd648Due" class="input" type="date"></label>
+</div>
+<label class="small"><input type="checkbox" id="dd648Confirm"> I confirm this is an unsigned, owner-reported planning assessment, not an independently verified closure.</label>
+<div class="dd640-actions"><button type="button" class="btn" id="dd648Prepare" disabled>Prepare closure-review worksheet</button><button type="button" class="btn" id="dd648Copy" disabled>Copy private review</button><button type="button" class="btn" id="dd648Download" disabled>Download private .txt</button><button type="button" class="btn secondary" id="dd648Reopen" disabled>Reopen owner plan for separate Save</button></div>
+<label for="dd648Preview" class="small">Read-only proposed review text (no server write)</label>
+<textarea id="dd648Preview" class="input dd640-copy" rows="9" readonly placeholder="Link a current dated digest and explicitly complete each review acknowledgement to prepare a local worksheet."></textarea>
+</fieldset>
+<p class="dd640-warning small">A closure candidate is NOT a completed stock count, receipt, supplier order or completed owner-plan status. The original owner editor controls every deliberate status update; never infer completion or automatically share this private worksheet.</p>
+</details>
+<details class="dd640-plan" id="dd649History" aria-labelledby="dd649Heading">
+<summary id="dd649Heading"><strong>Workshop Closure History &amp; Owner Decision Continuity</strong></summary>
+<p class="small">Load the signed-in owner's saved, dated review notes on demand. Compare them with an explicitly prepared Build 648 closure worksheet, then copy a decision-note draft for a separate manual save in the review editor above. These are planning recommendations, not stock movements or completed jobs.</p>
+<div class="dd640-plan-fields">
+<label>Saved owner plan<select class="input" id="dd649Plan" disabled><option value="">Load private owner plans above first</option></select></label>
+<label>Show saved outcomes<select class="input" id="dd649Filter" disabled><option value="all">All recorded reviews</option><option value="needs_physical_count">Physical count needed</option><option value="needs_supplier_review">Supplier review needed</option><option value="needs_workshop_review">Workshop review needed</option><option value="follow_up_scheduled">Follow-up scheduled</option><option value="no_change_recommended">No stock change recommended</option><option value="separate_action_recommended">Separate action recommended</option></select></label>
+</div>
+<div class="dd640-actions"><button type="button" class="btn" id="dd649Load" disabled>Load saved decision history</button><button type="button" class="btn" id="dd649More" disabled>Load earlier saved reviews</button><button type="button" class="btn secondary" id="dd649Clear" disabled>Clear private history</button></div>
+<p id="dd649Status" role="status" aria-live="polite">Load owner plans, choose a saved plan, then request its private review history. No background reads or writes occur.</p>
+<p id="dd649Summary" class="small">No verified saved review timeline yet.</p>
+<div id="dd649Rows"><p class="small">No saved history loaded.</p></div>
+<div class="dd640-actions"><button type="button" class="btn" id="dd649Link" disabled>Compare current prepared closure worksheet</button><button type="button" class="btn" id="dd649Reopen" disabled>Reopen original owner plan</button></div>
+<p id="dd649Compare" class="small">No Build 648 worksheet has been deliberately linked. A local recommendation is never a saved decision.</p>
+<div class="dd640-actions"><button type="button" class="btn" id="dd649Draft" disabled>Prepare manual decision-note draft</button><button type="button" class="btn" id="dd649Copy" disabled>Copy draft for separate review Save</button></div>
+<label class="small" for="dd649Preview">Private, unsigned manual review-note draft (not stored or transmitted)</label>
+<textarea class="input dd640-copy" id="dd649Preview" rows="5" readonly placeholder="Load history and explicitly compare a current prepared worksheet to draft a review note."></textarea>
+<p class="dd640-warning small">Only a separately authenticated, deliberate Save in the dated review editor can persist a note. Review-note outcomes do not prove stock counts, supplier replies, orders, completed workshop work or plan closure. A saved plan status still changes only in its original editor.</p>
+</details>
+<details class="dd640-plan" id="dd650Review" aria-labelledby="dd650Heading">
+<summary id="dd650Heading"><strong>Workshop Decision Summaries &amp; Saved Timeline Freshness</strong></summary>
+<p class="small">Review one saved plan's owner-reported decision totals and most recent outcome. Each refresh is a deliberate authenticated, read-only check. No stock, supplier or plan status changes occur.</p>
+<div class="dd640-plan-fields">
+<label>Saved owner plan<select id="dd650Plan" class="input" disabled><option value="">Load verified owner plans first</option></select></label>
+</div>
+<div class="dd640-actions"><button type="button" class="btn" id="dd650Refresh" disabled>Review current saved decisions</button><button type="button" class="btn secondary" id="dd650Clear" disabled>Clear private summary</button></div>
+<p id="dd650Status" role="status" aria-live="polite">Load saved owner plans, choose one and deliberately check its private decisions.</p>
+<h5>Saved decisions (owner-reported, not physical stock)</h5>
+<p id="dd650Summary" class="small">No current, verified owner decision summary.</p>
+<h5>Source freshness</h5>
+<p id="dd650Freshness" class="small">Not checked. Saved decisions may have changed.</p>
+<h5>Guided owner follow-up</h5>
+<p id="dd650Guidance" class="small">Choose a plan and explicitly review its private dated decisions.</p>
+<div class="dd640-actions"><button type="button" class="btn" id="dd650Reopen" disabled>Reopen original owner plan for separate Save</button></div>
+<p class="dd640-warning small">A fresh review read verifies only the saved owner-note record at that moment. It does not verify workbench completion, physical count, supplier availability, payment, marketplace publication or a live inventory balance. The original editor requires a separate deliberate Save.</p>
+</details>
+<details class="dd640-plan" id="dd651Queue" aria-labelledby="dd651Heading">
+<summary id="dd651Heading"><strong>Workshop Follow-Up Review Queue &amp; Owner Action Handoff</strong></summary>
+<p class="small">Deliberately check up to five of our saved owner plans at a time. The queue uses owner-only dated recommendations, saved follow-up dates and clear aging filters. Unscanned plans are never represented as reviewed.</p>
+<div class="dd640-actions">
+<button type="button" class="btn" id="dd651Scan" disabled>Review next five saved plans</button>
+<button type="button" class="btn secondary" id="dd651Restart" disabled>Refresh queue from first plan</button>
+<button type="button" class="btn secondary" id="dd651Clear" disabled>Clear private queue</button>
+</div>
+<label class="small">Show checked plans<select class="input" id="dd651Filter" disabled>
+<option value="all">All checked plans</option><option value="attention">Owner attention recommended</option>
+<option value="due">Follow-up due / overdue</option><option value="aging">Last recorded decision older than seven days</option>
+<option value="unreviewed">No saved dated decisions</option><option value="recent">Recorded decision within seven days</option>
+</select></label>
+<p id="dd651Status" role="status" aria-live="polite">Load private owner plans, then deliberately scan five at a time.</p>
+<p id="dd651Coverage" class="small">No saved owner plans inspected yet.</p>
+<div id="dd651Rows"><p class="small">No private decisions checked. Start a deliberate five-plan scan.</p></div>
+<h5>Selected owner follow-up</h5>
+<p id="dd651Selection" class="small">Select a verified scanned plan for manual follow-up.</p>
+<div class="dd640-actions">
+<button type="button" class="btn" id="dd651History" disabled>Open in private dated-review history</button>
+<button type="button" class="btn" id="dd651Reopen" disabled>Reopen original owner plan</button>
+<button type="button" class="btn secondary" id="dd651Prepare" disabled>Prepare unsigned owner handoff</button>
+<button type="button" class="btn secondary" id="dd651Copy" disabled>Copy handoff manually</button>
+</div>
+<label class="small" for="dd651Preview">Session-only, unsigned follow-up summary (not sent or saved)</label>
+<textarea class="input dd640-copy" id="dd651Preview" rows="7" readonly placeholder="Choose one verified checked plan and prepare a manual handoff."></textarea>
+<p class="dd640-warning small">Outcome and aging labels describe saved owner planning records only. Even a recent review cannot verify physical counts, workshop completion, supplier orders, purchasing approval or publication. Every actual change requires its separate original-source workflow.</p>
+</details>
+<details class="dd640-plan" id="dd652Views" aria-labelledby="dd652Heading">
+<summary id="dd652Heading"><strong>Workshop Saved Filter Views &amp; Action Priority Explanations</strong></summary>
+<p class="small">Save up to five named queue filters in this browser tab session (filter names only, never private decisions). Then review why each explicitly checked owner plan needs attention and return to a selected follow-up without automatically loading, saving or changing records.</p>
+<div class="dd640-plan-fields">
+<label>View name (2–30 characters)<input id="dd652Name" class="input" type="text" maxlength="30" placeholder="e.g. Overdue workshop follow-ups" autocomplete="off"></label>
+<label>Session-saved filter<select id="dd652Saved" class="input" disabled><option value="">Choose a saved filter</option></select></label>
+</div>
+<div class="dd640-actions">
+<button type="button" class="btn" id="dd652Save" disabled>Save current Build 651 filter</button>
+<button type="button" class="btn secondary" id="dd652Apply" disabled>Apply saved filter</button>
+<button type="button" class="btn secondary" id="dd652Delete" disabled>Delete selected filter</button>
+</div>
+<p id="dd652Status" role="status" aria-live="polite">Load private saved plans, then deliberately scan in Build 651. Saved filters never load source records automatically.</p>
+<h5>Explainable priorities within checked plans</h5>
+<div id="dd652Priorities"><p class="small">No verified checked plans yet.</p></div>
+<h5>Continue source-linked review</h5>
+<p id="dd652Detail" class="small">Select a checked plan in Build 651 for its latest planning-priority explanation.</p>
+<div class="dd640-actions"><button type="button" class="btn" id="dd652Continue" disabled>Return to selected owner follow-up</button></div>
+<p class="dd640-warning small">Priorities describe only the checked planning evidence. A saved view persists filter preferences in this tab session—not private plan identities, notes, statuses or work completion. Rescan explicitly after a refresh. Physical work, purchasing, stock and plan changes retain separate approvals.</p>
+</details>
+<details class="dd640-plan" id="dd653Bookmarks" aria-labelledby="dd653Heading">
+<summary id="dd653Heading"><strong>Workshop Follow-Up Bookmarks, Filter Recovery &amp; Decision Traceability</strong></summary>
+<p class="small">Bookmark five checked plans in page memory. Recover a prior filter explicitly; no private plans are stored or loaded automatically.</p>
+<div class="dd640-actions"><button type="button" class="btn" id="dd653Save" disabled>Bookmark selected checked plan</button><button type="button" class="btn secondary" id="dd653Clear" disabled>Clear all bookmarks</button></div>
+<label>Page-only review bookmark<select class="input" id="dd653Saved" disabled><option value="">Choose a bookmark</option></select></label>
+<div class="dd640-actions"><button type="button" class="btn secondary" id="dd653Remove" disabled>Remove bookmark</button><button type="button" class="btn" id="dd653Continue" disabled>Continue verified review</button><button type="button" class="btn" id="dd653History" disabled>Open original decision history</button></div>
+<p id="dd653Trace" class="small">No verified bookmark.</p>
+<h5>Filter recovery</h5><p id="dd653Recovery" class="small">No owner source.</p>
+<div class="dd640-actions"><button type="button" class="btn" id="dd653Recover" disabled>Recover previous filter</button><button type="button" class="btn secondary" id="dd653Forget" disabled>Forget filter preference</button></div>
+<p id="dd653Status" role="status" aria-live="polite">Load and check owner plans first.</p>
+<p class="dd640-warning small">Bookmarks expire when source facts change. Decision versions are planning evidence, not signed proof or completed work. Use original history Load and editor Save separately.</p>
+</details>
+<details class="dd640-plan" id="dd654Review" aria-labelledby="dd654Heading">
+<summary id="dd654Heading"><strong>Workshop Decision Trace Comparison &amp; Accessible Handoff</strong></summary>
+<p class="small">Compare a Build 653 bookmark with the manually checked queue. Changed or unseen facts stay on HOLD.</p>
+<h5>Source comparison</h5>
+<p id="dd654Comparison" class="small">Select a verified bookmark above.</p>
+<p id="dd654Freshness" role="status" aria-live="polite">No checked comparison.</p>
+<div class="dd640-actions"><button id="dd654History" type="button" class="btn" disabled>Review original decision history</button><button id="dd654Prepare" type="button" class="btn secondary" disabled>Prepare unsigned handoff</button><button id="dd654Copy" type="button" class="btn secondary" disabled>Copy reviewed handoff</button></div>
+<label class="small" for="dd654Preview">Unsigned handoff (manual copy)</label>
+<textarea id="dd654Preview" class="input dd640-copy" rows="6" readonly placeholder="Verify a bookmark, then prepare a handoff."></textarea>
+<p class="dd640-warning small">No automatic history, Comms messages or stock changes. Load original history separately. Master Shell trust remains independent.</p>
+</details>
+<p class="dd640-warning small">Review notes document recommendations only. Neither a completed review nor a recommended action verifies physical stock or authorizes purchasing, order changes, manufacturing or marketplace publication.</p>
+</section>
+<form id="productBrowserSearchForm" class="dd-product-toolbar dd635-toolbar">
+<label><span class="small">Find a Product</span><input class="input" id="productBrowserQuery" type="search" placeholder="ID, product no., name, SKU or category" autocomplete="off"/></label>
+<label><span class="small">Category</span><select class="input" id="productBrowserCategory"><option value="">All categories</option><option value="Jewelry">Jewelry</option><option value="Earrings">Earrings</option><option value="Rings">Rings</option><option value="Necklaces">Necklaces</option><option value="Other">Other</option></select></label>
+<label><span class="small">Sort all matching Products</span><select class="input" id="productBrowserSort"><option value="newest">Newest Product first</option><option value="updated">Recently updated</option><option value="name">Name A–Z</option><option value="price">Price low–high</option></select></label>
+<label><span class="small">Photo status</span><select class="input" id="productBrowserPhotos"><option value="all">All photos</option><option value="featured-missing">Missing featured photo</option></select></label>
+<label><span class="small">Finished stock</span><select class="input" id="productBrowserStock"><option value="all">All stock levels</option><option value="attention">Needs attention (0–2)</option><option value="low">Low stock (1–2)</option><option value="out">Out of stock (0)</option><option value="tracked">Tracked Products</option><option value="untracked">Not tracked</option></select></label>
+<label class="dd-product-rows-label"><span class="small">Rows</span><select class="input" id="productBrowserPageSize"><option value="8" selected>8</option><option value="16">16</option><option value="24">24</option></select></label>
+<button class="btn" type="submit">Search</button>
+<button class="btn" id="productBrowserRefresh" type="button">Refresh</button>
+<button class="btn" id="productBrowserClear" type="button">Clear filters</button>
+</form>
+<p class="small">Photo indicators use only the saved Product's featured-image field. Image descriptions, ownership rights and gallery completeness are <strong>not verified in this list</strong>; open <strong>Images</strong> on one Product to review them before external use. Filters and sorting never publish or update a Product.</p>
+<div id="productBrowserStatus" class="dd-product-status small" aria-live="polite"></div>
 
-      <div class="dd-product-table-wrap dd-product-table-compact">
-        <table class="dd-product-table dd-product-table-v165 dd635-table">
-          <thead><tr><th>Image</th><th>Product</th><th>Price / Stock</th><th>Actions</th></tr></thead>
-          <tbody id="productBrowserBody"><tr><td colspan="4" class="dd-empty">Loading one compact Product page…</td></tr></tbody>
-        </table>
-      </div>
-      <section class="dd639-stock-panel" id="dd639StockPanel" aria-labelledby="dd639StockHeading" hidden>
-        <h3 id="dd639StockHeading">Saved stock and order commitments — read-only</h3>
-        <p class="small">Select Availability on a tracked physical Product above. This on-demand review checks one Product, qualifying order commitments, serialized restrictions and finished-lot sources. It does not change stock or call Etsy.</p>
-        <div class="dd639-stock-actions"><button class="btn" type="button" id="dd639StockReload">Refresh saved stock and commitments</button><button class="btn" type="button" id="dd639StockClose">Close</button></div>
-        <p id="dd639StockStatus" role="status" aria-live="polite">Nothing has been read yet.</p>
-        <div id="dd639StockResults" aria-live="polite"></div>
-      </section>
-      <section class="dd638-count-panel" id="dd638CountPanel" aria-labelledby="dd638CountHeading" hidden>
-        <h3 id="dd638CountHeading">Finished inventory — count &amp; recorded history</h3>
-        <p id="dd638CountProduct" role="status" aria-live="polite">Select Count / History on a Product above.</p>
-        <p class="small"><strong>History is partial:</strong> this view lists recorded stock-related admin audit actions, not a complete inventory ledger. Older edits, missing audit records, sales and untracked changes may not appear. Never derive the actual physical count from this list.</p>
-        <div class="dd638-count-actions"><button class="btn" type="button" id="dd638HistoryRefresh">Refresh actual stock &amp; history</button><button class="btn" type="button" id="dd638CountClose">Close</button></div>
-        <p id="dd638HistoryStatus" role="status" aria-live="polite">History has not been loaded.</p>
-        <div id="dd638HistoryRows" class="dd638-history">No history loaded.</div>
-        <h4>Compare a physical count</h4>
-        <p class="small">Check the real finished Products on hand. A correction below committed orders is blocked; we do not change lot provenance, supplier inventory, prices or external channels.</p>
-        <div class="dd638-count-grid">
-          <label><span class="small">Actually counted finished units (0–1,000,000)</span><input id="dd638CountedQuantity" class="input" type="number" min="0" max="1000000" step="1" inputmode="numeric"/></label>
-          <label><span class="small">Factual count/discrepancy note (required)</span><input id="dd638CountNote" class="input" type="text" maxlength="240" placeholder="e.g. Physical count of rings on 8 Nov"/></label>
-        </div>
-        <div class="dd638-count-actions"><button class="btn" type="button" id="dd638CountPreview" disabled>Preview saved vs counted</button></div>
-        <p id="dd638CountStatus" role="status" aria-live="polite">No stock correction has been prepared.</p>
-        <div id="dd638CountComparison" aria-live="polite">Preview a fresh server count before confirming any change.</div>
-        <label class="dd638-count-ack"><input id="dd638CountOwnerConfirmed" type="checkbox" disabled/>We physically counted this Product, verified the before/after quantities and reviewed the existing order-commitment and storefront warnings. Authorize only this one count correction.</label>
-        <button class="btn primary" id="dd638CountApply" type="button" disabled>Confirm reviewed stock correction</button>
-      </section>
-      <section class="dd637-restock" id="dd637RestockPanel" aria-labelledby="dd637RestockHeading" hidden>
-        <h3 id="dd637RestockHeading">Restock one finished Product — verify first</h3>
-        <p id="dd637RestockProduct" role="status" aria-live="polite">Choose Restock on a tracked Product above.</p>
-        <p class="small">Enter only finished units we physically counted or received. This shortcut does not purchase supplies, receive inventory lots, change prices, or synchronize Etsy and other channels. Active Products may show increased availability on our storefront after Save.</p>
-        <div class="dd637-restock-fields">
-          <label><span class="small">Whole finished units added (1–1000)</span><input class="input" id="dd637RestockUnits" type="number" min="1" max="1000" step="1" value="1" inputmode="numeric"/></label>
-          <label><span class="small">Factual source/count note (required)</span><input class="input" id="dd637RestockNote" type="text" maxlength="240" placeholder="e.g. Counted 4 finished rings on workbench"/></label>
-        </div>
-        <div class="dd637-restock-actions"><button class="btn" id="dd637RestockPreview" type="button">Preview fresh stock</button><button class="btn" id="dd637RestockCancel" type="button">Close</button></div>
-        <p id="dd637RestockStatus" role="status" aria-live="polite">Nothing has been changed.</p>
-        <div id="dd637RestockComparison" aria-live="polite">Preview current saved stock before confirming.</div>
-        <label class="dd637-restock-ack"><input id="dd637RestockOwnerConfirmed" type="checkbox" disabled/>We verified the actual finished units, the Product, the before/after total and its storefront impact. Authorize this one stock update only.</label>
-        <button class="btn primary" id="dd637RestockApply" type="button" disabled>Confirm and add reviewed units</button>
-      </section>
-      <section class="dd636-bulk-review" id="dd636BulkPanel" aria-labelledby="dd636BulkHeading">
-        <h3 id="dd636BulkHeading">Bulk draft changes — review first</h3>
-        <p class="small">Select up to eight <strong>draft</strong> Products using the checkboxes above, including across pages. We can change a category or return drafts to Pending review / Needs changes. Changing category always forces Needs changes. Prices, stock, images, publish status and external destinations are excluded.</p>
-        <p id="dd636SelectedCount" role="status" aria-live="polite">No draft Products selected.</p>
-        <div class="dd636-bulk-controls">
-          <label><span class="small">Change category (optional)</span><select id="dd636BulkCategory" class="input"><option value="">Keep each category</option><option value="Jewelry">Jewelry</option><option value="Earrings">Earrings</option><option value="Rings">Rings</option><option value="Necklaces">Necklaces</option><option value="Other">Other</option></select></label>
-          <label><span class="small">Change draft review state (optional)</span><select id="dd636BulkReviewState" class="input"><option value="">Keep review state</option><option value="pending_review">Pending review</option><option value="needs_changes">Needs changes</option></select></label>
-        </div>
-        <div class="dd636-bulk-actions"><button class="btn" type="button" id="dd636Preview" disabled>Preview selected drafts</button><button class="btn" type="button" id="dd636Clear">Clear selection</button></div>
-        <p id="dd636BulkStatus" role="status" aria-live="polite">No changes have been prepared or saved.</p>
-        <div id="dd636PreviewRows">Choose drafts and click Preview to see their actual saved values before deciding.</div>
-        <label class="dd636-bulk-ack"><input id="dd636OwnerConfirmed" type="checkbox" disabled/>I reviewed every Product and every before/after value. I authorize only these draft category/review changes; no external publication.</label>
-        <button class="btn primary" type="button" id="dd636Apply" disabled>Confirm and save reviewed draft changes</button>
-      </section>
-      <details class="card" style="margin:14px 0" id="productBrowser390PriceAuditPanel">
-        <summary>Build 394 · Source-backed Product price review</summary>
-        <p class="small">Some Product prices may have been set to zero by the previous malformed decimal validator. This read-only review never changes prices. Verify intended amounts from invoices or earlier source evidence.</p>
-        <button class="btn" id="productBrowser390PriceAudit" type="button">Review zero-priced Products</button>
-        <p class="small">Browser acceptance: verify the intended amount against original price evidence, enter it in Product Editor, Save, confirm the displayed “CAD price verified” message, then Refresh the Product Browser to verify the persisted price. Do not bulk-restore guessed prices.</p><p id="productBrowser390PriceAuditStatus" class="small" role="status">No database read until you press Review.</p>
-        <div id="productBrowser390PriceAuditRows" style="overflow:auto"></div>
-        <section aria-labelledby="productPriceSourceHeading" style="margin-top:14px">
-          <h3 id="productPriceSourceHeading">Verify approved price source for one Product</h3>
-          <p class="small">Select any Product ID, including a nonzero-priced Product. This does not update the Product or any Etsy listing. The approved original CAD price must come from a real price decision or previously approved catalog record, not from estimated cost.</p>
-          <label for="productPriceSourceId">Product ID</label>
-          <div class="dd-admin-responsive-actions"><input class="input" type="number" min="1" step="1" id="productPriceSourceId" placeholder="Product ID" style="max-width:190px">
-          <button class="btn" id="productPriceSourceLoad" type="button">Read current price &amp; source approval</button></div>
-          <p class="small" id="productPriceSourceMessage" aria-live="polite">No source record loaded.</p>
-          <div id="productPriceSourceMount"></div>
-        </section>
-      </details>
-      <div class="dd-product-pager">
-        <button class="btn" id="productBrowserPrev" type="button" disabled>Previous</button>
-        <span id="productBrowserPageLabel" class="small">Page 1 • 8 per page</span>
-        <button class="btn" id="productBrowserNext" type="button" disabled>Next</button>
-      </div>
-    </section>
-  </div>
+<div class="dd-product-table-wrap dd-product-table-compact">
+<table class="dd-product-table dd-product-table-v165 dd635-table">
+<thead><tr><th>Image</th><th>Product</th><th>Price / Stock</th><th>Actions</th></tr></thead>
+<tbody id="productBrowserBody"><tr><td colspan="4" class="dd-empty">Loading one compact Product page…</td></tr></tbody>
+</table>
+</div>
+<section class="dd639-stock-panel" id="dd639StockPanel" aria-labelledby="dd639StockHeading" hidden>
+<h3 id="dd639StockHeading">Saved stock and order commitments — read-only</h3>
+<p class="small">Select Availability on a tracked physical Product above. This on-demand review checks one Product, qualifying order commitments, serialized restrictions and finished-lot sources. It does not change stock or call Etsy.</p>
+<div class="dd639-stock-actions"><button class="btn" type="button" id="dd639StockReload">Refresh saved stock and commitments</button><button class="btn" type="button" id="dd639StockClose">Close</button></div>
+<p id="dd639StockStatus" role="status" aria-live="polite">Nothing has been read yet.</p>
+<div id="dd639StockResults" aria-live="polite"></div>
+</section>
+<section class="dd638-count-panel" id="dd638CountPanel" aria-labelledby="dd638CountHeading" hidden>
+<h3 id="dd638CountHeading">Finished inventory — count &amp; recorded history</h3>
+<p id="dd638CountProduct" role="status" aria-live="polite">Select Count / History on a Product above.</p>
+<p class="small"><strong>History is partial:</strong> this view lists recorded stock-related admin audit actions, not a complete inventory ledger. Older edits, missing audit records, sales and untracked changes may not appear. Never derive the actual physical count from this list.</p>
+<div class="dd638-count-actions"><button class="btn" type="button" id="dd638HistoryRefresh">Refresh actual stock &amp; history</button><button class="btn" type="button" id="dd638CountClose">Close</button></div>
+<p id="dd638HistoryStatus" role="status" aria-live="polite">History has not been loaded.</p>
+<div id="dd638HistoryRows" class="dd638-history">No history loaded.</div>
+<h4>Compare a physical count</h4>
+<p class="small">Check the real finished Products on hand. A correction below committed orders is blocked; we do not change lot provenance, supplier inventory, prices or external channels.</p>
+<div class="dd638-count-grid">
+<label><span class="small">Actually counted finished units (0–1,000,000)</span><input id="dd638CountedQuantity" class="input" type="number" min="0" max="1000000" step="1" inputmode="numeric"/></label>
+<label><span class="small">Factual count/discrepancy note (required)</span><input id="dd638CountNote" class="input" type="text" maxlength="240" placeholder="e.g. Physical count of rings on 8 Nov"/></label>
+</div>
+<div class="dd638-count-actions"><button class="btn" type="button" id="dd638CountPreview" disabled>Preview saved vs counted</button></div>
+<p id="dd638CountStatus" role="status" aria-live="polite">No stock correction has been prepared.</p>
+<div id="dd638CountComparison" aria-live="polite">Preview a fresh server count before confirming any change.</div>
+<label class="dd638-count-ack"><input id="dd638CountOwnerConfirmed" type="checkbox" disabled/>We physically counted this Product, verified the before/after quantities and reviewed the existing order-commitment and storefront warnings. Authorize only this one count correction.</label>
+<button class="btn primary" id="dd638CountApply" type="button" disabled>Confirm reviewed stock correction</button>
+</section>
+<section class="dd637-restock" id="dd637RestockPanel" aria-labelledby="dd637RestockHeading" hidden>
+<h3 id="dd637RestockHeading">Restock one finished Product — verify first</h3>
+<p id="dd637RestockProduct" role="status" aria-live="polite">Choose Restock on a tracked Product above.</p>
+<p class="small">Enter only finished units we physically counted or received. This shortcut does not purchase supplies, receive inventory lots, change prices, or synchronize Etsy and other channels. Active Products may show increased availability on our storefront after Save.</p>
+<div class="dd637-restock-fields">
+<label><span class="small">Whole finished units added (1–1000)</span><input class="input" id="dd637RestockUnits" type="number" min="1" max="1000" step="1" value="1" inputmode="numeric"/></label>
+<label><span class="small">Factual source/count note (required)</span><input class="input" id="dd637RestockNote" type="text" maxlength="240" placeholder="e.g. Counted 4 finished rings on workbench"/></label>
+</div>
+<div class="dd637-restock-actions"><button class="btn" id="dd637RestockPreview" type="button">Preview fresh stock</button><button class="btn" id="dd637RestockCancel" type="button">Close</button></div>
+<p id="dd637RestockStatus" role="status" aria-live="polite">Nothing has been changed.</p>
+<div id="dd637RestockComparison" aria-live="polite">Preview current saved stock before confirming.</div>
+<label class="dd637-restock-ack"><input id="dd637RestockOwnerConfirmed" type="checkbox" disabled/>We verified the actual finished units, the Product, the before/after total and its storefront impact. Authorize this one stock update only.</label>
+<button class="btn primary" id="dd637RestockApply" type="button" disabled>Confirm and add reviewed units</button>
+</section>
+<section class="dd636-bulk-review" id="dd636BulkPanel" aria-labelledby="dd636BulkHeading">
+<h3 id="dd636BulkHeading">Bulk draft changes — review first</h3>
+<p class="small">Select up to eight <strong>draft</strong> Products using the checkboxes above, including across pages. We can change a category or return drafts to Pending review / Needs changes. Changing category always forces Needs changes. Prices, stock, images, publish status and external destinations are excluded.</p>
+<p id="dd636SelectedCount" role="status" aria-live="polite">No draft Products selected.</p>
+<div class="dd636-bulk-controls">
+<label><span class="small">Change category (optional)</span><select id="dd636BulkCategory" class="input"><option value="">Keep each category</option><option value="Jewelry">Jewelry</option><option value="Earrings">Earrings</option><option value="Rings">Rings</option><option value="Necklaces">Necklaces</option><option value="Other">Other</option></select></label>
+<label><span class="small">Change draft review state (optional)</span><select id="dd636BulkReviewState" class="input"><option value="">Keep review state</option><option value="pending_review">Pending review</option><option value="needs_changes">Needs changes</option></select></label>
+</div>
+<div class="dd636-bulk-actions"><button class="btn" type="button" id="dd636Preview" disabled>Preview selected drafts</button><button class="btn" type="button" id="dd636Clear">Clear selection</button></div>
+<p id="dd636BulkStatus" role="status" aria-live="polite">No changes have been prepared or saved.</p>
+<div id="dd636PreviewRows">Choose drafts and click Preview to see their actual saved values before deciding.</div>
+<label class="dd636-bulk-ack"><input id="dd636OwnerConfirmed" type="checkbox" disabled/>I reviewed every Product and every before/after value. I authorize only these draft category/review changes; no external publication.</label>
+<button class="btn primary" type="button" id="dd636Apply" disabled>Confirm and save reviewed draft changes</button>
+</section>
+<details class="card" style="margin:14px 0" id="productBrowser390PriceAuditPanel">
+<summary>Build 394 · Source-backed Product price review</summary>
+<p class="small">Some Product prices may have been set to zero by the previous malformed decimal validator. This read-only review never changes prices. Verify intended amounts from invoices or earlier source evidence.</p>
+<button class="btn" id="productBrowser390PriceAudit" type="button">Review zero-priced Products</button>
+<p class="small">Browser acceptance: verify the intended amount against original price evidence, enter it in Product Editor, Save, confirm the displayed “CAD price verified” message, then Refresh the Product Browser to verify the persisted price. Do not bulk-restore guessed prices.</p><p id="productBrowser390PriceAuditStatus" class="small" role="status">No database read until you press Review.</p>
+<div id="productBrowser390PriceAuditRows" style="overflow:auto"></div>
+<section aria-labelledby="productPriceSourceHeading" style="margin-top:14px">
+<h3 id="productPriceSourceHeading">Verify approved price source for one Product</h3>
+<p class="small">Select any Product ID, including a nonzero-priced Product. This does not update the Product or any Etsy listing. The approved original CAD price must come from a real price decision or previously approved catalog record, not from estimated cost.</p>
+<label for="productPriceSourceId">Product ID</label>
+<div class="dd-admin-responsive-actions"><input class="input" type="number" min="1" step="1" id="productPriceSourceId" placeholder="Product ID" style="max-width:190px">
+<button class="btn" id="productPriceSourceLoad" type="button">Read current price &amp; source approval</button></div>
+<p class="small" id="productPriceSourceMessage" aria-live="polite">No source record loaded.</p>
+<div id="productPriceSourceMount"></div>
+</section>
+</details>
+<div class="dd-product-pager">
+<button class="btn" id="productBrowserPrev" type="button" disabled>Previous</button>
+<span id="productBrowserPageLabel" class="small">Page 1 • 8 per page</span>
+<button class="btn" id="productBrowserNext" type="button" disabled>Next</button>
+</div>
+</section>
+</div>
 
-  <script src="/public/js/auth.js?v=440"></script>\n  <script src="/public/js/admin-route-usage.js?v=249"></script>
-  <script src="/public/js/admin-products-browser-v162.js?v=170&b635=1&b636=1&b637=1&b638=1&b639=1"></script>
-  <script src="/public/js/admin-product-count-history-638.js?v=638"></script>
-  <script src="/public/js/admin-product-stock-visibility-639.js?v=639"></script>
+<script src="/public/js/auth.js?v=440"></script>\n  <script src="/public/js/admin-route-usage.js?v=249"></script>
+<script src="/public/js/admin-products-browser-v162.js?v=170&b635=1&b636=1&b637=1&b638=1&b639=1"></script>
+<script src="/public/js/admin-product-count-history-638.js?v=638"></script>
+<script src="/public/js/admin-product-stock-visibility-639.js?v=639"></script>
 <script src="/public/js/admin-product-zero-price-review-v390.js?v=390"></script>
 <script src="/public/js/admin-product-price-source-review-v394.js?v=394"></script>
 <script src="/public/js/admin-product-stock-exceptions-640.js?v=640"></script>

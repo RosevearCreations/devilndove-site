@@ -1,3 +1,124 @@
+// Build 680 — owner-supervised profitability exceptions and freshness review.
+(()=>{'use strict';const $=id=>document.getElementById(id);
+async function call(payload,id){
+ if(!window.DDAuth?.apiFetch)throw Error('Admin login required');
+ const url='/api/admin/social-post-queue'+(!payload&&id?'?campaign_queue_id='+encodeURIComponent(id):'');
+ const r=await window.DDAuth.apiFetch(url,payload?{method:'POST',body:JSON.stringify(payload)}:undefined);
+ const d=await r.json();if(!r.ok||!d.ok)throw Error(d.error||'Financial evidence unavailable');return d;
+}
+async function load(){
+ const id=Number($('dd680Campaign').value);
+ if(!id){$('dd680Status').textContent='HOLD · Choose a campaign.';return;}
+ try{const d=await call(null,id),f=d.financial680||{},h=d.financial681||{};
+ $('dd680Status').textContent='Campaign: '+(f.campaign||'—')+' · Master ACK: '+(f.ack||'HOLD')+
+ ' · Connection: '+(f.connection||'HOLD')+' · Source records: '+(f.evidence_count||0)+
+ ' · Stale: '+(f.stale_count||0)+' · Open exceptions: '+(f.exceptions||[]).map(x=>x.reference).join(', ')+
+ ' · Blockers: '+(f.blockers||[]).join(', ')+' · Independent profit certification: HOLD';
+ const open=$('dd681Open');open.replaceChildren(new Option('Choose open exception',''));
+ for(const e of h.exceptions||[])if(!e.resolved_at)open.add(new Option(e.reference+' · '+e.sla,e.queue_id+':'+e.reference));
+ $('dd681Sla').textContent='Audit: '+(h.status||'HOLD')+' · '+(h.exceptions||[]).map(e=>
+   e.reference+' '+e.sla+' (opened '+e.opened_at+', acknowledged '+(e.ack_at||'not yet')+')').join('; ');
+ $('dd681Master').textContent=(h.master_receipts||[]).map(r=>r.state+' at '+r.recorded_at+' · Master '+r.master_revision).join('; ')||'No signed Master receipt recorded. Connection HOLD.';
+ $('dd681History').textContent=(h.owner_history||[]).map(r=>r.kind+' · '+r.recorded_at).join('; ')||'No recorded owner acceptance.';
+ }catch(e){$('dd680Status').textContent='HOLD · '+e.message;}
+}
+document.addEventListener('DOMContentLoaded',()=>{
+ if(!$('dd680-ops'))return;
+ (async()=>{try{const d=await call(),names=new Set();
+ for(const q of d.queue||[])if(q.utm_campaign&&!names.has(q.utm_campaign)){
+ names.add(q.utm_campaign);$('dd680Campaign').add(new Option(q.utm_campaign+' · #'+q.social_post_queue_id,q.social_post_queue_id));
+ }}catch(e){$('dd680Status').textContent='HOLD · '+e.message;}})();
+ $('dd680Campaign').addEventListener('change',()=>void load());
+ $('dd680Refresh').addEventListener('click',()=>void load());
+ $('dd681Acknowledge').addEventListener('click',async()=>{
+  const [qid,ref]=String($('dd681Open').value||'').split(':');
+  $('dd681Result').textContent='Checking open exception and owner authority…';
+  try{
+   const d=await call({action:'owner_exception_ack_681',social_post_queue_id:Number(qid),
+    exception_reference:ref,owner_reviewed:$('dd681OwnerReview').checked});
+   $('dd681Result').textContent=(d.result?.status||'Recorded')+' · Financial certification remains HOLD.';
+   $('dd681OwnerReview').checked=false;await load();
+  }catch(e){$('dd681Result').textContent='HOLD · '+e.message;}
+ });
+
+ $('dd680Exception').addEventListener('submit',async e=>{
+ e.preventDefault();$('dd680Result').textContent='Recording owner decision…';
+ try{const d=await call({action:'owner_profit_exception_680',social_post_queue_id:Number($('dd680Campaign').value),
+ exception_reference:$('dd680Ref').value.trim(),kind:$('dd680Kind').value,
+ reason:$('dd680Kind').value==='open'?$('dd680Reason').value.trim():'',
+ resolution:$('dd680Kind').value==='resolve'?$('dd680Reason').value.trim():'',
+ owner_reviewed:$('dd680Owner').checked});
+ $('dd680Result').textContent=(d.result?.status||'Saved')+' · Independent certification still HOLD.';
+ $('dd680Owner').checked=false;await load();
+ }catch(e){$('dd680Result').textContent='HOLD · '+e.message;}
+ });
+});})();
+
+// Build 679 — independently signed order costs and source-level net contribution.
+(() => {
+  'use strict';
+  const $=id=>document.getElementById(id);
+  async function request(payload,id){
+    if(!window.DDAuth?.apiFetch)throw Error('Authenticated owner session required');
+    const url='/api/admin/social-post-queue'+(!payload&&id?'?campaign_queue_id='+encodeURIComponent(id):'');
+    const response=await window.DDAuth.apiFetch(url,payload?{method:'POST',body:JSON.stringify(payload)}:undefined);
+    const body=await response.json();
+    if(!response.ok||!body.ok)throw Error(body.error||'Source verification unavailable');
+    return body;
+  }
+  const cad=v=>(Number(v||0)/100).toFixed(2);
+  async function refresh(){
+    const id=Number($('dd679Campaign').value);
+    if(!id){$('dd679Summary').textContent='HOLD · Select a campaign.';return;}
+    try{
+      const data=await request(null,id),r=data.financial679||{},m=r.financial;
+      $('dd679Summary').textContent=[
+        'Source status: '+(r.status||'HOLD'),
+        'Orders: '+(r.orders_seen||0),'Verified order-cost records: '+(r.product_cost_receipts_seen||0),
+        m?'Tax-excluded receipts CAD '+cad(m.tax_excluded_receipts_cents):'Receipts HOLD',
+        m?'Advertising CAD '+cad(m.verified_ad_cost_cents):'Advertising HOLD',
+        m?'Other costs CAD '+cad(m.verified_operating_cost_cents):'Operating costs HOLD',
+        m?'Source net contribution CAD '+cad(m.net_contribution_cents):'Net contribution HOLD',
+        'Master: '+(r.master_handoff||'HOLD'),
+        'Evidence blockers: '+(r.blockers||[]).join(', ')
+      ].join(' · ');
+    }catch(error){$('dd679Summary').textContent='HOLD · '+error.message;}
+  }
+  document.addEventListener('DOMContentLoaded',()=>{
+    if(!$('dd679-net'))return;
+    (async()=>{try{const d=await request(),seen=new Set();for(const item of d.queue||[]){
+      if(item.utm_campaign&&!seen.has(item.utm_campaign)){
+        seen.add(item.utm_campaign);
+        $('dd679Campaign').add(new Option(item.utm_campaign+' · #'+item.social_post_queue_id,item.social_post_queue_id));
+      }
+    }}catch(error){$('dd679Summary').textContent='HOLD · '+error.message;}})();
+    $('dd679Campaign').addEventListener('change',()=>void refresh());
+    $('dd679Reconcile').addEventListener('click',()=>void refresh());
+    $('dd679CostForm').addEventListener('submit',async event=>{
+      event.preventDefault();$('dd679CostStatus').textContent='Checking independently signed cost evidence…';
+      const payload={action:'verify_product_cost_679',social_post_queue_id:Number($('dd679Campaign').value),
+        order_id:Number($('dd679Order').value),axis:$('dd679Axis').value,
+        amount_cents:Math.round(Number($('dd679Amount').value)*100),
+        reference:$('dd679Reference').value.trim(),issuer:$('dd679Issuer').value.trim(),
+        source_sha256:$('dd679Digest').value.trim(),observed_at:$('dd679Observed').value.trim(),
+        verifier_signature:$('dd679Signature').value.trim(),owner_reviewed:$('dd679OwnerReview').checked};
+      try{const d=await request(payload);
+        $('dd679CostStatus').textContent=(d.result?.status||'Cost recorded')+' · No independent Master admission claimed.';
+        $('dd679Signature').value='';$('dd679OwnerReview').checked=false;await refresh();}
+      catch(error){$('dd679CostStatus').textContent='HOLD · '+error.message;}
+    });
+    $('dd679Signoff').addEventListener('submit',async event=>{
+      event.preventDefault();$('dd679SignoffStatus').textContent='Rechecking source settlement and costs…';
+      try{const d=await request({action:'owner_net_signoff_679',
+        social_post_queue_id:Number($('dd679Campaign').value),
+        owner_reviewed:$('dd679Reviewed').checked,confirm_scope:$('dd679Scope').checked});
+        $('dd679SignoffStatus').textContent=(d.result?.status||'Reviewed')+' · Master independent admission HOLD.';
+        $('dd679Reviewed').checked=false;$('dd679Scope').checked=false;await refresh();}
+      catch(error){$('dd679SignoffStatus').textContent='HOLD · '+error.message;}
+    });
+  });
+})();
+
 // Build 678 — exact signed expenses, read-only campaign reconciliation, explicit owner signoff.
 (() => {
   'use strict';
