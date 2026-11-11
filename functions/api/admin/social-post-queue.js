@@ -1110,6 +1110,49 @@ async function scheduleCampaign674(db,adminUser,payload){
     WHERE social_post_queue_id=?`).bind(campaign,date,trimTo(payload.schedule_timezone||'UTC',64),adminUser.user_id,id).run();
   return {social_post_queue_id:id,campaign_name:campaign,scheduled_at:date,approval_reset:true,publication_performed:false};
 }
+// Build 675: provider metrics are accepted only from a fresh, authenticated
+// read-only lookup of a previously acknowledged publication ID.
+async function verifyEngagement675(context,db,adminUser,payload){
+  const queueId=Number(payload.social_post_queue_id),platform=slugKey(payload.platform_key||'');
+  if(!Number.isSafeInteger(queueId)||queueId<1||!['facebook','x'].includes(platform))
+    return {verified:false,status:'provider_metrics_unsupported',publication_performed:false};
+  const receipt=await db.prepare(`SELECT external_post_id FROM social_post_attempts WHERE social_post_queue_id=?
+    AND platform_key=? AND attempt_status IN ('api_posted','receipt_verified') AND COALESCE(external_post_id,'')<>''
+    ORDER BY social_post_attempt_id DESC LIMIT 1`).bind(queueId,platform).first();
+  if(!receipt)return {verified:false,status:'publication_receipt_missing',publication_performed:false};
+  const id=String(receipt.external_post_id),env=context.env,meta=platform==='x'
+    ?{url:`https://api.x.com/2/tweets/${encodeURIComponent(id)}?tweet.fields=public_metrics`,token:envText(env,'X_USER_ACCESS_TOKEN','TWITTER_USER_ACCESS_TOKEN')}
+    :{url:`https://graph.facebook.com/${envText(env,'META_GRAPH_API_VERSION')||'v22.0'}/${encodeURIComponent(id)}?fields=id,reactions.limit(0).summary(true),comments.limit(0).summary(true)`,token:envText(env,'FACEBOOK_PAGE_ACCESS_TOKEN','META_PAGE_ACCESS_TOKEN')};
+  if(!meta.token)return {verified:false,status:'provider_credentials_missing',publication_performed:false};
+  try{
+    const res=await fetch(meta.url,{headers:{Authorization:`Bearer ${meta.token}`},signal:AbortSignal.timeout(6000)});
+    const json=await res.json().catch(()=>({})),item=json.data||json;
+    if(!res.ok||String(item.id||'')!==id)return {verified:false,status:'provider_metrics_hold',publication_performed:false};
+    const values=platform==='x'?{likes:item.public_metrics?.like_count,replies:item.public_metrics?.reply_count,
+      shares:item.public_metrics?.retweet_count,quotes:item.public_metrics?.quote_count}
+      :{likes:item.reactions?.summary?.total_count,replies:item.comments?.summary?.total_count};
+    const metrics={};for(const [key,value] of Object.entries(values))
+      if(Number.isSafeInteger(value)&&value>=0)metrics[key]=value;
+    if(!Object.keys(metrics).length)return {verified:false,status:'provider_metrics_missing',publication_performed:false};
+    const observedAt=new Date().toISOString();
+    await recordApiAttempt(db,adminUser,queueId,platform,'engagement_verified',{
+      external_post_id:id,response:{provider_id:id,metrics,observed_at:observedAt,provenance:'read_only_provider_api'},
+      notes:'Verified source-scoped engagement snapshot; not sales or ROI.'
+    });
+    return {verified:true,status:'engagement_verified',platform,metrics,observed_at:observedAt,publication_performed:false};
+  }catch{return {verified:false,status:'provider_metrics_unavailable',publication_performed:false};}
+}
+async function engagement675(db){
+  const data=rows(await db.prepare(`SELECT a.social_post_queue_id,a.platform_key,a.external_post_id,a.response_json,a.attempted_at,
+    q.utm_campaign FROM social_post_attempts a JOIN social_post_queue q ON q.social_post_queue_id=a.social_post_queue_id
+    WHERE a.attempt_status='engagement_verified' ORDER BY a.social_post_attempt_id DESC LIMIT 100`).all().catch(()=>({results:[]})));
+  const seen=new Set(),snapshots=[];
+  for(const item of data){const key=item.social_post_queue_id+':'+item.platform_key;if(seen.has(key))continue;seen.add(key);
+    const evidence=safeJson(item.response_json,{});if(evidence.provenance!=='read_only_provider_api')continue;
+    snapshots.push({social_post_queue_id:item.social_post_queue_id,platform:item.platform_key,campaign:item.utm_campaign,
+      provider_id:item.external_post_id,metrics:evidence.metrics,observed_at:evidence.observed_at});}
+  return {snapshots,roi_status:'UNAVAILABLE_NO_VERIFIED_ATTRIBUTED_REVENUE_AND_SPEND',financial_claims:false};
+}
 async function verifyPublication673(context,db,adminUser,payload){
   const id=Number(payload.social_post_queue_id),platform=slugKey(payload.platform_key||'');
   if(!Number.isSafeInteger(id)||id<1||!['facebook','instagram','pinterest','x'].includes(platform))throw Error('Select a valid queue and supported social channel.');
@@ -1203,7 +1246,7 @@ export async function onRequestGet(context) {
   if (!db) return jsonResponse({ ok: false, error: 'Database binding is not configured.' }, 500);
   try {
     const data = await summarize(db, context.env);
-    return jsonResponse({ ok: true, ...data, receipts673:await receipts673(db), queue: data.queue.map(normalizeQueueRow), mode: 'review_first_api_when_configured' }, 200, { 'Cache-Control': 'no-store' });
+    return jsonResponse({ ok: true, ...data, receipts673:await receipts673(db),engagement675:await engagement675(db), queue: data.queue.map(normalizeQueueRow), mode: 'review_first_api_when_configured' }, 200, { 'Cache-Control': 'no-store' });
   } catch (error) {
     await captureRuntimeIncident(context.env, context.request, {
       incident_scope: 'admin_social',
@@ -1244,6 +1287,7 @@ export async function onRequestPost(context) {
     else if (action === 'verify_publication_673') result = await verifyPublication673(context,db,adminUser,payload);
     else if (action === 'retry_failed_673') result = await retryFailed673(context,db,adminUser,payload);
     else if (action === 'campaign_schedule_674') result = await scheduleCampaign674(db,adminUser,payload);
+    else if (action === 'verify_engagement_675') result = await verifyEngagement675(context,db,adminUser,payload);
     else throw new Error(`Unsupported social queue action: ${action}`);
 
     await auditAdminAction(context.env, context.request, adminUser, {
