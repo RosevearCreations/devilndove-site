@@ -9,11 +9,17 @@ async function call(payload,id){
 async function load(){
  const id=Number($('dd680Campaign').value);
  if(!id){$('dd680Status').textContent='HOLD · Choose a campaign.';return;}
- try{const f=(await call(null,id)).financial680||{};
+ try{const d=await call(null,id),f=d.financial680||{},h=d.financial681||{};
  $('dd680Status').textContent='Campaign: '+(f.campaign||'—')+' · Master ACK: '+(f.ack||'HOLD')+
  ' · Connection: '+(f.connection||'HOLD')+' · Source records: '+(f.evidence_count||0)+
  ' · Stale: '+(f.stale_count||0)+' · Open exceptions: '+(f.exceptions||[]).map(x=>x.reference).join(', ')+
  ' · Blockers: '+(f.blockers||[]).join(', ')+' · Independent profit certification: HOLD';
+ const open=$('dd681Open');open.replaceChildren(new Option('Choose open exception',''));
+ for(const e of h.exceptions||[])if(!e.resolved_at)open.add(new Option(e.reference+' · '+e.sla,e.queue_id+':'+e.reference));
+ $('dd681Sla').textContent='Audit: '+(h.status||'HOLD')+' · '+(h.exceptions||[]).map(e=>
+   e.reference+' '+e.sla+' (opened '+e.opened_at+', acknowledged '+(e.ack_at||'not yet')+')').join('; ');
+ $('dd681Master').textContent=(h.master_receipts||[]).map(r=>r.state+' at '+r.recorded_at+' · Master '+r.master_revision).join('; ')||'No signed Master receipt recorded. Connection HOLD.';
+ $('dd681History').textContent=(h.owner_history||[]).map(r=>r.kind+' · '+r.recorded_at).join('; ')||'No recorded owner acceptance.';
  }catch(e){$('dd680Status').textContent='HOLD · '+e.message;}
 }
 document.addEventListener('DOMContentLoaded',()=>{
@@ -24,6 +30,17 @@ document.addEventListener('DOMContentLoaded',()=>{
  }}catch(e){$('dd680Status').textContent='HOLD · '+e.message;}})();
  $('dd680Campaign').addEventListener('change',()=>void load());
  $('dd680Refresh').addEventListener('click',()=>void load());
+ $('dd681Acknowledge').addEventListener('click',async()=>{
+  const [qid,ref]=String($('dd681Open').value||'').split(':');
+  $('dd681Result').textContent='Checking open exception and owner authority…';
+  try{
+   const d=await call({action:'owner_exception_ack_681',social_post_queue_id:Number(qid),
+    exception_reference:ref,owner_reviewed:$('dd681OwnerReview').checked});
+   $('dd681Result').textContent=(d.result?.status||'Recorded')+' · Financial certification remains HOLD.';
+   $('dd681OwnerReview').checked=false;await load();
+  }catch(e){$('dd681Result').textContent='HOLD · '+e.message;}
+ });
+
  $('dd680Exception').addEventListener('submit',async e=>{
  e.preventDefault();$('dd680Result').textContent='Recording owner decision…';
  try{const d=await call({action:'owner_profit_exception_680',social_post_queue_id:Number($('dd680Campaign').value),

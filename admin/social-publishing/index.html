@@ -2,289 +2,300 @@
 <html lang="en">
 <head>
 <meta name="p:domain_verify" content="416962017515ec25302304e522b8bd8a"/>
-  <meta charset="utf-8">
-  <meta content="width=device-width,initial-scale=1" name="viewport">
-  <meta name="robots" content="noindex,nofollow">
-  <link href="/css/styles.css" rel="stylesheet">
-  <link href="/css/admin-social-oauth-acceptance-v85.css" rel="stylesheet">
-  <link href="/assets/mark.png" rel="icon" type="image/png">
-  <title>Social Publishing — Devil n Dove Admin</title>
-  <meta content="Review-first social publishing, controlled OAuth acceptance, product social drafts, privacy checks, and UTM tracking." name="description">
+<meta charset="utf-8">
+<meta content="width=device-width,initial-scale=1" name="viewport">
+<meta name="robots" content="noindex,nofollow">
+<link href="/css/styles.css" rel="stylesheet">
+<link href="/css/admin-social-oauth-acceptance-v85.css" rel="stylesheet">
+<link href="/assets/mark.png" rel="icon" type="image/png">
+<title>Social Publishing — Devil n Dove Admin</title>
+<meta content="Review-first social publishing, controlled OAuth acceptance, product social drafts, privacy checks, and UTM tracking." name="description">
 </head>
 <body>
-  <div class="container admin-shell social-publishing-page">
-    <div class="nav">
-      <div class="brand"><img alt="Devil n Dove logo" src="/assets/logo-clear-nav.webp"><div><div style="font-weight:800;letter-spacing:.2px;line-height:1.1">Devil n Dove</div><div class="small">Social Publishing</div></div></div>
-      <div class="links"><a href="/">Home</a><a href="/shop/">Shop</a><a href="/admin/">Admin</a><a href="/admin/operations/">Operations</a><button class="btn" data-nav-logout type="button">Logout</button></div>
-    </div>
-    <div class="hero">
-      <div>
-        <h1>Social Publishing & Product Automation</h1>
-        <p>Turn approved products into reviewable social drafts, keep privacy checks in front of publishing, and connect one selected Development provider through the protected OAuth acceptance lane.</p>
-      </div>
-    </div>
+<div class="container admin-shell social-publishing-page">
+<div class="nav">
+<div class="brand"><img alt="Devil n Dove logo" src="/assets/logo-clear-nav.webp"><div><div style="font-weight:800;letter-spacing:.2px;line-height:1.1">Devil n Dove</div><div class="small">Social Publishing</div></div></div>
+<div class="links"><a href="/">Home</a><a href="/shop/">Shop</a><a href="/admin/">Admin</a><a href="/admin/operations/">Operations</a><button class="btn" data-nav-logout type="button">Logout</button></div>
+</div>
+<div class="hero">
+<div>
+<h1>Social Publishing & Product Automation</h1>
+<p>Turn approved products into reviewable social drafts, keep privacy checks in front of publishing, and connect one selected Development provider through the protected OAuth acceptance lane.</p>
+</div>
+</div>
 
-    <figure class="card social-workflow-visual" aria-label="Social publishing workflow illustration">
-      <img src="/assets/assets/images/brand-v3/social-publishing-placeholder.webp" alt="Admin-only explanatory illustration of reviewed content, privacy/preflight review, and explicit publish.">
-      <figcaption class="small">Admin-only explanatory illustration. It is not publication evidence and is never used on product pages, social posts, Open Graph cards, or structured data.</figcaption>
-    </figure>
-    <nav class="admin-department-links card social-publishing-links" aria-label="Social publishing navigation">
-      <a class="btn" href="/admin/">Dashboard</a>
-      <a class="btn" href="/admin/catalog/">Catalog</a>
-      <a class="btn" href="/admin/catalog-media/">Catalog Media</a>
-      <a class="btn" href="/admin/content-studio/">Content Studio</a>
-      <a class="btn" href="/admin/creative-assets/">CAIP</a>
-      <a class="btn" href="/admin/release-preflight/">Release Preflight</a>
-      <a class="btn" href="/admin/operations/">Operations</a>
-    </nav>
-    <section class="card" id="dd671-social-creator" aria-labelledby="dd671-title">
-      <p class="eyebrow">Build 671 · Unified Socials creator</p><h2 id="dd671-title">Create a story from workshop media</h2>
-      <p>Choose an active or previous CAIP project, tag its existing uploaded assets, and create a private review draft. Original uploads stay in CAIP; tags are references, not public media links. A reviewed public derivative and verified account are required before direct posting.</p>
-      <div class="dd671-layout"><div><label for="dd671Project">CAIP project</label><select id="dd671Project" class="input"><option value="">Load projects first</option></select><div class="dd671-links"><a href="/admin/creative-assets/">Upload or review in CAIP</a><a href="/admin/caip-content-handoff/">Prepare Content Studio handoff</a></div><fieldset id="dd671Assets"><legend>Tag source media</legend><p class="small">Load a project to see its source assets.</p></fieldset></div><form id="dd671Form"><label for="dd671Title">Post title</label><input class="input" id="dd671Title" maxlength="140" required placeholder="What we made in the workshop"><label for="dd671Summary">Story / caption notes</label><textarea class="input" id="dd671Summary" rows="4" maxlength="1200" required placeholder="What happened, what we learned, or what went sideways..."></textarea><fieldset><legend>Target social channels</legend><div class="dd671-platforms"><label><input type="checkbox" value="facebook"> Facebook Page</label><label><input type="checkbox" value="instagram"> Instagram</label><label><input type="checkbox" value="pinterest"> Pinterest</label><label><input type="checkbox" value="tiktok"> TikTok</label><label><input type="checkbox" value="x"> X</label><label><input type="checkbox" value="youtube"> YouTube</label></div></fieldset><label class="dd671-confirm"><input type="checkbox" id="dd671Confirm" required> I will review rights, consent, captions and public media before any publication.</label><button class="btn primary" type="submit" id="dd671Create" disabled>Create review draft</button><p id="dd671Status" role="status" aria-live="polite">Load genuine CAIP projects to begin.</p></form></div>
-      <p class="small">This workflow never publishes when a draft is created. For explicit API publishing after approval, use the existing Social Post Queue below; unconfigured platforms remain manual-only.</p>
-    </section>
-    <section class="card" id="dd672-owner-gate" aria-labelledby="dd672-title">
-      <p class="eyebrow">Build 672 · Owner-supervised publication readiness</p><h2 id="dd672-title">Approve a public derivative and verify social accounts</h2>
-      <p>Original CAIP uploads stay private. Only a real public derivative whose canonical CAIP rights, consent, privacy approval and URL match may be linked to a draft. This action does not publish.</p>
-      <div class="dd671-layout"><div><h3>1. Live destination identity check</h3><button class="btn" id="dd672Verify" type="button">Verify configured social accounts</button><div id="dd672Accounts" aria-live="polite"><p class="small">No live provider identity check requested. Credentials alone do not prove a valid account.</p></div></div><form id="dd672Derivative"><h3>2. Approve exact public media</h3><label>CAIP social draft<select class="input" id="dd672Queue" required><option value="">Load draft queue</option></select></label><button class="btn secondary" id="dd672LoadQueue" type="button">Refresh drafts</button><label>CAIP asset ID<input class="input" id="dd672Asset" type="number" min="1" required></label><label>Canonical HTTPS public derivative URL<input class="input" id="dd672Url" type="url" pattern="https://.*" required placeholder="https://..."></label><label class="dd671-confirm"><input id="dd672Reviewed" type="checkbox" required> We reviewed the exact derivative and caption for public use.</label><label class="dd671-confirm"><input id="dd672Owner" type="checkbox" required> Owner approval: confirm source rights, consent, privacy and no customer identifiers.</label><button class="btn primary" type="submit">Record derivative approval</button><p id="dd672Status" role="status" aria-live="polite">An approval requires matching canonical CAIP evidence. Missing proof stays HOLD.</p></form></div>
-      <p class="small">3. After approval, use the existing Social Post Queue below to inspect the preview, check the Privacy Guard and explicitly publish to only those verified, authorized platforms. TikTok and YouTube remain manual-only.</p>
-    </section>
-    <style>.dd671-layout{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:20px}.dd671-layout label{display:block;margin:12px 0 6px}.dd671-layout .input{width:100%;box-sizing:border-box}.dd671-layout fieldset{margin:14px 0;padding:14px;border:1px solid #9b82b0;border-radius:12px}.dd671-layout fieldset label{display:flex;align-items:center;gap:8px}.dd671-links{display:flex;gap:12px;flex-wrap:wrap;margin:10px 0}.dd671-platforms{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:4px}.dd671-asset{display:flex!important;align-items:flex-start!important;gap:10px;margin:8px 0!important;padding:8px;border:1px solid #6d587c;border-radius:9px}.dd671-asset small{display:block;overflow-wrap:anywhere}.dd671-confirm{display:flex!important;align-items:start;gap:8px}@media(max-width:750px){.dd671-layout{grid-template-columns:1fr}}</style>
+<figure class="card social-workflow-visual" aria-label="Social publishing workflow illustration">
+<img src="/assets/assets/images/brand-v3/social-publishing-placeholder.webp" alt="Admin-only explanatory illustration of reviewed content, privacy/preflight review, and explicit publish.">
+<figcaption class="small">Admin-only explanatory illustration. It is not publication evidence and is never used on product pages, social posts, Open Graph cards, or structured data.</figcaption>
+</figure>
+<nav class="admin-department-links card social-publishing-links" aria-label="Social publishing navigation">
+<a class="btn" href="/admin/">Dashboard</a>
+<a class="btn" href="/admin/catalog/">Catalog</a>
+<a class="btn" href="/admin/catalog-media/">Catalog Media</a>
+<a class="btn" href="/admin/content-studio/">Content Studio</a>
+<a class="btn" href="/admin/creative-assets/">CAIP</a>
+<a class="btn" href="/admin/release-preflight/">Release Preflight</a>
+<a class="btn" href="/admin/operations/">Operations</a>
+</nav>
+<section class="card" id="dd671-social-creator" aria-labelledby="dd671-title">
+<p class="eyebrow">Build 671 · Unified Socials creator</p><h2 id="dd671-title">Create a story from workshop media</h2>
+<p>Choose an active or previous CAIP project, tag its existing uploaded assets, and create a private review draft. Original uploads stay in CAIP; tags are references, not public media links. A reviewed public derivative and verified account are required before direct posting.</p>
+<div class="dd671-layout"><div><label for="dd671Project">CAIP project</label><select id="dd671Project" class="input"><option value="">Load projects first</option></select><div class="dd671-links"><a href="/admin/creative-assets/">Upload or review in CAIP</a><a href="/admin/caip-content-handoff/">Prepare Content Studio handoff</a></div><fieldset id="dd671Assets"><legend>Tag source media</legend><p class="small">Load a project to see its source assets.</p></fieldset></div><form id="dd671Form"><label for="dd671Title">Post title</label><input class="input" id="dd671Title" maxlength="140" required placeholder="What we made in the workshop"><label for="dd671Summary">Story / caption notes</label><textarea class="input" id="dd671Summary" rows="4" maxlength="1200" required placeholder="What happened, what we learned, or what went sideways..."></textarea><fieldset><legend>Target social channels</legend><div class="dd671-platforms"><label><input type="checkbox" value="facebook"> Facebook Page</label><label><input type="checkbox" value="instagram"> Instagram</label><label><input type="checkbox" value="pinterest"> Pinterest</label><label><input type="checkbox" value="tiktok"> TikTok</label><label><input type="checkbox" value="x"> X</label><label><input type="checkbox" value="youtube"> YouTube</label></div></fieldset><label class="dd671-confirm"><input type="checkbox" id="dd671Confirm" required> I will review rights, consent, captions and public media before any publication.</label><button class="btn primary" type="submit" id="dd671Create" disabled>Create review draft</button><p id="dd671Status" role="status" aria-live="polite">Load genuine CAIP projects to begin.</p></form></div>
+<p class="small">This workflow never publishes when a draft is created. For explicit API publishing after approval, use the existing Social Post Queue below; unconfigured platforms remain manual-only.</p>
+</section>
+<section class="card" id="dd672-owner-gate" aria-labelledby="dd672-title">
+<p class="eyebrow">Build 672 · Owner-supervised publication readiness</p><h2 id="dd672-title">Approve a public derivative and verify social accounts</h2>
+<p>Original CAIP uploads stay private. Only a real public derivative whose canonical CAIP rights, consent, privacy approval and URL match may be linked to a draft. This action does not publish.</p>
+<div class="dd671-layout"><div><h3>1. Live destination identity check</h3><button class="btn" id="dd672Verify" type="button">Verify configured social accounts</button><div id="dd672Accounts" aria-live="polite"><p class="small">No live provider identity check requested. Credentials alone do not prove a valid account.</p></div></div><form id="dd672Derivative"><h3>2. Approve exact public media</h3><label>CAIP social draft<select class="input" id="dd672Queue" required><option value="">Load draft queue</option></select></label><button class="btn secondary" id="dd672LoadQueue" type="button">Refresh drafts</button><label>CAIP asset ID<input class="input" id="dd672Asset" type="number" min="1" required></label><label>Canonical HTTPS public derivative URL<input class="input" id="dd672Url" type="url" pattern="https://.*" required placeholder="https://..."></label><label class="dd671-confirm"><input id="dd672Reviewed" type="checkbox" required> We reviewed the exact derivative and caption for public use.</label><label class="dd671-confirm"><input id="dd672Owner" type="checkbox" required> Owner approval: confirm source rights, consent, privacy and no customer identifiers.</label><button class="btn primary" type="submit">Record derivative approval</button><p id="dd672Status" role="status" aria-live="polite">An approval requires matching canonical CAIP evidence. Missing proof stays HOLD.</p></form></div>
+<p class="small">3. After approval, use the existing Social Post Queue below to inspect the preview, check the Privacy Guard and explicitly publish to only those verified, authorized platforms. TikTok and YouTube remain manual-only.</p>
+</section>
+<style>.dd671-layout{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:20px}.dd671-layout label{display:block;margin:12px 0 6px}.dd671-layout .input{width:100%;box-sizing:border-box}.dd671-layout fieldset{margin:14px 0;padding:14px;border:1px solid #9b82b0;border-radius:12px}.dd671-layout fieldset label{display:flex;align-items:center;gap:8px}.dd671-links{display:flex;gap:12px;flex-wrap:wrap;margin:10px 0}.dd671-platforms{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:4px}.dd671-asset{display:flex!important;align-items:flex-start!important;gap:10px;margin:8px 0!important;padding:8px;border:1px solid #6d587c;border-radius:9px}.dd671-asset small{display:block;overflow-wrap:anywhere}.dd671-confirm{display:flex!important;align-items:start;gap:8px}@media(max-width:750px){.dd671-layout{grid-template-columns:1fr}}</style>
 
-    <section class="card" id="dd676-finance" aria-labelledby="dd676-title">
-      <p class="eyebrow">Build 676 · Financial attribution evidence</p><h2 id="dd676-title">Campaign costs, paid-order review &amp; ROI certification</h2>
-      <p>Build 677 binds new orders to observed campaign sessions. Paid orders need matching session and settlement evidence. Vendor cost verification is still required to certify ROI; older unbound orders remain HOLD.</p>
-      <form id="dd676Form" class="dd671-layout">
-        <div><label>Campaign-linked social item<select class="input" id="dd676Queue" required><option value="">Choose campaign</option></select></label><label>Evidence type<select class="input" id="dd676Kind"><option value="cost">Marketing expense receipt</option><option value="revenue">Paid-order attribution candidate</option></select></label></div>
-        <div><label>Cost in CAD<input class="input" id="dd676Cost" type="number" min="0.01" step="0.01" placeholder="e.g. 24.50"></label><label>Expense receipt reference<input class="input" id="dd676Reference" maxlength="100" placeholder="Vendor invoice or receipt ID"></label><label>Order ID<input class="input" id="dd676Order" type="number" min="1" placeholder="For paid-order candidate"></label><label class="dd671-confirm"><input type="checkbox" id="dd676Confirm" required> Owner reviewed the original evidence; this is not a certified ROI claim.</label><button class="btn primary" type="submit">Record evidence</button></div>
-      </form><p id="dd676Result" role="status" aria-live="polite">No financial evidence recorded in this session.</p>
-      <div id="dd676Status" aria-live="polite">Certification: HOLD</div>
-      <div class="table-scroll" tabindex="0"><table><thead><tr><th>Campaign</th><th>Evidence</th><th>Source reference</th><th>CAD</th><th>Recorded</th><th>Certification</th></tr></thead><tbody id="dd676Rows"></tbody></table></div>
-    </section>
-    <section class="card" id="dd680-ops"><p class="eyebrow">Build 680 · Owner financial exception control</p>
-      <h2>Evidence freshness &amp; Master ACK review</h2>
-      <p>Read-only finance status must stay HOLD for stale evidence, open exceptions or an unmatched signed Master ACK. A signed ACK alone never proves live integration.</p>
-      <label>Campaign<select id="dd680Campaign" class="input"><option value="">Choose campaign</option></select></label>
-      <button id="dd680Refresh" class="btn" type="button">Refresh source and ACK status</button>
-      <p id="dd680Status" role="status" aria-live="polite">Select a campaign to review.</p>
-      <form id="dd680Exception"><label>Exception reference<input class="input" id="dd680Ref" required pattern="[A-Za-z0-9_-]{6,80}"></label>
-        <label>Action<select id="dd680Kind"><option value="open">Open issue</option><option value="resolve">Resolve existing issue</option></select></label>
-        <label>Reason / resolution<textarea class="input" id="dd680Reason" rows="2" required></textarea></label>
-        <label><input type="checkbox" id="dd680Owner" required> Owner reviewed the financial exception.</label>
-        <button class="btn primary" type="submit">Save supervised decision</button></form>
-      <p id="dd680Result" role="status" aria-live="polite">No owner exception saved.</p>
-      <p class="small">Independent Master ACK admission requires an approved signed verifier integration; the public form does not accept or generate Master signatures.</p>
-    </section>
-    <section class="card" id="dd679-net" aria-labelledby="dd679-title">
-      <p class="eyebrow">Build 679 · Source-verified financial evidence</p>
-      <h2 id="dd679-title">Product costs &amp; campaign net-contribution review</h2>
-      <p>Record a separately verified original cost allocation for each attributed paid order. Required categories: product materials/labour, fulfillment, payment processing and overhead. Zero-dollar amounts need independent evidence too. Taxes collected are excluded from net receipts. The result is not an audited financial statement.</p>
-      <form id="dd679CostForm" class="dd671-layout">
-        <div><label>Campaign<select id="dd679Campaign" class="input" required><option value="">Choose campaign</option></select></label>
-        <label>Source order ID<input id="dd679Order" class="input" type="number" min="1" required></label>
-        <label>Cost category<select id="dd679Axis" class="input"><option value="product_cogs">Product materials, manufacturing and labour</option><option value="shipping_fulfilment">Shipping / fulfillment cost</option><option value="payment_processing">Payment processing fees</option><option value="overhead_allocated">Verified overhead allocation</option></select></label>
-        <label>CAD amount<input id="dd679Amount" class="input" type="number" min="0" step=".01" required></label>
-        <label>Original cost receipt ID<input id="dd679Reference" class="input" maxlength="100" required></label></div>
-        <div><label>Independent source issuer<input id="dd679Issuer" class="input" maxlength="120" required></label>
-        <label>Original document SHA-256<input id="dd679Digest" class="input" pattern="[0-9A-Fa-f]{64}" required></label>
-        <label>Verifier observation (UTC ISO timestamp)<input id="dd679Observed" class="input" required placeholder="2026-11-11T19:00:00.000Z"></label>
-        <label>Independent Ed25519 signature (base64)<textarea id="dd679Signature" class="input" rows="3" required></textarea></label>
-        <label class="dd671-confirm"><input type="checkbox" id="dd679OwnerReview" required> We checked the source document and matching paid order.</label>
-        <button class="btn primary" type="submit">Record independently verified cost</button></div>
-      </form>
-      <p id="dd679CostStatus" role="status" aria-live="polite">No product-cost verification performed.</p>
-      <button class="btn secondary" id="dd679Reconcile" type="button">Reconcile source net contribution</button>
-      <p id="dd679Summary" role="status" aria-live="polite">Choose a campaign. Missing signed costs or unsettled orders remain HOLD.</p>
-      <form id="dd679Signoff"><label class="dd671-confirm"><input id="dd679Reviewed" type="checkbox" required> We reviewed each independently signed source cost and current order settlement.</label>
-      <label class="dd671-confirm"><input id="dd679Scope" type="checkbox" required> We accept source-level net contribution only; AI Data Platform admission and independent financial audit remain separate gates.</label>
-      <button class="btn primary" type="submit">Owner signoff on source net contribution</button></form>
-      <p id="dd679SignoffStatus" role="status" aria-live="polite">Signoff HOLD pending complete evidence.</p>
-    </section>
-    <section class="card" id="dd678-finance" aria-labelledby="dd678-title">
-      <p class="eyebrow">Build 678 · Independent expense verification</p><h2 id="dd678-title">Campaign financial acceptance</h2>
-      <p>Marketing expense records require a real original receipt and an Ed25519 signature from a separately enrolled independent verifier. The signature must cover the exact campaign, queue ID, receipt reference, vendor, CAD amount, original document SHA-256 and verification time. No private verifier key is entered here. This acceptance is <strong>gross attributed order receipts minus verified advertising costs</strong>, not net business profit.</p>
-      <form id="dd678VerifyForm" class="dd671-layout">
-        <div><label>Campaign<select id="dd678Campaign" class="input" required><option value="">Choose campaign</option></select></label>
-          <label>Original expense reference<input class="input" id="dd678Receipt" maxlength="100" required></label>
-          <label>Vendor name<input class="input" id="dd678Vendor" maxlength="100" required></label>
-          <label>Original document SHA-256 (64 hex characters)<input class="input" id="dd678Digest" pattern="[a-fA-F0-9]{64}" required></label></div>
-        <div><label>Independent verifier observation (UTC ISO 8601)<input class="input" id="dd678Checked" placeholder="2026-11-11T18:00:00.000Z" required></label>
-          <label>Verifier Ed25519 signature (base64)<textarea class="input" id="dd678Signature" rows="3" required></textarea></label>
-          <label class="dd671-confirm"><input type="checkbox" id="dd678Reviewed" required> Owner reviewed the original receipt and independent signature evidence.</label>
-          <button class="btn primary" type="submit">Verify exact expense evidence</button></div>
-      </form>
-      <p id="dd678VerifyResult" role="status" aria-live="polite">Independent verifier enrollment and an exact signed receipt are required. Owner-entered costs remain HOLD.</p>
-      <button type="button" class="btn secondary" id="dd678Refresh">Reconcile selected campaign</button>
-      <div id="dd678Summary" role="status" aria-live="polite">Choose a campaign for a read-only reconciliation.</div>
-      <form id="dd678Signoff"><label class="dd671-confirm"><input type="checkbox" id="dd678Owner" required> We reviewed the matching settled orders and verified expense receipts.</label>
-        <label class="dd671-confirm"><input type="checkbox" id="dd678Gross" required> We understand this is a marketing-return estimate before product costs, taxes, shipping and overhead, not certified net profit.</label>
-        <button class="btn primary" type="submit">Owner signoff on marketing return</button></form>
-      <p id="dd678SignoffResult" role="status" aria-live="polite">Owner signoff remains HOLD until all recorded campaign expenses and paid orders reconcile.</p>
-    </section>
-    <section class="card" id="dd675-roi" aria-labelledby="dd675-title">
-      <p class="eyebrow">Build 675 · Verified attribution and engagement</p><h2 id="dd675-title">Marketing attribution &amp; ROI evidence</h2>
-      <p>Visits, checkout starts and enquiries come from stored UTM-tagged site events. Provider engagement is imported only after a direct read-only identity-matched lookup. Neither a checkout start nor a like is a sale.</p>
-      <button class="btn secondary" id="dd675Refresh" type="button">Refresh evidence</button>
-      <div id="dd675Roi" role="status" aria-live="polite">ROI unavailable until confirmed attributed revenue and campaign spend are independently recorded.</div>
-      <h3>Campaign traffic and enquiry funnel</h3><div class="table-scroll" tabindex="0"><table><thead><tr><th>Campaign</th><th>Source</th><th>Visits</th><th>Sessions</th><th>Checkouts started</th><th>Enquiries</th></tr></thead><tbody id="dd675Funnel"></tbody></table></div>
-      <h3>Provider engagement snapshots</h3><div class="table-scroll" tabindex="0"><table><thead><tr><th>Campaign / channel</th><th>Verified provider ID</th><th>Reported counts</th><th>Observed</th></tr></thead><tbody id="dd675Snapshots"></tbody></table></div>
-      <h3>Verify current engagement</h3><form id="dd675Verify"><label>Posted queue item<select class="input" id="dd675Queue" required><option value="">Choose a published item</option></select></label><label>Channel<select class="input" id="dd675Platform"><option value="facebook">Facebook</option><option value="x">X</option></select></label><button class="btn primary" type="submit">Request read-only provider metrics</button></form><p id="dd675Result" role="status" aria-live="polite">No external metrics imported.</p>
-    </section>
-    <section class="card" id="dd674-marketing" aria-labelledby="dd674-title">
-      <p class="eyebrow">Build 674 · Marketing command centre</p><h2 id="dd674-title">Campaign calendar &amp; cross-channel results</h2>
-      <p>Based on stored draft schedules, UTM attribution and verified delivery receipts. Audience reach, sales and engagement are shown only when a real source recorded them. Scheduling does not automatically publish.</p>
-      <div class="dd671-layout"><div><label for="dd674Month">Calendar month</label><input class="input" type="month" id="dd674Month"><label for="dd674Campaign">Campaign</label><select class="input" id="dd674Campaign"><option value="">All campaigns</option></select></div><form id="dd674Schedule"><h3>Owner scheduling</h3><label>Queue item<select class="input" id="dd674Queue" required><option value="">Choose a draft</option></select></label><label>Campaign name<input class="input" id="dd674Name" maxlength="60" required placeholder="Autumn Workshop Stories"></label><label>Local date and time<input class="input" type="datetime-local" id="dd674Date" required></label><button class="btn primary" type="submit">Save campaign schedule for review</button><small>Uses this device's local time zone and saves a UTC review schedule; never auto-posts.</small></form></div>
-      <p id="dd674Message" role="status" aria-live="polite">No scheduling changes made.</p><div id="dd674Summary" aria-live="polite"></div>
-      <div class="table-scroll" tabindex="0" aria-label="Campaign calendar"><table><thead><tr><th>Date</th><th>Campaign / story</th><th>Destinations</th><th>Review status</th></tr></thead><tbody id="dd674Calendar"><tr><td colspan="4">Loading…</td></tr></tbody></table></div>
-      <div class="table-scroll" tabindex="0" aria-label="Cross-channel evidence"><table><thead><tr><th>Channel</th><th>Acknowledged</th><th>Verified</th><th>Failed</th><th>HOLD</th></tr></thead><tbody id="dd674Channels"></tbody></table></div>
-    </section>
-    <section class="card" id="dd673-receipts" aria-labelledby="dd673-title">
-      <p class="eyebrow">Build 673 · Verified evidence and supervised recovery</p><h2 id="dd673-title">Social delivery &amp; owner analytics</h2>
-      <p>Each channel is tracked separately. An API acknowledgement is not an independently verified live post; audience reach is not inferred. Retry only after checking the destination for an accidental duplicate.</p>
-      <button class="btn secondary" id="dd673Refresh" type="button">Refresh delivery evidence</button>
-      <div id="dd673Totals" aria-live="polite">Loading recorded channel evidence…</div>
-      <div class="table-scroll" tabindex="0" aria-label="Per-channel social delivery evidence"><table><thead><tr><th>Draft</th><th>Platform</th><th>Latest evidence</th><th>Provider ID</th><th>Recorded</th><th>Owner action</th></tr></thead><tbody id="dd673Rows"><tr><td colspan="6">Loading…</td></tr></tbody></table></div>
-      <p id="dd673Result" role="status" aria-live="polite">No provider lookup or retry has been performed.</p>
-    </section>
-    <section class="card social-preflight-panel" id="social-platform-preflight">
-      <div class="social-automation-heading">
-        <div>
-          <p class="eyebrow">No credentials required</p>
-          <h2>Platform Preview & Media Preflight</h2>
-          <p>Check a proposed caption, destination link, and image before social API credentials are approved. This tool runs in the browser and does not publish, save, upload, or change product records.</p>
-        </div>
-        <img class="social-preflight-icon" src="/assets/assets/images/brand-v3/social-platform-preflight-placeholder.webp" alt="Admin-only preflight illustration showing platform readiness checks before explicit publishing.">
-      </div>
-      <div class="social-preflight-grid">
-        <div class="social-preflight-fields">
-          <label>Platform
-            <select id="socialPreflightPlatform">
-              <option value="instagram">Instagram image post</option>
-              <option value="facebook">Facebook Page post</option>
-              <option value="pinterest">Pinterest Pin</option>
-              <option value="x">X post</option>
-            </select>
-          </label>
-          <label>Caption<textarea id="socialPreflightCaption" rows="7" placeholder="Paste the reviewed caption here..."></textarea></label>
-          <label>Public product or article URL<input id="socialPreflightLink" type="url" placeholder="https://devilndove.com/shop/product/?slug=..."></label>
-          <label>Public image URL<input id="socialPreflightImage" type="url" placeholder="https://.../real-product-image.jpg"></label>
-          <div class="social-preflight-actions"><button class="btn primary" id="socialPreflightRun" type="button">Run preflight</button><button class="btn" id="socialPreflightClear" type="button">Clear</button></div>
-        </div>
-        <div>
-          <div id="socialPreflightResults" class="social-preflight-results" aria-live="polite"><p class="small">Enter the proposed content, then run the preflight. Results are advisory and do not replace platform review, media consent, or the Social Media Privacy Guard.</p></div>
-          <article class="social-post-preview" id="socialPreflightPreview" hidden>
-            <div class="social-post-preview-head"><strong id="socialPreviewAccount">Devil n Dove</strong><span id="socialPreviewPlatform"></span></div>
-            <img id="socialPreviewImage" alt="Proposed social media image preview">
-            <div class="social-post-preview-copy" id="socialPreviewCaption"></div>
-            <a id="socialPreviewLink" target="_blank" rel="noopener">Open destination link</a>
-          </article>
-        </div>
-      </div>
-    </section>
+<section class="card" id="dd676-finance" aria-labelledby="dd676-title">
+<p class="eyebrow">Build 676 · Financial attribution evidence</p><h2 id="dd676-title">Campaign costs, paid-order review &amp; ROI certification</h2>
+<p>Build 677 binds new orders to observed campaign sessions. Paid orders need matching session and settlement evidence. Vendor cost verification is still required to certify ROI; older unbound orders remain HOLD.</p>
+<form id="dd676Form" class="dd671-layout">
+<div><label>Campaign-linked social item<select class="input" id="dd676Queue" required><option value="">Choose campaign</option></select></label><label>Evidence type<select class="input" id="dd676Kind"><option value="cost">Marketing expense receipt</option><option value="revenue">Paid-order attribution candidate</option></select></label></div>
+<div><label>Cost in CAD<input class="input" id="dd676Cost" type="number" min="0.01" step="0.01" placeholder="e.g. 24.50"></label><label>Expense receipt reference<input class="input" id="dd676Reference" maxlength="100" placeholder="Vendor invoice or receipt ID"></label><label>Order ID<input class="input" id="dd676Order" type="number" min="1" placeholder="For paid-order candidate"></label><label class="dd671-confirm"><input type="checkbox" id="dd676Confirm" required> Owner reviewed the original evidence; this is not a certified ROI claim.</label><button class="btn primary" type="submit">Record evidence</button></div>
+</form><p id="dd676Result" role="status" aria-live="polite">No financial evidence recorded in this session.</p>
+<div id="dd676Status" aria-live="polite">Certification: HOLD</div>
+<div class="table-scroll" tabindex="0"><table><thead><tr><th>Campaign</th><th>Evidence</th><th>Source reference</th><th>CAD</th><th>Recorded</th><th>Certification</th></tr></thead><tbody id="dd676Rows"></tbody></table></div>
+</section>
+<section class="card" id="dd680-ops"><p class="eyebrow">Build 680 · Owner financial exception control</p>
+<h2>Evidence freshness &amp; Master ACK review</h2>
+<p>Read-only finance status must stay HOLD for stale evidence, open exceptions or an unmatched signed Master ACK. A signed ACK alone never proves live integration.</p>
+<label>Campaign<select id="dd680Campaign" class="input"><option value="">Choose campaign</option></select></label>
+<button id="dd680Refresh" class="btn" type="button">Refresh source and ACK status</button>
+<p id="dd680Status" role="status" aria-live="polite">Select a campaign to review.</p>
+<form id="dd680Exception"><label>Exception reference<input class="input" id="dd680Ref" required pattern="[A-Za-z0-9_-]{6,80}"></label>
+<label>Action<select id="dd680Kind"><option value="open">Open issue</option><option value="resolve">Resolve existing issue</option></select></label>
+<label>Reason / resolution<textarea class="input" id="dd680Reason" rows="2" required></textarea></label>
+<label><input type="checkbox" id="dd680Owner" required> Owner reviewed the financial exception.</label>
+<button class="btn primary" type="submit">Save supervised decision</button></form>
+<p id="dd680Result" role="status" aria-live="polite">No owner exception saved.</p>
+<h3>Build 681 · Financial exception SLA and owner history</h3>
+<p class="small">Provisional owner targets: acknowledge within 24 hours, resolve within 72 hours. Neither target overrides source finance or Master acceptance gates.</p>
+<div id="dd681Sla" role="status" aria-live="polite">Select a campaign to see SLA aging.</div>
+<label>Open exception to acknowledge<select id="dd681Open" class="input"><option value="">Choose open exception</option></select></label>
+<label><input type="checkbox" id="dd681OwnerReview"> Owner reviewed this exception.</label>
+<button type="button" class="btn" id="dd681Acknowledge">Record owner acknowledgement</button>
+<p id="dd681Result" role="status" aria-live="polite">Acknowledgement is not closure or financial certification.</p>
+<h3>Signed Master receipt lifecycle</h3>
+<div id="dd681Master">No verified source receipt selected.</div>
+<h3>Owner acceptance history</h3>
+<div id="dd681History">No campaign selected.</div>
+<p class="small">Independent Master ACK admission requires an approved signed verifier integration; the public form does not accept or generate Master signatures.</p>
+</section>
+<section class="card" id="dd679-net" aria-labelledby="dd679-title">
+<p class="eyebrow">Build 679 · Source-verified financial evidence</p>
+<h2 id="dd679-title">Product costs &amp; campaign net-contribution review</h2>
+<p>Record a separately verified original cost allocation for each attributed paid order. Required categories: product materials/labour, fulfillment, payment processing and overhead. Zero-dollar amounts need independent evidence too. Taxes collected are excluded from net receipts. The result is not an audited financial statement.</p>
+<form id="dd679CostForm" class="dd671-layout">
+<div><label>Campaign<select id="dd679Campaign" class="input" required><option value="">Choose campaign</option></select></label>
+<label>Source order ID<input id="dd679Order" class="input" type="number" min="1" required></label>
+<label>Cost category<select id="dd679Axis" class="input"><option value="product_cogs">Product materials, manufacturing and labour</option><option value="shipping_fulfilment">Shipping / fulfillment cost</option><option value="payment_processing">Payment processing fees</option><option value="overhead_allocated">Verified overhead allocation</option></select></label>
+<label>CAD amount<input id="dd679Amount" class="input" type="number" min="0" step=".01" required></label>
+<label>Original cost receipt ID<input id="dd679Reference" class="input" maxlength="100" required></label></div>
+<div><label>Independent source issuer<input id="dd679Issuer" class="input" maxlength="120" required></label>
+<label>Original document SHA-256<input id="dd679Digest" class="input" pattern="[0-9A-Fa-f]{64}" required></label>
+<label>Verifier observation (UTC ISO timestamp)<input id="dd679Observed" class="input" required placeholder="2026-11-11T19:00:00.000Z"></label>
+<label>Independent Ed25519 signature (base64)<textarea id="dd679Signature" class="input" rows="3" required></textarea></label>
+<label class="dd671-confirm"><input type="checkbox" id="dd679OwnerReview" required> We checked the source document and matching paid order.</label>
+<button class="btn primary" type="submit">Record independently verified cost</button></div>
+</form>
+<p id="dd679CostStatus" role="status" aria-live="polite">No product-cost verification performed.</p>
+<button class="btn secondary" id="dd679Reconcile" type="button">Reconcile source net contribution</button>
+<p id="dd679Summary" role="status" aria-live="polite">Choose a campaign. Missing signed costs or unsettled orders remain HOLD.</p>
+<form id="dd679Signoff"><label class="dd671-confirm"><input id="dd679Reviewed" type="checkbox" required> We reviewed each independently signed source cost and current order settlement.</label>
+<label class="dd671-confirm"><input id="dd679Scope" type="checkbox" required> We accept source-level net contribution only; AI Data Platform admission and independent financial audit remain separate gates.</label>
+<button class="btn primary" type="submit">Owner signoff on source net contribution</button></form>
+<p id="dd679SignoffStatus" role="status" aria-live="polite">Signoff HOLD pending complete evidence.</p>
+</section>
+<section class="card" id="dd678-finance" aria-labelledby="dd678-title">
+<p class="eyebrow">Build 678 · Independent expense verification</p><h2 id="dd678-title">Campaign financial acceptance</h2>
+<p>Marketing expense records require a real original receipt and an Ed25519 signature from a separately enrolled independent verifier. The signature must cover the exact campaign, queue ID, receipt reference, vendor, CAD amount, original document SHA-256 and verification time. No private verifier key is entered here. This acceptance is <strong>gross attributed order receipts minus verified advertising costs</strong>, not net business profit.</p>
+<form id="dd678VerifyForm" class="dd671-layout">
+<div><label>Campaign<select id="dd678Campaign" class="input" required><option value="">Choose campaign</option></select></label>
+<label>Original expense reference<input class="input" id="dd678Receipt" maxlength="100" required></label>
+<label>Vendor name<input class="input" id="dd678Vendor" maxlength="100" required></label>
+<label>Original document SHA-256 (64 hex characters)<input class="input" id="dd678Digest" pattern="[a-fA-F0-9]{64}" required></label></div>
+<div><label>Independent verifier observation (UTC ISO 8601)<input class="input" id="dd678Checked" placeholder="2026-11-11T18:00:00.000Z" required></label>
+<label>Verifier Ed25519 signature (base64)<textarea class="input" id="dd678Signature" rows="3" required></textarea></label>
+<label class="dd671-confirm"><input type="checkbox" id="dd678Reviewed" required> Owner reviewed the original receipt and independent signature evidence.</label>
+<button class="btn primary" type="submit">Verify exact expense evidence</button></div>
+</form>
+<p id="dd678VerifyResult" role="status" aria-live="polite">Independent verifier enrollment and an exact signed receipt are required. Owner-entered costs remain HOLD.</p>
+<button type="button" class="btn secondary" id="dd678Refresh">Reconcile selected campaign</button>
+<div id="dd678Summary" role="status" aria-live="polite">Choose a campaign for a read-only reconciliation.</div>
+<form id="dd678Signoff"><label class="dd671-confirm"><input type="checkbox" id="dd678Owner" required> We reviewed the matching settled orders and verified expense receipts.</label>
+<label class="dd671-confirm"><input type="checkbox" id="dd678Gross" required> We understand this is a marketing-return estimate before product costs, taxes, shipping and overhead, not certified net profit.</label>
+<button class="btn primary" type="submit">Owner signoff on marketing return</button></form>
+<p id="dd678SignoffResult" role="status" aria-live="polite">Owner signoff remains HOLD until all recorded campaign expenses and paid orders reconcile.</p>
+</section>
+<section class="card" id="dd675-roi" aria-labelledby="dd675-title">
+<p class="eyebrow">Build 675 · Verified attribution and engagement</p><h2 id="dd675-title">Marketing attribution &amp; ROI evidence</h2>
+<p>Visits, checkout starts and enquiries come from stored UTM-tagged site events. Provider engagement is imported only after a direct read-only identity-matched lookup. Neither a checkout start nor a like is a sale.</p>
+<button class="btn secondary" id="dd675Refresh" type="button">Refresh evidence</button>
+<div id="dd675Roi" role="status" aria-live="polite">ROI unavailable until confirmed attributed revenue and campaign spend are independently recorded.</div>
+<h3>Campaign traffic and enquiry funnel</h3><div class="table-scroll" tabindex="0"><table><thead><tr><th>Campaign</th><th>Source</th><th>Visits</th><th>Sessions</th><th>Checkouts started</th><th>Enquiries</th></tr></thead><tbody id="dd675Funnel"></tbody></table></div>
+<h3>Provider engagement snapshots</h3><div class="table-scroll" tabindex="0"><table><thead><tr><th>Campaign / channel</th><th>Verified provider ID</th><th>Reported counts</th><th>Observed</th></tr></thead><tbody id="dd675Snapshots"></tbody></table></div>
+<h3>Verify current engagement</h3><form id="dd675Verify"><label>Posted queue item<select class="input" id="dd675Queue" required><option value="">Choose a published item</option></select></label><label>Channel<select class="input" id="dd675Platform"><option value="facebook">Facebook</option><option value="x">X</option></select></label><button class="btn primary" type="submit">Request read-only provider metrics</button></form><p id="dd675Result" role="status" aria-live="polite">No external metrics imported.</p>
+</section>
+<section class="card" id="dd674-marketing" aria-labelledby="dd674-title">
+<p class="eyebrow">Build 674 · Marketing command centre</p><h2 id="dd674-title">Campaign calendar &amp; cross-channel results</h2>
+<p>Based on stored draft schedules, UTM attribution and verified delivery receipts. Audience reach, sales and engagement are shown only when a real source recorded them. Scheduling does not automatically publish.</p>
+<div class="dd671-layout"><div><label for="dd674Month">Calendar month</label><input class="input" type="month" id="dd674Month"><label for="dd674Campaign">Campaign</label><select class="input" id="dd674Campaign"><option value="">All campaigns</option></select></div><form id="dd674Schedule"><h3>Owner scheduling</h3><label>Queue item<select class="input" id="dd674Queue" required><option value="">Choose a draft</option></select></label><label>Campaign name<input class="input" id="dd674Name" maxlength="60" required placeholder="Autumn Workshop Stories"></label><label>Local date and time<input class="input" type="datetime-local" id="dd674Date" required></label><button class="btn primary" type="submit">Save campaign schedule for review</button><small>Uses this device's local time zone and saves a UTC review schedule; never auto-posts.</small></form></div>
+<p id="dd674Message" role="status" aria-live="polite">No scheduling changes made.</p><div id="dd674Summary" aria-live="polite"></div>
+<div class="table-scroll" tabindex="0" aria-label="Campaign calendar"><table><thead><tr><th>Date</th><th>Campaign / story</th><th>Destinations</th><th>Review status</th></tr></thead><tbody id="dd674Calendar"><tr><td colspan="4">Loading…</td></tr></tbody></table></div>
+<div class="table-scroll" tabindex="0" aria-label="Cross-channel evidence"><table><thead><tr><th>Channel</th><th>Acknowledged</th><th>Verified</th><th>Failed</th><th>HOLD</th></tr></thead><tbody id="dd674Channels"></tbody></table></div>
+</section>
+<section class="card" id="dd673-receipts" aria-labelledby="dd673-title">
+<p class="eyebrow">Build 673 · Verified evidence and supervised recovery</p><h2 id="dd673-title">Social delivery &amp; owner analytics</h2>
+<p>Each channel is tracked separately. An API acknowledgement is not an independently verified live post; audience reach is not inferred. Retry only after checking the destination for an accidental duplicate.</p>
+<button class="btn secondary" id="dd673Refresh" type="button">Refresh delivery evidence</button>
+<div id="dd673Totals" aria-live="polite">Loading recorded channel evidence…</div>
+<div class="table-scroll" tabindex="0" aria-label="Per-channel social delivery evidence"><table><thead><tr><th>Draft</th><th>Platform</th><th>Latest evidence</th><th>Provider ID</th><th>Recorded</th><th>Owner action</th></tr></thead><tbody id="dd673Rows"><tr><td colspan="6">Loading…</td></tr></tbody></table></div>
+<p id="dd673Result" role="status" aria-live="polite">No provider lookup or retry has been performed.</p>
+</section>
+<section class="card social-preflight-panel" id="social-platform-preflight">
+<div class="social-automation-heading">
+<div>
+<p class="eyebrow">No credentials required</p>
+<h2>Platform Preview & Media Preflight</h2>
+<p>Check a proposed caption, destination link, and image before social API credentials are approved. This tool runs in the browser and does not publish, save, upload, or change product records.</p>
+</div>
+<img class="social-preflight-icon" src="/assets/assets/images/brand-v3/social-platform-preflight-placeholder.webp" alt="Admin-only preflight illustration showing platform readiness checks before explicit publishing.">
+</div>
+<div class="social-preflight-grid">
+<div class="social-preflight-fields">
+<label>Platform
+<select id="socialPreflightPlatform">
+<option value="instagram">Instagram image post</option>
+<option value="facebook">Facebook Page post</option>
+<option value="pinterest">Pinterest Pin</option>
+<option value="x">X post</option>
+</select>
+</label>
+<label>Caption<textarea id="socialPreflightCaption" rows="7" placeholder="Paste the reviewed caption here..."></textarea></label>
+<label>Public product or article URL<input id="socialPreflightLink" type="url" placeholder="https://devilndove.com/shop/product/?slug=..."></label>
+<label>Public image URL<input id="socialPreflightImage" type="url" placeholder="https://.../real-product-image.jpg"></label>
+<div class="social-preflight-actions"><button class="btn primary" id="socialPreflightRun" type="button">Run preflight</button><button class="btn" id="socialPreflightClear" type="button">Clear</button></div>
+</div>
+<div>
+<div id="socialPreflightResults" class="social-preflight-results" aria-live="polite"><p class="small">Enter the proposed content, then run the preflight. Results are advisory and do not replace platform review, media consent, or the Social Media Privacy Guard.</p></div>
+<article class="social-post-preview" id="socialPreflightPreview" hidden>
+<div class="social-post-preview-head"><strong id="socialPreviewAccount">Devil n Dove</strong><span id="socialPreviewPlatform"></span></div>
+<img id="socialPreviewImage" alt="Proposed social media image preview">
+<div class="social-post-preview-copy" id="socialPreviewCaption"></div>
+<a id="socialPreviewLink" target="_blank" rel="noopener">Open destination link</a>
+</article>
+</div>
+</div>
+</section>
 
-    <section class="card" id="social-provider-readiness">
-      <p class="eyebrow">Build 85 provider prerequisites</p>
-      <h2>Public policy pages and exact callback URLs</h2>
-      <p>The secure OAuth lifecycle is implemented. A real authorization response is accepted only on the Development Preview when the explicit operator switch and exactly one selected social provider agree. Production OAuth and all provider publication remain closed.</p>
-      <div class="social-setup-grid">
-        <article><h3>Public documents</h3><ul class="clean small"><li><a href="/privacy/" target="_blank" rel="noopener">Privacy Policy</a></li><li><a href="/terms/" target="_blank" rel="noopener">Terms of Use and Sale</a></li><li><a href="/data-deletion/" target="_blank" rel="noopener">Data Deletion Instructions</a></li><li><a href="/social-connections/" target="_blank" rel="noopener">Social Connection Disclosure</a></li></ul></article>
-        <article><h3>OAuth callback checks</h3><ul class="clean small"><li><a href="/api/social/oauth/meta/callback" target="_blank" rel="noopener">Meta callback</a></li><li><a href="/api/social/oauth/pinterest/callback" target="_blank" rel="noopener">Pinterest callback</a></li><li><a href="/api/social/oauth/x/callback" target="_blank" rel="noopener">X callback</a></li><li><a href="/api/social/oauth/tiktok/callback" target="_blank" rel="noopener">TikTok callback</a></li><li><a href="/api/social/oauth/youtube/callback" target="_blank" rel="noopener">YouTube callback</a></li></ul></article>
-      </div>
-      <p class="small"><strong>Pinterest verification:</strong> <code>p:domain_verify</code> is included in the head of every HTML page, including the home page.</p>
-    </section>
+<section class="card" id="social-provider-readiness">
+<p class="eyebrow">Build 85 provider prerequisites</p>
+<h2>Public policy pages and exact callback URLs</h2>
+<p>The secure OAuth lifecycle is implemented. A real authorization response is accepted only on the Development Preview when the explicit operator switch and exactly one selected social provider agree. Production OAuth and all provider publication remain closed.</p>
+<div class="social-setup-grid">
+<article><h3>Public documents</h3><ul class="clean small"><li><a href="/privacy/" target="_blank" rel="noopener">Privacy Policy</a></li><li><a href="/terms/" target="_blank" rel="noopener">Terms of Use and Sale</a></li><li><a href="/data-deletion/" target="_blank" rel="noopener">Data Deletion Instructions</a></li><li><a href="/social-connections/" target="_blank" rel="noopener">Social Connection Disclosure</a></li></ul></article>
+<article><h3>OAuth callback checks</h3><ul class="clean small"><li><a href="/api/social/oauth/meta/callback" target="_blank" rel="noopener">Meta callback</a></li><li><a href="/api/social/oauth/pinterest/callback" target="_blank" rel="noopener">Pinterest callback</a></li><li><a href="/api/social/oauth/x/callback" target="_blank" rel="noopener">X callback</a></li><li><a href="/api/social/oauth/tiktok/callback" target="_blank" rel="noopener">TikTok callback</a></li><li><a href="/api/social/oauth/youtube/callback" target="_blank" rel="noopener">YouTube callback</a></li></ul></article>
+</div>
+<p class="small"><strong>Pinterest verification:</strong> <code>p:domain_verify</code> is included in the head of every HTML page, including the home page.</p>
+</section>
 
-    <div id="socialOAuthAcceptanceMount"></div>
-    <div id="socialProductAutomationMount"></div>
-    <div id="socialPostQueueAdminMount"></div>
-    <div id="socialMediaPrivacyGuardAdminMount"></div>
+<div id="socialOAuthAcceptanceMount"></div>
+<div id="socialProductAutomationMount"></div>
+<div id="socialPostQueueAdminMount"></div>
+<div id="socialMediaPrivacyGuardAdminMount"></div>
 
-    <section id="setup-guide" class="card social-setup-guide">
-      <p class="eyebrow">Connection guide</p>
-      <h2>What “connected” means</h2>
-      <p><strong>A pixel is tracking, not publishing.</strong> Meta Pixel/CAPI, Pinterest Tag, TikTok Pixel, and Google/YouTube tags measure visits and conversions. Organic publishing requires a provider developer app, secure OAuth authorization, intended-account verification, reviewed media/copy, and explicit human approval. Provider secrets remain in Cloudflare; they never belong in product forms, Git, browser JavaScript, or plaintext D1 fields.</p>
+<section id="setup-guide" class="card social-setup-guide">
+<p class="eyebrow">Connection guide</p>
+<h2>What “connected” means</h2>
+<p><strong>A pixel is tracking, not publishing.</strong> Meta Pixel/CAPI, Pinterest Tag, TikTok Pixel, and Google/YouTube tags measure visits and conversions. Organic publishing requires a provider developer app, secure OAuth authorization, intended-account verification, reviewed media/copy, and explicit human approval. Provider secrets remain in Cloudflare; they never belong in product forms, Git, browser JavaScript, or plaintext D1 fields.</p>
 
-      <div class="social-setup-grid">
-        <article>
-          <h3>1. Meta: Facebook Page + Instagram</h3>
-          <ol>
-            <li>Create a Meta developer app and configure only the products/permissions needed for Devil n Dove-owned Page and professional Instagram access.</li>
-            <li>Ensure the Facebook Page and Instagram Professional account are controlled by the intended Devil n Dove business identity.</li>
-            <li>Configure the secure OAuth client references, exact callback URL, intended Page ID, optional linked Instagram ID, and a safe account label in Development Cloudflare settings.</li>
-            <li>Select <code>meta</code> as the one Build 85 Development acceptance provider only when the external app is ready for deliberate authorization.</li>
-            <li>Complete OAuth from the Build 85 panel. The callback verifies the intended Page/account before encrypted token persistence.</li>
-            <li>Prepare and human-approve a queue draft. Build 85 still does not authorize a Facebook or Instagram post.</li>
-          </ol>
-        </article>
-        <article>
-          <h3>2. X</h3>
-          <ol>
-            <li>Create an X developer app and configure OAuth 2.0 Authorization Code with PKCE and only the required scopes.</li>
-            <li>Configure the expected Devil n Dove user ID and safe account label in Development.</li>
-            <li>Select <code>x</code> as the one Development acceptance provider before starting OAuth.</li>
-            <li>Complete intended-account verification and human draft approval before any later publication acceptance is considered.</li>
-          </ol>
-        </article>
-        <article>
-          <h3>3. Pinterest</h3>
-          <ol>
-            <li>Create a Pinterest developer app for the Devil n Dove Business account and configure the exact callback URL.</li>
-            <li>Configure the expected Devil n Dove Pinterest username and safe account label in Development.</li>
-            <li>Select <code>pinterest</code> as the one Development acceptance provider and complete the guarded OAuth flow.</li>
-            <li>Use a public HTTPS product image and destination URL in a human-reviewed queue draft. Build 85 does not create the Pin.</li>
-          </ol>
-        </article>
-        <article>
-          <h3>4. TikTok</h3>
-          <ol>
-            <li>Create a TikTok developer app and configure the intended Devil n Dove account identity plus exact OAuth redirect.</li>
-            <li>Use the Build 85 selected-provider acceptance lane only after app/scopes are externally approved.</li>
-            <li>Keep video/photo transfer and Direct Post disabled until a separate publication acceptance proves the required upload/post contract.</li>
-          </ol>
-        </article>
-        <article>
-          <h3>5. YouTube</h3>
-          <ol>
-            <li>Create a Google Cloud OAuth client, enable the YouTube Data API, and configure the exact callback.</li>
-            <li>Configure the expected Devil n Dove channel ID and safe label in Development.</li>
-            <li>Use Build 85 only to verify the OAuth/channel identity and human-approved draft evidence.</li>
-            <li>Resumable upload remains outside this build and is not authorized automatically.</li>
-          </ol>
-        </article>
-        <article>
-          <h3>6. Measurement and campaigns</h3>
-          <ol>
-            <li>Tracking pixels/tags remain separate from organic publishing authorization.</li>
-            <li>Use the social queue’s UTM fields and complete privacy/media review before marking a draft ready.</li>
-            <li>Review outcomes in existing analytics after a future controlled provider publication acceptance; Build 85 does not create provider posts.</li>
-          </ol>
-        </article>
-      </div>
-    </section>
+<div class="social-setup-grid">
+<article>
+<h3>1. Meta: Facebook Page + Instagram</h3>
+<ol>
+<li>Create a Meta developer app and configure only the products/permissions needed for Devil n Dove-owned Page and professional Instagram access.</li>
+<li>Ensure the Facebook Page and Instagram Professional account are controlled by the intended Devil n Dove business identity.</li>
+<li>Configure the secure OAuth client references, exact callback URL, intended Page ID, optional linked Instagram ID, and a safe account label in Development Cloudflare settings.</li>
+<li>Select <code>meta</code> as the one Build 85 Development acceptance provider only when the external app is ready for deliberate authorization.</li>
+<li>Complete OAuth from the Build 85 panel. The callback verifies the intended Page/account before encrypted token persistence.</li>
+<li>Prepare and human-approve a queue draft. Build 85 still does not authorize a Facebook or Instagram post.</li>
+</ol>
+</article>
+<article>
+<h3>2. X</h3>
+<ol>
+<li>Create an X developer app and configure OAuth 2.0 Authorization Code with PKCE and only the required scopes.</li>
+<li>Configure the expected Devil n Dove user ID and safe account label in Development.</li>
+<li>Select <code>x</code> as the one Development acceptance provider before starting OAuth.</li>
+<li>Complete intended-account verification and human draft approval before any later publication acceptance is considered.</li>
+</ol>
+</article>
+<article>
+<h3>3. Pinterest</h3>
+<ol>
+<li>Create a Pinterest developer app for the Devil n Dove Business account and configure the exact callback URL.</li>
+<li>Configure the expected Devil n Dove Pinterest username and safe account label in Development.</li>
+<li>Select <code>pinterest</code> as the one Development acceptance provider and complete the guarded OAuth flow.</li>
+<li>Use a public HTTPS product image and destination URL in a human-reviewed queue draft. Build 85 does not create the Pin.</li>
+</ol>
+</article>
+<article>
+<h3>4. TikTok</h3>
+<ol>
+<li>Create a TikTok developer app and configure the intended Devil n Dove account identity plus exact OAuth redirect.</li>
+<li>Use the Build 85 selected-provider acceptance lane only after app/scopes are externally approved.</li>
+<li>Keep video/photo transfer and Direct Post disabled until a separate publication acceptance proves the required upload/post contract.</li>
+</ol>
+</article>
+<article>
+<h3>5. YouTube</h3>
+<ol>
+<li>Create a Google Cloud OAuth client, enable the YouTube Data API, and configure the exact callback.</li>
+<li>Configure the expected Devil n Dove channel ID and safe label in Development.</li>
+<li>Use Build 85 only to verify the OAuth/channel identity and human-approved draft evidence.</li>
+<li>Resumable upload remains outside this build and is not authorized automatically.</li>
+</ol>
+</article>
+<article>
+<h3>6. Measurement and campaigns</h3>
+<ol>
+<li>Tracking pixels/tags remain separate from organic publishing authorization.</li>
+<li>Use the social queue’s UTM fields and complete privacy/media review before marking a draft ready.</li>
+<li>Review outcomes in existing analytics after a future controlled provider publication acceptance; Build 85 does not create provider posts.</li>
+</ol>
+</article>
+</div>
+</section>
 
-    <section class="card social-automation-boundaries">
-      <h2>How a new product becomes a social draft</h2>
-      <ol>
-        <li>Product is saved as Active and Approved/Published, with a usable product image.</li>
-        <li>When “Create a social draft” is enabled, the app creates one idempotent draft linked to that product.</li>
-        <li>Open the queue to review copy, media, platform choices, UTM link, duplicate warning, and Social Media Privacy Guard result.</li>
-        <li>Explicitly mark the queue item ready + approved only after privacy/public-media review is satisfied.</li>
-        <li>The Build 85 OAuth panel may then show the evidence as ready for a future controlled publication acceptance. It still provides no provider Publish action.</li>
-      </ol>
-      <p><strong>Important:</strong> Automatic drafting is enabled only by an admin setting. Automatic publishing remains deliberately unavailable because every final post can expose names, addresses, private workshop details, customer information, copyright-protected material, or an unfinished product claim.</p>
-    </section>
+<section class="card social-automation-boundaries">
+<h2>How a new product becomes a social draft</h2>
+<ol>
+<li>Product is saved as Active and Approved/Published, with a usable product image.</li>
+<li>When “Create a social draft” is enabled, the app creates one idempotent draft linked to that product.</li>
+<li>Open the queue to review copy, media, platform choices, UTM link, duplicate warning, and Social Media Privacy Guard result.</li>
+<li>Explicitly mark the queue item ready + approved only after privacy/public-media review is satisfied.</li>
+<li>The Build 85 OAuth panel may then show the evidence as ready for a future controlled publication acceptance. It still provides no provider Publish action.</li>
+</ol>
+<p><strong>Important:</strong> Automatic drafting is enabled only by an admin setting. Automatic publishing remains deliberately unavailable because every final post can expose names, addresses, private workshop details, customer information, copyright-protected material, or an unfinished product claim.</p>
+</section>
 
-    <div class="footer card" style="margin-top:18px"></div>
-  </div>
-  <script src="/js/main.js?v=440"></script>
-  <script src="/public/js/auth.js?v=440"></script>
-  <script src="/public/js/admin-route-usage.js"></script>
-  <script src="/public/js/site-auth-ui.js?v=440"></script>
-  <script src="/public/js/admin-self-protect.js?v=440"></script>
-  <script src="/public/js/admin-social-platform-preflight.js"></script>
-  <script src="/public/js/admin-social-oauth-acceptance-v85.js"></script>
-  <script src="/public/js/admin-social-product-automation.js"></script>
-  <script src="/public/js/admin-social-post-queue.js"></script>
-  <script src="/public/js/admin-social-media-privacy-guard.js"></script>
+<div class="footer card" style="margin-top:18px"></div>
+</div>
+<script src="/js/main.js?v=440"></script>
+<script src="/public/js/auth.js?v=440"></script>
+<script src="/public/js/admin-route-usage.js"></script>
+<script src="/public/js/site-auth-ui.js?v=440"></script>
+<script src="/public/js/admin-self-protect.js?v=440"></script>
+<script src="/public/js/admin-social-platform-preflight.js"></script>
+<script src="/public/js/admin-social-oauth-acceptance-v85.js"></script>
+<script src="/public/js/admin-social-product-automation.js"></script>
+<script src="/public/js/admin-social-post-queue.js"></script>
+<script src="/public/js/admin-social-media-privacy-guard.js"></script>
 <link rel="stylesheet" href="/css/admin-brand-v3-set18.css?v=18">
 <script defer src="/public/js/admin-brand-v3-set18.js?v=18"></script>
 </body>

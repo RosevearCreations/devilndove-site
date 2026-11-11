@@ -1702,6 +1702,78 @@ if(!saved)throw Error('Owner exception evidence was not durably saved. HOLD.');
 return {status,exception_reference:ref,profitability_certified:false,publication_performed:false};
 }
 
+
+export function exceptionSla681(e,now=Date.now()){
+ const opened=Date.parse(e.opened_at),ack=Date.parse(e.ack_at),closed=Date.parse(e.resolved_at);
+ return {...e,age_hours:Number.isFinite(opened)?Math.max(0,Math.floor((now-opened)/3600000)):null,
+  acknowledgement_due_at:Number.isFinite(opened)?new Date(opened+24*3600000).toISOString():null,
+  resolution_due_at:Number.isFinite(opened)?new Date(opened+72*3600000).toISOString():null,
+  sla:!Number.isFinite(opened)?'HOLD_INVALID_CLOCK':Number.isFinite(closed)?'RESOLVED':
+   now>opened+72*3600000&&!Number.isFinite(ack)?'ACK_AND_RESOLUTION_OVERDUE':
+   now>opened+72*3600000?'RESOLUTION_OVERDUE':
+   !Number.isFinite(ack)&&now>opened+24*3600000?'ACK_OVERDUE':Number.isFinite(ack)?'ACKNOWLEDGED_OPEN':'AWAITING_ACK'};
+}
+
+async function finance681(db,env,id){
+ const source=await campaignNet679(db,id);
+ if(!source?.campaign)return {status:'HOLD_SELECT_CAMPAIGN',exceptions:[],master_receipts:[],owner_history:[]};
+ const audit=rows(await db.prepare(`SELECT a.social_post_attempt_id,a.social_post_queue_id,a.platform_key,a.attempt_status,a.external_post_id,a.attempted_at,a.response_json
+ FROM social_post_attempts a JOIN social_post_queue q ON q.social_post_queue_id=a.social_post_queue_id
+ WHERE q.utm_campaign=? AND a.attempt_status IN
+ ('profit_exception_open_680','profit_exception_resolved_680','owner_exception_acknowledged_681',
+ 'master_signed_ack_680','campaign_roi_owner_accepted','net_campaign_owner_accepted_679')
+ ORDER BY a.social_post_attempt_id ASC LIMIT 251`).bind(source.campaign).all());
+ const now=Date.now(),issues=new Map(),masters=[],history=[];
+ for(const a of audit.slice(0,250)){
+  const d=safeJson(a.response_json,{}),key=a.social_post_queue_id+':'+a.external_post_id;
+  if(a.attempt_status==='profit_exception_open_680')issues.set(key,{reference:a.external_post_id,queue_id:a.social_post_queue_id,reason:d.reason||'',opened_at:a.attempted_at,ack_at:null,resolved_at:null});
+  if(a.attempt_status==='owner_exception_acknowledged_681'){
+   const e=issues.get(key);if(e&&!e.resolved_at)e.ack_at=a.attempted_at;
+   history.push({kind:'exception_acknowledgement',recorded_at:a.attempted_at});
+  }
+  if(a.attempt_status==='profit_exception_resolved_680'){const e=issues.get(key);if(e)e.resolved_at=a.attempted_at;}
+  if(['campaign_roi_owner_accepted','net_campaign_owner_accepted_679'].includes(a.attempt_status))
+   history.push({kind:a.attempt_status,recorded_at:a.attempted_at});
+  if(a.attempt_status==='master_signed_ack_680'){
+   const t=Date.parse(d.ack_at),same=d.fingerprint===source.fingerprint&&
+    d.source_revision===normalizeText(env?.DEVILNDOVE_SOURCE_REVISION);
+   masters.push({recorded_at:a.attempted_at,master_revision:d.master_revision||null,
+    source_revision:d.source_revision||null,
+    state:!same?'SUPERSEDED_OR_SOURCE_MISMATCH':!Number.isFinite(t)||now-t>86400000||t>now+300000?'EXPIRED_OR_INVALID_TIME':'SIGNED_AT_INTAKE_RECEIPT_ONLY'});
+  }
+ }
+ const exceptions=[...issues.values()].map(e=>exceptionSla681(e,now));
+ return {campaign:source.campaign,status:audit.length>250?'HOLD_INCOMPLETE_AUDIT':'READ_ONLY',as_of:new Date(now).toISOString(),
+  exception_sla:{acknowledge_hours:24,resolve_hours:72,policy:'PROVISIONAL_OWNER_REVIEW_TARGETS'},
+  exceptions,master_receipts:masters.slice(-25).reverse(),owner_history:history.slice(-25).reverse(),
+  scan_complete:audit.length<=250,connection:'HOLD_INDEPENDENT_RUNTIME_TRANSPORT_AND_MASTER_ADMISSION',
+  master_accepted:false,profitability_certified:false};
+}
+async function ownerExceptionAck681(db,user,p){
+ const id=Number(p.social_post_queue_id),ref=normalizeText(p.exception_reference);
+ if(!Number.isSafeInteger(id)||id<1||!/^[-a-zA-Z0-9_]{6,80}$/.test(ref)||p.owner_reviewed!==true)
+  throw Error('Select a real campaign exception and explicitly confirm owner review.');
+ const source=await campaignNet679(db,id);
+ if(!source?.campaign)throw Error('Campaign not found. HOLD.');
+ const last=await db.prepare(`SELECT attempt_status FROM social_post_attempts WHERE social_post_queue_id=?
+ AND platform_key='profit_exception_680' AND external_post_id=?
+ ORDER BY social_post_attempt_id DESC LIMIT 1`).bind(id,ref).first();
+ if(last?.attempt_status!=='profit_exception_open_680')throw Error('Only an open exception may be acknowledged.');
+ const earlier=await finance681(db,{},id);
+ if(!earlier.scan_complete)throw Error('Audit window incomplete; owner review HOLD.');
+ const match=earlier.exceptions?.find(e=>e.queue_id===id&&e.reference===ref&&!e.resolved_at);
+ if(!match||match.ack_at)throw Error('Exception acknowledgement already recorded or no open episode.');
+ await recordApiAttempt(db,user,id,'profit_exception_review_681','owner_exception_acknowledged_681',{
+  external_post_id:ref,response:{campaign:source.campaign,owner_user_id:user.user_id,decision:'acknowledged_for_review',
+  profitability_certified:false},notes:'Owner acknowledgement only, not resolution or Master acceptance.'});
+ const saved=await db.prepare(`SELECT social_post_attempt_id FROM social_post_attempts
+ WHERE social_post_queue_id=? AND platform_key='profit_exception_review_681'
+ AND external_post_id=? AND attempt_status='owner_exception_acknowledged_681'
+ ORDER BY social_post_attempt_id DESC LIMIT 1`).bind(id,ref).first();
+ if(!saved)throw Error('Owner acceptance history was not durably saved. HOLD.');
+ return {status:'owner_exception_acknowledged_681',connection:'HOLD',publication_performed:false};
+}
+
 export async function onRequestGet(context) {
 const adminUser = await getAdminUserFromRequest(context.request, context.env);
 if (!adminUser) return jsonResponse({ ok: false, error: 'Admin access required.' }, 401);
@@ -1709,7 +1781,7 @@ const db = getDb(context.env);
 if (!db) return jsonResponse({ ok: false, error: 'Database binding is not configured.' }, 500);
 try {
 const data = await summarize(db, context.env);
-return jsonResponse({ ok: true, ...data, receipts673:await receipts673(db),engagement675:await engagement675(db),financial676:await financial676(db), financial678:await financialSummary678(db,context.request.headers.get('x-campaign-queue-id')||new URL(context.request.url).searchParams.get('campaign_queue_id')), financial679:await campaignNet679(db,new URL(context.request.url).searchParams.get('campaign_queue_id')), financial680:await finance680(db,context.env,new URL(context.request.url).searchParams.get('campaign_queue_id')), queue: data.queue.map(normalizeQueueRow), mode: 'review_first_api_when_configured' }, 200, { 'Cache-Control': 'no-store' });
+return jsonResponse({ ok: true, ...data, receipts673:await receipts673(db),engagement675:await engagement675(db),financial676:await financial676(db), financial678:await financialSummary678(db,context.request.headers.get('x-campaign-queue-id')||new URL(context.request.url).searchParams.get('campaign_queue_id')), financial679:await campaignNet679(db,new URL(context.request.url).searchParams.get('campaign_queue_id')), financial680:await finance680(db,context.env,new URL(context.request.url).searchParams.get('campaign_queue_id')), financial681:await finance681(db,context.env,new URL(context.request.url).searchParams.get('campaign_queue_id')), queue: data.queue.map(normalizeQueueRow), mode: 'review_first_api_when_configured' }, 200, { 'Cache-Control': 'no-store' });
 } catch (error) {
 await captureRuntimeIncident(context.env, context.request, {
 incident_scope: 'admin_social',
@@ -1756,6 +1828,7 @@ else if (action === 'verify_product_cost_679') result = await verifyCost679(db,c
 else if (action === 'owner_net_signoff_679') result = await ownerNetSignoff679(db,adminUser,payload,recordApiAttempt);
 else if (action === 'master_ack_680') result = await masterAck680(db,context.env,adminUser,payload);
 else if (action === 'owner_profit_exception_680') result = await exception680(db,adminUser,payload);
+    else if (action === 'owner_exception_ack_681') result = await ownerExceptionAck681(db,adminUser,payload);
 else if (action === 'expense_attestation_678') result = await expenseAttestation678(db,context.env,adminUser,payload,recordApiAttempt);
 else if (action === 'owner_marketing_signoff_678') result = await ownerSignoff678(db,adminUser,payload,recordApiAttempt);
 else throw new Error(`Unsupported social queue action: ${action}`);

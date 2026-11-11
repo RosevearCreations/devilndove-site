@@ -1635,7 +1635,7 @@
       "reference_screen": "Product Management",
       "reason": "Existing compact Product browser and low-read recovery were previously revamped; preserve behavior and styling.",
       "evidence": {
-        "byte_length": 65052,
+        "byte_length": 61396,
         "stylesheets": 2,
         "scripts": 22,
         "forms": 2,
@@ -2070,7 +2070,7 @@
       "reference_screen": "Settings & Configuration",
       "reason": "Existing social authorization and draft boundaries must remain intact; integration redesign is queued separately.",
       "evidence": {
-        "byte_length": 33523,
+        "byte_length": 32550,
         "stylesheets": 3,
         "scripts": 11,
         "forms": 10,

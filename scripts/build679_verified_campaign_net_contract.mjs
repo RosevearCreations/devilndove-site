@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
-import {netContribution679} from '../functions/api/admin/social-post-queue.js';
+import {netContribution679,exceptionSla681} from '../functions/api/admin/social-post-queue.js';
 const read=p=>readFileSync(new URL('../'+p,import.meta.url),'utf8');
 const core=read('functions/api/admin/social-post-queue.js');
 const api=read('functions/api/admin/social-post-queue.js');
@@ -30,4 +30,23 @@ assert.match(api,/master_ack_680/);
 assert.match(api,/owner_profit_exception_680/);
 assert.match(html,/dd680-ops/);
 assert.match(browser,/dd680Exception/);
-console.log('BUILD 679/680 source financial controls and Master HOLD: PASS');
+
+for(const marker of [/async function finance681/,/async function ownerExceptionAck681/,
+ /ACK_OVERDUE/,/RESOLUTION_OVERDUE/,/PROVISIONAL_OWNER_REVIEW_TARGETS/,
+ /SUPERSEDED_OR_SOURCE_MISMATCH/,/SIGNED_AT_INTAKE_RECEIPT_ONLY/,
+ /owner_exception_acknowledged_681/,/HOLD_INDEPENDENT_RUNTIME_TRANSPORT_AND_MASTER_ADMISSION/,
+ /Audit window incomplete/,/Master ACK nonce already admitted/])assert.match(core,marker);
+assert.match(api,/financial681:await finance681/);
+assert.match(api,/owner_exception_ack_681/);
+assert.match(html,/dd681Open/);
+assert.match(html,/dd681History/);
+assert.match(browser,/dd681Sla/);
+
+const clock=Date.parse('2026-11-11T12:00:00.000Z');
+const incident={reference:'EXCEPTION_681',opened_at:'2026-11-08T06:00:00.000Z',ack_at:null,resolved_at:null};
+assert.equal(exceptionSla681(incident,clock).sla,'ACK_AND_RESOLUTION_OVERDUE');
+assert.equal(exceptionSla681({...incident,ack_at:'2026-11-08T07:00:00.000Z'},clock).sla,'RESOLUTION_OVERDUE');
+assert.equal(exceptionSla681({...incident,resolved_at:'2026-11-08T08:00:00.000Z'},clock).sla,'RESOLVED');
+assert.equal(exceptionSla681({...incident,opened_at:'2026-11-11T10:00:00.000Z'},clock).sla,'AWAITING_ACK');
+assert.equal(exceptionSla681({...incident,opened_at:'not-a-date'},clock).sla,'HOLD_INVALID_CLOCK');
+console.log('BUILD 679–681 source financial, SLA and Master HOLD: PASS');
