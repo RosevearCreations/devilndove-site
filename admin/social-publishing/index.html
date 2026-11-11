@@ -51,6 +51,16 @@
     </section>
     <style>.dd671-layout{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:20px}.dd671-layout label{display:block;margin:12px 0 6px}.dd671-layout .input{width:100%;box-sizing:border-box}.dd671-layout fieldset{margin:14px 0;padding:14px;border:1px solid #9b82b0;border-radius:12px}.dd671-layout fieldset label{display:flex;align-items:center;gap:8px}.dd671-links{display:flex;gap:12px;flex-wrap:wrap;margin:10px 0}.dd671-platforms{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:4px}.dd671-asset{display:flex!important;align-items:flex-start!important;gap:10px;margin:8px 0!important;padding:8px;border:1px solid #6d587c;border-radius:9px}.dd671-asset small{display:block;overflow-wrap:anywhere}.dd671-confirm{display:flex!important;align-items:start;gap:8px}@media(max-width:750px){.dd671-layout{grid-template-columns:1fr}}</style>
 
+    <section class="card" id="dd676-finance" aria-labelledby="dd676-title">
+      <p class="eyebrow">Build 676 · Financial attribution evidence</p><h2 id="dd676-title">Campaign costs, paid-order review &amp; ROI certification</h2>
+      <p>We can record a CAD expense receipt and independently verify whether a named order has settled payment. The current checkout does not bind an order directly to a campaign, so paid-order attribution and financial ROI remain HOLD until that proof is available.</p>
+      <form id="dd676Form" class="dd671-layout">
+        <div><label>Campaign-linked social item<select class="input" id="dd676Queue" required><option value="">Choose campaign</option></select></label><label>Evidence type<select class="input" id="dd676Kind"><option value="cost">Marketing expense receipt</option><option value="revenue">Paid-order attribution candidate</option></select></label></div>
+        <div><label>Cost in CAD<input class="input" id="dd676Cost" type="number" min="0.01" step="0.01" placeholder="e.g. 24.50"></label><label>Expense receipt reference<input class="input" id="dd676Reference" maxlength="100" placeholder="Vendor invoice or receipt ID"></label><label>Order ID<input class="input" id="dd676Order" type="number" min="1" placeholder="For paid-order candidate"></label><label class="dd671-confirm"><input type="checkbox" id="dd676Confirm" required> Owner reviewed the original evidence; this is not a certified ROI claim.</label><button class="btn primary" type="submit">Record evidence</button></div>
+      </form><p id="dd676Result" role="status" aria-live="polite">No financial evidence recorded in this session.</p>
+      <div id="dd676Status" aria-live="polite">Certification: HOLD</div>
+      <div class="table-scroll" tabindex="0"><table><thead><tr><th>Campaign</th><th>Evidence</th><th>Source reference</th><th>CAD</th><th>Recorded</th><th>Certification</th></tr></thead><tbody id="dd676Rows"></tbody></table></div>
+    </section>
     <section class="card" id="dd675-roi" aria-labelledby="dd675-title">
       <p class="eyebrow">Build 675 · Verified attribution and engagement</p><h2 id="dd675-title">Marketing attribution &amp; ROI evidence</h2>
       <p>Visits, checkout starts and enquiries come from stored UTM-tagged site events. Provider engagement is imported only after a direct read-only identity-matched lookup. Neither a checkout start nor a like is a sale.</p>

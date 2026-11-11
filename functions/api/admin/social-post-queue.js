@@ -1153,6 +1153,62 @@ async function engagement675(db){
       provider_id:item.external_post_id,metrics:evidence.metrics,observed_at:evidence.observed_at});}
   return {snapshots,roi_status:'UNAVAILABLE_NO_VERIFIED_ATTRIBUTED_REVENUE_AND_SPEND',financial_claims:false};
 }
+// Build 676: order settlement and campaign attribution are separate evidence
+// axes. The current order schema has no authoritative UTM/session foreign key.
+async function recordFinancialEvidence676(db,adminUser,payload){
+  const id=Number(payload.social_post_queue_id),kind=slugKey(payload.kind||'');
+  const post=await db.prepare('SELECT utm_campaign FROM social_post_queue WHERE social_post_queue_id=?').bind(id).first();
+  if(!Number.isSafeInteger(id)||id<1||!post?.utm_campaign||payload.owner_reviewed!==true)
+    throw Error('An existing named campaign and explicit owner review are required.');
+  if(kind==='cost'){
+    const cents=Number(payload.cost_cents),ref=trimTo(payload.receipt_reference||'',100).trim();
+    if(!Number.isSafeInteger(cents)||cents<=0||!ref||payload.currency!=='CAD')
+      throw Error('Provide a positive CAD amount and authentic expense receipt reference.');
+    const duplicate=await db.prepare(`SELECT social_post_attempt_id FROM social_post_attempts WHERE
+      attempt_status='campaign_cost_recorded' AND platform_key='campaign_cost' AND external_post_id=? LIMIT 1`).bind(ref).first();
+    if(duplicate)throw Error('Expense receipt already recorded; duplicate cost blocked.');
+    await recordApiAttempt(db,adminUser,id,'campaign_cost','campaign_cost_recorded',{
+      external_post_id:ref,response:{campaign:post.utm_campaign,cost_cents:cents,currency:'CAD',receipt_reference:ref,
+        provenance:'owner_attested_expense_receipt',roi_certified:false},
+      notes:'Owner-recorded expense evidence, not independent vendor verification.'});
+    return {status:'cost_evidence_recorded',roi_certified:false,publication_performed:false};
+  }
+  if(kind==='revenue'){
+    const orderId=Number(payload.order_id);
+    if(!Number.isSafeInteger(orderId)||orderId<1)throw Error('A real order ID is required.');
+    const order=await db.prepare('SELECT order_id,currency,total_cents,payment_status FROM orders WHERE order_id=?').bind(orderId).first();
+    if(!order||String(order.currency).toUpperCase()!=='CAD'||['refunded','partially_refunded','cancelled','failed'].includes(String(order.payment_status||'').toLowerCase()))throw Error('Order unavailable, not CAD or has an unsafe payment state.');
+    const payment=await db.prepare(`SELECT COALESCE(SUM(CASE WHEN LOWER(payment_status) IN
+      ('paid','completed','captured') THEN amount_cents ELSE 0 END),0) AS settled_cents,
+      SUM(CASE WHEN LOWER(payment_status) IN ('refunded','partially_refunded') THEN 1 ELSE 0 END) AS refund_rows
+      FROM payments WHERE order_id=? AND UPPER(currency)='CAD'`).bind(orderId).first();
+    if(!payment||Number(payment.refund_rows)>0||Number(payment.settled_cents)<Number(order.total_cents)||Number(order.total_cents)<=0)
+      throw Error('Payment is not fully settled or a refund prevents revenue certification.');
+    const duplicate=await db.prepare(`SELECT social_post_attempt_id FROM social_post_attempts WHERE
+      attempt_status='campaign_revenue_candidate_hold' AND platform_key='campaign_revenue'
+      AND external_post_id=? LIMIT 1`).bind(String(orderId)).first();
+    if(duplicate)throw Error('This order already has a campaign-attribution candidate.');
+    await recordApiAttempt(db,adminUser,id,'campaign_revenue','campaign_revenue_candidate_hold',{
+      external_post_id:String(orderId),response:{campaign:post.utm_campaign,order_id:orderId,
+        settled_cents:Number(payment.settled_cents),currency:'CAD',settlement_verified:true,
+        attribution_verified:false,reason:'no_authoritative_order_to_campaign_binding'},
+      notes:'Paid order verified; marketing attribution remains HOLD.'});
+    return {status:'paid_order_verified_attribution_hold',roi_certified:false,publication_performed:false};
+  }
+  throw Error('Choose cost or revenue evidence.');
+}
+async function financial676(db){
+  const result=rows(await db.prepare(`SELECT a.attempt_status,a.external_post_id,a.response_json,a.attempted_at,
+    q.utm_campaign FROM social_post_attempts a JOIN social_post_queue q ON q.social_post_queue_id=a.social_post_queue_id
+    WHERE a.attempt_status IN ('campaign_cost_recorded','campaign_revenue_candidate_hold')
+    ORDER BY a.social_post_attempt_id DESC LIMIT 150`).all().catch(()=>({results:[]})));
+  const items=result.map(row=>{const detail=safeJson(row.response_json,{});return {kind:row.attempt_status,
+    campaign:row.utm_campaign,reference:row.external_post_id,amount_cents:row.attempt_status==='campaign_cost_recorded'?
+      detail.cost_cents:detail.settled_cents,observed_at:row.attempted_at,
+    attribution_verified:false,roi_certified:false};});
+  return {items,certification:'HOLD_UNBOUND_ORDER_ATTRIBUTION',currency:'CAD',
+    cost_evidence:'OWNER_ATTESTED_NOT_VENDOR_VERIFIED',roi_percent:null,roi_certified:false};
+}
 async function verifyPublication673(context,db,adminUser,payload){
   const id=Number(payload.social_post_queue_id),platform=slugKey(payload.platform_key||'');
   if(!Number.isSafeInteger(id)||id<1||!['facebook','instagram','pinterest','x'].includes(platform))throw Error('Select a valid queue and supported social channel.');
@@ -1246,7 +1302,7 @@ export async function onRequestGet(context) {
   if (!db) return jsonResponse({ ok: false, error: 'Database binding is not configured.' }, 500);
   try {
     const data = await summarize(db, context.env);
-    return jsonResponse({ ok: true, ...data, receipts673:await receipts673(db),engagement675:await engagement675(db), queue: data.queue.map(normalizeQueueRow), mode: 'review_first_api_when_configured' }, 200, { 'Cache-Control': 'no-store' });
+    return jsonResponse({ ok: true, ...data, receipts673:await receipts673(db),engagement675:await engagement675(db),financial676:await financial676(db), queue: data.queue.map(normalizeQueueRow), mode: 'review_first_api_when_configured' }, 200, { 'Cache-Control': 'no-store' });
   } catch (error) {
     await captureRuntimeIncident(context.env, context.request, {
       incident_scope: 'admin_social',
@@ -1288,6 +1344,7 @@ export async function onRequestPost(context) {
     else if (action === 'retry_failed_673') result = await retryFailed673(context,db,adminUser,payload);
     else if (action === 'campaign_schedule_674') result = await scheduleCampaign674(db,adminUser,payload);
     else if (action === 'verify_engagement_675') result = await verifyEngagement675(context,db,adminUser,payload);
+    else if (action === 'financial_evidence_676') result = await recordFinancialEvidence676(db,adminUser,payload);
     else throw new Error(`Unsupported social queue action: ${action}`);
 
     await auditAdminAction(context.env, context.request, adminUser, {

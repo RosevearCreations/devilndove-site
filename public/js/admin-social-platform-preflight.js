@@ -1,3 +1,36 @@
+// Build 676 — owner-attested campaign costs, verified settlement and attribution HOLD.
+(() => {
+  'use strict';
+  const $=id=>document.getElementById(id);
+  const request=async payload=>{if(!window.DDAuth?.apiFetch)throw Error('Authenticated admin required');
+    const res=await window.DDAuth.apiFetch('/api/admin/social-post-queue',payload?
+      {method:'POST',body:JSON.stringify(payload)}:undefined),data=await res.json();
+    if(!res.ok||!data.ok)throw Error(data.error||'Evidence unavailable');return data;};
+  async function load(){
+    try{const data=await request(),queue=$('dd676Queue'),old=queue.value;
+      queue.replaceChildren(new Option('Choose campaign',''));
+      for(const item of data.queue||[])if(item.utm_campaign)queue.add(new Option(item.utm_campaign+' · #'+item.social_post_queue_id,item.social_post_queue_id));
+      queue.value=old;
+      const finance=data.financial676||{},tbody=$('dd676Rows');tbody.replaceChildren();
+      for(const item of finance.items||[]){const row=document.createElement('tr');
+        const values=[item.campaign,item.kind,item.reference,(Number(item.amount_cents||0)/100).toFixed(2),item.observed_at,'HOLD'];
+        for(const value of values){const cell=document.createElement('td');cell.textContent=String(value??'—');row.append(cell);}tbody.append(row);}
+      $('dd676Status').textContent='Financial ROI: HOLD · No authoritative order-to-campaign binding. Expense receipts are owner-attested; paid orders are settlement-checked but marketing attribution is unverified.';
+    }catch(error){$('dd676Status').textContent='HOLD · '+error.message;}
+  }
+  document.addEventListener('DOMContentLoaded',()=>{
+    if(!$('dd676-finance'))return;
+    $('dd676Form').addEventListener('submit',async event=>{event.preventDefault();
+      const kind=$('dd676Kind').value,cost=Number($('dd676Cost').value);
+      const payload={action:'financial_evidence_676',social_post_queue_id:Number($('dd676Queue').value),
+        kind,currency:'CAD',cost_cents:Math.round(cost*100),receipt_reference:$('dd676Reference').value.trim(),
+        order_id:Number($('dd676Order').value),owner_reviewed:$('dd676Confirm').checked};
+      $('dd676Result').textContent='Checking source evidence…';
+      try{const data=await request(payload);$('dd676Result').textContent=(data.result?.status||'Evidence recorded')+' · ROI remains HOLD.';$('dd676Confirm').checked=false;await load();}
+      catch(error){$('dd676Result').textContent='HOLD · '+error.message;}
+    });void load();
+  });
+})();
 // Build 675 — independently sourced engagement snapshots and evidence-labelled attribution.
 (() => {
   'use strict';
