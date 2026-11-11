@@ -1,3 +1,68 @@
+// Build 672 — read-only account identity and exact public derivative owner approval.
+(() => {
+  'use strict';
+  const byId = id => document.getElementById(id);
+  const text = value => String(value ?? '');
+  const api = async (action, extras = {}) => {
+    if (!window.DDAuth?.apiFetch) throw new Error('Admin authentication is unavailable.');
+    const response = await window.DDAuth.apiFetch('/api/admin/social-post-queue', action
+      ? { method: 'POST', body: JSON.stringify({ action, ...extras }) }
+      : undefined);
+    const result = await response.json();
+    if (!response.ok || !result.ok) throw new Error(result.error || result.message || 'Request failed.');
+    return result;
+  };
+  const show = (id, message) => { const node = byId(id); if (node) node.textContent = message; };
+  document.addEventListener('DOMContentLoaded', () => {
+    if (!byId('dd672-owner-gate')) return;
+    const verify = byId('dd672Verify');
+    verify?.addEventListener('click', async () => {
+      verify.disabled = true;
+      show('dd672Accounts', 'Checking configured destinations with each provider…');
+      try {
+        const data = await api('verify_accounts_672');
+        const lines = (data.accounts || []).map(account =>
+          `${account.platform}: ${account.verified ? 'VERIFIED' : 'HOLD'} · ${account.verified ? (account.account_name || account.account_id || 'Identity confirmed') : account.status}`);
+        show('dd672Accounts', lines.join(' | ') || 'No destinations available.');
+      } catch (error) { show('dd672Accounts', 'HOLD · ' + error.message); }
+      finally { verify.disabled = false; }
+    });
+    const load = async () => {
+      const select = byId('dd672Queue');
+      select.replaceChildren(new Option('Choose an unposted CAIP draft', ''));
+      try {
+        const data = await api();
+        const queue = (data.queue || []).filter(item => item.source_type === 'caip_project' && item.post_status !== 'posted');
+        for (const item of queue) {
+          const id = item.social_post_queue_id;
+          select.add(new Option(`#${id} · Project ${item.source_id} · ${text(item.caption || item.title).slice(0, 65)}`, id));
+        }
+        show('dd672Status', queue.length ? 'Select a draft, then approve its exact verified public derivative.' : 'HOLD · No unposted CAIP-linked drafts.');
+      } catch (error) { show('dd672Status', 'HOLD · ' + error.message); }
+    };
+    byId('dd672LoadQueue')?.addEventListener('click', load);
+    byId('dd672Derivative')?.addEventListener('submit', async event => {
+      event.preventDefault();
+      const button = event.currentTarget.querySelector('[type="submit"]');
+      button.disabled = true;
+      show('dd672Status', 'Checking canonical CAIP rights, consent and exact URL…');
+      try {
+        const result = await api('approve_caip_derivative_672', {
+          social_post_queue_id: Number(byId('dd672Queue').value),
+          creative_asset_id: Number(byId('dd672Asset').value),
+          public_url: byId('dd672Url').value.trim(),
+          exact_media_reviewed: byId('dd672Reviewed').checked,
+          owner_confirmed: byId('dd672Owner').checked
+        });
+        show('dd672Status', `Recorded approval for CAIP asset #${result.creative_asset_id}. Post remains a draft; no publication was performed.`);
+        byId('dd672Reviewed').checked = false;
+        byId('dd672Owner').checked = false;
+      } catch (error) { show('dd672Status', 'HOLD · ' + error.message); }
+      finally { button.disabled = false; }
+    });
+    void load();
+  });
+})();
 // Build 211 — browser-only social post preview and platform media preflight.
 (() => {
   'use strict';

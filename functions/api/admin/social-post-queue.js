@@ -959,11 +959,26 @@ async function publishQueuedPost(context, db, adminUser, payload = {}) {
   const readiness = getPlatformReadiness(context.env);
   const results = [];
 
+  // Build 672: a tagged CAIP original is not a public derivative. Never let
+  // force=true bypass the per-URL, per-project owner approval for this source.
+  if (row.source_type === 'caip_project') {
+    const approved = images.length > 0 && await Promise.all(images.map(async (url) => {
+      const receipt = await db.prepare(`SELECT consent_record_id FROM media_consent_records
+        WHERE source_type='caip_project' AND source_id=? AND media_url=?
+          AND consent_status='approved' AND public_use_allowed=1 AND social_use_allowed=1
+          AND (expires_at IS NULL OR datetime(expires_at)>CURRENT_TIMESTAMP)
+        ORDER BY consent_record_id DESC LIMIT 1`).bind(String(row.source_id||''),url).first().catch(()=>null);
+      return !!receipt;
+    })).then(flags=>flags.every(Boolean));
+    if (!approved) return {social_post_queue_id:id,attempted_platforms:selected,
+      results:selected.map(platform=>({platform,status:'blocked_caip_derivative_approval',notes:'Exact public derivative and owner consent receipt required; force cannot override.'}))};
+  }
+
   await db.prepare(`UPDATE social_post_queue SET last_publish_attempt_at=CURRENT_TIMESTAMP, updated_by_user_id=?, updated_at=CURRENT_TIMESTAMP WHERE social_post_queue_id=?`).bind(adminUser.user_id, id).run().catch(() => null);
 
   const privacyStatus = slugKey(row.privacy_status || 'needs_review');
   const privacyApproved = Number(row.approved_for_public_post || 0) === 1 || ['approved', 'no_private_media'].includes(privacyStatus);
-  if (!privacyApproved && payload.force !== true) {
+  if (!privacyApproved && (row.source_type === 'caip_project' || payload.force !== true)) {
     for (const platform of selected) {
       const blocked = { platform, status: 'blocked_privacy_review', privacy_status: privacyStatus, notes: 'Review Social Media Privacy Guard before API publishing this post.' };
       await recordApiAttempt(db, adminUser, id, platform, 'blocked_privacy_review', blocked);
@@ -990,8 +1005,9 @@ async function publishQueuedPost(context, db, adminUser, payload = {}) {
     return { social_post_queue_id: id, attempted_platforms: selected, results };
   }
 
+  const verified672 = row.source_type === 'caip_project' ? await verifyAccounts672(context.env) : [];
   for (const platform of selected) {
-    if (row.approval_status !== 'approved' && payload.force !== true) {
+    if (row.approval_status !== 'approved' && (row.source_type === 'caip_project' || payload.force !== true)) {
       const blocked = { platform, status: 'blocked_needs_approval', notes: 'Approve/ready the queue item before API publishing.' };
       await recordApiAttempt(db, adminUser, id, platform, 'blocked_needs_approval', blocked);
       results.push(blocked);
@@ -1001,6 +1017,12 @@ async function publishQueuedPost(context, db, adminUser, payload = {}) {
       const manual = { platform, status: 'manual_pending', notes: readiness[platform]?.notes || 'This platform remains manual/review-first in this build.' };
       await recordApiAttempt(db, adminUser, id, platform, 'manual_pending', manual);
       results.push(manual);
+      continue;
+    }
+    if (row.source_type === 'caip_project' && !verified672.some(account=>account.platform===platform && account.verified)) {
+      const held={platform,status:'blocked_account_unverified',notes:'Destination identity must be verified with its provider before owner-supervised CAIP publishing.'};
+      await recordApiAttempt(db,adminUser,id,platform,'blocked_account_unverified',held);
+      results.push(held);
       continue;
     }
     if (!readiness[platform]?.api_ready) {
@@ -1042,6 +1064,45 @@ async function publishQueuedPost(context, db, adminUser, payload = {}) {
         updated_by_user_id = ?, updated_at = CURRENT_TIMESTAMP
     WHERE social_post_queue_id = ?`).bind(terminal, terminal, adminUser.user_id, id).run().catch(() => null);
   return { social_post_queue_id: id, attempted_platforms: selected, results };
+}
+
+// Read-only account identity check. A configured token alone is not a verified account.
+async function verifyAccounts672(env) {
+  const checks=[
+    ['facebook',envText(env,'FACEBOOK_PAGE_ID','META_PAGE_ID'),envText(env,'FACEBOOK_PAGE_ACCESS_TOKEN','META_PAGE_ACCESS_TOKEN'),id=>`https://graph.facebook.com/${envText(env,'META_GRAPH_API_VERSION')||'v22.0'}/${encodeURIComponent(id)}?fields=id,name`],
+    ['instagram',envText(env,'INSTAGRAM_USER_ID','IG_USER_ID','INSTAGRAM_BUSINESS_ACCOUNT_ID'),envText(env,'INSTAGRAM_ACCESS_TOKEN','META_PAGE_ACCESS_TOKEN','FACEBOOK_PAGE_ACCESS_TOKEN'),id=>`https://graph.facebook.com/${envText(env,'META_GRAPH_API_VERSION')||'v22.0'}/${encodeURIComponent(id)}?fields=id,username`],
+    ['pinterest','user_account',envText(env,'PINTEREST_ACCESS_TOKEN'),()=> 'https://api.pinterest.com/v5/user_account'],
+    ['x','me',envText(env,'X_USER_ACCESS_TOKEN','TWITTER_USER_ACCESS_TOKEN'),()=> 'https://api.x.com/2/users/me']
+  ];
+  return Promise.all(checks.map(async ([platform,id,token,url])=>{
+    if (!id||!token)return {platform,verified:false,status:'credentials_missing'};
+    try {const response=await fetch(url(id),{headers:{Authorization:`Bearer ${token}`},signal:AbortSignal.timeout(6000)});
+      const body=await response.json().catch(()=>({}));const user=body.data||body;
+      const identity=String(user.id||'');const verified=response.ok&&!!identity&&(platform==='pinterest'||platform==='x'||identity===String(id));
+      return {platform,verified,status:verified?'account_verified':'account_unverified',account_id:verified?identity:null,account_name:verified?String(user.name||user.username||user.business_name||'').slice(0,100):null};
+    }catch{return {platform,verified:false,status:'verification_unavailable'};}
+  })).then(rows=>[...rows,{platform:'tiktok',verified:false,status:'manual_only'},{platform:'youtube',verified:false,status:'manual_only'}]);
+}
+
+async function approveCaipDerivative672(db,adminUser,payload) {
+  const queueId=Number(payload.social_post_queue_id),assetId=Number(payload.creative_asset_id);
+  const url=String(payload.public_url||'').trim();
+  if (!Number.isSafeInteger(queueId)||queueId<1||!Number.isSafeInteger(assetId)||assetId<1||!/^https:\/\//i.test(url))throw Error('Choose a real queue, CAIP asset and HTTPS public derivative URL.');
+  if (payload.owner_confirmed!==true||payload.exact_media_reviewed!==true)throw Error('Explicit owner confirmation of the exact public media and caption is required.');
+  const post=await db.prepare('SELECT source_type,source_id,post_status FROM social_post_queue WHERE social_post_queue_id=?').bind(queueId).first();
+  if(post?.source_type!=='caip_project'||!/^\d+$/.test(String(post.source_id||''))||post.post_status==='posted')throw Error('Choose an unposted CAIP-linked draft.');
+  const asset=await db.prepare(`SELECT ca.creative_asset_id,ca.rights_status,ma.public_url,f.consent_state,f.privacy_state,f.rights_status AS upload_rights
+    FROM creative_assets ca JOIN caip_media_upload_files f ON f.creative_asset_id=ca.creative_asset_id AND f.creative_project_id=ca.creative_project_id
+    LEFT JOIN media_assets ma ON ma.media_asset_id=ca.media_asset_id
+    WHERE ca.creative_project_id=? AND ca.creative_asset_id=? AND f.upload_status='uploaded'
+    ORDER BY f.caip_media_upload_file_id DESC LIMIT 1`).bind(Number(post.source_id),assetId).first();
+  if(!asset||asset.consent_state!=='public_allowed'||asset.upload_rights!=='public_allowed'||asset.privacy_state!=='public_approved'||asset.rights_status!=='public_allowed'||asset.public_url!==url)
+    throw Error('CAIP source rights, consent, public-approval state or canonical derivative URL are not independently verified. HOLD.');
+  await db.prepare(`INSERT INTO media_consent_records(consent_key,subject_label,source_type,source_id,media_url,consent_status,consent_scope,public_use_allowed,social_use_allowed,privacy_notes,reviewed_by_user_id,updated_at)
+    VALUES(?,?,'caip_project',?,?,'approved','all_public',1,1,?, ?,CURRENT_TIMESTAMP)
+    ON CONFLICT(consent_key) DO UPDATE SET media_url=excluded.media_url,consent_status='approved',public_use_allowed=1,social_use_allowed=1,reviewed_by_user_id=excluded.reviewed_by_user_id,updated_at=CURRENT_TIMESTAMP`).bind(`caip672:${queueId}:${assetId}`,`CAIP asset ${assetId}`,String(post.source_id),url,'Owner reviewed exact public derivative; source rights and consent checked.',adminUser.user_id).run();
+  await db.prepare(`UPDATE social_post_queue SET image_urls_json=?,approval_status='needs_review',post_status='draft',updated_by_user_id=?,updated_at=CURRENT_TIMESTAMP WHERE social_post_queue_id=?`).bind(JSON.stringify([url]),adminUser.user_id,queueId).run();
+  return {social_post_queue_id:queueId,creative_asset_id:assetId,public_derivative_approved:true,publication_performed:false};
 }
 
 export async function onRequestGet(context) {
@@ -1087,6 +1148,8 @@ export async function onRequestPost(context) {
     else if (action === 'archive_caption_template') result = await archiveCaptionTemplate(db, payload);
     else if (action === 'dry_run_platforms') result = await dryRunQueuedPost(context, db, adminUser, payload);
     else if (action === 'publish_platforms') result = await publishQueuedPost(context, db, adminUser, payload);
+    else if (action === 'verify_accounts_672') result = {accounts:await verifyAccounts672(context.env),verified_at:new Date().toISOString(),publication_performed:false};
+    else if (action === 'approve_caip_derivative_672') result = await approveCaipDerivative672(db,adminUser,payload);
     else throw new Error(`Unsupported social queue action: ${action}`);
 
     await auditAdminAction(context.env, context.request, adminUser, {
