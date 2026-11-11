@@ -1,3 +1,30 @@
+// Build 675 — independently sourced engagement snapshots and evidence-labelled attribution.
+(() => {
+  'use strict';
+  const $=id=>document.getElementById(id);
+  const append=(target,values)=>{const row=document.createElement('tr');for(const value of values){const cell=document.createElement('td');cell.textContent=String(value??'—');row.append(cell);}target.append(row);};
+  const request=async body=>{if(!window.DDAuth?.apiFetch)throw Error('Admin authentication required');
+    const res=await window.DDAuth.apiFetch('/api/admin/social-post-queue',body?{method:'POST',body:JSON.stringify(body)}:undefined);
+    const data=await res.json();if(!res.ok||!data.ok)throw Error(data.error||'Evidence unavailable');return data;};
+  async function load(){try{const data=await request(),funnel=$('dd675Funnel'),snap=$('dd675Snapshots');funnel.replaceChildren();snap.replaceChildren();
+    const rollups=data.utm_rollups||[],evidence=data.engagement675?.snapshots||[];
+    for(const row of rollups)append(funnel,[row.utm_campaign,row.utm_source+' / '+row.utm_medium,row.page_views,row.visitor_sessions||row.session_count,row.checkout_starts,row.custom_request_count]);
+    for(const row of evidence)append(snap,[row.campaign+' / '+row.platform,row.provider_id,Object.entries(row.metrics||{}).map(([key,value])=>key+': '+value).join(' · '),row.observed_at]);
+    if(!rollups.length)append(funnel,['No attributed campaign evidence','','','','','']);
+    if(!evidence.length)append(snap,['No independently verified engagement snapshots','','','']);
+    const selector=$('dd675Queue'),prior=selector.value;selector.replaceChildren(new Option('Choose a published item',''));
+    for(const q of data.queue||[])if(q.post_status==='posted'||q.published_at)selector.add(new Option('#'+q.social_post_queue_id+' · '+(q.title||'Post').slice(0,55),q.social_post_queue_id));
+    selector.value=prior; // Keep the owner's selected post if still present.
+    $('dd675Roi').textContent='ROI: UNAVAILABLE · Confirmed attributed sales revenue and evidenced campaign spend are not both present. Visits, checkouts and enquiries are separate indicators, not financial return.';
+  }catch(error){$('dd675Roi').textContent='HOLD · '+error.message;}}
+  document.addEventListener('DOMContentLoaded',()=>{if(!$('dd675-roi'))return;$('dd675Refresh')?.addEventListener('click',load);
+    $('dd675Verify').addEventListener('submit',async e=>{e.preventDefault();$('dd675Result').textContent='Requesting read-only provider evidence…';
+      try{const data=await request({action:'verify_engagement_675',social_post_queue_id:Number($('dd675Queue').value),platform_key:$('dd675Platform').value});
+        const result=data.result||{};$('dd675Result').textContent=result.verified?'Verified '+result.platform+' metrics from provider; snapshot recorded.':'HOLD · '+(result.status||'No verified metrics');await load();
+      }catch(error){$('dd675Result').textContent='HOLD · '+error.message;}});
+    void load();
+  });
+})();
 // Build 674 — owner campaign calendar and source-grounded cross-channel command centre.
 (() => {
   'use strict';

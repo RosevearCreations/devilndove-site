@@ -51,6 +51,15 @@
     </section>
     <style>.dd671-layout{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:20px}.dd671-layout label{display:block;margin:12px 0 6px}.dd671-layout .input{width:100%;box-sizing:border-box}.dd671-layout fieldset{margin:14px 0;padding:14px;border:1px solid #9b82b0;border-radius:12px}.dd671-layout fieldset label{display:flex;align-items:center;gap:8px}.dd671-links{display:flex;gap:12px;flex-wrap:wrap;margin:10px 0}.dd671-platforms{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:4px}.dd671-asset{display:flex!important;align-items:flex-start!important;gap:10px;margin:8px 0!important;padding:8px;border:1px solid #6d587c;border-radius:9px}.dd671-asset small{display:block;overflow-wrap:anywhere}.dd671-confirm{display:flex!important;align-items:start;gap:8px}@media(max-width:750px){.dd671-layout{grid-template-columns:1fr}}</style>
 
+    <section class="card" id="dd675-roi" aria-labelledby="dd675-title">
+      <p class="eyebrow">Build 675 · Verified attribution and engagement</p><h2 id="dd675-title">Marketing attribution &amp; ROI evidence</h2>
+      <p>Visits, checkout starts and enquiries come from stored UTM-tagged site events. Provider engagement is imported only after a direct read-only identity-matched lookup. Neither a checkout start nor a like is a sale.</p>
+      <button class="btn secondary" id="dd675Refresh" type="button">Refresh evidence</button>
+      <div id="dd675Roi" role="status" aria-live="polite">ROI unavailable until confirmed attributed revenue and campaign spend are independently recorded.</div>
+      <h3>Campaign traffic and enquiry funnel</h3><div class="table-scroll" tabindex="0"><table><thead><tr><th>Campaign</th><th>Source</th><th>Visits</th><th>Sessions</th><th>Checkouts started</th><th>Enquiries</th></tr></thead><tbody id="dd675Funnel"></tbody></table></div>
+      <h3>Provider engagement snapshots</h3><div class="table-scroll" tabindex="0"><table><thead><tr><th>Campaign / channel</th><th>Verified provider ID</th><th>Reported counts</th><th>Observed</th></tr></thead><tbody id="dd675Snapshots"></tbody></table></div>
+      <h3>Verify current engagement</h3><form id="dd675Verify"><label>Posted queue item<select class="input" id="dd675Queue" required><option value="">Choose a published item</option></select></label><label>Channel<select class="input" id="dd675Platform"><option value="facebook">Facebook</option><option value="x">X</option></select></label><button class="btn primary" type="submit">Request read-only provider metrics</button></form><p id="dd675Result" role="status" aria-live="polite">No external metrics imported.</p>
+    </section>
     <section class="card" id="dd674-marketing" aria-labelledby="dd674-title">
       <p class="eyebrow">Build 674 · Marketing command centre</p><h2 id="dd674-title">Campaign calendar &amp; cross-channel results</h2>
       <p>Based on stored draft schedules, UTM attribution and verified delivery receipts. Audience reach, sales and engagement are shown only when a real source recorded them. Scheduling does not automatically publish.</p>
