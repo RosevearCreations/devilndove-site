@@ -1184,29 +1184,37 @@ async function recordFinancialEvidence676(db,adminUser,payload){
       FROM payments WHERE order_id=? AND UPPER(currency)='CAD'`).bind(orderId).first();
     if(!payment||Number(payment.refund_rows)>0||Number(payment.settled_cents)<Number(order.total_cents)||Number(order.total_cents)<=0)
       throw Error('Payment is not fully settled or a refund prevents revenue certification.');
+    const binding=await db.prepare(`SELECT a.response_json,q.utm_campaign FROM social_post_attempts a
+      JOIN social_post_queue q ON q.social_post_queue_id=a.social_post_queue_id
+      WHERE a.platform_key='checkout_attribution' AND a.attempt_status='checkout_session_bound'
+      AND a.external_post_id=? ORDER BY a.social_post_attempt_id ASC LIMIT 1`).bind(String(orderId)).first();
+    const bound=safeJson(binding?.response_json,{});
+    if(!binding||binding.utm_campaign!==post.utm_campaign||!Number.isSafeInteger(Number(bound.site_visitor_session_id)))
+      throw Error('Paid order has no matching recorded checkout campaign identity. Attribution HOLD.');
     const duplicate=await db.prepare(`SELECT social_post_attempt_id FROM social_post_attempts WHERE
-      attempt_status='campaign_revenue_candidate_hold' AND platform_key='campaign_revenue'
+      attempt_status IN ('campaign_revenue_candidate_hold','campaign_revenue_bound') AND platform_key='campaign_revenue'
       AND external_post_id=? LIMIT 1`).bind(String(orderId)).first();
     if(duplicate)throw Error('This order already has a campaign-attribution candidate.');
-    await recordApiAttempt(db,adminUser,id,'campaign_revenue','campaign_revenue_candidate_hold',{
+    await recordApiAttempt(db,adminUser,id,'campaign_revenue','campaign_revenue_bound',{
       external_post_id:String(orderId),response:{campaign:post.utm_campaign,order_id:orderId,
         settled_cents:Number(payment.settled_cents),currency:'CAD',settlement_verified:true,
-        attribution_verified:false,reason:'no_authoritative_order_to_campaign_binding'},
-      notes:'Paid order verified; marketing attribution remains HOLD.'});
-    return {status:'paid_order_verified_attribution_hold',roi_certified:false,publication_performed:false};
+        attribution_verified:true,site_visitor_session_id:Number(bound.site_visitor_session_id),
+        provenance:'server_observed_checkout_campaign',roi_certified:false},
+      notes:'Paid order and first-party campaign session matched; expense verification still required for certified ROI.'});
+    return {status:'paid_order_bound_to_campaign',roi_certified:false,publication_performed:false};
   }
   throw Error('Choose cost or revenue evidence.');
 }
 async function financial676(db){
   const result=rows(await db.prepare(`SELECT a.attempt_status,a.external_post_id,a.response_json,a.attempted_at,
     q.utm_campaign FROM social_post_attempts a JOIN social_post_queue q ON q.social_post_queue_id=a.social_post_queue_id
-    WHERE a.attempt_status IN ('campaign_cost_recorded','campaign_revenue_candidate_hold')
+    WHERE a.attempt_status IN ('campaign_cost_recorded','campaign_revenue_candidate_hold','campaign_revenue_bound')
     ORDER BY a.social_post_attempt_id DESC LIMIT 150`).all().catch(()=>({results:[]})));
   const items=result.map(row=>{const detail=safeJson(row.response_json,{});return {kind:row.attempt_status,
     campaign:row.utm_campaign,reference:row.external_post_id,amount_cents:row.attempt_status==='campaign_cost_recorded'?
       detail.cost_cents:detail.settled_cents,observed_at:row.attempted_at,
-    attribution_verified:false,roi_certified:false};});
-  return {items,certification:'HOLD_UNBOUND_ORDER_ATTRIBUTION',currency:'CAD',
+    attribution_verified:row.attempt_status==='campaign_revenue_bound',roi_certified:false};});
+  return {items,certification:items.some(i=>i.attribution_verified)?'HOLD_VENDOR_COST_VERIFICATION':'HOLD_CHECKOUT_SESSION_AND_PAID_ORDER_PROOF',currency:'CAD',
     cost_evidence:'OWNER_ATTESTED_NOT_VENDOR_VERIFIED',roi_percent:null,roi_certified:false};
 }
 async function verifyPublication673(context,db,adminUser,payload){
