@@ -24,10 +24,11 @@ async function evidence(db,queueId){
  const platforms=parse(post.target_platforms_json,[]);
  const consent=consentGate851(consents,platforms);
  const receipts=(await db.prepare('SELECT id,kind,platform,device_nonce,nonce,revision,observed_at,signed_verified FROM social_recall_evidence_851 WHERE queue_id=? ORDER BY id DESC LIMIT 100').bind(queueId).all()).results||[];
- const truncated=receipts.length>=100;
- return {post,platforms,consent,receipts,truncated};
+ const liveRows=(await db.prepare("SELECT platform_key,attempted_at FROM social_post_attempts WHERE social_post_queue_id=? AND attempt_status IN ('api_posted','receipt_verified') ORDER BY social_post_attempt_id DESC LIMIT 101").bind(queueId).all()).results||[];
+ const truncated=receipts.length>=100||liveRows.length>=101;
+ return {post,platforms,consent,receipts,liveRows,truncated};
 }
-const safeResult=(o,expectedRevision)=>({ok:true,build:851,queue_id:o.post.social_post_queue_id,consent_gate:o.consent,platform_count:o.platforms.length,receipt_count:o.receipts.length,ledger_truncated:o.truncated,closure:scopedClosure851({consent:o.consent,platforms:o.platforms,deviceReceipts:o.receipts.filter(r=>r.kind==='device_witness'),ackReceipt:o.receipts.find(r=>r.kind==='receiver_ack'),expectedRevision,windowComplete:!o.truncated}),master_connection:'HOLD',publication_performed:false,provider_mutation_performed:false,master_events_emitted:0});
+const safeResult=(o,expectedRevision)=>({ok:true,build:851,queue_id:o.post.social_post_queue_id,consent_gate:o.consent,platform_count:o.platforms.length,receipt_count:o.receipts.length,ledger_truncated:o.truncated,closure:scopedClosure851({consent:o.consent,platforms:o.platforms,deviceReceipts:o.receipts.filter(r=>r.kind==='device_witness'),ackReceipt:o.receipts.find(r=>r.kind==='receiver_ack'),laterLiveReceipts:o.liveRows,expectedRevision,windowComplete:!o.truncated}),master_connection:'HOLD',publication_performed:false,provider_mutation_performed:false,master_events_emitted:0});
 export async function onRequest({request,env}){
  if(!['GET','POST'].includes(request.method))return reply(summary('Method not allowed.'),405);
  const admin=await getAdminUserFromRequest(request,env),db=getDb(env);
