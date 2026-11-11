@@ -1,3 +1,70 @@
+// Build 678 — exact signed expenses, read-only campaign reconciliation, explicit owner signoff.
+(() => {
+  'use strict';
+  const $ = id => document.getElementById(id);
+  const call = async (payload,queueId) => {
+    if(!window.DDAuth?.apiFetch)throw Error('Authenticated admin required');
+    const url='/api/admin/social-post-queue'+(!payload&&queueId?'?campaign_queue_id='+encodeURIComponent(queueId):'');
+    const response=await window.DDAuth.apiFetch(url,payload?{method:'POST',body:JSON.stringify(payload)}:undefined);
+    const data=await response.json();
+    if(!response.ok||!data.ok)throw Error(data.error||'Campaign evidence unavailable');
+    return data;
+  };
+  async function reconcile(){
+    const id=Number($('dd678Campaign').value);
+    if(!id){$('dd678Summary').textContent='HOLD · Choose a campaign.';return;}
+    try {
+      const data=await call(null,id),f=data.financial678||{};
+      const m=f.metrics;
+      const fmt=n=>(Number(n||0)/100).toFixed(2);
+      $('dd678Summary').textContent=[
+        'Campaign: '+(f.campaign||'Unknown'),
+        'Expense receipts: '+(f.receipt_count||0),
+        'Verified expense evidence: '+(f.verified_receipt_count||0),
+        'Settled attributed orders: '+(f.paid_order_count||0),
+        m?'Gross attributed receipts CAD '+fmt(m.attributed_sales_cents):'Attributed receipts HOLD',
+        m?'Verified ad spend CAD '+fmt(m.verified_ad_cost_cents):'Advertising spend HOLD',
+        m?'Marketing contribution CAD '+fmt(m.marketing_contribution_cents)+'; marketing return '+m.marketing_roi_percent+'%':'Marketing return HOLD',
+        'Owner signoff: '+(f.signoff||'HOLD'),
+        'Net business profit: '+(f.profitability_status||'HOLD'),
+        'Blockers: '+(f.blockers||[]).join(', ')
+      ].join(' · ');
+    }catch(e){$('dd678Summary').textContent='HOLD · '+e.message;}
+  }
+  document.addEventListener('DOMContentLoaded',()=>{
+    if(!$('dd678-finance'))return;
+    const queue=$('dd678Campaign');
+    (async()=>{try{
+      const data=await call();const seen=new Set();
+      for(const item of data.queue||[]){
+        if(!item.utm_campaign||seen.has(item.utm_campaign))continue;
+        seen.add(item.utm_campaign);
+        queue.add(new Option(item.utm_campaign+' · #'+item.social_post_queue_id,item.social_post_queue_id));
+      }
+    }catch(e){$('dd678Summary').textContent='HOLD · '+e.message;}})();
+    queue.addEventListener('change',()=>void reconcile());
+    $('dd678Refresh').addEventListener('click',()=>void reconcile());
+    $('dd678VerifyForm').addEventListener('submit',async e=>{
+      e.preventDefault();$('dd678VerifyResult').textContent='Checking independent signature…';
+      const payload={action:'expense_attestation_678',social_post_queue_id:Number(queue.value),
+        receipt_reference:$('dd678Receipt').value.trim(),vendor:$('dd678Vendor').value.trim(),
+        original_document_sha256:$('dd678Digest').value.trim(),checked_at:$('dd678Checked').value.trim(),
+        verifier_signature:$('dd678Signature').value.trim(),owner_reviewed:$('dd678Reviewed').checked};
+      try{const result=await call(payload);$('dd678VerifyResult').textContent=(result.result?.status||'Verified')+' · Receipt was independently signed; no ROI certified.';
+        $('dd678Signature').value='';$('dd678Reviewed').checked=false;await reconcile();}
+      catch(error){$('dd678VerifyResult').textContent='HOLD · '+error.message;}
+    });
+    $('dd678Signoff').addEventListener('submit',async e=>{
+      e.preventDefault();$('dd678SignoffResult').textContent='Checking current payment and expense evidence…';
+      try{const result=await call({action:'owner_marketing_signoff_678',social_post_queue_id:Number(queue.value),
+        owner_reviewed:$('dd678Owner').checked,confirm_gross_basis:$('dd678Gross').checked});
+        $('dd678SignoffResult').textContent=(result.result?.status||'Accepted')+' · Net business profitability remains HOLD.';
+        $('dd678Owner').checked=false;$('dd678Gross').checked=false;await reconcile();}
+      catch(error){$('dd678SignoffResult').textContent='HOLD · '+error.message;}
+    });
+  });
+})();
+
 // Build 676 — owner-attested campaign costs, verified settlement and attribution HOLD.
 (() => {
   'use strict';

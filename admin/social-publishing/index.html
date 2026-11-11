@@ -61,6 +61,27 @@
       <div id="dd676Status" aria-live="polite">Certification: HOLD</div>
       <div class="table-scroll" tabindex="0"><table><thead><tr><th>Campaign</th><th>Evidence</th><th>Source reference</th><th>CAD</th><th>Recorded</th><th>Certification</th></tr></thead><tbody id="dd676Rows"></tbody></table></div>
     </section>
+    <section class="card" id="dd678-finance" aria-labelledby="dd678-title">
+      <p class="eyebrow">Build 678 · Independent expense verification</p><h2 id="dd678-title">Campaign financial acceptance</h2>
+      <p>Marketing expense records require a real original receipt and an Ed25519 signature from a separately enrolled independent verifier. The signature must cover the exact campaign, queue ID, receipt reference, vendor, CAD amount, original document SHA-256 and verification time. No private verifier key is entered here. This acceptance is <strong>gross attributed order receipts minus verified advertising costs</strong>, not net business profit.</p>
+      <form id="dd678VerifyForm" class="dd671-layout">
+        <div><label>Campaign<select id="dd678Campaign" class="input" required><option value="">Choose campaign</option></select></label>
+          <label>Original expense reference<input class="input" id="dd678Receipt" maxlength="100" required></label>
+          <label>Vendor name<input class="input" id="dd678Vendor" maxlength="100" required></label>
+          <label>Original document SHA-256 (64 hex characters)<input class="input" id="dd678Digest" pattern="[a-fA-F0-9]{64}" required></label></div>
+        <div><label>Independent verifier observation (UTC ISO 8601)<input class="input" id="dd678Checked" placeholder="2026-11-11T18:00:00.000Z" required></label>
+          <label>Verifier Ed25519 signature (base64)<textarea class="input" id="dd678Signature" rows="3" required></textarea></label>
+          <label class="dd671-confirm"><input type="checkbox" id="dd678Reviewed" required> Owner reviewed the original receipt and independent signature evidence.</label>
+          <button class="btn primary" type="submit">Verify exact expense evidence</button></div>
+      </form>
+      <p id="dd678VerifyResult" role="status" aria-live="polite">Independent verifier enrollment and an exact signed receipt are required. Owner-entered costs remain HOLD.</p>
+      <button type="button" class="btn secondary" id="dd678Refresh">Reconcile selected campaign</button>
+      <div id="dd678Summary" role="status" aria-live="polite">Choose a campaign for a read-only reconciliation.</div>
+      <form id="dd678Signoff"><label class="dd671-confirm"><input type="checkbox" id="dd678Owner" required> We reviewed the matching settled orders and verified expense receipts.</label>
+        <label class="dd671-confirm"><input type="checkbox" id="dd678Gross" required> We understand this is a marketing-return estimate before product costs, taxes, shipping and overhead, not certified net profit.</label>
+        <button class="btn primary" type="submit">Owner signoff on marketing return</button></form>
+      <p id="dd678SignoffResult" role="status" aria-live="polite">Owner signoff remains HOLD until all recorded campaign expenses and paid orders reconcile.</p>
+    </section>
     <section class="card" id="dd675-roi" aria-labelledby="dd675-title">
       <p class="eyebrow">Build 675 · Verified attribution and engagement</p><h2 id="dd675-title">Marketing attribution &amp; ROI evidence</h2>
       <p>Visits, checkout starts and enquiries come from stored UTM-tagged site events. Provider engagement is imported only after a direct read-only identity-matched lookup. Neither a checkout start nor a like is a sale.</p>
