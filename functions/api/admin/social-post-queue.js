@@ -1097,6 +1097,19 @@ async function receipts673(db) {
     manually_recorded:channels.filter(x=>x.attempt_status==='posted_manual').length
   },interpretation:'Latest recorded channel outcome, not a provider-wide reach or engagement measurement.'};
 }
+// Build 674: campaign planning only; approval is reset and no provider is called.
+async function scheduleCampaign674(db,adminUser,payload){
+  const id=Number(payload.social_post_queue_id);
+  const campaign=trimTo(payload.campaign_name||'',60).trim();
+  const date=parseScheduledAt(payload.scheduled_at);
+  if(!Number.isSafeInteger(id)||id<1||!campaign||!date||!Number.isFinite(new Date(date).getTime()))throw Error('Choose an existing draft, campaign and valid schedule.');
+  const row=await db.prepare('SELECT post_status FROM social_post_queue WHERE social_post_queue_id=?').bind(id).first();
+  if(!row||['posted','archived'].includes(row.post_status))throw Error('Posted or archived content cannot be rescheduled.');
+  await db.prepare(`UPDATE social_post_queue SET utm_campaign=?,scheduled_at=?,schedule_timezone=?,
+    post_status='draft',approval_status='needs_review',updated_by_user_id=?,updated_at=CURRENT_TIMESTAMP
+    WHERE social_post_queue_id=?`).bind(campaign,date,trimTo(payload.schedule_timezone||'UTC',64),adminUser.user_id,id).run();
+  return {social_post_queue_id:id,campaign_name:campaign,scheduled_at:date,approval_reset:true,publication_performed:false};
+}
 async function verifyPublication673(context,db,adminUser,payload){
   const id=Number(payload.social_post_queue_id),platform=slugKey(payload.platform_key||'');
   if(!Number.isSafeInteger(id)||id<1||!['facebook','instagram','pinterest','x'].includes(platform))throw Error('Select a valid queue and supported social channel.');
@@ -1230,6 +1243,7 @@ export async function onRequestPost(context) {
     else if (action === 'approve_caip_derivative_672') result = await approveCaipDerivative672(db,adminUser,payload);
     else if (action === 'verify_publication_673') result = await verifyPublication673(context,db,adminUser,payload);
     else if (action === 'retry_failed_673') result = await retryFailed673(context,db,adminUser,payload);
+    else if (action === 'campaign_schedule_674') result = await scheduleCampaign674(db,adminUser,payload);
     else throw new Error(`Unsupported social queue action: ${action}`);
 
     await auditAdminAction(context.env, context.request, adminUser, {

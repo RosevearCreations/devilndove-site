@@ -1,0 +1,18 @@
+import assert from 'node:assert/strict';
+import {readFileSync} from 'node:fs';
+const read=name=>readFileSync(new URL('../'+name,import.meta.url),'utf8');
+const api=read('functions/api/admin/social-post-queue.js');
+const html=read('admin/social-publishing/index.html');
+const js=read('public/js/admin-social-platform-preflight.js');
+assert.match(api,/async function scheduleCampaign674/);
+assert.match(api,/campaign_schedule_674/);
+assert.match(api,/post_status='draft',approval_status='needs_review'/);
+assert.match(api,/\['posted','archived'\]\.includes\(row\.post_status\)/);
+assert.match(api,/publication_performed:false/);
+assert.match(html,/id="dd674-marketing"/);
+for(const id of ['dd674Month','dd674Campaign','dd674Queue','dd674Name','dd674Date','dd674Calendar','dd674Channels'])assert.ok(html.includes('id="'+id+'"'));
+assert.match(js,/campaign_schedule_674/);
+assert.match(js,/receipts673\?\.channels/);
+assert.match(js,/No inferred reach|no inferred reach/);
+assert.match(js,/new Date\(\$\('dd674Date'\)\.value\)/);
+console.log('Build 674 campaign month, attribution, channel evidence and owner-reviewed scheduling: PASS');
