@@ -1,8 +1,8 @@
 import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
-import {netContribution679} from '../functions/api/admin/_lib/marketingFinance679.js';
+import {netContribution679} from '../functions/api/admin/social-post-queue.js';
 const read=p=>readFileSync(new URL('../'+p,import.meta.url),'utf8');
-const core=read('functions/api/admin/_lib/marketingFinance679.js');
+const core=read('functions/api/admin/social-post-queue.js');
 const api=read('functions/api/admin/social-post-queue.js');
 const html=read('admin/social-publishing/index.html');
 const browser=read('public/js/admin-social-platform-preflight.js');
