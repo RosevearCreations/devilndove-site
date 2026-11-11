@@ -1,6 +1,6 @@
 // Build 851 — owner-gated, append-only source custody; never call a social provider.
 import {getAdminUserFromRequest,getDb,jsonResponse} from '../_lib/adminAudit.js';
-import {CONTRACT_851,verifyDeviceWitness851,verifyMasterAck851,consentGate851,scopedClosure851} from '../_lib/socialRecall851.mjs';
+import {CONTRACT_851,verifyDeviceWitness851,verifyMasterAck851,consentGate851,scopedClosure851,latestDeviceWitnesses851} from '../_lib/socialRecall851.mjs';
 const reply=(data,status=200)=>jsonResponse(data,status,{'Cache-Control':'private, no-store'});
 const positive=v=>Number.isSafeInteger(Number(v))&&Number(v)>0?Number(v):0;
 const valid=platform=>['facebook','instagram','pinterest','x'].includes(platform);
@@ -28,7 +28,7 @@ async function evidence(db,queueId){
  const truncated=receipts.length>=100||liveRows.length>=101;
  return {post,platforms,consent,receipts,liveRows,truncated};
 }
-const safeResult=(o,expectedRevision)=>({ok:true,build:851,queue_id:o.post.social_post_queue_id,consent_gate:o.consent,platform_count:o.platforms.length,receipt_count:o.receipts.length,ledger_truncated:o.truncated,closure:scopedClosure851({consent:o.consent,platforms:o.platforms,deviceReceipts:o.receipts.filter((r,i,all)=>r.kind==='device_witness'&&all.findIndex(x=>x.kind==='device_witness'&&x.platform===r.platform)===i),ackReceipt:o.receipts.find(r=>r.kind==='receiver_ack'),laterLiveReceipts:o.liveRows,expectedRevision,windowComplete:!o.truncated}),master_connection:'HOLD',publication_performed:false,provider_mutation_performed:false,master_events_emitted:0});
+const safeResult=(o,expectedRevision)=>({ok:true,build:851,queue_id:o.post.social_post_queue_id,consent_gate:o.consent,platform_count:o.platforms.length,receipt_count:o.receipts.length,ledger_truncated:o.truncated,closure:scopedClosure851({consent:o.consent,platforms:o.platforms,deviceReceipts:latestDeviceWitnesses851(o.receipts),ackReceipt:o.receipts.find(r=>r.kind==='receiver_ack'),laterLiveReceipts:o.liveRows,expectedRevision,windowComplete:!o.truncated}),master_connection:'HOLD',publication_performed:false,provider_mutation_performed:false,master_events_emitted:0});
 export async function onRequest({request,env}){
  if(!['GET','POST'].includes(request.method))return reply(summary('Method not allowed.'),405);
  const admin=await getAdminUserFromRequest(request,env),db=getDb(env);
