@@ -33,6 +33,15 @@ export function consentGate851(consents=[],platforms=[]){
  if(Array.isArray(consents)&&consents.some(c=>!['revoked','blocked'].includes(c.consent_status)||Number(c.public_use_allowed)!==0||Number(c.social_use_allowed)!==0))blockers.push('CONSENT_NOT_REVOKED_OR_PERMISSION_RESTORED');
  return {ok:!blockers.length,blockers};
 }
+export function latestDeviceWitnesses851(rows=[]){
+ if(!Array.isArray(rows))return [];
+ const seen=new Set(),out=[];
+ for(const r of [...rows].sort((a,b)=>Number(b.id||0)-Number(a.id||0))){
+  if(r.kind!=='device_witness'||!channels.has(r.platform)||seen.has(r.platform))continue;
+  seen.add(r.platform);out.push(r);
+ }
+ return out;
+}
 export function scopedClosure851({consent,platforms=[],deviceReceipts=[],ackReceipt,laterLiveReceipts=[],expectedRevision,windowComplete=true,now=Date.now()}={}){
  const blockers=[...(consent?.blockers||[])];
  if(!windowComplete)blockers.push('SOURCE_EVIDENCE_WINDOW_INCOMPLETE');
