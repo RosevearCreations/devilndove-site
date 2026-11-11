@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import {webcrypto} from 'node:crypto';
 import {CONTRACT_851,verifyDeviceWitness851,verifyMasterAck851,consentGate851,scopedClosure851} from '../functions/api/_lib/socialRecall851.mjs';
-globalThis.crypto=webcrypto;
+const crypto=webcrypto;
 const b64=v=>Buffer.from(v).toString('base64url');
 const pair=await crypto.subtle.generateKey({name:'Ed25519'},true,['sign','verify']);
 const key=b64(await crypto.subtle.exportKey('raw',pair.publicKey));
