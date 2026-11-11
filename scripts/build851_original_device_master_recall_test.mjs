@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import {webcrypto} from 'node:crypto';
-import {CONTRACT_851,verifyDeviceWitness851,verifyMasterAck851,consentGate851,scopedClosure851} from '../functions/api/_lib/socialRecall851.mjs';
+import {CONTRACT_851,verifyDeviceWitness851,verifyMasterAck851,consentGate851,scopedClosure851,latestDeviceWitnesses851} from '../functions/api/_lib/socialRecall851.mjs';
 const crypto=webcrypto;
 const b64=v=>Buffer.from(v).toString('base64url');
 const pair=await crypto.subtle.generateKey({name:'Ed25519'},true,['sign','verify']);
@@ -33,4 +33,6 @@ assert.equal(scopedClosure851({consent,platforms:['facebook'],deviceReceipts:cur
 assert.equal(scopedClosure851({consent,platforms:['facebook'],deviceReceipts:currentReceipts,ackReceipt:currentAck,expectedRevision:'b'.repeat(40),now}).decision,'HOLD');
 assert.equal(scopedClosure851({consent,platforms:['facebook'],deviceReceipts:currentReceipts,ackReceipt:currentAck,expectedRevision:sha,windowComplete:false,now}).decision,'HOLD');
 assert.equal(scopedClosure851({consent,platforms:['facebook'],deviceReceipts:currentReceipts,ackReceipt:currentAck,expectedRevision:sha,laterLiveReceipts:[{platform_key:'facebook',attempted_at:new Date(now+1000).toISOString()}],now}).decision,'HOLD');
+const chosen=latestDeviceWitnesses851([{id:1,kind:'device_witness',platform:'facebook',observed_at:new Date(now-900000).toISOString()},{id:2,kind:'device_witness',platform:'facebook',observed_at},{id:3,kind:'receiver_ack'}]);
+assert.equal(chosen.length,1);assert.equal(chosen[0].id,2);
 console.log('Devil n Dove 851 signed witness, independent Master ACK, revoked consent and scoped review tests passed.');
