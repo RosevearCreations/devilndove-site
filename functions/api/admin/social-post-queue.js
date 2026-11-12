@@ -3128,6 +3128,7 @@ source_revision:current?.source_revision||null,
 source_fingerprint_sha256:current?.fingerprint_sha256||null,
 current_signature_verified_independently:masterCurrent,
 historical_source_receipt_count:historicalIds.size,
+bounded_historical_receipt_ids:[...historicalIds].slice(0,80),
 recorded_gap_count:gaps.length,source_provenance_hold_count:provenanceHolds,
 pending_owner_provenance_count:pendingProvenance,
 historical_receipt_pairs:gaps.slice(0,40),
@@ -3213,9 +3214,11 @@ const dated=v=>{const t=Date.parse(v||'');return Number.isFinite(t)&&t<=now+3000
 const age=v=>{const t=dated(v);return t===null?null:Math.max(0,Math.floor((now-t)/60000));};
 const expiry=Date.parse(current?.expires_at||'');
 const currentMaster=Number(current?.verified_master_receipt_id);
+const historicalIds=new Set((prior?.provenance?.bounded_historical_receipt_ids||[]).map(Number));
 const signedNow=!!current?.master_fresh&&!!prior?.master_accepted_now&&
 Number.isFinite(expiry)&&expiry>now&&Number.isSafeInteger(currentMaster)&&currentMaster>0&&
 currentMaster===Number(prior?.provenance?.current_exact_master_receipt_id)&&
+historicalIds.has(currentMaster)&&
 !!prior?.provenance?.current_signature_verified_independently;
 const priorReceipts=(prior?.owner_reviews||[]).filter(x=>
 x.state==='OWNER_REVIEW_RECORDED_NO_EXTERNAL_MASTER_CERTIFICATION');
@@ -3293,7 +3296,7 @@ const valid=Number.isSafeInteger(id)&&id>0&&id>ref&&id<previousId&&
 at!==null&&at<=previousTime&&sourceAt!==null&&at>=sourceAt&&
 row.attempt_status===status&&paired&&!seen.has(key)&&
 (!requiresCurrent||Number.isSafeInteger(Number(d.master_receipt_id))&&
-Number(d.master_receipt_id)>0)&&
+Number(d.master_receipt_id)>0&&historicalIds.has(Number(d.master_receipt_id)))&&
 d.fingerprint_sha256===current?.fingerprint_sha256&&
 d.source_revision===current?.source_revision&&
 d.owner_reviewed===true&&Number.isSafeInteger(Number(d.owner_user_id))&&
