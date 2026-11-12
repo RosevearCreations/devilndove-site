@@ -16,7 +16,7 @@
     "max_js_bytes": 600000,
     "max_css_bytes": 500000,
     "max_html_bytes": 500000,
-    "max_runtime_source_bytes": 19010000,
+    "max_runtime_source_bytes": 19079000,
     "max_runtime_source_files": 1854,
     "max_inline_data_uri_bytes": 650000
   },
@@ -33,6 +33,19 @@
     "production_mutation": false
   },
   "budget_reviews": [
+    {
+      "build": 699,
+      "date": "2026-11-12",
+      "scope": "Original camera capture token continuity and collision-safe existing draft recovery, split D1 product save and SHA-256 R2 photo/video attachment-only retries; smartphone Shop collapsed secondary filters and measured first-product viewport fallback; independent third-party Ed25519 original financial source repair document witness verification, current source drift and protected owner readback",
+      "prior_limit_bytes": 19010000,
+      "new_limit_bytes": 19079000,
+      "delta_bytes": 69000,
+      "delta_percent": 0.363,
+      "runtime_file_limit_unchanged": 1854,
+      "review_reason": "Reviewed limited 69,000-byte (<0.363%) source allowance for explicit no-auto-retry camera media recovery and original owner identity, product attachments R2 object key digest and D1 conditional insert, first-product viewport measurement and accessible jump, plus a distinct financial repair-document verifier. Same existing D1/R2; no schema migration, no extra cloud vendor, no automatic source-repair clearance, financial certification, public video publication, provider replay, or CONNECTED assertion. All zero-D1 and exact SHA promotion gates stay enabled.",
+      "owner_financial_approval": "NOT_INFERRED",
+      "independent_live_source_repair": "UNVERIFIED_HOLD"
+    },
     {
       "build": 698,
       "date": "2026-11-12",
