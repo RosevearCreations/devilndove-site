@@ -42,21 +42,40 @@ export async function onRequestPost(context){
   if(!mime||file.type&&file.type!==mime)return json({ok:false,error:'Only MP4, WebM or MOV videos are accepted'},415);
   const size=Number(file.size||0);
   if(size<=0||size>25*1024*1024)return json({ok:false,error:'Video must be 25 MB or smaller. Compress larger videos before upload.'},413);
-  const exists=await db.prepare('SELECT product_id FROM products WHERE product_id=? LIMIT 1').bind(product).first();
+  const token=clean(form.get('capture_reference'),120);
+  const camera699=token.startsWith('camera699-');
+  if(camera699&&!/^camera699-[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/.test(token))
+    return json({ok:false,error:'Invalid camera upload capture token.'},400);
+  const exists=await db.prepare('SELECT product_id,status,capture_entry_mode,capture_reference,capture_created_by_user_id FROM products WHERE product_id=? LIMIT 1').bind(product).first();
   if(!exists)return json({ok:false,error:'Save Product before adding video'},404);
-  const objectKey=`products/${product}/video/${crypto.randomUUID()}-${safeName(file.name||'clip.mp4')}`;
-  await media.put(objectKey,await file.arrayBuffer(),{httpMetadata:{contentType:mime,cacheControl:'public,max-age=31536000,immutable'},customMetadata:{product_id:String(product),source:'build389-product-video',uploaded_by_user_id:String(actor.user_id||'')}});
+  if(camera699&&!(exists.status==='draft'&&exists.capture_entry_mode==='camera'&&
+    exists.capture_reference===token&&Number(exists.capture_created_by_user_id)===Number(actor.user_id)))
+    return json({ok:false,error:'Original owner camera draft and video identity do not match.'},403);
+  const buffer=await file.arrayBuffer();
+  const digest=camera699?Array.from(new Uint8Array(await crypto.subtle.digest('SHA-256',buffer))).map(x=>x.toString(16).padStart(2,'0')).join(''):null;
+  const objectKey=camera699
+    ? `products/${product}/video/camera699-${digest}.${extension}`
+    : `products/${product}/video/${crypto.randomUUID()}-${safeName(file.name||'clip.mp4')}`;
   const url=`${publicBase(context.env)}/${objectKey}`;
+  if(camera699){
+    const prior=await db.prepare('SELECT product_video_id,publication_status FROM product_video_attachments WHERE product_id=? AND object_key=? ORDER BY product_video_id ASC LIMIT 1').bind(product,objectKey).first();
+    if(prior)return json({ok:true,already_attached:true,product_video_id:Number(prior.product_video_id),publication_status:prior.publication_status,video_url:url,message:'Original camera video attachment already confirmed; no duplicate created.'});
+    const existingObject=typeof media.head==='function'?await media.head(objectKey).catch(()=>null):null;
+    if(existingObject&&Number(existingObject.size)!==size)
+      return json({ok:false,error:'Existing original R2 video digest has mismatched byte size; inspect attachments.'},409);
+    if(!existingObject)await media.put(objectKey,buffer,{httpMetadata:{contentType:mime,cacheControl:'public,max-age=31536000,immutable'},customMetadata:{product_id:String(product),source:'build699-camera-video',uploaded_by_user_id:String(actor.user_id||'')}});
+  }else await media.put(objectKey,buffer,{httpMetadata:{contentType:mime,cacheControl:'public,max-age=31536000,immutable'},customMetadata:{product_id:String(product),source:'build389-product-video',uploaded_by_user_id:String(actor.user_id||'')}});
   try{
    const r=await db.prepare(`INSERT INTO product_video_attachments
     (product_id,object_key,video_url,original_filename,mime_type,file_size_bytes,video_title,caption,alt_description,publication_status,uploaded_by_user_id)
-    VALUES(?,?,?,?,?,?,?,?,?,'internal_review',?)`)
+    SELECT ?,?,?,?,?,?,?,?,?, 'internal_review',?
+    WHERE NOT EXISTS (SELECT 1 FROM product_video_attachments WHERE product_id=? AND object_key=?)`)
     .bind(product,objectKey,url,clean(file.name,120),mime,size,clean(form.get('video_title'),160),clean(form.get('caption'),1000),
-     clean(form.get('alt_description'),500),id(actor.user_id)||null).run();
-   const newId=Number(r?.meta?.last_row_id||0);
+     clean(form.get('alt_description'),500),id(actor.user_id)||null,product,objectKey).run();
+   const newId=Number((await db.prepare('SELECT product_video_id FROM product_video_attachments WHERE product_id=? AND object_key=? ORDER BY product_video_id ASC LIMIT 1').bind(product,objectKey).first())?.product_video_id||0);
    if(!newId)throw Error('Video source row not confirmed');
    if(typeof context.waitUntil==='function')context.waitUntil(auditAdminAction(context.env,context.request,actor,{action_type:'add_product_video_build389',target_type:'product_video',target_id:newId,target_key:objectKey,details:{product_id:product,file_size_bytes:size,publication_status:'internal_review'}}).catch(()=>null));
    return json({ok:true,product_video_id:newId,publication_status:'internal_review',video_url:url,message:'OK — video attached privately for review. Product-page approval is a separate action.'});
-  }catch(e){try{await media.delete(objectKey)}catch{};return json({ok:false,error:'Video storage completed but attachment was not confirmed; inspect Product Video attachments before retrying.',retry_automatically:false},503);}
+  }catch(e){if(!camera699){try{await media.delete(objectKey)}catch{}}return json({ok:false,error:'Video storage completed but attachment was not confirmed; same original camera draft can be retried manually with the same file.',retry_automatically:false,same_original_draft:camera699},503);}
  }catch{return json({ok:false,error:'Video write outcome could not be confirmed. Inspect Product attachments; do not retry automatically.',retry_automatically:false},503);}
 }
