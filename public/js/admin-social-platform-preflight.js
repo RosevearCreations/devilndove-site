@@ -695,12 +695,55 @@ select.value=value;void refresh();});
 li.appendChild(b);list.appendChild(li);
 }
 }
+function draw687(d){
+if(!$('dd687-finance'))return;
+const v=d.financial687,q=d.financialRecoveryQueue686;
+$('dd687Status').textContent=v?.campaign_queue_id?
+v.status+' · Owner review target '+v.advisory_target_minutes+' minutes · Independent current Master '+(v.master_accepted_now?'VERIFIED':'HOLD')+
+' · continuous connection HOLD · audited profits HOLD':
+'HOLD · Select a campaign in the financial receipt panel above.';
+$('dd687Stats').textContent=v?.campaign_queue_id?
+'Open '+v.open_count+' · Due soon '+v.due_soon_count+' · Overdue '+v.overdue_count+
+' · Recorded owner closures '+v.closed_count+' · Within advisory target '+v.closed_within_target_count+
+' · Mean recorded closure '+(v.mean_recorded_closure_minutes??'unavailable')+' min':
+'No selected campaign closure analytics.';
+$('dd687Coverage').textContent=v?
+(v.history_complete?'Selected campaign incident/receipt scan complete. ':'HOLD: incomplete, invalid or unpaired history. ')+
+'These are bounded ledger observations, not certified recovery outcomes. Portfolio visible open cases: '+
+(q?.total_visible_open??'unavailable')+(q&&!q.history_complete?' · Portfolio history incomplete.':''):
+'Incident history not available.';
+$('dd687Renewal').textContent=v?.renewal?
+v.renewal.current_status+' · Latest recorded receipt #'+(v.renewal.latest_recorded_receipt_id||'—')+
+' · Historical renewal entries '+v.renewal.recorded_renewal_count+
+' · Current verified receipt #'+(v.renewal.current_verified_receipt_id||'—')+
+' · expiry '+(v.renewal.expires_at||'HOLD')+
+' · Historical entries are NOT automatically reverified.':
+'No selected campaign renewal evidence. HOLD.';
+const receipts=$('dd687Receipts');receipts.replaceChildren();
+for(const r of v?.renewal?.receipts||[]){
+const li=document.createElement('li');li.textContent='Receipt #'+r.receipt_id+' · '+r.state+
+' · issued '+(r.issued_at||'unavailable')+' · recorded '+(r.recorded_at||'unavailable');
+receipts.appendChild(li);
+}
+if(!receipts.childElementCount){const li=document.createElement('li');li.textContent='No recorded Master acceptance for this campaign. HOLD.';receipts.appendChild(li);}
+const list=$('dd687Followups');list.replaceChildren();
+for(const x of v?.owner_followups||[]){
+const li=document.createElement('li');
+li.textContent=x.sla_state+' · '+x.issue_code+' · '+x.age_minutes+' min · Review due '+x.due_at+
+' · Case '+x.case_id;
+list.appendChild(li);
+}
+if(!list.childElementCount){const li=document.createElement('li');
+li.textContent=v?.history_complete?'No open owner cases in this bounded campaign history.':'No complete owner case proof available; HOLD.';
+list.appendChild(li);}
+}
 async function refresh(){
 const id=Number($('dd685Campaign').value);
 if(!id){state=null;$('dd685Status').textContent='HOLD · Select a campaign.';}
 try{
 const d=await api(null,id||0),v=d.financial685;
 draw686(d);
+draw687(d);
 if(!id)return;
 if(!v||v.queue_id!==id)throw Error('Fresh exact financial evidence was not returned.');
 state=v;
@@ -728,7 +771,7 @@ await refresh();
 document.addEventListener('DOMContentLoaded',()=>{
 if(!$('dd685-finance'))return;
 (async()=>{try{
-const d=await api(null);draw686(d);const seen=new Set();
+const d=await api(null);draw686(d);draw687(d);const seen=new Set();
 for(const q of d.queue||[])if(q.utm_campaign&&!seen.has(q.social_post_queue_id)){
 seen.add(q.social_post_queue_id);
 $('dd685Campaign').add(new Option(q.utm_campaign+' · #'+q.social_post_queue_id,q.social_post_queue_id));
@@ -737,6 +780,11 @@ $('dd685Campaign').add(new Option(q.utm_campaign+' · #'+q.social_post_queue_id,
 $('dd685Campaign').addEventListener('change',()=>void refresh());
 $('dd685Refresh').addEventListener('click',()=>void refresh());
 $('dd686Refresh').addEventListener('click',()=>void refresh());
+$('dd687Refresh').addEventListener('click',()=>void refresh());
+$('dd687Review').addEventListener('click',()=>{
+$('dd685Recovery').scrollIntoView({behavior:'smooth',block:'start'});
+$('dd685Note').focus({preventScroll:true});
+});
 $('dd686Escalate').addEventListener('click',async()=>{
 try{
 if(!state?.alerts686?.source_drift)throw Error('Current signed source/Master drift must be read back first.');
