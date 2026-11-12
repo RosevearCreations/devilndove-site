@@ -2627,6 +2627,182 @@ connection:'HOLD_INDEPENDENT_CONTINUOUS_RUNTIME_TELEMETRY',
 financial_certified:false,external_replay_performed:false};
 }
 
+// Build 690 — bounded sampled renewal continuity, replay exception owner disposition,
+// and independently reverified owner audit closure reconciliation. No external replay.
+export function assessFinance690(current,replay,ownerRows,receiptRows,now=Date.now()){
+const n=Number(current?.queue_id),selected=Number.isSafeInteger(n)&&n>0;
+const rows690=Array.isArray(ownerRows)?ownerRows:[],receipts=Array.isArray(receiptRows)?receiptRows:[];
+const bounded=rows690.length<=60&&receipts.length<=80&&!!current?.history_complete;
+const expires=Date.parse(current?.expires_at||''),seconds=Number.isFinite(expires)?
+Math.floor((expires-now)/1000):null;
+const verifiedNow=!!current?.master_fresh&&!!replay?.master_accepted_now&&
+Number.isFinite(expires)&&expires>now&&
+Number(replay?.renewal?.current_reverified_receipt_id)===Number(current?.verified_master_receipt_id)&&
+Number(current?.verified_master_receipt_id)>0;
+const monitor=verifiedNow?(seconds<=300?'RENEWAL_DUE_SOON':'VERIFIED_CURRENT_ON_REFRESH'):
+'HOLD_INDEPENDENT_RENEWAL_RECHECK';
+const replayHistory=Array.isArray(replay?.owner_action_history)?replay.owner_action_history:[],
+replayed=Array.isArray(replay?.owner_audit_receipts)?replay.owner_audit_receipts:[];
+const exceptions=replayHistory.filter(x=>x.replay_state==='HOLD_OWNER_ACTION_REPLAY_DRIFT')
+.map(x=>({case_id:x.case_id,reference_receipt_id:Number(x.receipt_id),
+issue_code:'HOLD_OWNER_ACTION_REPLAY_DRIFT',recorded_at:x.recorded_at||null,
+disposition:'REQUIRES_EXACT_OWNER_INVESTIGATION'}));
+const totalBad=Number(replay?.invalid_replay_count||0);
+if(totalBad>exceptions.length)exceptions.push({case_id:null,reference_receipt_id:null,
+issue_code:'HOLD_UNPAIRED_OWNER_AUDIT_OR_HISTORY',recorded_at:null,
+disposition:'MISSING_EXACT_EVIDENCE_REQUIRES_SOURCE_RECOVERY'});
+let historicalIntegrity=receipts.length>0&&receipts.length<=80,
+prevId=Infinity,prevTime=Infinity;
+const renewalHistory=[];
+for(const r of receipts){
+const id=Number(r.social_post_attempt_id),d=safeJson(r.response_json,{}),c=d.claim||{},
+time=Date.parse(r.attempted_at||''),issued=Date.parse(c.issued_at||'');
+const valid=Number.isSafeInteger(id)&&id>0&&id<prevId&&
+Number.isFinite(time)&&time<=now+300000&&time<=prevTime&&
+Number.isFinite(issued)&&issued<=now+300000&&issued<=time+300000&&
+c.queue_id===n&&c.fingerprint_sha256===current?.fingerprint_sha256&&
+c.source_revision===current?.source_revision&&
+c.source_signer_receipt_id===current?.source_signer_receipt_id&&
+typeof c.receiver_receipt_id==='string'&&c.receiver_receipt_id.length>=10&&!!d.signature;
+if(!valid)historicalIntegrity=false;
+renewalHistory.push({receipt_id:id,recorded_at:r.attempted_at,
+observed_source_pin_match:!!valid,previous_interval_minutes:Number.isFinite(prevTime)&&
+Number.isFinite(time)?Math.max(0,Math.floor((prevTime-time)/60000)):null,
+historical_only:id!==Number(current?.verified_master_receipt_id)});
+prevId=id;prevTime=time;
+}
+const currentReceiptPresent=renewalHistory.some(x=>x.receipt_id===
+Number(current?.verified_master_receipt_id)&&x.observed_source_pin_match);
+const closureSource=new Map(replayed.filter(x=>x.decision==='accept_owner_audit')
+.map(x=>[Number(x.receipt_id),x]));
+const exceptionByReceipt=new Map(exceptions.filter(x=>x.reference_receipt_id)
+.map(x=>[x.reference_receipt_id,x]));
+const receiptSet=new Set(renewalHistory.map(x=>x.receipt_id));
+let invalidOwner=0,previousOwnerId=Infinity,previousOwnerTime=Infinity;
+const seen=new Set(),ownerHistory=[];
+for(const r of rows690){
+const id=Number(r.social_post_attempt_id),d=safeJson(r.response_json,{}),
+time=Date.parse(r.attempted_at||''),ref=Number(d.reference_receipt_id),
+prior=closureSource.get(ref),exception=exceptionByReceipt.get(ref);
+const type=d.decision==='review_replay_exception'?'owner_replay_exception_reviewed_690':
+d.decision==='reconcile_owner_closure'?'owner_financial_closure_reconciled_690':null;
+const key=d.decision+'|'+ref;
+const related=d.decision==='review_replay_exception'?
+!!exception&&exception.case_id===d.case_id&&d.issue_code===exception.issue_code:
+!!prior&&prior.case_id===d.case_id&&
+receiptSet.has(Number(d.master_receipt_id))&&
+Number(d.master_receipt_id)>0;
+const valid=Number.isSafeInteger(id)&&id>0&&id>ref&&id<previousOwnerId&&
+Number.isFinite(time)&&time<=now+300000&&time<=previousOwnerTime&&
+type===r.attempt_status&&related&&
+d.fingerprint_sha256===current?.fingerprint_sha256&&
+d.source_revision===current?.source_revision&&
+Number.isSafeInteger(Number(d.owner_user_id))&&Number(d.owner_user_id)>0&&
+d.owner_reviewed===true&&typeof d.resolution_note==='string'&&
+d.resolution_note.length>=20&&d.resolution_note.length<=400&&
+!seen.has(key);
+if(valid)seen.add(key);else invalidOwner++;
+ownerHistory.push({receipt_id:id,decision:d.decision||null,case_id:d.case_id||null,
+reference_receipt_id:ref,recorded_at:r.attempted_at,
+state:valid?'OWNER_REVIEW_RECORDED_NOT_INDEPENDENT_CERTIFICATION':'HOLD_INVALID_OWNER_HISTORY'});
+previousOwnerId=id;previousOwnerTime=time;
+}
+const reviewedExceptions=new Set(ownerHistory.filter(x=>x.state!=='HOLD_INVALID_OWNER_HISTORY'&&
+x.decision==='review_replay_exception').map(x=>x.reference_receipt_id));
+const reconciled=new Set(ownerHistory.filter(x=>x.state!=='HOLD_INVALID_OWNER_HISTORY'&&
+x.decision==='reconcile_owner_closure').map(x=>x.reference_receipt_id));
+const closureCandidates=[...closureSource.values()].map(x=>({...x,
+owner_reconciled:reconciled.has(Number(x.receipt_id)),
+status:verifiedNow&&historicalIntegrity&&currentReceiptPresent&&
+!!replay?.history_complete?'CURRENT_REVIEW_ELIGIBLE':'HOLD_CURRENT_MASTER_OR_REPLAY_EVIDENCE'}));
+const ownerHistoryComplete=selected&&bounded&&invalidOwner===0;
+const ledgerComplete=ownerHistoryComplete&&historicalIntegrity&&currentReceiptPresent;
+return{status:!selected?'HOLD_SELECT_CAMPAIGN':!bounded||invalidOwner?
+'HOLD_OWNER_EVIDENCE_HISTORY':!historicalIntegrity?'HOLD_HISTORICAL_RENEWAL_LINEAGE':
+!replay?.history_complete||totalBad?'HOLD_REPLAY_EXCEPTIONS':
+!verifiedNow||!currentReceiptPresent?'HOLD_MASTER_RENEWAL_RECHECK':
+'OWNER_CLOSURE_RECONCILIATION_REVIEW_ONLY',
+observed_at:new Date(now).toISOString(),campaign_queue_id:selected?n:null,
+history_complete:ownerHistoryComplete,ledger_complete:ledgerComplete,
+replay_exception_count:exceptions.length,
+unreviewed_replay_exception_count:exceptions.filter(x=>x.reference_receipt_id&&
+!reviewedExceptions.has(x.reference_receipt_id)).length,
+replay_exceptions:exceptions.map(x=>({...x,owner_reviewed:
+x.reference_receipt_id?reviewedExceptions.has(x.reference_receipt_id):false})).slice(0,30),
+renewal:{status:monitor,expires_at:Number.isFinite(expires)?new Date(expires).toISOString():null,
+seconds_to_expiry:seconds,observed_at:new Date(now).toISOString(),
+current_independently_reverified_receipt_id:verifiedNow?current.verified_master_receipt_id:null,
+current_receipt_in_bounded_history:currentReceiptPresent,
+historical_chain_pin_matches:historicalIntegrity,
+record_count:renewalHistory.length,
+historical_gap_over_20_minutes_count:renewalHistory.filter(x=>
+x.previous_interval_minutes!==null&&x.previous_interval_minutes>20).length,
+recent_history:renewalHistory.slice(0,12),background_polling:false,
+historical_signatures_reverified:false},
+closure_candidates:closureCandidates.slice(0,30),
+eligible_closure_count:verifiedNow&&ledgerComplete&&!!replay?.history_complete?
+closureCandidates.filter(x=>!x.owner_reconciled).length:0,
+reconciled_closure_count:reconciled.size,owner_history:ownerHistory.slice(0,40),
+invalid_owner_history_count:invalidOwner,
+master_accepted_now:verifiedNow&&ledgerComplete&&!!replay?.history_complete&&totalBad===0,
+connection:'HOLD_INDEPENDENT_CONTINUOUS_RUNTIME_TELEMETRY',
+financial_certified:false,auto_exception_resolution:false,auto_closure:false,
+external_replay_performed:false};
+}
+async function finance690(db,env,id){
+const n=Number(id);
+if(!Number.isSafeInteger(n)||n<1)
+return assessFinance690({queue_id:0},{history_complete:false},[],[]);
+const current=await financial685(db,env,n),replay=await finance689(db,env,n);
+const reviews=rows(await db.prepare("SELECT social_post_attempt_id,attempt_status,response_json,attempted_at FROM social_post_attempts WHERE social_post_queue_id=? AND platform_key='finance_owner_reconcile_690' ORDER BY social_post_attempt_id DESC LIMIT 61").bind(n).all());
+const renewals=rows(await db.prepare("SELECT social_post_attempt_id,response_json,attempted_at FROM social_post_attempts WHERE social_post_queue_id=? AND platform_key='finance_acceptance_684' ORDER BY social_post_attempt_id DESC LIMIT 81").bind(n).all());
+return assessFinance690(current,replay,reviews,renewals);
+}
+async function ownerReconcile690(db,env,user,p){
+const n=Number(p.social_post_queue_id),v=await financial685(db,env,n),
+state=await finance690(db,env,n),
+decision=normalizeText(p.decision),caseId=normalizeText(p.case_id),
+note=normalizeText(p.resolution_note),ref=Number(p.reference_receipt_id);
+if(!v.queue_id||!v.history_complete||!state.history_complete||
+!state.ledger_complete||p.owner_reviewed!==true||
+p.expected_fingerprint_sha256!==v.fingerprint_sha256||
+p.expected_source_revision!==v.source_revision||
+!v.fingerprint_sha256||note.length<20||note.length>400||
+!Number.isSafeInteger(ref)||ref<=0)
+throw Error('Complete bounded audit, exact source and explicit owner review required. HOLD.');
+let target=null,status='',issue_code=null;
+if(decision==='review_replay_exception'){
+target=state.replay_exceptions.find(x=>x.case_id===caseId&&
+x.reference_receipt_id===ref&&!x.owner_reviewed);
+issue_code=target?.issue_code||null;
+status='owner_replay_exception_reviewed_690';
+}else if(decision==='reconcile_owner_closure'){
+if(!state.master_accepted_now||state.status!=='OWNER_CLOSURE_RECONCILIATION_REVIEW_ONLY'||
+Number(p.expected_master_receipt_id)!==v.verified_master_receipt_id)
+throw Error('Current fresh independently signed Master receipt and unbroken replay lineage required. HOLD.');
+target=state.closure_candidates.find(x=>x.case_id===caseId&&
+Number(x.receipt_id)===ref&&!x.owner_reconciled&&x.status==='CURRENT_REVIEW_ELIGIBLE');
+status='owner_financial_closure_reconciled_690';
+}else throw Error('Unsupported owner reconciliation decision. HOLD.');
+if(!target)throw Error('No matching unreviewed exact receipt; duplicate or stale evidence. HOLD.');
+const payload={decision,case_id:caseId,reference_receipt_id:ref,
+issue_code,fingerprint_sha256:v.fingerprint_sha256,source_revision:v.source_revision,
+master_receipt_id:decision==='reconcile_owner_closure'?v.verified_master_receipt_id:null,
+owner_user_id:user.user_id,owner_reviewed:true,resolution_note:note,
+independent_master_connected:false,financial_certified:false,
+historical_replay_repaired:false,auto_closure:false};
+const nonce='finance690-'+decision+'-'+ref;
+const receipt_id=await append684(db,user,n,'finance_owner_reconcile_690',status,nonce,payload);
+const after=await finance690(db,env,n);
+if(!after.owner_history.some(x=>x.receipt_id===receipt_id&&x.decision===decision&&
+x.reference_receipt_id===ref&&x.state==='OWNER_REVIEW_RECORDED_NOT_INDEPENDENT_CERTIFICATION'))
+throw Error('Exact owner reconciliation not confirmed by durable readback. HOLD.');
+return{status,receipt_id,reference_receipt_id:ref,case_id:caseId,
+master_accepted_now:after.master_accepted_now,
+exception_evidence_repaired:false,financial_certified:false,
+connection:'HOLD_INDEPENDENT_CONTINUOUS_RUNTIME_TELEMETRY'};
+}
+
 // Build 682 — source-only financial export and owner discrepancy audit.
 async function finance682(db,env,id){
 const n=Number(id);
@@ -2699,6 +2875,17 @@ const db=getDb(context.env);
 if (!db) return jsonResponse({ ok:false,error:'Database binding is not configured.'},500);
 try{
 const params=new URL(context.request.url).searchParams;
+if(params.get('export')==='financial690'){
+const n=Number(params.get('campaign_queue_id'));
+if(!Number.isSafeInteger(n)||n<1)return jsonResponse({ok:false,error:'Exact financial campaign required.'},400,{'Cache-Control':'no-store'});
+const report=await finance690(db,context.env,n);
+return new Response(JSON.stringify({report_type:'FINANCIAL_REPLAY_RENEWAL_RECONCILIATION_690',
+owner_continuity_report:report,independent_master_accepted_now:report.master_accepted_now,
+historical_signatures_reverified:false,financial_certified:false},null,2),{
+status:200,headers:{'Content-Type':'application/json; charset=utf-8',
+'Content-Disposition':'attachment; filename="devilndove-finance-continuity-'+n+'-690.json"',
+'Cache-Control':'private, no-store','X-Content-Type-Options':'nosniff'}});
+}
 if(params.get('export')==='financial689'){
 const id=Number(params.get('campaign_queue_id'));
 if(!Number.isSafeInteger(id)||id<1)return jsonResponse({ok:false,error:'Select an exact campaign for protected audit replay.'},400,{'Cache-Control':'no-store'});
@@ -2730,7 +2917,7 @@ return new Response(JSON.stringify(evidence,null,2),{status:200,headers:{
 'Cache-Control':'private, no-store','X-Content-Type-Options':'nosniff'}});
 }
 const data=await summarize(db,context.env);
-return jsonResponse({ ok:true,...data,receipts673:await receipts673(db),engagement675:await engagement675(db),financial676:await financial676(db),financial678:await financialSummary678(db,context.request.headers.get('x-campaign-queue-id')||new URL(context.request.url).searchParams.get('campaign_queue_id')),financial679:await campaignNet679(db,new URL(context.request.url).searchParams.get('campaign_queue_id')),financial680:await finance680(db,context.env,new URL(context.request.url).searchParams.get('campaign_queue_id')),financial681:await finance681(db,context.env,new URL(context.request.url).searchParams.get('campaign_queue_id')),financial682:await finance682(db,context.env,new URL(context.request.url).searchParams.get('campaign_queue_id')),financial683:await financial683(db,context.env,new URL(context.request.url).searchParams.get('campaign_queue_id')),financial684:await financial684(db,context.env,new URL(context.request.url).searchParams.get('campaign_queue_id')),financial685:await financial685(db,context.env,new URL(context.request.url).searchParams.get('campaign_queue_id')),financialRecoveryQueue686:await globalFinanceQueue686(db),financial687:await finance687(db,context.env,new URL(context.request.url).searchParams.get('campaign_queue_id')),financial688:await finance688(db,context.env,new URL(context.request.url).searchParams.get('campaign_queue_id')),financial689:await finance689(db,context.env,new URL(context.request.url).searchParams.get('campaign_queue_id')),queue:data.queue.map(normalizeQueueRow),mode:'review_first_api_when_configured'},200,{ 'Cache-Control':'no-store'});
+return jsonResponse({ ok:true,...data,receipts673:await receipts673(db),engagement675:await engagement675(db),financial676:await financial676(db),financial678:await financialSummary678(db,context.request.headers.get('x-campaign-queue-id')||new URL(context.request.url).searchParams.get('campaign_queue_id')),financial679:await campaignNet679(db,new URL(context.request.url).searchParams.get('campaign_queue_id')),financial680:await finance680(db,context.env,new URL(context.request.url).searchParams.get('campaign_queue_id')),financial681:await finance681(db,context.env,new URL(context.request.url).searchParams.get('campaign_queue_id')),financial682:await finance682(db,context.env,new URL(context.request.url).searchParams.get('campaign_queue_id')),financial683:await financial683(db,context.env,new URL(context.request.url).searchParams.get('campaign_queue_id')),financial684:await financial684(db,context.env,new URL(context.request.url).searchParams.get('campaign_queue_id')),financial685:await financial685(db,context.env,new URL(context.request.url).searchParams.get('campaign_queue_id')),financialRecoveryQueue686:await globalFinanceQueue686(db),financial687:await finance687(db,context.env,new URL(context.request.url).searchParams.get('campaign_queue_id')),financial688:await finance688(db,context.env,new URL(context.request.url).searchParams.get('campaign_queue_id')),financial689:await finance689(db,context.env,new URL(context.request.url).searchParams.get('campaign_queue_id')),financial690:await finance690(db,context.env,new URL(context.request.url).searchParams.get('campaign_queue_id')),queue:data.queue.map(normalizeQueueRow),mode:'review_first_api_when_configured'},200,{ 'Cache-Control':'no-store'});
 } catch (error){
 await captureRuntimeIncident(context.env,context.request,{
 incident_scope:'admin_social',
@@ -2789,6 +2976,7 @@ else if (action==='revalidate_finance_master_685') result=await revalidate685(db
 else if (action==='owner_finance_recovery_685') result=await recovery685(db,context.env,adminUser,payload);
 else if (action==='owner_finance_review_688') result=await ownerReview688(db,context.env,adminUser,payload);
 else if (action==='owner_finance_audit_689') result=await ownerAudit689(db,context.env,adminUser,payload);
+else if (action==='owner_finance_reconcile_690') result=await ownerReconcile690(db,context.env,adminUser,payload);
 else if (action==='expense_attestation_678') result=await expenseAttestation678(db,context.env,adminUser,payload,recordApiAttempt);
 else if (action==='owner_marketing_signoff_678') result=await ownerSignoff678(db,adminUser,payload,recordApiAttempt);
 else throw new Error(`Unsupported social queue action: ${action}`);
