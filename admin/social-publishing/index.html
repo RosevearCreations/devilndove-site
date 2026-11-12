@@ -61,6 +61,23 @@
 <div id="dd676Status" aria-live="polite">Certification: HOLD</div>
 <div class="table-scroll" tabindex="0"><table><thead><tr><th>Campaign</th><th>Evidence</th><th>Source reference</th><th>CAD</th><th>Recorded</th><th>Certification</th></tr></thead><tbody id="dd676Rows"></tbody></table></div>
 </section>
+<section class="card" id="dd682-finance" aria-labelledby="dd682-title">
+ <p class="eyebrow">Build 682 · Source-owned audit export</p><h2 id="dd682-title">Financial evidence export &amp; Master discrepancy review</h2>
+ <p>Export source-owned JSON evidence and review discrepancies. Neither a source export nor an owner acknowledgement proves independent Master acceptance or audited profit.</p>
+ <label>Campaign<select id="dd682Campaign" class="input"><option value="">Choose campaign</option></select></label>
+ <button id="dd682Refresh" type="button" class="btn">Reconcile discrepancies</button>
+ <button id="dd682Export" type="button" class="btn secondary">Export sanitized evidence JSON</button>
+ <p id="dd682Status" role="status" aria-live="polite">Select a campaign.</p>
+ <form id="dd682Review">
+  <label>Outstanding discrepancy<select id="dd682Case" class="input" required><option value="">Choose an active case</option></select></label>
+  <label>Owner action<select id="dd682Disposition" class="input"><option value="acknowledge">Reviewed; awaiting proof</option><option value="escalate">Escalate to independent Master review</option></select></label>
+  <label>Audit notes<textarea id="dd682Note" class="input" minlength="15" maxlength="400" rows="3" required></textarea></label>
+  <label><input id="dd682Reviewed" type="checkbox" required> Owner checked the current source fingerprint.</label>
+  <button class="btn primary" type="submit">Record owner audit decision</button>
+ </form>
+ <p id="dd682Result" role="status" aria-live="polite">Review does not close an independent Master acceptance gate.</p>
+ <p class="small">Sanitized export excludes customer/order identifiers, signing material and personal details. Unverified Master connection remains HOLD.</p>
+</section>
 <section class="card" id="dd680-ops"><p class="eyebrow">Build 680 · Owner financial exception control</p>
 <h2>Evidence freshness &amp; Master ACK review</h2>
 <p>Read-only finance status must stay HOLD for stale evidence, open exceptions or an unmatched signed Master ACK. A signed ACK alone never proves live integration.</p>

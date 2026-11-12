@@ -52,4 +52,15 @@ assert.equal(exceptionSla681({...incident,opened_at:'not-a-date'},clock).sla,'HO
 assert.equal(exceptionSla681({...incident,opened_at:'2026-11-08 06:00:00'},clock).sla,'ACK_AND_RESOLUTION_OVERDUE');
 assert.match(core,/social_post_attempt_id>\?/);
 assert.match(core,/parseUtc681/);
-console.log('BUILD 679–681 source financial, SLA and Master HOLD: PASS');
+for(const marker of [/async function finance682/,/async function ownerDiscrepancy682/,
+ /financial682:await finance682/,/owner_discrepancy_review_682/,
+ /HOLD_INDEPENDENT_RUNTIME_TRANSPORT_AND_MASTER_ADMISSION/,
+ /MASTER_INDEPENDENT_ADMISSION_UNVERIFIED/,/SOURCE_AUDIT_WINDOW_INCOMPLETE/,
+ /source\.fingerprint/,/fingerprint_sha256/,/content-disposition/i,
+ /Content-Disposition/,/private, no-store/,/X-Content-Type-Options/,
+ /social_post_attempt_id>\?/,/Master.*HOLD|master_accepted:false/])assert.match(core,marker);
+assert.match(html,/dd682-finance/);
+assert.match(browser,/dd682Export/);
+assert.match(browser,/dd682Review/);
+assert.doesNotMatch(core.slice(core.indexOf('async function finance682'),core.indexOf('async function ownerDiscrepancy682')),/d\.signature|customer_email|customer_name|order_id:/);
+console.log('BUILD 679–682 finance provenance, Master admission HOLD and sanitized export: PASS');

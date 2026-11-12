@@ -1,3 +1,56 @@
+// Build 682 source-owned financial export & owner discrepancy audit.
+(()=>{'use strict';const $=id=>document.getElementById(id);let pin='';
+async function api(payload,query=''){
+ if(!window.DDAuth?.apiFetch)throw Error('Authenticated Admin session required');
+ const res=await window.DDAuth.apiFetch('/api/admin/social-post-queue'+query,
+  payload?{method:'POST',body:JSON.stringify(payload)}:undefined);
+ if(!res.ok){let msg='Source evidence unavailable';try{msg=(await res.json()).error||msg}catch{}throw Error(msg)}
+ return payload?res.json():res;
+}
+async function refresh(){
+ const id=Number($('dd682Campaign').value);
+ if(!id){$('dd682Status').textContent='HOLD · Choose campaign.';return}
+ try{
+  const data=await(await api(null,'?campaign_queue_id='+id)).json(),v=data.financial682||{};
+  pin=v.fingerprint_sha256||'';
+  const select=$('dd682Case');select.replaceChildren(new Option('Choose active discrepancy',''));
+  for(const c of v.cases||[])select.add(new Option(c.code+' · '+(c.last_review?.disposition||'UNREVIEWED'),c.code));
+  $('dd682Status').textContent='Source: '+(v.source_status||'HOLD')+' · '+(v.cases||[]).length+
+   ' discrepancies · '+(v.reviews||[]).length+' owner audit entries · Master: '+(v.master_connection||'HOLD')+
+   ' · Audit completeness: '+(v.complete?'complete':'HOLD');
+ }catch(e){$('dd682Status').textContent='HOLD · '+e.message}
+}
+document.addEventListener('DOMContentLoaded',()=>{
+ if(!$('dd682-finance'))return;
+ (async()=>{try{const d=await(await api()).json(),seen=new Set();for(const q of d.queue||[]){
+ if(q.utm_campaign&&!seen.has(q.utm_campaign)){seen.add(q.utm_campaign);
+ $('dd682Campaign').add(new Option(q.utm_campaign+' · #'+q.social_post_queue_id,q.social_post_queue_id))}
+ }}catch(e){$('dd682Status').textContent='HOLD · '+e.message}})();
+ $('dd682Campaign').addEventListener('change',()=>void refresh());
+ $('dd682Refresh').addEventListener('click',()=>void refresh());
+ $('dd682Export').addEventListener('click',async()=>{
+  const id=Number($('dd682Campaign').value);$('dd682Result').textContent='Preparing protected export…';
+  try{if(!id)throw Error('Choose a campaign');
+   const res=await api(null,'?export=financial682&campaign_queue_id='+id),blob=await res.blob();
+   const href=URL.createObjectURL(blob),a=document.createElement('a');
+   a.href=href;a.download='devilndove-financial-evidence-'+id+'.json';document.body.appendChild(a);a.click();a.remove();
+   setTimeout(()=>URL.revokeObjectURL(href),30000);
+   $('dd682Result').textContent='Sanitized source report exported. Master acceptance remains HOLD.';
+  }catch(e){$('dd682Result').textContent='HOLD · '+e.message}
+ });
+ $('dd682Review').addEventListener('submit',async e=>{
+  e.preventDefault();$('dd682Result').textContent='Recording source-pinned review…';
+  try{
+   const d=await api({action:'owner_discrepancy_review_682',social_post_queue_id:Number($('dd682Campaign').value),
+   case_code:$('dd682Case').value,disposition:$('dd682Disposition').value,
+   review_note:$('dd682Note').value.trim(),owner_reviewed:$('dd682Reviewed').checked,
+   expected_fingerprint_sha256:pin});
+   $('dd682Result').textContent=(d.result?.status||'Recorded')+' · Independent Master admission still HOLD.';
+   $('dd682Reviewed').checked=false;await refresh();
+  }catch(e){$('dd682Result').textContent='HOLD · '+e.message}
+ });
+});})();
+
 // Build 680 — owner-supervised profitability exceptions and freshness review.
 (()=>{'use strict';const $=id=>document.getElementById(id);
 async function call(payload,id){
