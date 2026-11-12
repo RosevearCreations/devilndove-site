@@ -689,7 +689,9 @@ const b=document.createElement('button');b.type='button';b.className='btn second
 b.textContent=item.priority+' · '+item.campaign+' · '+item.issue_code+
 ' · '+(item.age_minutes===null?'age unverified':item.age_minutes+' min old')+
 ' · Review campaign #'+item.queue_id;
-b.addEventListener('click',()=>{$('dd685Campaign').value=String(item.queue_id);void refresh();});
+b.addEventListener('click',()=>{const select=$('dd685Campaign'),value=String(item.queue_id);
+if(!Array.from(select.options).some(o=>o.value===value))select.add(new Option(item.campaign+' · #'+value,value));
+select.value=value;void refresh();});
 li.appendChild(b);list.appendChild(li);
 }
 }
