@@ -1402,7 +1402,7 @@ const processName=String(processSelect?.selectedOptions?.[0]?.dataset?.processNa
 return{
 ...original,
 site_item_inventory_id:Number(row.dataset.inventoryRow || original.site_item_inventory_id || 0),
-source_type:String(value('source_type') || original.source_type || 'other').trim().toLowerCase(),
+source_type: String(value('source_type') || original.source_type || 'other').trim().toLowerCase(),
 item_name:value('item_name') || original.item_name,
 inventory_process_id:Number(value('inventory_process_id') || 0),
 category:processName && !/^unassigned/i.test(processName) ? processName.toLowerCase() :'',
