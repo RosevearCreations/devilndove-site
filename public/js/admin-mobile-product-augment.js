@@ -350,6 +350,7 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 
+// Build 698 continuity: uploaded videos stay in internal review only, not auto-publication.
 // Build 699 — interrupted mobile camera draft save and R2 media recovery.
 // The server assigns DD numbers; localStorage contains only a random capture
 // reference and original Product ID, never media, credentials or source bytes.
