@@ -16,7 +16,7 @@
     "max_js_bytes": 600000,
     "max_css_bytes": 500000,
     "max_html_bytes": 500000,
-    "max_runtime_source_bytes": 18635000,
+    "max_runtime_source_bytes": 18647000,
     "max_runtime_source_files": 1854,
     "max_inline_data_uri_bytes": 650000
   },
@@ -33,6 +33,19 @@
     "production_mutation": false
   },
   "budget_reviews": [
+    {
+      "build": 687,
+      "date": "2026-11-12",
+      "scope": "Protected financial incident review SLA age windows, independently verified receipt renewal history projection and owner closure analytics with bounded D1 scans",
+      "prior_limit_bytes": 18635000,
+      "new_limit_bytes": 18647000,
+      "delta_bytes": 12000,
+      "delta_percent": 0.0644,
+      "runtime_file_limit_unchanged": 1854,
+      "review_reason": "Build 687 adds read-only exact incident and historical receipt analyses to the existing financial Admin API and page without new runtime files or schema changes. The reviewed 12,000-byte increase (<0.065% prior cap) retains all independent file-count, per-file, source syntax, migration, cloud deployment and live integrity proof gates. Only the latest Build 685 independently reverified acceptance can show current Master proof.",
+      "owner_financial_approval": "NOT_INFERRED",
+      "production_runtime_master_acceptance": "EVIDENCE_GATED_HOLD"
+    },
     {
       "build": 686,
       "date": "2026-11-12",
