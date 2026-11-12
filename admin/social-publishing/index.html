@@ -174,6 +174,36 @@
 <p id="dd689Result" role="status" aria-live="polite">No Build 689 owner audit action recorded.</p>
 <p class="small">All actions are explicit, authenticated and append-only. A successful owner review never activates a provider, certifies profit or changes continuous connection state.</p>
 </section>
+<section class="card" id="dd690-finance" aria-labelledby="dd690-title">
+<p class="eyebrow">Build 690 · Financial continuity &amp; closure</p>
+<h2 id="dd690-title">Replay exception investigation, Master receipt renewal monitoring &amp; owner closure reconciliation</h2>
+<p>Review sampled, server-clock signed Master receipt freshness and historical gaps. A replay mismatch can be documented for investigation without treating it as repaired. A closure reconciliation needs a matching previous owner audit acceptance and a fresh independently verified exact-source Master receipt.</p>
+<button class="btn secondary" type="button" id="dd690Refresh">Refresh evidence and renewal clock</button>
+<button class="btn secondary" type="button" id="dd690Export">Export protected owner continuity JSON</button>
+<p id="dd690Status" role="status" aria-live="polite">HOLD · Refresh a selected financial campaign.</p>
+<p id="dd690Renewal" class="small">Master receipt freshness has not been read.</p>
+<p id="dd690Stats" class="small">Owner reconciliation results unavailable.</p>
+<h3>Replay exceptions requiring investigation</h3>
+<ol id="dd690Exceptions" class="clean" aria-label="Exact replay evidence discrepancies"><li>Refresh to review protected evidence.</li></ol>
+<h3>Historical owner audit closures</h3>
+<ol id="dd690Closures" class="clean" aria-label="Owner closure reconciliation evidence"><li>No closure audit loaded.</li></ol>
+<form id="dd690Form">
+<h3>Record exact owner reconciliation</h3>
+<label>Owner decision
+<select id="dd690Decision" class="input" required>
+<option value="review_replay_exception">Record replay discrepancy investigation (remains HOLD)</option>
+<option value="reconcile_owner_closure">Reconcile independently verified prior owner closure</option>
+</select></label>
+<label>Matching case and source receipt
+<select id="dd690Source" class="input" required><option value="">Select exact evidence</option></select></label>
+<label>Owner investigation or reconciliation note (20–400 characters)
+<textarea id="dd690Note" class="input" rows="3" minlength="20" maxlength="400" required></textarea></label>
+<label><input type="checkbox" id="dd690Reviewed" required> We inspected the exact case, source fingerprint, historical receipt and any current signed Master evidence. This is a recorded owner decision, not automatic repair.</label>
+<button class="btn secondary" type="submit" id="dd690Submit">Record owner evidence decision</button>
+</form>
+<p role="status" aria-live="polite" id="dd690Result">No Build 690 owner decision recorded.</p>
+<p class="small">Refresh is manual; no continuous background telemetry, provider replay, Master renewal automation, incident auto-close, or financial certification occurs.</p>
+</section>
 <section class="card" id="dd684-finance" aria-labelledby="dd684-title">
 <p class="eyebrow">Build 684 · Independent financial runtime verification</p>
 <h2 id="dd684-title">Signer enrollment, verified Master acceptance &amp; financial closure continuity</h2>
