@@ -121,7 +121,7 @@ for(const rx of [/camera700_readback/,/original_owner_verified:true/,
  /SELECT product_video_id,object_key,publication_status,file_size_bytes/,
  /SELECT product_image_id,image_url/,
  /publication_status==='internal_review'/,
- /status:items\.length&&/])
+ /status:photoRows\.length&&items\.length&&/])
 assert.match(camera,rx);
 for(const id of ['dd700FieldProof','dd700Readback','dd700ReadbackStatus',
 'dd700ReadbackDetails','dd700Export','dd700ExportStatus','dd700DeviceNotes'])
