@@ -2070,10 +2070,10 @@
       "reference_screen": "Settings & Configuration",
       "reason": "Existing social authorization and draft boundaries must remain intact; integration redesign is queued separately.",
       "evidence": {
-        "byte_length": 46748,
+        "byte_length": 49480,
         "stylesheets": 3,
         "scripts": 11,
-        "forms": 18,
+        "forms": 19,
         "has_viewport": true
       },
       "owner_visual_acceptance": "PENDING"
