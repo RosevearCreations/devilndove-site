@@ -16,7 +16,7 @@
     "max_js_bytes": 600000,
     "max_css_bytes": 500000,
     "max_html_bytes": 500000,
-    "max_runtime_source_bytes": 18802000,
+    "max_runtime_source_bytes": 18834000,
     "max_runtime_source_files": 1854,
     "max_inline_data_uri_bytes": 650000
   },
@@ -33,6 +33,19 @@
     "production_mutation": false
   },
   "budget_reviews": [
+    {
+      "build": 694,
+      "date": "2026-11-12",
+      "scope": "Owner financial SLA resolution ledger with original owner audit acceptance pairing, source-pinned independently revalidated Master provenance closure review, owner acceptance continuity and protected Admin no-store export",
+      "prior_limit_bytes": 18802000,
+      "new_limit_bytes": 18834000,
+      "delta_bytes": 32000,
+      "delta_percent": 0.1702,
+      "runtime_file_limit_unchanged": 1854,
+      "review_reason": "Reviewed narrowly scoped 32,000-byte (<0.171%) allowance supports Build 694 source-bound owner resolution projections and manual Admin controls in existing runtime files; no schema migration, background jobs, private keys, external financial replay, automatic closure, actual source mismatch repair or continuous CONNECTED/certified financial claims. System Gate, current quality, source caps, Cloudflare deployment and independent live-resource proof remain enforced.",
+      "owner_financial_approval": "NOT_INFERRED",
+      "production_runtime_master_acceptance": "EVIDENCE_GATED_HOLD"
+    },
     {
       "build": 693,
       "date": "2026-11-12",
