@@ -32,7 +32,7 @@ assert.equal(assess685({...v,master_accepted:false},evidence,now).status,'HOLD_S
 assert.equal(assess685({queue_id:0},null,now).status,'HOLD_SELECT_CAMPAIGN');
 const backend=read('functions/api/admin/social-post-queue.js'),
  page=read('admin/social-publishing/index.html'),
- client=read('public/js/admin-finance-freshness-685.js'),
+ client=read('public/js/admin-social-platform-preflight.js'),
  pipeline=read('.github/workflows/current-application-quality.yml');
 for(const m of [/async function financial685/,/async function revalidate685/,
  /async function recovery685/,/await accept684\(db,env,user,p\)/,
@@ -45,7 +45,7 @@ for(const m of [/async function financial685/,/async function revalidate685/,
 for(const id of ['dd685-finance','dd685Campaign','dd685Refresh','dd685Clock',
  'dd685Status','dd685RecheckReviewed','dd685Revalidate','dd685Recovery',
  'dd685Case','dd685Decision','dd685Reviewed','dd685Result','dd685History'])assert.ok(page.includes('id="'+id+'"'),id);
-assert.match(page,/\/public\/js\/admin-finance-freshness-685\.js/);
+assert.match(page,/\/public\/js\/admin-social-platform-preflight\.js/);
 assert.match(client,/DDAuth\.apiFetch/);
 assert.match(client,/setInterval\(clock,15000\)/);
 assert.match(client,/revalidate_finance_master_685/);
