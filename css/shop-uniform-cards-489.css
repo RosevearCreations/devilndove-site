@@ -57,3 +57,61 @@
  }
  body[data-dd-shop-products-first="698"] #shop698ProductsHeading{font-size:1.2rem}
 }
+
+/* Build 699: first real Product viewport contract (browser-measured, no auto-scroll). */
+#shop699JumpProducts[hidden]{display:none!important}
+.shop699-primary-search{display:grid;gap:8px}
+.shop699-primary-search input{width:100%;max-width:100%}
+.shop699-primary-actions{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.shop699-optional-filters{margin-top:12px}
+.shop699-optional-filters>summary{cursor:pointer;font-weight:600;line-height:1.4;padding:4px 0}
+@media(max-width:700px){
+body[data-dd-shop-viewport-contract="699"] .hero.public-service-hero{
+ max-height:116px!important;min-height:0!important;overflow:hidden!important;
+ padding:8px 11px!important;margin:4px 0 8px!important;
+}
+body[data-dd-shop-viewport-contract="699"] .hero.public-service-hero h1{
+ font-size:clamp(1.1rem,4.65vw,1.35rem)!important;line-height:1.18!important;
+ margin:0 0 3px!important;
+}
+body[data-dd-shop-viewport-contract="699"] .hero.public-service-hero p{
+ line-height:1.25!important;font-size:.8rem!important;
+ display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2;line-clamp:2;overflow:hidden!important;
+}
+body[data-dd-shop-viewport-contract="699"] #shop698SearchPanel{
+ padding:10px!important;margin:0 0 8px!important;
+}
+body[data-dd-shop-viewport-contract="699"] #shop698SearchPanel h2{
+ margin:0 0 4px!important;font-size:1.04rem!important;
+}
+body[data-dd-shop-viewport-contract="699"] #shop699SearchHint{
+ display:none!important;
+}
+body[data-dd-shop-viewport-contract="699"] .shop699-primary-search{
+ gap:5px!important;
+}
+body[data-dd-shop-viewport-contract="699"] .shop699-primary-search input{
+ min-height:42px!important;font-size:16px!important;
+}
+body[data-dd-shop-viewport-contract="699"] .shop699-primary-actions{
+ gap:6px!important;
+}
+body[data-dd-shop-viewport-contract="699"] .shop699-primary-actions>.btn{
+ min-height:38px!important;padding:7px 12px!important;
+}
+body[data-dd-shop-viewport-contract="699"] #shop699BrowseOptions{
+ margin-top:6px!important;
+}
+body[data-dd-shop-viewport-contract="699"] #shop699BrowseOptions>summary{
+ font-size:.86rem!important;padding:4px 0!important;
+}
+body[data-dd-shop-viewport-contract="699"] #shopResultsSection{
+ margin:0!important;padding-top:0!important;
+}
+body[data-dd-shop-viewport-contract="699"] #shop698ProductsHeading{
+ font-size:1.1rem!important;margin:0 0 5px!important;
+}
+body[data-dd-shop-viewport-contract="699"] #shopSummary{
+ margin-bottom:5px!important;
+}
+}
