@@ -195,7 +195,7 @@ async function enrichProductsWithOfferAvailability(db,products){
 const list=Array.isArray(products) ? products :[];
 if (!db || !list.length) return list;
 try{
-const ids=[...new Set(list.map((product)=>Number(product.product_id||0)).filter((id)=>Number.isInteger(id)&&id>0))].slice(0,120);
+const ids=[...new Set(list.map((product)=>Number(product.product_id||0)).filter((id)=>Number.isInteger(id)&&id>0))].slice(0, 120);
 if(!ids.length)return list;
 const marks=ids.map(()=>'?').join(',');
 const reservedRows=normalizeResults(await db.prepare(`
@@ -241,7 +241,7 @@ try{
 const storyColumns=await getStrictTableColumnSet(db,"product_story_public_notes");
 if (!storyColumns.has("product_id")) return rows;
 
-const ids=[...new Set(rows.map((product)=> Number(product.product_id || 0)).filter((id)=> Number.isInteger(id) && id > 0))].slice(0,120);
+const ids=[...new Set(rows.map((product)=> Number(product.product_id || 0)).filter((id)=> Number.isInteger(id) && id > 0))].slice(0, 120);
 if (!ids.length) return rows;
 
 const selectList=[
@@ -306,7 +306,7 @@ if (!db || !rows.length) return rows;
 try{
 const imageColumns=await getStrictTableColumnSet(db,"product_images");
 if (!imageColumns.has("product_id") || !imageColumns.has("image_url")) return rows;
-const ids=[...new Set(rows.map((product)=> Number(product.product_id || 0)).filter((id)=> Number.isInteger(id) && id > 0))].slice(0,120);
+const ids=[...new Set(rows.map((product)=> Number(product.product_id || 0)).filter((id)=> Number.isInteger(id) && id > 0))].slice(0, 120);
 if (!ids.length) return rows;
 
 const selectList=[
@@ -451,7 +451,7 @@ const hasProof=imageCount >=3 ? 1 :0;
 const ready=imageCount >=3 && product.short_description && product.meta_title && product.meta_description ? 1 :0;
 return{ ...product,has_proof_image:hasProof,proof_image_count:hasProof ? 1 :0,blocked_public_image_count:0,ready_for_social:ready };
 });
-const ids=[...new Set(rows.map((product)=> Number(product.product_id || 0)).filter((id)=> Number.isInteger(id) && id > 0))].slice(0,120);
+const ids=[...new Set(rows.map((product)=> Number(product.product_id || 0)).filter((id)=> Number.isInteger(id) && id > 0))].slice(0, 120);
 if (!ids.length) return rows;
 const roleExpr=annotationColumns.has('image_role') ? 'image_role':"''";
 const statusExpr=annotationColumns.has('public_use_status') ? 'public_use_status':"''";
