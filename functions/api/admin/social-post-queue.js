@@ -2297,7 +2297,7 @@ state:Number(r.social_post_attempt_id)===Number(current?.verified_master_receipt
 'CURRENT_INDEPENDENT_SIGNATURE_REVERIFIED':'RECORDED_HISTORY_NOT_CURRENTLY_REVERIFIED'};
 });
 const last=receipts[0]||null;
-return{status:!valid?'HOLD_SELECT_CAMPAIGN':!complete?'HOLD_BOUNDED_HISTORY_INCOMPLETE':'OWNER_REVIEW_ANALYTICS_ONLY',
+return{status:!valid?'HOLD_SELECT_CAMPAIGN':!complete||invalid>0?'HOLD_BOUNDED_HISTORY_INCOMPLETE':'OWNER_REVIEW_ANALYTICS_ONLY',
 campaign_queue_id:valid?Number(current.queue_id):null,observed_at:new Date(now).toISOString(),
 history_complete:complete&&invalid===0,partial_history:!complete||invalid>0,
 advisory_target_minutes:target,advisory_only:true,
