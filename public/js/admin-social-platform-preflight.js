@@ -1,540 +1,610 @@
 
+// Build 684: browser prepares public claims only; all verification stays server-side.
+(()=>{'use strict';const $=id=>document.getElementById(id);let state=null;
+async function call(payload,id){
+if(!window.DDAuth?.apiFetch)throw Error('Authenticated Admin required.');
+const response=await DDAuth.apiFetch('/api/admin/social-post-queue'+(!payload&&id?'?campaign_queue_id='+id:''),
+payload?{method:'POST',body:JSON.stringify(payload)}:undefined);
+const value=await response.json();if(!response.ok||!value.ok)throw Error(value.error||'Runtime proof unavailable.');return value;
+}
+async function refresh(){
+const id=Number($('dd684Campaign').value);if(!id){state=null;$('dd684Status').textContent='HOLD · Select a campaign.';return}
+try{const d=await call(null,id),v=d.financial684||{};state=v;
+$('dd684Status').textContent='Signer: '+(v.signer_enrolled?'VERIFIED':'HOLD')+
+' · Master acceptance: '+(v.master_accepted?'VERIFIED':'HOLD')+
+' · Receiver: '+(v.receiver_configured?'Configured':'HOLD')+
+' · Continuity: '+(v.closed_cases||[]).filter(x=>x.current).length+' current closures'+
+' · Transport: '+(v.connection||'HOLD')+' · Profit certification: HOLD';
+const list=$('dd684Case');list.replaceChildren(new Option('Choose a reviewed case',''));
+const seen=new Set();
+for(const x of d.financial682?.reviews||[])if(x.current_evidence&&
+['MASTER_RECEIPT_NOT_CURRENT','MASTER_INDEPENDENT_ADMISSION_UNVERIFIED'].includes(x.case_code)&&!seen.has(x.case_code)){
+list.add(new Option(x.case_code,x.case_code));seen.add(x.case_code);}
+}catch(e){state=null;$('dd684Status').textContent='HOLD · '+e.message;}
+}
+document.addEventListener('DOMContentLoaded',()=>{
+if(!$('dd684-finance'))return;
+(async()=>{try{const data=await call(),seen=new Set();
+for(const q of data.queue||[])if(q.utm_campaign&&!seen.has(q.utm_campaign)){
+seen.add(q.utm_campaign);$('dd684Campaign').add(new Option(q.utm_campaign+' · #'+q.social_post_queue_id,q.social_post_queue_id));
+}}catch(e){$('dd684Status').textContent='HOLD · '+e.message}})();
+$('dd684Campaign').addEventListener('change',()=>void refresh());
+$('dd684Refresh').addEventListener('click',()=>void refresh());
+$('dd684Prepare').addEventListener('click',()=>{
+try{if(!state?.source_signer_receipt_id||!state.signer_id||!state.source_revision)
+throw Error('Current independently signed source receipt not available.');
+if(!$('dd684Nonce').value)$('dd684Nonce').value=crypto.randomUUID();
+if(!$('dd684Time').value)$('dd684Time').value=new Date().toISOString();
+const c={v:1,purpose:'devilndove_finance_signer_runtime_684',source:'devilndove',
+queue_id:state.queue_id,campaign:state.campaign,source_revision:state.source_revision,
+fingerprint_sha256:state.fingerprint_sha256,source_signer_receipt_id:state.source_signer_receipt_id,
+signer_id:state.signer_id,nonce:$('dd684Nonce').value.trim(),issued_at:$('dd684Time').value.trim()};
+$('dd684Claim').textContent=JSON.stringify(c);
+$('dd684Result').textContent='Sign this exact UTF-8 JSON with the independently controlled Ed25519 key. Do not enter private keys.';
+}catch(e){$('dd684Result').textContent='HOLD · '+e.message}});
+async function send(action,fields){
+if(!state?.fingerprint_sha256)throw Error('Refresh current campaign fingerprint.');
+const d=await call({action,social_post_queue_id:Number($('dd684Campaign').value),
+expected_fingerprint_sha256:state.fingerprint_sha256,owner_reviewed:true,...fields});
+$('dd684Result').textContent=(d.result?.status||'Recorded')+' · Receipt #'+(d.result?.receipt_id||'—')+
+' · Continuous runtime connection and independent audited profitability remain separate.';
+await refresh();
+}
+$('dd684Enrollment').addEventListener('submit',async e=>{e.preventDefault();try{
+if(!$('dd684EnrollReviewed').checked)throw Error('Explicit owner review required.');
+await send('enroll_finance_signer_684',{nonce:$('dd684Nonce').value.trim(),
+issued_at:$('dd684Time').value.trim(),signature:$('dd684Signature').value.trim()});
+$('dd684Signature').value='';$('dd684EnrollReviewed').checked=false;
+}catch(x){$('dd684Result').textContent='HOLD · '+x.message}});
+$('dd684Master').addEventListener('submit',async e=>{e.preventDefault();try{
+if(!$('dd684MasterReviewed').checked)throw Error('Owner review required.');
+await send('verify_finance_master_684',{});$('dd684MasterReviewed').checked=false;
+}catch(x){$('dd684Result').textContent='HOLD · '+x.message}});
+$('dd684Continuity').addEventListener('submit',async e=>{e.preventDefault();try{
+if(!$('dd684CloseReviewed').checked)throw Error('Owner closure review required.');
+await send('close_finance_continuity_684',{case_code:$('dd684Case').value,
+resolution_note:$('dd684Note').value.trim()});$('dd684CloseReviewed').checked=false;
+}catch(x){$('dd684Result').textContent='HOLD · '+x.message}});
+});
+})();
+
+
 // Build 683: private signer/Master intake UI.
 (()=>{'use strict';const $=id=>document.getElementById(id);let latest=null;
 async function api(payload,id){
- if(!window.DDAuth?.apiFetch)throw Error('Authenticated Admin session required.');
- const q=!payload&&id?'?campaign_queue_id='+encodeURIComponent(id):'';
- const res=await DDAuth.apiFetch('/api/admin/social-post-queue'+q,payload?{method:'POST',body:JSON.stringify(payload)}:undefined);
- const data=await res.json();if(!res.ok||!data.ok)throw Error(data.error||'Financial evidence unavailable');return data;
+if(!window.DDAuth?.apiFetch)throw Error('Authenticated Admin session required.');
+const q=!payload&&id?'?campaign_queue_id='+encodeURIComponent(id):'';
+const res=await DDAuth.apiFetch('/api/admin/social-post-queue'+q,payload?{method:'POST',body:JSON.stringify(payload)}:undefined);
+const data=await res.json();if(!res.ok||!data.ok)throw Error(data.error||'Financial evidence unavailable');return data;
 }
 async function refresh(){
- const id=Number($('dd683Campaign').value);if(!id){latest=null;$('dd683Status').textContent='HOLD · Select campaign.';return}
- try{
- const d=await api(null,id),v=d.financial683||{},b=d.financial682||{};latest=v;
- $('dd683Status').textContent='Signer: '+(v.signer?.status||'HOLD')+' #'+(v.signer?.receipt_id||'—')+
- ' · Master: '+(v.master?.status||'HOLD')+' #'+(v.master?.receipt_id||'—')+
- ' · Discrepancies: '+(b.cases||[]).map(x=>x.code).join(', ')+
- ' · Connection: '+(v.master_connection||'HOLD')+' · Accounting certification: HOLD';
- const select=$('dd683Case');select.replaceChildren(new Option('Choose previously reviewed case',''));
- const seen=new Set();for(const item of b.reviews||[])if(!seen.has(item.case_code)){
- seen.add(item.case_code);select.add(new Option(item.case_code,item.case_code));}
- }catch(e){latest=null;$('dd683Status').textContent='HOLD · '+e.message;}
+const id=Number($('dd683Campaign').value);if(!id){latest=null;$('dd683Status').textContent='HOLD · Select campaign.';return}
+try{
+const d=await api(null,id),v=d.financial683||{},b=d.financial682||{};latest=v;
+$('dd683Status').textContent='Signer: '+(v.signer?.status||'HOLD')+' #'+(v.signer?.receipt_id||'—')+
+' · Master: '+(v.master?.status||'HOLD')+' #'+(v.master?.receipt_id||'—')+
+' · Discrepancies: '+(b.cases||[]).map(x=>x.code).join(', ')+
+' · Connection: '+(v.master_connection||'HOLD')+' · Accounting certification: HOLD';
+const select=$('dd683Case');select.replaceChildren(new Option('Choose previously reviewed case',''));
+const seen=new Set();for(const item of b.reviews||[])if(!seen.has(item.case_code)){
+seen.add(item.case_code);select.add(new Option(item.case_code,item.case_code));}
+}catch(e){latest=null;$('dd683Status').textContent='HOLD · '+e.message;}
 }
 const claim=(kind)=>{
- if(!latest?.source_revision||!latest.fingerprint_sha256||!latest.campaign)throw Error('Select an exact current source with configured revision.');
- const n=kind==='source'?'Source':'Master',nonce=$('dd683'+n+'Nonce'),time=$('dd683'+n+'Time');
- if(!nonce.value)nonce.value=crypto.randomUUID();
- if(!time.value)time.value=new Date().toISOString();
- if(kind==='source'){
- if(!latest.signer?.signer_id)throw Error('Independent financial signer has not been enrolled in server environment.');
- return {version:1,source:'devilndove',campaign:latest.campaign,queue_id:latest.queue_id,
- source_revision:latest.source_revision,fingerprint_sha256:latest.fingerprint_sha256,
- signer_id:latest.signer.signer_id,nonce:nonce.value.trim(),issued_at:time.value.trim()};
- }
- if(!latest.signer?.receipt_id||!latest.signer?.nonce)throw Error('Independently signed source receipt is required before Master claim.');
- return {version:1,source:'devilndove',campaign:latest.campaign,queue_id:latest.queue_id,
- source_revision:latest.source_revision,fingerprint_sha256:latest.fingerprint_sha256,
- source_signer_receipt_id:latest.signer.receipt_id,source_signer_nonce:latest.signer.nonce,
- master_revision:$('dd683MasterRevision').value.trim(),nonce:nonce.value.trim(),issued_at:time.value.trim()};
+if(!latest?.source_revision||!latest.fingerprint_sha256||!latest.campaign)throw Error('Select an exact current source with configured revision.');
+const n=kind==='source'?'Source':'Master',nonce=$('dd683'+n+'Nonce'),time=$('dd683'+n+'Time');
+if(!nonce.value)nonce.value=crypto.randomUUID();
+if(!time.value)time.value=new Date().toISOString();
+if(kind==='source'){
+if(!latest.signer?.signer_id)throw Error('Independent financial signer has not been enrolled in server environment.');
+return{version:1,source:'devilndove',campaign:latest.campaign,queue_id:latest.queue_id,
+source_revision:latest.source_revision,fingerprint_sha256:latest.fingerprint_sha256,
+signer_id:latest.signer.signer_id,nonce:nonce.value.trim(),issued_at:time.value.trim()};
+}
+if(!latest.signer?.receipt_id||!latest.signer?.nonce)throw Error('Independently signed source receipt is required before Master claim.');
+return{version:1,source:'devilndove',campaign:latest.campaign,queue_id:latest.queue_id,
+source_revision:latest.source_revision,fingerprint_sha256:latest.fingerprint_sha256,
+source_signer_receipt_id:latest.signer.receipt_id,source_signer_nonce:latest.signer.nonce,
+master_revision:$('dd683MasterRevision').value.trim(),nonce:nonce.value.trim(),issued_at:time.value.trim()};
 };
 async function submit(action,extras){
- const id=Number($('dd683Campaign').value);if(!id)throw Error('Choose campaign.');
- const result=await api({action,social_post_queue_id:id,...extras});
- $('dd683Result').textContent=(result.result?.status||'Saved')+' · Receipt #'+(result.result?.receipt_id||'—')+
- ' · Independent runtime connection and audited profitability remain HOLD.';
- await refresh();
+const id=Number($('dd683Campaign').value);if(!id)throw Error('Choose campaign.');
+const result=await api({action,social_post_queue_id:id,...extras});
+$('dd683Result').textContent=(result.result?.status||'Saved')+' · Receipt #'+(result.result?.receipt_id||'—')+
+' · Independent runtime connection and audited profitability remain HOLD.';
+await refresh();
 }
 document.addEventListener('DOMContentLoaded',()=>{
- if(!$('dd683-finance'))return;
- (async()=>{try{const d=await api(),seen=new Set();for(const q of d.queue||[])if(q.utm_campaign&&!seen.has(q.utm_campaign)){
- seen.add(q.utm_campaign);$('dd683Campaign').add(new Option(q.utm_campaign+' · #'+q.social_post_queue_id,q.social_post_queue_id));
- }}catch(e){$('dd683Status').textContent='HOLD · '+e.message}})();
- $('dd683Campaign').addEventListener('change',()=>void refresh());
- $('dd683Refresh').addEventListener('click',()=>void refresh());
- for(const kind of ['Source','Master'])$('dd683Prepare'+kind).addEventListener('click',()=>{
- try{const text=JSON.stringify(claim(kind.toLowerCase()));$('dd683Claim').textContent=text;
- $('dd683Result').textContent='Copy this exact UTF-8 JSON to the independently controlled Ed25519 signer. Private signing keys never enter this site.'}
- catch(e){$('dd683Result').textContent='HOLD · '+e.message}
- });
- $('dd683Source').addEventListener('submit',async e=>{e.preventDefault();try{
- await submit('admit_financial_signer_683',{nonce:$('dd683SourceNonce').value.trim(),
- issued_at:$('dd683SourceTime').value.trim(),signature:$('dd683SourceSignature').value.trim(),
- owner_reviewed:$('dd683SourceReviewed').checked});
- $('dd683SourceSignature').value='';$('dd683SourceReviewed').checked=false;
- }catch(x){$('dd683Result').textContent='HOLD · '+x.message}});
- $('dd683Master').addEventListener('submit',async e=>{e.preventDefault();try{
- await submit('correlate_financial_master_683',{nonce:$('dd683MasterNonce').value.trim(),
- issued_at:$('dd683MasterTime').value.trim(),master_revision:$('dd683MasterRevision').value.trim(),
- signature:$('dd683MasterSignature').value.trim(),owner_reviewed:$('dd683MasterReviewed').checked});
- $('dd683MasterSignature').value='';$('dd683MasterReviewed').checked=false;
- }catch(x){$('dd683Result').textContent='HOLD · '+x.message}});
- $('dd683Closure').addEventListener('submit',async e=>{e.preventDefault();try{
- await submit('close_financial_discrepancy_683',{case_code:$('dd683Case').value,
- resolution_note:$('dd683Note').value.trim(),expected_fingerprint_sha256:latest?.fingerprint_sha256,
- owner_reviewed:$('dd683ClosureReviewed').checked});
- $('dd683ClosureReviewed').checked=false;
- }catch(x){$('dd683Result').textContent='HOLD · '+x.message}});
+if(!$('dd683-finance'))return;
+(async()=>{try{const d=await api(),seen=new Set();for(const q of d.queue||[])if(q.utm_campaign&&!seen.has(q.utm_campaign)){
+seen.add(q.utm_campaign);$('dd683Campaign').add(new Option(q.utm_campaign+' · #'+q.social_post_queue_id,q.social_post_queue_id));
+}}catch(e){$('dd683Status').textContent='HOLD · '+e.message}})();
+$('dd683Campaign').addEventListener('change',()=>void refresh());
+$('dd683Refresh').addEventListener('click',()=>void refresh());
+for(const kind of ['Source','Master'])$('dd683Prepare'+kind).addEventListener('click',()=>{
+try{const text=JSON.stringify(claim(kind.toLowerCase()));$('dd683Claim').textContent=text;
+$('dd683Result').textContent='Copy this exact UTF-8 JSON to the independently controlled Ed25519 signer. Private signing keys never enter this site.'}
+catch(e){$('dd683Result').textContent='HOLD · '+e.message}
+});
+$('dd683Source').addEventListener('submit',async e=>{e.preventDefault();try{
+await submit('admit_financial_signer_683',{nonce:$('dd683SourceNonce').value.trim(),
+issued_at:$('dd683SourceTime').value.trim(),signature:$('dd683SourceSignature').value.trim(),
+owner_reviewed:$('dd683SourceReviewed').checked});
+$('dd683SourceSignature').value='';$('dd683SourceReviewed').checked=false;
+}catch(x){$('dd683Result').textContent='HOLD · '+x.message}});
+$('dd683Master').addEventListener('submit',async e=>{e.preventDefault();try{
+await submit('correlate_financial_master_683',{nonce:$('dd683MasterNonce').value.trim(),
+issued_at:$('dd683MasterTime').value.trim(),master_revision:$('dd683MasterRevision').value.trim(),
+signature:$('dd683MasterSignature').value.trim(),owner_reviewed:$('dd683MasterReviewed').checked});
+$('dd683MasterSignature').value='';$('dd683MasterReviewed').checked=false;
+}catch(x){$('dd683Result').textContent='HOLD · '+x.message}});
+$('dd683Closure').addEventListener('submit',async e=>{e.preventDefault();try{
+await submit('close_financial_discrepancy_683',{case_code:$('dd683Case').value,
+resolution_note:$('dd683Note').value.trim(),expected_fingerprint_sha256:latest?.fingerprint_sha256,
+owner_reviewed:$('dd683ClosureReviewed').checked});
+$('dd683ClosureReviewed').checked=false;
+}catch(x){$('dd683Result').textContent='HOLD · '+x.message}});
 });
 })();
 
 // Build 682 source-owned financial export & owner discrepancy audit.
 (()=>{'use strict';const $=id=>document.getElementById(id);let pin='';
 async function api(payload,query=''){
- if(!window.DDAuth?.apiFetch)throw Error('Authenticated Admin session required');
- const res=await window.DDAuth.apiFetch('/api/admin/social-post-queue'+query,
-  payload?{method:'POST',body:JSON.stringify(payload)}:undefined);
- if(!res.ok){let msg='Source evidence unavailable';try{msg=(await res.json()).error||msg}catch{}throw Error(msg)}
- return payload?res.json():res;
+if(!window.DDAuth?.apiFetch)throw Error('Authenticated Admin session required');
+const res=await window.DDAuth.apiFetch('/api/admin/social-post-queue'+query,
+payload?{method:'POST',body:JSON.stringify(payload)}:undefined);
+if(!res.ok){let msg='Source evidence unavailable';try{msg=(await res.json()).error||msg}catch{}throw Error(msg)}
+return payload?res.json():res;
 }
 async function refresh(){
- const id=Number($('dd682Campaign').value);
- if(!id){$('dd682Status').textContent='HOLD · Choose campaign.';return}
- try{
-  const data=await(await api(null,'?campaign_queue_id='+id)).json(),v=data.financial682||{};
-  pin=v.fingerprint_sha256||'';
-  const select=$('dd682Case');select.replaceChildren(new Option('Choose active discrepancy',''));
-  for(const c of v.cases||[])select.add(new Option(c.code+' · '+(c.last_review?.disposition||'UNREVIEWED'),c.code));
-  $('dd682Status').textContent='Source: '+(v.source_status||'HOLD')+' · '+(v.cases||[]).length+
-   ' discrepancies · '+(v.reviews||[]).length+' owner audit entries · Master: '+(v.master_connection||'HOLD')+
-   ' · Audit completeness: '+(v.complete?'complete':'HOLD');
- }catch(e){$('dd682Status').textContent='HOLD · '+e.message}
+const id=Number($('dd682Campaign').value);
+if(!id){$('dd682Status').textContent='HOLD · Choose campaign.';return}
+try{
+const data=await(await api(null,'?campaign_queue_id='+id)).json(),v=data.financial682||{};
+pin=v.fingerprint_sha256||'';
+const select=$('dd682Case');select.replaceChildren(new Option('Choose active discrepancy',''));
+for(const c of v.cases||[])select.add(new Option(c.code+' · '+(c.last_review?.disposition||'UNREVIEWED'),c.code));
+$('dd682Status').textContent='Source: '+(v.source_status||'HOLD')+' · '+(v.cases||[]).length+
+' discrepancies · '+(v.reviews||[]).length+' owner audit entries · Master: '+(v.master_connection||'HOLD')+
+' · Audit completeness: '+(v.complete?'complete':'HOLD');
+}catch(e){$('dd682Status').textContent='HOLD · '+e.message}
 }
 document.addEventListener('DOMContentLoaded',()=>{
- if(!$('dd682-finance'))return;
- (async()=>{try{const d=await(await api()).json(),seen=new Set();for(const q of d.queue||[]){
- if(q.utm_campaign&&!seen.has(q.utm_campaign)){seen.add(q.utm_campaign);
- $('dd682Campaign').add(new Option(q.utm_campaign+' · #'+q.social_post_queue_id,q.social_post_queue_id))}
- }}catch(e){$('dd682Status').textContent='HOLD · '+e.message}})();
- $('dd682Campaign').addEventListener('change',()=>void refresh());
- $('dd682Refresh').addEventListener('click',()=>void refresh());
- $('dd682Export').addEventListener('click',async()=>{
-  const id=Number($('dd682Campaign').value);$('dd682Result').textContent='Preparing protected export…';
-  try{if(!id)throw Error('Choose a campaign');
-   const res=await api(null,'?export=financial682&campaign_queue_id='+id),blob=await res.blob();
-   const href=URL.createObjectURL(blob),a=document.createElement('a');
-   a.href=href;a.download='devilndove-financial-evidence-'+id+'.json';document.body.appendChild(a);a.click();a.remove();
-   setTimeout(()=>URL.revokeObjectURL(href),30000);
-   $('dd682Result').textContent='Sanitized source report exported. Master acceptance remains HOLD.';
-  }catch(e){$('dd682Result').textContent='HOLD · '+e.message}
- });
- $('dd682Review').addEventListener('submit',async e=>{
-  e.preventDefault();$('dd682Result').textContent='Recording source-pinned review…';
-  try{
-   const d=await api({action:'owner_discrepancy_review_682',social_post_queue_id:Number($('dd682Campaign').value),
-   case_code:$('dd682Case').value,disposition:$('dd682Disposition').value,
-   review_note:$('dd682Note').value.trim(),owner_reviewed:$('dd682Reviewed').checked,
-   expected_fingerprint_sha256:pin});
-   $('dd682Result').textContent=(d.result?.status||'Recorded')+' · Independent Master admission still HOLD.';
-   $('dd682Reviewed').checked=false;await refresh();
-  }catch(e){$('dd682Result').textContent='HOLD · '+e.message}
- });
+if(!$('dd682-finance'))return;
+(async()=>{try{const d=await(await api()).json(),seen=new Set();for(const q of d.queue||[]){
+if(q.utm_campaign&&!seen.has(q.utm_campaign)){seen.add(q.utm_campaign);
+$('dd682Campaign').add(new Option(q.utm_campaign+' · #'+q.social_post_queue_id,q.social_post_queue_id))}
+}}catch(e){$('dd682Status').textContent='HOLD · '+e.message}})();
+$('dd682Campaign').addEventListener('change',()=>void refresh());
+$('dd682Refresh').addEventListener('click',()=>void refresh());
+$('dd682Export').addEventListener('click',async()=>{
+const id=Number($('dd682Campaign').value);$('dd682Result').textContent='Preparing protected export…';
+try{if(!id)throw Error('Choose a campaign');
+const res=await api(null,'?export=financial682&campaign_queue_id='+id),blob=await res.blob();
+const href=URL.createObjectURL(blob),a=document.createElement('a');
+a.href=href;a.download='devilndove-financial-evidence-'+id+'.json';document.body.appendChild(a);a.click();a.remove();
+setTimeout(()=>URL.revokeObjectURL(href),30000);
+$('dd682Result').textContent='Sanitized source report exported. Master acceptance remains HOLD.';
+}catch(e){$('dd682Result').textContent='HOLD · '+e.message}
+});
+$('dd682Review').addEventListener('submit',async e=>{
+e.preventDefault();$('dd682Result').textContent='Recording source-pinned review…';
+try{
+const d=await api({action:'owner_discrepancy_review_682',social_post_queue_id:Number($('dd682Campaign').value),
+case_code:$('dd682Case').value,disposition:$('dd682Disposition').value,
+review_note:$('dd682Note').value.trim(),owner_reviewed:$('dd682Reviewed').checked,
+expected_fingerprint_sha256:pin});
+$('dd682Result').textContent=(d.result?.status||'Recorded')+' · Independent Master admission still HOLD.';
+$('dd682Reviewed').checked=false;await refresh();
+}catch(e){$('dd682Result').textContent='HOLD · '+e.message}
+});
 });})();
 
 // Build 680 — owner-supervised profitability exceptions and freshness review.
 (()=>{'use strict';const $=id=>document.getElementById(id);
 async function call(payload,id){
- if(!window.DDAuth?.apiFetch)throw Error('Admin login required');
- const url='/api/admin/social-post-queue'+(!payload&&id?'?campaign_queue_id='+encodeURIComponent(id):'');
- const r=await window.DDAuth.apiFetch(url,payload?{method:'POST',body:JSON.stringify(payload)}:undefined);
- const d=await r.json();if(!r.ok||!d.ok)throw Error(d.error||'Financial evidence unavailable');return d;
+if(!window.DDAuth?.apiFetch)throw Error('Admin login required');
+const url='/api/admin/social-post-queue'+(!payload&&id?'?campaign_queue_id='+encodeURIComponent(id):'');
+const r=await window.DDAuth.apiFetch(url,payload?{method:'POST',body:JSON.stringify(payload)}:undefined);
+const d=await r.json();if(!r.ok||!d.ok)throw Error(d.error||'Financial evidence unavailable');return d;
 }
 async function load(){
- const id=Number($('dd680Campaign').value);
- if(!id){$('dd680Status').textContent='HOLD · Choose a campaign.';return;}
- try{const d=await call(null,id),f=d.financial680||{},h=d.financial681||{};
- $('dd680Status').textContent='Campaign: '+(f.campaign||'—')+' · Master ACK: '+(f.ack||'HOLD')+
- ' · Connection: '+(f.connection||'HOLD')+' · Source records: '+(f.evidence_count||0)+
- ' · Stale: '+(f.stale_count||0)+' · Open exceptions: '+(f.exceptions||[]).map(x=>x.reference).join(', ')+
- ' · Blockers: '+(f.blockers||[]).join(', ')+' · Independent profit certification: HOLD';
- const open=$('dd681Open');open.replaceChildren(new Option('Choose open exception',''));
- for(const e of h.exceptions||[])if(!e.resolved_at)open.add(new Option(e.reference+' · '+e.sla,e.queue_id+':'+e.reference));
- $('dd681Sla').textContent='Audit: '+(h.status||'HOLD')+' · '+(h.exceptions||[]).map(e=>
-   e.reference+' '+e.sla+' (opened '+e.opened_at+', acknowledged '+(e.ack_at||'not yet')+')').join('; ');
- $('dd681Master').textContent=(h.master_receipts||[]).map(r=>r.state+' at '+r.recorded_at+' · Master '+r.master_revision).join('; ')||'No signed Master receipt recorded. Connection HOLD.';
- $('dd681History').textContent=(h.owner_history||[]).map(r=>r.kind+' · '+r.recorded_at).join('; ')||'No recorded owner acceptance.';
- }catch(e){$('dd680Status').textContent='HOLD · '+e.message;}
+const id=Number($('dd680Campaign').value);
+if(!id){$('dd680Status').textContent='HOLD · Choose a campaign.';return;}
+try{const d=await call(null,id),f=d.financial680||{},h=d.financial681||{};
+$('dd680Status').textContent='Campaign: '+(f.campaign||'—')+' · Master ACK: '+(f.ack||'HOLD')+
+' · Connection: '+(f.connection||'HOLD')+' · Source records: '+(f.evidence_count||0)+
+' · Stale: '+(f.stale_count||0)+' · Open exceptions: '+(f.exceptions||[]).map(x=>x.reference).join(', ')+
+' · Blockers: '+(f.blockers||[]).join(', ')+' · Independent profit certification: HOLD';
+const open=$('dd681Open');open.replaceChildren(new Option('Choose open exception',''));
+for(const e of h.exceptions||[])if(!e.resolved_at)open.add(new Option(e.reference+' · '+e.sla,e.queue_id+':'+e.reference));
+$('dd681Sla').textContent='Audit: '+(h.status||'HOLD')+' · '+(h.exceptions||[]).map(e=>
+e.reference+' '+e.sla+' (opened '+e.opened_at+', acknowledged '+(e.ack_at||'not yet')+')').join('; ');
+$('dd681Master').textContent=(h.master_receipts||[]).map(r=>r.state+' at '+r.recorded_at+' · Master '+r.master_revision).join('; ')||'No signed Master receipt recorded. Connection HOLD.';
+$('dd681History').textContent=(h.owner_history||[]).map(r=>r.kind+' · '+r.recorded_at).join('; ')||'No recorded owner acceptance.';
+}catch(e){$('dd680Status').textContent='HOLD · '+e.message;}
 }
 document.addEventListener('DOMContentLoaded',()=>{
- if(!$('dd680-ops'))return;
- (async()=>{try{const d=await call(),names=new Set();
- for(const q of d.queue||[])if(q.utm_campaign&&!names.has(q.utm_campaign)){
- names.add(q.utm_campaign);$('dd680Campaign').add(new Option(q.utm_campaign+' · #'+q.social_post_queue_id,q.social_post_queue_id));
- }}catch(e){$('dd680Status').textContent='HOLD · '+e.message;}})();
- $('dd680Campaign').addEventListener('change',()=>void load());
- $('dd680Refresh').addEventListener('click',()=>void load());
- $('dd681Acknowledge').addEventListener('click',async()=>{
-  const [qid,ref]=String($('dd681Open').value||'').split(':');
-  $('dd681Result').textContent='Checking open exception and owner authority…';
-  try{
-   const d=await call({action:'owner_exception_ack_681',social_post_queue_id:Number(qid),
-    exception_reference:ref,owner_reviewed:$('dd681OwnerReview').checked});
-   $('dd681Result').textContent=(d.result?.status||'Recorded')+' · Financial certification remains HOLD.';
-   $('dd681OwnerReview').checked=false;await load();
-  }catch(e){$('dd681Result').textContent='HOLD · '+e.message;}
- });
+if(!$('dd680-ops'))return;
+(async()=>{try{const d=await call(),names=new Set();
+for(const q of d.queue||[])if(q.utm_campaign&&!names.has(q.utm_campaign)){
+names.add(q.utm_campaign);$('dd680Campaign').add(new Option(q.utm_campaign+' · #'+q.social_post_queue_id,q.social_post_queue_id));
+}}catch(e){$('dd680Status').textContent='HOLD · '+e.message;}})();
+$('dd680Campaign').addEventListener('change',()=>void load());
+$('dd680Refresh').addEventListener('click',()=>void load());
+$('dd681Acknowledge').addEventListener('click',async()=>{
+const [qid,ref]=String($('dd681Open').value||'').split(':');
+$('dd681Result').textContent='Checking open exception and owner authority…';
+try{
+const d=await call({action:'owner_exception_ack_681',social_post_queue_id:Number(qid),
+exception_reference:ref,owner_reviewed:$('dd681OwnerReview').checked});
+$('dd681Result').textContent=(d.result?.status||'Recorded')+' · Financial certification remains HOLD.';
+$('dd681OwnerReview').checked=false;await load();
+}catch(e){$('dd681Result').textContent='HOLD · '+e.message;}
+});
 
- $('dd680Exception').addEventListener('submit',async e=>{
- e.preventDefault();$('dd680Result').textContent='Recording owner decision…';
- try{const d=await call({action:'owner_profit_exception_680',social_post_queue_id:Number($('dd680Campaign').value),
- exception_reference:$('dd680Ref').value.trim(),kind:$('dd680Kind').value,
- reason:$('dd680Kind').value==='open'?$('dd680Reason').value.trim():'',
- resolution:$('dd680Kind').value==='resolve'?$('dd680Reason').value.trim():'',
- owner_reviewed:$('dd680Owner').checked});
- $('dd680Result').textContent=(d.result?.status||'Saved')+' · Independent certification still HOLD.';
- $('dd680Owner').checked=false;await load();
- }catch(e){$('dd680Result').textContent='HOLD · '+e.message;}
- });
+$('dd680Exception').addEventListener('submit',async e=>{
+e.preventDefault();$('dd680Result').textContent='Recording owner decision…';
+try{const d=await call({action:'owner_profit_exception_680',social_post_queue_id:Number($('dd680Campaign').value),
+exception_reference:$('dd680Ref').value.trim(),kind:$('dd680Kind').value,
+reason:$('dd680Kind').value==='open'?$('dd680Reason').value.trim():'',
+resolution:$('dd680Kind').value==='resolve'?$('dd680Reason').value.trim():'',
+owner_reviewed:$('dd680Owner').checked});
+$('dd680Result').textContent=(d.result?.status||'Saved')+' · Independent certification still HOLD.';
+$('dd680Owner').checked=false;await load();
+}catch(e){$('dd680Result').textContent='HOLD · '+e.message;}
+});
 });})();
 
 // Build 679 — independently signed order costs and source-level net contribution.
-(() => {
-  'use strict';
-  const $=id=>document.getElementById(id);
-  async function request(payload,id){
-    if(!window.DDAuth?.apiFetch)throw Error('Authenticated owner session required');
-    const url='/api/admin/social-post-queue'+(!payload&&id?'?campaign_queue_id='+encodeURIComponent(id):'');
-    const response=await window.DDAuth.apiFetch(url,payload?{method:'POST',body:JSON.stringify(payload)}:undefined);
-    const body=await response.json();
-    if(!response.ok||!body.ok)throw Error(body.error||'Source verification unavailable');
-    return body;
-  }
-  const cad=v=>(Number(v||0)/100).toFixed(2);
-  async function refresh(){
-    const id=Number($('dd679Campaign').value);
-    if(!id){$('dd679Summary').textContent='HOLD · Select a campaign.';return;}
-    try{
-      const data=await request(null,id),r=data.financial679||{},m=r.financial;
-      $('dd679Summary').textContent=[
-        'Source status: '+(r.status||'HOLD'),
-        'Orders: '+(r.orders_seen||0),'Verified order-cost records: '+(r.product_cost_receipts_seen||0),
-        m?'Tax-excluded receipts CAD '+cad(m.tax_excluded_receipts_cents):'Receipts HOLD',
-        m?'Advertising CAD '+cad(m.verified_ad_cost_cents):'Advertising HOLD',
-        m?'Other costs CAD '+cad(m.verified_operating_cost_cents):'Operating costs HOLD',
-        m?'Source net contribution CAD '+cad(m.net_contribution_cents):'Net contribution HOLD',
-        'Master: '+(r.master_handoff||'HOLD'),
-        'Evidence blockers: '+(r.blockers||[]).join(', ')
-      ].join(' · ');
-    }catch(error){$('dd679Summary').textContent='HOLD · '+error.message;}
-  }
-  document.addEventListener('DOMContentLoaded',()=>{
-    if(!$('dd679-net'))return;
-    (async()=>{try{const d=await request(),seen=new Set();for(const item of d.queue||[]){
-      if(item.utm_campaign&&!seen.has(item.utm_campaign)){
-        seen.add(item.utm_campaign);
-        $('dd679Campaign').add(new Option(item.utm_campaign+' · #'+item.social_post_queue_id,item.social_post_queue_id));
-      }
-    }}catch(error){$('dd679Summary').textContent='HOLD · '+error.message;}})();
-    $('dd679Campaign').addEventListener('change',()=>void refresh());
-    $('dd679Reconcile').addEventListener('click',()=>void refresh());
-    $('dd679CostForm').addEventListener('submit',async event=>{
-      event.preventDefault();$('dd679CostStatus').textContent='Checking independently signed cost evidence…';
-      const payload={action:'verify_product_cost_679',social_post_queue_id:Number($('dd679Campaign').value),
-        order_id:Number($('dd679Order').value),axis:$('dd679Axis').value,
-        amount_cents:Math.round(Number($('dd679Amount').value)*100),
-        reference:$('dd679Reference').value.trim(),issuer:$('dd679Issuer').value.trim(),
-        source_sha256:$('dd679Digest').value.trim(),observed_at:$('dd679Observed').value.trim(),
-        verifier_signature:$('dd679Signature').value.trim(),owner_reviewed:$('dd679OwnerReview').checked};
-      try{const d=await request(payload);
-        $('dd679CostStatus').textContent=(d.result?.status||'Cost recorded')+' · No independent Master admission claimed.';
-        $('dd679Signature').value='';$('dd679OwnerReview').checked=false;await refresh();}
-      catch(error){$('dd679CostStatus').textContent='HOLD · '+error.message;}
-    });
-    $('dd679Signoff').addEventListener('submit',async event=>{
-      event.preventDefault();$('dd679SignoffStatus').textContent='Rechecking source settlement and costs…';
-      try{const d=await request({action:'owner_net_signoff_679',
-        social_post_queue_id:Number($('dd679Campaign').value),
-        owner_reviewed:$('dd679Reviewed').checked,confirm_scope:$('dd679Scope').checked});
-        $('dd679SignoffStatus').textContent=(d.result?.status||'Reviewed')+' · Master independent admission HOLD.';
-        $('dd679Reviewed').checked=false;$('dd679Scope').checked=false;await refresh();}
-      catch(error){$('dd679SignoffStatus').textContent='HOLD · '+error.message;}
-    });
-  });
+(()=>{
+'use strict';
+const $=id=>document.getElementById(id);
+async function request(payload,id){
+if(!window.DDAuth?.apiFetch)throw Error('Authenticated owner session required');
+const url='/api/admin/social-post-queue'+(!payload&&id?'?campaign_queue_id='+encodeURIComponent(id):'');
+const response=await window.DDAuth.apiFetch(url,payload?{method:'POST',body:JSON.stringify(payload)}:undefined);
+const body=await response.json();
+if(!response.ok||!body.ok)throw Error(body.error||'Source verification unavailable');
+return body;
+}
+const cad=v=>(Number(v||0)/100).toFixed(2);
+async function refresh(){
+const id=Number($('dd679Campaign').value);
+if(!id){$('dd679Summary').textContent='HOLD · Select a campaign.';return;}
+try{
+const data=await request(null,id),r=data.financial679||{},m=r.financial;
+$('dd679Summary').textContent=[
+'Source status: '+(r.status||'HOLD'),
+'Orders: '+(r.orders_seen||0),'Verified order-cost records: '+(r.product_cost_receipts_seen||0),
+m?'Tax-excluded receipts CAD '+cad(m.tax_excluded_receipts_cents):'Receipts HOLD',
+m?'Advertising CAD '+cad(m.verified_ad_cost_cents):'Advertising HOLD',
+m?'Other costs CAD '+cad(m.verified_operating_cost_cents):'Operating costs HOLD',
+m?'Source net contribution CAD '+cad(m.net_contribution_cents):'Net contribution HOLD',
+'Master: '+(r.master_handoff||'HOLD'),
+'Evidence blockers: '+(r.blockers||[]).join(', ')
+].join(' · ');
+}catch(error){$('dd679Summary').textContent='HOLD · '+error.message;}
+}
+document.addEventListener('DOMContentLoaded',()=>{
+if(!$('dd679-net'))return;
+(async()=>{try{const d=await request(),seen=new Set();for(const item of d.queue||[]){
+if(item.utm_campaign&&!seen.has(item.utm_campaign)){
+seen.add(item.utm_campaign);
+$('dd679Campaign').add(new Option(item.utm_campaign+' · #'+item.social_post_queue_id,item.social_post_queue_id));
+}
+}}catch(error){$('dd679Summary').textContent='HOLD · '+error.message;}})();
+$('dd679Campaign').addEventListener('change',()=>void refresh());
+$('dd679Reconcile').addEventListener('click',()=>void refresh());
+$('dd679CostForm').addEventListener('submit',async event=>{
+event.preventDefault();$('dd679CostStatus').textContent='Checking independently signed cost evidence…';
+const payload={action:'verify_product_cost_679',social_post_queue_id:Number($('dd679Campaign').value),
+order_id:Number($('dd679Order').value),axis:$('dd679Axis').value,
+amount_cents:Math.round(Number($('dd679Amount').value)*100),
+reference:$('dd679Reference').value.trim(),issuer:$('dd679Issuer').value.trim(),
+source_sha256:$('dd679Digest').value.trim(),observed_at:$('dd679Observed').value.trim(),
+verifier_signature:$('dd679Signature').value.trim(),owner_reviewed:$('dd679OwnerReview').checked};
+try{const d=await request(payload);
+$('dd679CostStatus').textContent=(d.result?.status||'Cost recorded')+' · No independent Master admission claimed.';
+$('dd679Signature').value='';$('dd679OwnerReview').checked=false;await refresh();}
+catch(error){$('dd679CostStatus').textContent='HOLD · '+error.message;}
+});
+$('dd679Signoff').addEventListener('submit',async event=>{
+event.preventDefault();$('dd679SignoffStatus').textContent='Rechecking source settlement and costs…';
+try{const d=await request({action:'owner_net_signoff_679',
+social_post_queue_id:Number($('dd679Campaign').value),
+owner_reviewed:$('dd679Reviewed').checked,confirm_scope:$('dd679Scope').checked});
+$('dd679SignoffStatus').textContent=(d.result?.status||'Reviewed')+' · Master independent admission HOLD.';
+$('dd679Reviewed').checked=false;$('dd679Scope').checked=false;await refresh();}
+catch(error){$('dd679SignoffStatus').textContent='HOLD · '+error.message;}
+});
+});
 })();
 
 // Build 678 — exact signed expenses, read-only campaign reconciliation, explicit owner signoff.
-(() => {
-  'use strict';
-  const $ = id => document.getElementById(id);
-  const call = async (payload,queueId) => {
-    if(!window.DDAuth?.apiFetch)throw Error('Authenticated admin required');
-    const url='/api/admin/social-post-queue'+(!payload&&queueId?'?campaign_queue_id='+encodeURIComponent(queueId):'');
-    const response=await window.DDAuth.apiFetch(url,payload?{method:'POST',body:JSON.stringify(payload)}:undefined);
-    const data=await response.json();
-    if(!response.ok||!data.ok)throw Error(data.error||'Campaign evidence unavailable');
-    return data;
-  };
-  async function reconcile(){
-    const id=Number($('dd678Campaign').value);
-    if(!id){$('dd678Summary').textContent='HOLD · Choose a campaign.';return;}
-    try {
-      const data=await call(null,id),f=data.financial678||{};
-      const m=f.metrics;
-      const fmt=n=>(Number(n||0)/100).toFixed(2);
-      $('dd678Summary').textContent=[
-        'Campaign: '+(f.campaign||'Unknown'),
-        'Expense receipts: '+(f.receipt_count||0),
-        'Verified expense evidence: '+(f.verified_receipt_count||0),
-        'Settled attributed orders: '+(f.paid_order_count||0),
-        m?'Gross attributed receipts CAD '+fmt(m.attributed_sales_cents):'Attributed receipts HOLD',
-        m?'Verified ad spend CAD '+fmt(m.verified_ad_cost_cents):'Advertising spend HOLD',
-        m?'Marketing contribution CAD '+fmt(m.marketing_contribution_cents)+'; marketing return '+m.marketing_roi_percent+'%':'Marketing return HOLD',
-        'Owner signoff: '+(f.signoff||'HOLD'),
-        'Net business profit: '+(f.profitability_status||'HOLD'),
-        'Blockers: '+(f.blockers||[]).join(', ')
-      ].join(' · ');
-    }catch(e){$('dd678Summary').textContent='HOLD · '+e.message;}
-  }
-  document.addEventListener('DOMContentLoaded',()=>{
-    if(!$('dd678-finance'))return;
-    const queue=$('dd678Campaign');
-    (async()=>{try{
-      const data=await call();const seen=new Set();
-      for(const item of data.queue||[]){
-        if(!item.utm_campaign||seen.has(item.utm_campaign))continue;
-        seen.add(item.utm_campaign);
-        queue.add(new Option(item.utm_campaign+' · #'+item.social_post_queue_id,item.social_post_queue_id));
-      }
-    }catch(e){$('dd678Summary').textContent='HOLD · '+e.message;}})();
-    queue.addEventListener('change',()=>void reconcile());
-    $('dd678Refresh').addEventListener('click',()=>void reconcile());
-    $('dd678VerifyForm').addEventListener('submit',async e=>{
-      e.preventDefault();$('dd678VerifyResult').textContent='Checking independent signature…';
-      const payload={action:'expense_attestation_678',social_post_queue_id:Number(queue.value),
-        receipt_reference:$('dd678Receipt').value.trim(),vendor:$('dd678Vendor').value.trim(),
-        original_document_sha256:$('dd678Digest').value.trim(),checked_at:$('dd678Checked').value.trim(),
-        verifier_signature:$('dd678Signature').value.trim(),owner_reviewed:$('dd678Reviewed').checked};
-      try{const result=await call(payload);$('dd678VerifyResult').textContent=(result.result?.status||'Verified')+' · Receipt was independently signed; no ROI certified.';
-        $('dd678Signature').value='';$('dd678Reviewed').checked=false;await reconcile();}
-      catch(error){$('dd678VerifyResult').textContent='HOLD · '+error.message;}
-    });
-    $('dd678Signoff').addEventListener('submit',async e=>{
-      e.preventDefault();$('dd678SignoffResult').textContent='Checking current payment and expense evidence…';
-      try{const result=await call({action:'owner_marketing_signoff_678',social_post_queue_id:Number(queue.value),
-        owner_reviewed:$('dd678Owner').checked,confirm_gross_basis:$('dd678Gross').checked});
-        $('dd678SignoffResult').textContent=(result.result?.status||'Accepted')+' · Net business profitability remains HOLD.';
-        $('dd678Owner').checked=false;$('dd678Gross').checked=false;await reconcile();}
-      catch(error){$('dd678SignoffResult').textContent='HOLD · '+error.message;}
-    });
-  });
+(()=>{
+'use strict';
+const $=id=> document.getElementById(id);
+const call=async (payload,queueId)=>{
+if(!window.DDAuth?.apiFetch)throw Error('Authenticated admin required');
+const url='/api/admin/social-post-queue'+(!payload&&queueId?'?campaign_queue_id='+encodeURIComponent(queueId):'');
+const response=await window.DDAuth.apiFetch(url,payload?{method:'POST',body:JSON.stringify(payload)}:undefined);
+const data=await response.json();
+if(!response.ok||!data.ok)throw Error(data.error||'Campaign evidence unavailable');
+return data;
+};
+async function reconcile(){
+const id=Number($('dd678Campaign').value);
+if(!id){$('dd678Summary').textContent='HOLD · Choose a campaign.';return;}
+try{
+const data=await call(null,id),f=data.financial678||{};
+const m=f.metrics;
+const fmt=n=>(Number(n||0)/100).toFixed(2);
+$('dd678Summary').textContent=[
+'Campaign: '+(f.campaign||'Unknown'),
+'Expense receipts: '+(f.receipt_count||0),
+'Verified expense evidence: '+(f.verified_receipt_count||0),
+'Settled attributed orders: '+(f.paid_order_count||0),
+m?'Gross attributed receipts CAD '+fmt(m.attributed_sales_cents):'Attributed receipts HOLD',
+m?'Verified ad spend CAD '+fmt(m.verified_ad_cost_cents):'Advertising spend HOLD',
+m?'Marketing contribution CAD '+fmt(m.marketing_contribution_cents)+'; marketing return '+m.marketing_roi_percent+'%':'Marketing return HOLD',
+'Owner signoff: '+(f.signoff||'HOLD'),
+'Net business profit: '+(f.profitability_status||'HOLD'),
+'Blockers: '+(f.blockers||[]).join(', ')
+].join(' · ');
+}catch(e){$('dd678Summary').textContent='HOLD · '+e.message;}
+}
+document.addEventListener('DOMContentLoaded',()=>{
+if(!$('dd678-finance'))return;
+const queue=$('dd678Campaign');
+(async()=>{try{
+const data=await call();const seen=new Set();
+for(const item of data.queue||[]){
+if(!item.utm_campaign||seen.has(item.utm_campaign))continue;
+seen.add(item.utm_campaign);
+queue.add(new Option(item.utm_campaign+' · #'+item.social_post_queue_id,item.social_post_queue_id));
+}
+}catch(e){$('dd678Summary').textContent='HOLD · '+e.message;}})();
+queue.addEventListener('change',()=>void reconcile());
+$('dd678Refresh').addEventListener('click',()=>void reconcile());
+$('dd678VerifyForm').addEventListener('submit',async e=>{
+e.preventDefault();$('dd678VerifyResult').textContent='Checking independent signature…';
+const payload={action:'expense_attestation_678',social_post_queue_id:Number(queue.value),
+receipt_reference:$('dd678Receipt').value.trim(),vendor:$('dd678Vendor').value.trim(),
+original_document_sha256:$('dd678Digest').value.trim(),checked_at:$('dd678Checked').value.trim(),
+verifier_signature:$('dd678Signature').value.trim(),owner_reviewed:$('dd678Reviewed').checked};
+try{const result=await call(payload);$('dd678VerifyResult').textContent=(result.result?.status||'Verified')+' · Receipt was independently signed; no ROI certified.';
+$('dd678Signature').value='';$('dd678Reviewed').checked=false;await reconcile();}
+catch(error){$('dd678VerifyResult').textContent='HOLD · '+error.message;}
+});
+$('dd678Signoff').addEventListener('submit',async e=>{
+e.preventDefault();$('dd678SignoffResult').textContent='Checking current payment and expense evidence…';
+try{const result=await call({action:'owner_marketing_signoff_678',social_post_queue_id:Number(queue.value),
+owner_reviewed:$('dd678Owner').checked,confirm_gross_basis:$('dd678Gross').checked});
+$('dd678SignoffResult').textContent=(result.result?.status||'Accepted')+' · Net business profitability remains HOLD.';
+$('dd678Owner').checked=false;$('dd678Gross').checked=false;await reconcile();}
+catch(error){$('dd678SignoffResult').textContent='HOLD · '+error.message;}
+});
+});
 })();
 
 // Build 676 — owner-attested campaign costs, verified settlement and attribution HOLD.
-(() => {
-  'use strict';
-  const $=id=>document.getElementById(id);
-  const request=async payload=>{if(!window.DDAuth?.apiFetch)throw Error('Authenticated admin required');
-    const res=await window.DDAuth.apiFetch('/api/admin/social-post-queue',payload?
-      {method:'POST',body:JSON.stringify(payload)}:undefined),data=await res.json();
-    if(!res.ok||!data.ok)throw Error(data.error||'Evidence unavailable');return data;};
-  async function load(){
-    try{const data=await request(),queue=$('dd676Queue'),old=queue.value;
-      queue.replaceChildren(new Option('Choose campaign',''));
-      for(const item of data.queue||[])if(item.utm_campaign)queue.add(new Option(item.utm_campaign+' · #'+item.social_post_queue_id,item.social_post_queue_id));
-      queue.value=old;
-      const finance=data.financial676||{},tbody=$('dd676Rows');tbody.replaceChildren();
-      for(const item of finance.items||[]){const row=document.createElement('tr');
-        const values=[item.campaign,item.kind,item.reference,(Number(item.amount_cents||0)/100).toFixed(2),item.observed_at,item.attribution_verified?'Order/session matched · ROI HOLD':'HOLD'];
-        for(const value of values){const cell=document.createElement('td');cell.textContent=String(value??'—');row.append(cell);}tbody.append(row);}
-      $('dd676Status').textContent='Financial ROI: '+(finance.certification||'HOLD')+' · Checkout sessions can now bind paid orders to first-party campaign evidence. Expense receipts remain owner-attested, not independently vendor-verified. No certified ROI claim.';
-    }catch(error){$('dd676Status').textContent='HOLD · '+error.message;}
-  }
-  document.addEventListener('DOMContentLoaded',()=>{
-    if(!$('dd676-finance'))return;
-    $('dd676Form').addEventListener('submit',async event=>{event.preventDefault();
-      const kind=$('dd676Kind').value,cost=Number($('dd676Cost').value);
-      const payload={action:'financial_evidence_676',social_post_queue_id:Number($('dd676Queue').value),
-        kind,currency:'CAD',cost_cents:Math.round(cost*100),receipt_reference:$('dd676Reference').value.trim(),
-        order_id:Number($('dd676Order').value),owner_reviewed:$('dd676Confirm').checked};
-      $('dd676Result').textContent='Checking source evidence…';
-      try{const data=await request(payload);$('dd676Result').textContent=(data.result?.status||'Evidence recorded')+' · ROI remains HOLD.';$('dd676Confirm').checked=false;await load();}
-      catch(error){$('dd676Result').textContent='HOLD · '+error.message;}
-    });void load();
-  });
+(()=>{
+'use strict';
+const $=id=>document.getElementById(id);
+const request=async payload=>{if(!window.DDAuth?.apiFetch)throw Error('Authenticated admin required');
+const res=await window.DDAuth.apiFetch('/api/admin/social-post-queue',payload?
+{method:'POST',body:JSON.stringify(payload)}:undefined),data=await res.json();
+if(!res.ok||!data.ok)throw Error(data.error||'Evidence unavailable');return data;};
+async function load(){
+try{const data=await request(),queue=$('dd676Queue'),old=queue.value;
+queue.replaceChildren(new Option('Choose campaign',''));
+for(const item of data.queue||[])if(item.utm_campaign)queue.add(new Option(item.utm_campaign+' · #'+item.social_post_queue_id,item.social_post_queue_id));
+queue.value=old;
+const finance=data.financial676||{},tbody=$('dd676Rows');tbody.replaceChildren();
+for(const item of finance.items||[]){const row=document.createElement('tr');
+const values=[item.campaign,item.kind,item.reference,(Number(item.amount_cents||0)/100).toFixed(2),item.observed_at,item.attribution_verified?'Order/session matched · ROI HOLD':'HOLD'];
+for(const value of values){const cell=document.createElement('td');cell.textContent=String(value??'—');row.append(cell);}tbody.append(row);}
+$('dd676Status').textContent='Financial ROI: '+(finance.certification||'HOLD')+' · Checkout sessions can now bind paid orders to first-party campaign evidence. Expense receipts remain owner-attested, not independently vendor-verified. No certified ROI claim.';
+}catch(error){$('dd676Status').textContent='HOLD · '+error.message;}
+}
+document.addEventListener('DOMContentLoaded',()=>{
+if(!$('dd676-finance'))return;
+$('dd676Form').addEventListener('submit',async event=>{event.preventDefault();
+const kind=$('dd676Kind').value,cost=Number($('dd676Cost').value);
+const payload={action:'financial_evidence_676',social_post_queue_id:Number($('dd676Queue').value),
+kind,currency:'CAD',cost_cents:Math.round(cost*100),receipt_reference:$('dd676Reference').value.trim(),
+order_id:Number($('dd676Order').value),owner_reviewed:$('dd676Confirm').checked};
+$('dd676Result').textContent='Checking source evidence…';
+try{const data=await request(payload);$('dd676Result').textContent=(data.result?.status||'Evidence recorded')+' · ROI remains HOLD.';$('dd676Confirm').checked=false;await load();}
+catch(error){$('dd676Result').textContent='HOLD · '+error.message;}
+});void load();
+});
 })();
 // Build 675 — independently sourced engagement snapshots and evidence-labelled attribution.
-(() => {
-  'use strict';
-  const $=id=>document.getElementById(id);
-  const append=(target,values)=>{const row=document.createElement('tr');for(const value of values){const cell=document.createElement('td');cell.textContent=String(value??'—');row.append(cell);}target.append(row);};
-  const request=async body=>{if(!window.DDAuth?.apiFetch)throw Error('Admin authentication required');
-    const res=await window.DDAuth.apiFetch('/api/admin/social-post-queue',body?{method:'POST',body:JSON.stringify(body)}:undefined);
-    const data=await res.json();if(!res.ok||!data.ok)throw Error(data.error||'Evidence unavailable');return data;};
-  async function load(){try{const data=await request(),funnel=$('dd675Funnel'),snap=$('dd675Snapshots');funnel.replaceChildren();snap.replaceChildren();
-    const rollups=data.utm_rollups||[],evidence=data.engagement675?.snapshots||[];
-    for(const row of rollups)append(funnel,[row.utm_campaign,row.utm_source+' / '+row.utm_medium,row.page_views,row.visitor_sessions||row.session_count,row.checkout_starts,row.custom_request_count]);
-    for(const row of evidence)append(snap,[row.campaign+' / '+row.platform,row.provider_id,Object.entries(row.metrics||{}).map(([key,value])=>key+': '+value).join(' · '),row.observed_at]);
-    if(!rollups.length)append(funnel,['No attributed campaign evidence','','','','','']);
-    if(!evidence.length)append(snap,['No independently verified engagement snapshots','','','']);
-    const selector=$('dd675Queue'),prior=selector.value;selector.replaceChildren(new Option('Choose a published item',''));
-    for(const q of data.queue||[])if(q.post_status==='posted'||q.published_at)selector.add(new Option('#'+q.social_post_queue_id+' · '+(q.title||'Post').slice(0,55),q.social_post_queue_id));
-    selector.value=prior; // Keep the owner's selected post if still present.
-    $('dd675Roi').textContent='ROI: UNAVAILABLE · Confirmed attributed sales revenue and evidenced campaign spend are not both present. Visits, checkouts and enquiries are separate indicators, not financial return.';
-  }catch(error){$('dd675Roi').textContent='HOLD · '+error.message;}}
-  document.addEventListener('DOMContentLoaded',()=>{if(!$('dd675-roi'))return;$('dd675Refresh')?.addEventListener('click',load);
-    $('dd675Verify').addEventListener('submit',async e=>{e.preventDefault();$('dd675Result').textContent='Requesting read-only provider evidence…';
-      try{const data=await request({action:'verify_engagement_675',social_post_queue_id:Number($('dd675Queue').value),platform_key:$('dd675Platform').value});
-        const result=data.result||{};$('dd675Result').textContent=result.verified?'Verified '+result.platform+' metrics from provider; snapshot recorded.':'HOLD · '+(result.status||'No verified metrics');await load();
-      }catch(error){$('dd675Result').textContent='HOLD · '+error.message;}});
-    void load();
-  });
+(()=>{
+'use strict';
+const $=id=>document.getElementById(id);
+const append=(target,values)=>{const row=document.createElement('tr');for(const value of values){const cell=document.createElement('td');cell.textContent=String(value??'—');row.append(cell);}target.append(row);};
+const request=async body=>{if(!window.DDAuth?.apiFetch)throw Error('Admin authentication required');
+const res=await window.DDAuth.apiFetch('/api/admin/social-post-queue',body?{method:'POST',body:JSON.stringify(body)}:undefined);
+const data=await res.json();if(!res.ok||!data.ok)throw Error(data.error||'Evidence unavailable');return data;};
+async function load(){try{const data=await request(),funnel=$('dd675Funnel'),snap=$('dd675Snapshots');funnel.replaceChildren();snap.replaceChildren();
+const rollups=data.utm_rollups||[],evidence=data.engagement675?.snapshots||[];
+for(const row of rollups)append(funnel,[row.utm_campaign,row.utm_source+' / '+row.utm_medium,row.page_views,row.visitor_sessions||row.session_count,row.checkout_starts,row.custom_request_count]);
+for(const row of evidence)append(snap,[row.campaign+' / '+row.platform,row.provider_id,Object.entries(row.metrics||{}).map(([key,value])=>key+': '+value).join(' · '),row.observed_at]);
+if(!rollups.length)append(funnel,['No attributed campaign evidence','','','','','']);
+if(!evidence.length)append(snap,['No independently verified engagement snapshots','','','']);
+const selector=$('dd675Queue'),prior=selector.value;selector.replaceChildren(new Option('Choose a published item',''));
+for(const q of data.queue||[])if(q.post_status==='posted'||q.published_at)selector.add(new Option('#'+q.social_post_queue_id+' · '+(q.title||'Post').slice(0,55),q.social_post_queue_id));
+selector.value=prior;// Keep the owner's selected post if still present.
+$('dd675Roi').textContent='ROI: UNAVAILABLE · Confirmed attributed sales revenue and evidenced campaign spend are not both present. Visits, checkouts and enquiries are separate indicators, not financial return.';
+}catch(error){$('dd675Roi').textContent='HOLD · '+error.message;}}
+document.addEventListener('DOMContentLoaded',()=>{if(!$('dd675-roi'))return;$('dd675Refresh')?.addEventListener('click',load);
+$('dd675Verify').addEventListener('submit',async e=>{e.preventDefault();$('dd675Result').textContent='Requesting read-only provider evidence…';
+try{const data=await request({action:'verify_engagement_675',social_post_queue_id:Number($('dd675Queue').value),platform_key:$('dd675Platform').value});
+const result=data.result||{};$('dd675Result').textContent=result.verified?'Verified '+result.platform+' metrics from provider; snapshot recorded.':'HOLD · '+(result.status||'No verified metrics');await load();
+}catch(error){$('dd675Result').textContent='HOLD · '+error.message;}});
+void load();
+});
 })();
 // Build 674 — owner campaign calendar and source-grounded cross-channel command centre.
-(() => {
-  'use strict';
-  const $=id=>document.getElementById(id),add=(row,values)=>{for(const v of values){const c=document.createElement('td');c.textContent=String(v??'—');row.append(c);}};
-  let queue=[],receipts=[];
-  const request=async body=>{const res=await window.DDAuth.apiFetch('/api/admin/social-post-queue',body?{method:'POST',body:JSON.stringify(body)}:undefined);const json=await res.json();if(!res.ok||!json.ok)throw Error(json.error||'Campaign data unavailable');return json;};
-  function render(){
-    const month=$('dd674Month').value,campaign=$('dd674Campaign').value,body=$('dd674Calendar');body.replaceChildren();
-    const selected=queue.filter(q=>(!campaign||(q.utm_campaign||'')===campaign)&&String(q.scheduled_at||q.created_at||'').slice(0,7)===month);
-    for(const q of selected){const row=document.createElement('tr');add(row,[String(q.scheduled_at||q.created_at||'').slice(0,16),q.utm_campaign||'Unattributed', (q.target_platforms||[]).join(', '),q.approval_status+' / '+q.post_status]);row.children[1].append(document.createTextNode(' · '+(q.title||'')));body.append(row);}
-    if(!selected.length){const r=document.createElement('tr');add(r,['No matching scheduled or created drafts.','','','']);body.append(r);}
-    const byChannel=new Map();
-    for(const r of receipts){const name=r.platform_key||'unknown',s=byChannel.get(name)||{ack:0,verified:0,failed:0,hold:0};if(r.attempt_status==='api_posted')s.ack++;if(r.attempt_status==='receipt_verified')s.verified++;if(r.attempt_status==='api_failed')s.failed++;if(['blocked_account_unverified','recovery_requested'].includes(r.attempt_status))s.hold++;byChannel.set(name,s);}
-    const channelBody=$('dd674Channels');channelBody.replaceChildren();for(const [name,s] of byChannel){const row=document.createElement('tr');add(row,[name,s.ack,s.verified,s.failed,s.hold]);channelBody.append(row);}
-    $('dd674Summary').textContent=`${selected.length} visible posts · ${new Set(selected.map(q=>q.utm_campaign).filter(Boolean)).size} named campaigns · ${receipts.length} recent channel outcomes. Results are recorded evidence only; no inferred reach.`;
-  }
-  async function load(){try{const data=await request();queue=data.queue||[];receipts=data.receipts673?.channels||[];const campaigns=[...new Set(queue.map(q=>q.utm_campaign).filter(Boolean))].sort();const selector=$('dd674Campaign'),prior=selector.value;selector.replaceChildren(new Option('All campaigns',''));for(const c of campaigns)selector.add(new Option(c,c));selector.value=campaigns.includes(prior)?prior:'';const draft=$('dd674Queue');draft.replaceChildren(new Option('Choose a draft',''));for(const q of queue.filter(q=>q.post_status!=='posted'&&q.post_status!=='archived'))draft.add(new Option('#'+q.social_post_queue_id+' · '+(q.title||'Draft').slice(0,60),q.social_post_queue_id));render();}catch(e){$('dd674Message').textContent='HOLD · '+e.message;}}
-  document.addEventListener('DOMContentLoaded',()=>{if(!$('dd674-marketing'))return;$('dd674Month').value=new Date().toISOString().slice(0,7);$('dd674Month').addEventListener('change',render);$('dd674Campaign').addEventListener('change',render);
-    $('dd674Schedule').addEventListener('submit',async event=>{event.preventDefault();const id=Number($('dd674Queue').value),date=new Date($('dd674Date').value);if(!id||!Number.isFinite(date.getTime()))return;$('dd674Message').textContent='Saving owner-review schedule…';
-      try{await request({action:'campaign_schedule_674',social_post_queue_id:id,campaign_name:$('dd674Name').value.trim(),scheduled_at:date.toISOString(),schedule_timezone:Intl.DateTimeFormat().resolvedOptions().timeZone});$('dd674Message').textContent='Campaign schedule saved as draft; approval reset to needs review. No post published.';await load();}catch(e){$('dd674Message').textContent='HOLD · '+e.message;}});
-    void load();
-  });
+(()=>{
+'use strict';
+const $=id=>document.getElementById(id),add=(row,values)=>{for(const v of values){const c=document.createElement('td');c.textContent=String(v??'—');row.append(c);}};
+let queue=[],receipts=[];
+const request=async body=>{const res=await window.DDAuth.apiFetch('/api/admin/social-post-queue',body?{method:'POST',body:JSON.stringify(body)}:undefined);const json=await res.json();if(!res.ok||!json.ok)throw Error(json.error||'Campaign data unavailable');return json;};
+function render(){
+const month=$('dd674Month').value,campaign=$('dd674Campaign').value,body=$('dd674Calendar');body.replaceChildren();
+const selected=queue.filter(q=>(!campaign||(q.utm_campaign||'')===campaign)&&String(q.scheduled_at||q.created_at||'').slice(0,7)===month);
+for(const q of selected){const row=document.createElement('tr');add(row,[String(q.scheduled_at||q.created_at||'').slice(0,16),q.utm_campaign||'Unattributed',(q.target_platforms||[]).join(', '),q.approval_status+' / '+q.post_status]);row.children[1].append(document.createTextNode(' · '+(q.title||'')));body.append(row);}
+if(!selected.length){const r=document.createElement('tr');add(r,['No matching scheduled or created drafts.','','','']);body.append(r);}
+const byChannel=new Map();
+for(const r of receipts){const name=r.platform_key||'unknown',s=byChannel.get(name)||{ack:0,verified:0,failed:0,hold:0};if(r.attempt_status==='api_posted')s.ack++;if(r.attempt_status==='receipt_verified')s.verified++;if(r.attempt_status==='api_failed')s.failed++;if(['blocked_account_unverified','recovery_requested'].includes(r.attempt_status))s.hold++;byChannel.set(name,s);}
+const channelBody=$('dd674Channels');channelBody.replaceChildren();for(const [name,s] of byChannel){const row=document.createElement('tr');add(row,[name,s.ack,s.verified,s.failed,s.hold]);channelBody.append(row);}
+$('dd674Summary').textContent=`${selected.length} visible posts · ${new Set(selected.map(q=>q.utm_campaign).filter(Boolean)).size} named campaigns · ${receipts.length} recent channel outcomes. Results are recorded evidence only; no inferred reach.`;
+}
+async function load(){try{const data=await request();queue=data.queue||[];receipts=data.receipts673?.channels||[];const campaigns=[...new Set(queue.map(q=>q.utm_campaign).filter(Boolean))].sort();const selector=$('dd674Campaign'),prior=selector.value;selector.replaceChildren(new Option('All campaigns',''));for(const c of campaigns)selector.add(new Option(c,c));selector.value=campaigns.includes(prior)?prior:'';const draft=$('dd674Queue');draft.replaceChildren(new Option('Choose a draft',''));for(const q of queue.filter(q=>q.post_status!=='posted'&&q.post_status!=='archived'))draft.add(new Option('#'+q.social_post_queue_id+' · '+(q.title||'Draft').slice(0,60),q.social_post_queue_id));render();}catch(e){$('dd674Message').textContent='HOLD · '+e.message;}}
+document.addEventListener('DOMContentLoaded',()=>{if(!$('dd674-marketing'))return;$('dd674Month').value=new Date().toISOString().slice(0,7);$('dd674Month').addEventListener('change',render);$('dd674Campaign').addEventListener('change',render);
+$('dd674Schedule').addEventListener('submit',async event=>{event.preventDefault();const id=Number($('dd674Queue').value),date=new Date($('dd674Date').value);if(!id||!Number.isFinite(date.getTime()))return;$('dd674Message').textContent='Saving owner-review schedule…';
+try{await request({action:'campaign_schedule_674',social_post_queue_id:id,campaign_name:$('dd674Name').value.trim(),scheduled_at:date.toISOString(),schedule_timezone:Intl.DateTimeFormat().resolvedOptions().timeZone});$('dd674Message').textContent='Campaign schedule saved as draft; approval reset to needs review. No post published.';await load();}catch(e){$('dd674Message').textContent='HOLD · '+e.message;}});
+void load();
+});
 })();
 // Build 673 — per-channel receipt status, independently checked evidence and one-channel recovery.
-(() => {
-  'use strict';
-  const el=id=>document.getElementById(id);
-  const call=async (action,values={})=>{
-    if(!window.DDAuth?.apiFetch)throw Error('Authenticated admin session required.');
-    const response=await window.DDAuth.apiFetch('/api/admin/social-post-queue',action
-      ?{method:'POST',body:JSON.stringify({action,...values})}:undefined);
-    const data=await response.json();
-    if(!response.ok||!data.ok)throw Error(data.error||'Social evidence unavailable.');
-    return data;
-  };
-  const cell=(row,value)=>{const td=document.createElement('td');td.textContent=String(value??'—');row.append(td);return td;};
-  const load=async()=>{
-    const area=el('dd673Rows');if(!area)return;
-    try{
-      const data=await call();const view=data.receipts673||{channels:[],totals:{}};
-      const counts=view.totals;
-      el('dd673Totals').textContent=`Provider acknowledged: ${counts.provider_acknowledged||0} · Independently verified: ${counts.independently_verified||0} · Failed: ${counts.failed||0} · HOLD: ${counts.on_hold||0} · Manual records: ${counts.manually_recorded||0}. Counts reflect the latest 150 recorded attempts, not audience reach.`;
-      area.replaceChildren();
-      for(const entry of view.channels){
-        const row=document.createElement('tr');
-        cell(row,`#${entry.social_post_queue_id} · ${entry.title||''}`);
-        cell(row,entry.platform_key);cell(row,entry.attempt_status);
-        const idCell=cell(row,entry.external_post_id||'Not recorded');
-        if(entry.external_post_url?.startsWith('https://')){
-          const link=document.createElement('a');link.href=entry.external_post_url;link.target='_blank';link.rel='noopener noreferrer';link.textContent=' · Open provider link';idCell.append(link);
-        }
-        cell(row,entry.attempted_at);const actions=cell(row,'');
-        if(['api_posted','receipt_verified'].includes(entry.attempt_status)){
-          const button=document.createElement('button');button.type='button';button.className='btn secondary';button.textContent='Verify provider receipt';
-          button.addEventListener('click',()=>run(button,'verify_publication_673',entry));actions.append(button);
-        }else if(entry.attempt_status==='api_failed'){
-          const label=document.createElement('label'),check=document.createElement('input');check.type='checkbox';
-          label.append(check,document.createTextNode(' Checked provider: no duplicate'));
-          const button=document.createElement('button');button.type='button';button.className='btn secondary';button.textContent='Retry failed channel';
-          button.addEventListener('click',()=>{if(!check.checked){el('dd673Result').textContent='HOLD · Confirm the destination was checked for an existing post.';return;}
-            run(button,'retry_failed_673',entry,{owner_checked_no_duplicate:true});});
-          actions.append(label,button);
-        }
-        area.append(row);
-      }
-      if(!view.channels.length)area.append(Object.assign(document.createElement('tr'),{textContent:'No recorded deliveries yet.'}));
-    }catch(error){el('dd673Totals').textContent='HOLD · '+error.message;}
-  };
-  async function run(button,action,entry,extra={}){
-    button.disabled=true;el('dd673Result').textContent='Checking the selected channel…';
-    try{const data=await call(action,{social_post_queue_id:entry.social_post_queue_id,platform_key:entry.platform_key,...extra});
-      const result=data.result||{};
-      el('dd673Result').textContent=result.verified?'VERIFIED · Provider confirms the same publication ID.':
-        result.status&&!result.verified?`HOLD · ${result.status}; no new post created.`:
-        'Recovery request completed. Inspect the latest channel status below; no other channels were retried.';
-      await load();
-    }catch(error){el('dd673Result').textContent='HOLD · '+error.message;}
-    finally{button.disabled=false;}
-  }
-  document.addEventListener('DOMContentLoaded',()=>{if(!el('dd673-receipts'))return;el('dd673Refresh')?.addEventListener('click',load);void load();});
+(()=>{
+'use strict';
+const el=id=>document.getElementById(id);
+const call=async (action,values={})=>{
+if(!window.DDAuth?.apiFetch)throw Error('Authenticated admin session required.');
+const response=await window.DDAuth.apiFetch('/api/admin/social-post-queue',action
+?{method:'POST',body:JSON.stringify({action,...values})}:undefined);
+const data=await response.json();
+if(!response.ok||!data.ok)throw Error(data.error||'Social evidence unavailable.');
+return data;
+};
+const cell=(row,value)=>{const td=document.createElement('td');td.textContent=String(value??'—');row.append(td);return td;};
+const load=async()=>{
+const area=el('dd673Rows');if(!area)return;
+try{
+const data=await call();const view=data.receipts673||{channels:[],totals:{}};
+const counts=view.totals;
+el('dd673Totals').textContent=`Provider acknowledged: ${counts.provider_acknowledged||0} · Independently verified: ${counts.independently_verified||0} · Failed: ${counts.failed||0} · HOLD: ${counts.on_hold||0} · Manual records: ${counts.manually_recorded||0}. Counts reflect the latest 150 recorded attempts, not audience reach.`;
+area.replaceChildren();
+for(const entry of view.channels){
+const row=document.createElement('tr');
+cell(row,`#${entry.social_post_queue_id} · ${entry.title||''}`);
+cell(row,entry.platform_key);cell(row,entry.attempt_status);
+const idCell=cell(row,entry.external_post_id||'Not recorded');
+if(entry.external_post_url?.startsWith('https://')){
+const link=document.createElement('a');link.href=entry.external_post_url;link.target='_blank';link.rel='noopener noreferrer';link.textContent=' · Open provider link';idCell.append(link);
+}
+cell(row,entry.attempted_at);const actions=cell(row,'');
+if(['api_posted','receipt_verified'].includes(entry.attempt_status)){
+const button=document.createElement('button');button.type='button';button.className='btn secondary';button.textContent='Verify provider receipt';
+button.addEventListener('click',()=>run(button,'verify_publication_673',entry));actions.append(button);
+}else if(entry.attempt_status==='api_failed'){
+const label=document.createElement('label'),check=document.createElement('input');check.type='checkbox';
+label.append(check,document.createTextNode(' Checked provider: no duplicate'));
+const button=document.createElement('button');button.type='button';button.className='btn secondary';button.textContent='Retry failed channel';
+button.addEventListener('click',()=>{if(!check.checked){el('dd673Result').textContent='HOLD · Confirm the destination was checked for an existing post.';return;}
+run(button,'retry_failed_673',entry,{owner_checked_no_duplicate:true});});
+actions.append(label,button);
+}
+area.append(row);
+}
+if(!view.channels.length)area.append(Object.assign(document.createElement('tr'),{textContent:'No recorded deliveries yet.'}));
+}catch(error){el('dd673Totals').textContent='HOLD · '+error.message;}
+};
+async function run(button,action,entry,extra={}){
+button.disabled=true;el('dd673Result').textContent='Checking the selected channel…';
+try{const data=await call(action,{social_post_queue_id:entry.social_post_queue_id,platform_key:entry.platform_key,...extra});
+const result=data.result||{};
+el('dd673Result').textContent=result.verified?'VERIFIED · Provider confirms the same publication ID.':
+result.status&&!result.verified?`HOLD · ${result.status}; no new post created.`:
+'Recovery request completed. Inspect the latest channel status below; no other channels were retried.';
+await load();
+}catch(error){el('dd673Result').textContent='HOLD · '+error.message;}
+finally{button.disabled=false;}
+}
+document.addEventListener('DOMContentLoaded',()=>{if(!el('dd673-receipts'))return;el('dd673Refresh')?.addEventListener('click',load);void load();});
 })();
 // Build 672 — read-only account identity and exact public derivative owner approval.
-(() => {
-  'use strict';
-  const byId = id => document.getElementById(id);
-  const text = value => String(value ?? '');
-  const api = async (action, extras = {}) => {
-    if (!window.DDAuth?.apiFetch) throw new Error('Admin authentication is unavailable.');
-    const response = await window.DDAuth.apiFetch('/api/admin/social-post-queue', action
-      ? { method: 'POST', body: JSON.stringify({ action, ...extras }) }
-      : undefined);
-    const result = await response.json();
-    if (!response.ok || !result.ok) throw new Error(result.error || result.message || 'Request failed.');
-    return result;
-  };
-  const show = (id, message) => { const node = byId(id); if (node) node.textContent = message; };
-  document.addEventListener('DOMContentLoaded', () => {
-    if (!byId('dd672-owner-gate')) return;
-    const verify = byId('dd672Verify');
-    verify?.addEventListener('click', async () => {
-      verify.disabled = true;
-      show('dd672Accounts', 'Checking configured destinations with each provider…');
-      try {
-        const data = await api('verify_accounts_672');
-        const lines = (data.accounts || []).map(account =>
-          `${account.platform}: ${account.verified ? 'VERIFIED' : 'HOLD'} · ${account.verified ? (account.account_name || account.account_id || 'Identity confirmed') : account.status}`);
-        show('dd672Accounts', lines.join(' | ') || 'No destinations available.');
-      } catch (error) { show('dd672Accounts', 'HOLD · ' + error.message); }
-      finally { verify.disabled = false; }
-    });
-    const load = async () => {
-      const select = byId('dd672Queue');
-      select.replaceChildren(new Option('Choose an unposted CAIP draft', ''));
-      try {
-        const data = await api();
-        const queue = (data.queue || []).filter(item => item.source_type === 'caip_project' && item.post_status !== 'posted');
-        for (const item of queue) {
-          const id = item.social_post_queue_id;
-          select.add(new Option(`#${id} · Project ${item.source_id} · ${text(item.caption || item.title).slice(0, 65)}`, id));
-        }
-        show('dd672Status', queue.length ? 'Select a draft, then approve its exact verified public derivative.' : 'HOLD · No unposted CAIP-linked drafts.');
-      } catch (error) { show('dd672Status', 'HOLD · ' + error.message); }
-    };
-    byId('dd672LoadQueue')?.addEventListener('click', load);
-    byId('dd672Derivative')?.addEventListener('submit', async event => {
-      event.preventDefault();
-      const button = event.currentTarget.querySelector('[type="submit"]');
-      button.disabled = true;
-      show('dd672Status', 'Checking canonical CAIP rights, consent and exact URL…');
-      try {
-        const result = await api('approve_caip_derivative_672', {
-          social_post_queue_id: Number(byId('dd672Queue').value),
-          creative_asset_id: Number(byId('dd672Asset').value),
-          public_url: byId('dd672Url').value.trim(),
-          exact_media_reviewed: byId('dd672Reviewed').checked,
-          owner_confirmed: byId('dd672Owner').checked
-        });
-        show('dd672Status', `Recorded approval for CAIP asset #${result.creative_asset_id}. Post remains a draft; no publication was performed.`);
-        byId('dd672Reviewed').checked = false;
-        byId('dd672Owner').checked = false;
-      } catch (error) { show('dd672Status', 'HOLD · ' + error.message); }
-      finally { button.disabled = false; }
-    });
-    void load();
-  });
+(()=>{
+'use strict';
+const byId=id=> document.getElementById(id);
+const text=value=> String(value ?? '');
+const api=async (action,extras={})=>{
+if (!window.DDAuth?.apiFetch) throw new Error('Admin authentication is unavailable.');
+const response=await window.DDAuth.apiFetch('/api/admin/social-post-queue',action
+?{ method:'POST',body:JSON.stringify({ action,...extras }) }
+:undefined);
+const result=await response.json();
+if (!response.ok || !result.ok) throw new Error(result.error || result.message || 'Request failed.');
+return result;
+};
+const show=(id,message)=>{ const node=byId(id);if (node) node.textContent=message;};
+document.addEventListener('DOMContentLoaded',()=>{
+if (!byId('dd672-owner-gate')) return;
+const verify=byId('dd672Verify');
+verify?.addEventListener('click',async ()=>{
+verify.disabled=true;
+show('dd672Accounts','Checking configured destinations with each provider…');
+try{
+const data=await api('verify_accounts_672');
+const lines=(data.accounts || []).map(account=>
+`${account.platform}: ${account.verified ? 'VERIFIED' : 'HOLD'} · ${account.verified ? (account.account_name || account.account_id || 'Identity confirmed') : account.status}`);
+show('dd672Accounts',lines.join(' | ') || 'No destinations available.');
+} catch (error){ show('dd672Accounts','HOLD · '+ error.message);}
+finally{ verify.disabled=false;}
+});
+const load=async ()=>{
+const select=byId('dd672Queue');
+select.replaceChildren(new Option('Choose an unposted CAIP draft',''));
+try{
+const data=await api();
+const queue=(data.queue || []).filter(item=> item.source_type==='caip_project'&& item.post_status !=='posted');
+for (const item of queue){
+const id=item.social_post_queue_id;
+select.add(new Option(`#${id} · Project ${item.source_id} · ${text(item.caption || item.title).slice(0, 65)}`,id));
+}
+show('dd672Status',queue.length ? 'Select a draft, then approve its exact verified public derivative.':'HOLD · No unposted CAIP-linked drafts.');
+} catch (error){ show('dd672Status','HOLD · '+ error.message);}
+};
+byId('dd672LoadQueue')?.addEventListener('click',load);
+byId('dd672Derivative')?.addEventListener('submit',async event=>{
+event.preventDefault();
+const button=event.currentTarget.querySelector('[type="submit"]');
+button.disabled=true;
+show('dd672Status','Checking canonical CAIP rights, consent and exact URL…');
+try{
+const result=await api('approve_caip_derivative_672',{
+social_post_queue_id:Number(byId('dd672Queue').value),
+creative_asset_id:Number(byId('dd672Asset').value),
+public_url:byId('dd672Url').value.trim(),
+exact_media_reviewed:byId('dd672Reviewed').checked,
+owner_confirmed:byId('dd672Owner').checked
+});
+show('dd672Status',`Recorded approval for CAIP asset #${result.creative_asset_id}. Post remains a draft; no publication was performed.`);
+byId('dd672Reviewed').checked=false;
+byId('dd672Owner').checked=false;
+} catch (error){ show('dd672Status','HOLD · '+ error.message);}
+finally{ button.disabled=false;}
+});
+void load();
+});
 })();
 // Build 211 — browser-only social post preview and platform media preflight.
-(() => {
-  'use strict';
-  const $ = (id) => document.getElementById(id);
-  const limits = {
-    instagram: { caption: 2200, imageRequired: true, label: 'Instagram', formats: ['jpg','jpeg'], minWidth: 320, minRatio: 0.8, maxRatio: 1.91 },
-    facebook: { caption: 63206, imageRequired: false, label: 'Facebook', formats: ['jpg','jpeg','png','webp'], minWidth: 500, minRatio: 0.4, maxRatio: 2.5 },
-    pinterest: { caption: 500, imageRequired: true, label: 'Pinterest', formats: ['jpg','jpeg','png','webp'], minWidth: 600, minRatio: 0.4, maxRatio: 1.5 },
-    x: { caption: 280, imageRequired: false, label: 'X', formats: ['jpg','jpeg','png','webp'], minWidth: 0, minRatio: 0.1, maxRatio: 10 }
-  };
-  function esc(v){return String(v??'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');}
+(()=>{
+'use strict';
+const $=(id)=> document.getElementById(id);
+const limits={
+instagram:{ caption:2200,imageRequired:true,label:'Instagram',formats:['jpg','jpeg'],minWidth:320,minRatio:0.8,maxRatio:1.91 },
+facebook:{ caption:63206,imageRequired:false,label:'Facebook',formats:['jpg','jpeg','png','webp'],minWidth:500,minRatio:0.4,maxRatio:2.5 },
+pinterest:{ caption:500,imageRequired:true,label:'Pinterest',formats:['jpg','jpeg','png','webp'],minWidth:600,minRatio:0.4,maxRatio:1.5 },
+x:{ caption:280,imageRequired:false,label:'X',formats:['jpg','jpeg','png','webp'],minWidth:0,minRatio:0.1,maxRatio:10 }
+};
+function esc(v){return String(v??'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');}
   function extension(url){try{const p=new URL(url).pathname.toLowerCase();return (p.match(/\.([a-z0-9]+)$/)||[])[1]||'';}catch{return '';}}
   function result(kind,title,detail){return `<li class="social-check ${kind}"><strong>${esc(title)}</strong><span>${esc(detail)}</span></li>`;}
   function loadImage(url){return new Promise((resolve)=>{if(!url)return resolve(null);const img=new Image();img.onload=()=>resolve({width:img.naturalWidth,height:img.naturalHeight,ratio:img.naturalWidth/img.naturalHeight});img.onerror=()=>resolve({error:true});img.src=url;});}
@@ -562,5 +632,5 @@ document.addEventListener('DOMContentLoaded',()=>{
   document.addEventListener('DOMContentLoaded',()=>{
     $('socialPreflightRun')?.addEventListener('click',run);
     $('socialPreflightClear')?.addEventListener('click',()=>{['socialPreflightCaption','socialPreflightLink','socialPreflightImage'].forEach(id=>{if($(id))$(id).value='';});if($('socialPreflightResults'))$('socialPreflightResults').innerHTML='<p class="small">Preflight cleared. Nothing was saved or published.</p>';if($('socialPreflightPreview'))$('socialPreflightPreview').hidden=true;});
-  });
+});
 })();

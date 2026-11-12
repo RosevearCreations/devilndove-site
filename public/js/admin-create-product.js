@@ -1,23 +1,23 @@
 // File: /public/js/admin-create-product.js
 // Build 231: resource-aware draft autosave, browser recovery, and safe non-JSON errors.
 
-document.addEventListener("DOMContentLoaded", () => {
-const form = document.getElementById("createProductForm");
-const messageEl = document.getElementById("createProductMessage");
-const taxClassSelect = document.getElementById("create_product_tax_class_id");
-const MAX_PRODUCT_IMAGES = 7;
-const MAX_UPLOAD_SELECTION = 6;
-const MAX_GALLERY_IMAGE_FIELDS = MAX_PRODUCT_IMAGES - 1;
-const AUTOSAVE_DELAY_MS = 2200;
-const AUTOSAVE_RECOVERY_KEY = "dd_admin_product_autosave_recovery_v1";
-let autosaveTimer = null;
-let autosaveInFlight = false;
-let autosaveQueuedAfterFlight = false;
-let lastAutosaveFingerprint = "";
-let autosaveStatusEl = null;
-let autosaveRecoverButton = null;
+document.addEventListener("DOMContentLoaded",()=>{
+const form=document.getElementById("createProductForm");
+const messageEl=document.getElementById("createProductMessage");
+const taxClassSelect=document.getElementById("create_product_tax_class_id");
+const MAX_PRODUCT_IMAGES=7;
+const MAX_UPLOAD_SELECTION=6;
+const MAX_GALLERY_IMAGE_FIELDS=MAX_PRODUCT_IMAGES - 1;
+const AUTOSAVE_DELAY_MS=2200;
+const AUTOSAVE_RECOVERY_KEY="dd_admin_product_autosave_recovery_v1";
+let autosaveTimer=null;
+let autosaveInFlight=false;
+let autosaveQueuedAfterFlight=false;
+let lastAutosaveFingerprint="";
+let autosaveStatusEl=null;
+let autosaveRecoverButton=null;
 
-function normalizeText(value) {
+function normalizeText(value){
 return String(value || "").trim();
 }
 
@@ -25,24 +25,24 @@ return String(value || "").trim();
 // This helper was referenced by the draft image manager but was previously
 // missing from this bundle, causing the manager to crash before saved images
 // could render.
-function normalizeImageKey(url) {
+function normalizeImageKey(url){
 return String(url || "")
 .trim()
 .toLowerCase()
-.replace(/[?#].*$/, "")
-.replace(/\/+$/, "");
+.replace(/[?#].*$/,"")
+.replace(/\/+$/,"");
 }
 
-function escapeHtml(value) {
+function escapeHtml(value){
 return String(value ?? "")
-.replaceAll("&", "&amp;")
-.replaceAll("<", "&lt;")
-.replaceAll(">", "&gt;")
-.replaceAll('"', "&quot;")
-.replaceAll("'", "&#039;");
+.replaceAll("&","&amp;")
+.replaceAll("<","&lt;")
+.replaceAll(">","&gt;")
+.replaceAll('"',"&quot;")
+.replaceAll("'","&#039;");
 }
 
-function slugify(value) {
+function slugify(value){
 return normalizeText(value)
 .toLowerCase()
 .replace(/["']/g, "")
@@ -155,7 +155,7 @@ syncRequiredFieldOutlines();
 updateImageRoleChecklist();
 renderDraftImageManager();
 lastAutosaveFingerprint = "";
-setAutosaveStatus("Recovered the browser copy. Review it, then use Autosave now or Save/Update Product.", "pending");
+setAutosaveStatus("Recovered the browser copy. Review it,then use Autosave now or Save/Update Product.", "pending");
 }
 
 function isDraftMode() {
@@ -246,7 +246,7 @@ select.innerHTML = `<option value="">${placeholder}</option>` + rows.map((item) 
 const rawValue = valueKey ? item?.[valueKey] : item;
 const value = normalizeText(rawValue == null ? "" : rawValue);
 const label = labelBuilder ? labelBuilder(item) : value;
-return `<option value="${value.replace(/"/g, "&quot;")}">${String(label || value || "").replace(/</g, "&lt;").replace(/>/g, "&gt;")}</option>`;
+return `<option value="${value.replace(/"/g, "&quot;")}">${String(label || value || "").replace(/</g,"&lt;").replace(/>/g,"&gt;")}</option>`;
 }).join("");
 if (currentValue) select.value = currentValue;
 }
@@ -456,7 +456,7 @@ const rows = imageSlotRows();
 const seoImageUrl = currentSeoImageUrl();
 const seoKey = normalizeImageKey(seoImageUrl);
 if (hint) hint.textContent = rows.length
-? `${rows.length}/${MAX_PRODUCT_IMAGES} saved image slot${rows.length === 1 ? "" : "s"}. Drag to reorder. The first card is featured; the purple SEO/social badge marks the saved Open Graph image.`
+? `${rows.length}/${MAX_PRODUCT_IMAGES} saved image slot${rows.length===1 ? "":"s"}. Drag to reorder. The first card is featured;the purple SEO/social badge marks the saved Open Graph image.`
 : "No saved image URLs yet. Upload images or paste public URLs below.";
 if (!rows.length) {
 grid.innerHTML = '<div class="small dd-product-image-empty-card">No existing product pictures yet.</div>';
@@ -465,21 +465,21 @@ return;
 grid.innerHTML = rows.map((row, index) => {
 const isSeo = Boolean(seoKey && normalizeImageKey(row.url) === seoKey);
 return `
-      <article class="dd-product-image-manager-card ${index === 0 ? 'is-featured' : ''} ${isSeo ? 'is-seo-image' : ''}" draggable="true" data-draft-image-card="${index}" data-slot-key="${escapeHtml(row.key)}">
-        <button class="dd-product-image-manager-thumb" type="button" data-draft-image-edit="${index}" title="Click to edit this image URL">
-          <img src="${escapeHtml(row.url)}" alt="${escapeHtml(index === 0 ? 'Featured product image' : `Product gallery image ${index}`)}" loading="lazy" />
-        </button>
-        <div class="dd-product-image-manager-meta">
-          <strong>${escapeHtml(index === 0 ? 'Featured / first' : `Gallery ${index}`)} ${isSeo ? '<span class="dd-product-image-seo-badge">SEO / social</span>' : ''}</strong>
-          <span class="small">${escapeHtml(row.url)}</span>
-        </div>
-        <div class="dd-product-image-manager-actions">
-          <button class="btn" type="button" data-draft-image-edit="${index}">Edit URL</button>
-          <button class="btn" type="button" data-draft-image-featured="${index}" ${index === 0 ? 'disabled' : ''}>Make first</button>
-          <button class="btn" type="button" data-draft-image-seo="${index}" ${isSeo ? 'disabled' : ''}>${isSeo ? 'SEO selected' : 'Use for SEO/social'}</button>
-          <button class="btn" type="button" data-draft-image-remove="${index}">Remove</button>
-        </div>
-      </article>`;
+<article class="dd-product-image-manager-card ${index === 0 ? 'is-featured' : ''} ${isSeo ? 'is-seo-image' : ''}"draggable="true"data-draft-image-card="${index}"data-slot-key="${escapeHtml(row.key)}">
+<button class="dd-product-image-manager-thumb"type="button"data-draft-image-edit="${index}"title="Click to edit this image URL">
+<img src="${escapeHtml(row.url)}"alt="${escapeHtml(index === 0 ? 'Featured product image' : `Product gallery image ${index}`)}"loading="lazy"/>
+</button>
+<div class="dd-product-image-manager-meta">
+<strong>${escapeHtml(index===0 ? 'Featured / first':`Gallery ${index}`)} ${isSeo ? '<span class="dd-product-image-seo-badge">SEO / social</span>':''}</strong>
+<span class="small">${escapeHtml(row.url)}</span>
+</div>
+<div class="dd-product-image-manager-actions">
+<button class="btn"type="button"data-draft-image-edit="${index}">Edit URL</button>
+<button class="btn"type="button"data-draft-image-featured="${index}"${index===0 ? 'disabled':''}>Make first</button>
+<button class="btn"type="button"data-draft-image-seo="${index}"${isSeo ? 'disabled':''}>${isSeo ? 'SEO selected':'Use for SEO/social'}</button>
+<button class="btn"type="button"data-draft-image-remove="${index}">Remove</button>
+</div>
+</article>`;
 }).join("");
 }
 
@@ -545,26 +545,26 @@ const panel = document.createElement("div");
 panel.id = "productDraftImageUploader";
 panel.className = "dd-product-draft-media-panel";
 panel.innerHTML = `
-      <div>
-        <h3 style="margin:0 0 6px 0">Product pictures</h3>
-        <p class="small" style="margin:0">Drafts can be saved without pictures. Upload up to 6 pictures at a time, or paste public image URLs below. Existing saved image URLs appear here as visual cards so we can click to edit, remove, or drag them into the correct order. The first card becomes the featured image.</p>
-      </div>
-      <div class="dd-product-image-manager-head">
-        <strong>Current product pictures</strong>
-        <span class="small" id="productDraftExistingImageStatus">No saved image URLs yet.</span>
-      </div>
-      <div class="dd-product-image-manager-grid" id="productDraftExistingImages" aria-live="polite"></div>
-      <div class="dd-product-draft-media-grid">
-        <label><span class="small">Choose images</span><input class="input" id="productDraftImageFile" type="file" accept="image/*" multiple /></label>
-        <label><span class="small">Alt text base</span><input class="input" id="productDraftImageAlt" type="text" maxlength="160" placeholder="Short description used as the base for uploaded product pictures" /></label>
-        <label><span class="small">Placement</span><select class="input" id="productDraftImagePlacement"><option value="auto">Auto-fill featured, then gallery</option><option value="featured">First image featured, rest gallery</option><option value="gallery">Gallery only</option></select></label>
-      </div>
-      <div class="dd-product-draft-media-actions">
-        <button class="btn" id="productDraftUploadButton" type="button">Upload selected images</button>
-        <span class="small" id="productDraftUploadStatus">No images selected.</span>
-      </div>
-      <div class="dd-product-draft-image-preview" id="productDraftImagePreview" hidden></div>
-    `;
+<div>
+<h3 style="margin:0 0 6px 0">Product pictures</h3>
+<p class="small"style="margin:0">Drafts can be saved without pictures. Upload up to 6 pictures at a time,or paste public image URLs below. Existing saved image URLs appear here as visual cards so we can click to edit,remove,or drag them into the correct order. The first card becomes the featured image.</p>
+</div>
+<div class="dd-product-image-manager-head">
+<strong>Current product pictures</strong>
+<span class="small"id="productDraftExistingImageStatus">No saved image URLs yet.</span>
+</div>
+<div class="dd-product-image-manager-grid"id="productDraftExistingImages"aria-live="polite"></div>
+<div class="dd-product-draft-media-grid">
+<label><span class="small">Choose images</span><input class="input"id="productDraftImageFile"type="file"accept="image/*"multiple /></label>
+<label><span class="small">Alt text base</span><input class="input"id="productDraftImageAlt"type="text"maxlength="160"placeholder="Short description used as the base for uploaded product pictures"/></label>
+<label><span class="small">Placement</span><select class="input"id="productDraftImagePlacement"><option value="auto">Auto-fill featured,then gallery</option><option value="featured">First image featured,rest gallery</option><option value="gallery">Gallery only</option></select></label>
+</div>
+<div class="dd-product-draft-media-actions">
+<button class="btn"id="productDraftUploadButton"type="button">Upload selected images</button>
+<span class="small"id="productDraftUploadStatus">No images selected.</span>
+</div>
+<div class="dd-product-draft-image-preview"id="productDraftImagePreview"hidden></div>
+`;
 if (anchor?.parentElement) anchor.parentElement.insertBefore(panel, anchor);
 else form.insertBefore(panel, form.firstElementChild || null);
 
@@ -586,13 +586,13 @@ preview.innerHTML = "";
 return;
 }
 const trimmed = files.slice(0, MAX_UPLOAD_SELECTION);
-const rejected = files.length > MAX_UPLOAD_SELECTION ? ` Only the first ${MAX_UPLOAD_SELECTION} will be uploaded.` : "";
-status.textContent = `${trimmed.length} image${trimmed.length === 1 ? "" : "s"} selected.${rejected}`;
+const rejected = files.length > MAX_UPLOAD_SELECTION ? `Only the first ${MAX_UPLOAD_SELECTION} will be uploaded.` : "";
+status.textContent = `${trimmed.length} image${trimmed.length===1 ? "":"s"} selected.${rejected}`;
 preview.hidden = false;
 preview.innerHTML = trimmed.map((file) => {
 const url = URL.createObjectURL(file);
 setTimeout(() => URL.revokeObjectURL(url), 2500);
-return `<img alt="Selected product preview" src="${url}" />`;
+return `<img alt="Selected product preview"src="${url}"/>`;
 }).join("");
 if (altInput && !normalizeText(altInput.value)) {
 altInput.value = normalizeText(form.elements.namedItem("name")?.value) || trimmed[0].name.replace(/\.[a-z0-9]+$/i, "");
@@ -619,7 +619,7 @@ const uploadFiles = files.slice(0, Math.min(MAX_UPLOAD_SELECTION, openSlots));
 const originalText = uploadButton.textContent;
 uploadButton.disabled = true;
 uploadButton.textContent = "Uploading…";
-status.textContent = `Uploading ${uploadFiles.length} image${uploadFiles.length === 1 ? "" : "s"}…`;
+status.textContent = `Uploading ${uploadFiles.length} image${uploadFiles.length===1 ? "":"s"}…`;
 const uploadedUrls = [];
 const failures = [];
 try {
@@ -652,20 +652,20 @@ const url = normalizeText(data?.asset?.public_url);
 if (!url) throw new Error("Upload succeeded but no public image URL was returned. Check the R2 public base URL setting.");
 uploadedUrls.push(url);
 fillImageField(url, placement === "gallery" ? "gallery" : (placement === "featured" && index === 0 ? "featured" : "auto"));
-status.textContent = `Uploaded ${uploadedUrls.length}/${uploadFiles.length} image${uploadFiles.length === 1 ? "" : "s"}…`;
+status.textContent = `Uploaded ${uploadedUrls.length}/${uploadFiles.length} image${uploadFiles.length===1 ? "":"s"}…`;
 } catch (error) {
-failures.push(`${file.name}: ${error.message || "Upload failed"}`);
+failures.push(`${file.name}:${error.message || "Upload failed"}`);
 }
 }
 
 if (uploadedUrls.length) {
-setMessage(`${uploadedUrls.length} image${uploadedUrls.length === 1 ? "" : "s"} uploaded and added to the product form.`);
+setMessage(`${uploadedUrls.length} image${uploadedUrls.length===1 ? "":"s"} uploaded and added to the product form.`);
 syncRequiredFieldOutlines();
 scheduleAutosave("image-upload");
 }
 status.textContent = failures.length
-? `${uploadedUrls.length} uploaded, ${failures.length} failed. ${failures[0]}`
-: `${uploadedUrls.length} image${uploadedUrls.length === 1 ? "" : "s"} uploaded.`;
+? `${uploadedUrls.length} uploaded,${failures.length} failed. ${failures[0]}`
+: `${uploadedUrls.length} image${uploadedUrls.length===1 ? "":"s"} uploaded.`;
 updateImageRoleChecklist();
 renderDraftImageManager();
 } catch (error) {
@@ -725,13 +725,13 @@ const panel = document.createElement("div");
 panel.id = "productImageRoleChecklist";
 panel.className = "dd-product-image-role-checklist small";
 panel.innerHTML = `
-      <div style="display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;align-items:center">
-        <strong>Product image role checklist</strong>
-        <span id="productImageRoleChecklistSummary">Add photos to check coverage.</span>
-      </div>
-      <div class="dd-product-image-role-grid" id="productImageRoleChecklistItems"></div>
-      <div class="status-note" id="productDuplicateImageWarning" style="display:none;margin-top:10px"></div>
-    `;
+<div style="display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;align-items:center">
+<strong>Product image role checklist</strong>
+<span id="productImageRoleChecklistSummary">Add photos to check coverage.</span>
+</div>
+<div class="dd-product-image-role-grid"id="productImageRoleChecklistItems"></div>
+<div class="status-note"id="productDuplicateImageWarning"style="display:none;margin-top:10px"></div>
+`;
 if (anchor?.parentElement) anchor.parentElement.insertBefore(panel, anchor.nextSibling);
 else form.insertBefore(panel, form.firstElementChild || null);
 updateImageRoleChecklist();
@@ -753,17 +753,17 @@ const roles = [
 ];
 const items = panel.querySelector("#productImageRoleChecklistItems");
 if (items) {
-items.innerHTML = roles.map((role) => `<div class="dd-product-image-role ${role.ok ? 'ok' : 'todo'}"><strong>${role.ok ? '✓' : '○'} ${escapeHtml(role.label)}</strong><span>${escapeHtml(role.hint)}</span></div>`).join("");
+items.innerHTML = roles.map((role) => `<div class="dd-product-image-role ${role.ok ? 'ok' : 'todo'}"><strong>${role.ok ? '✓':'○'} ${escapeHtml(role.label)}</strong><span>${escapeHtml(role.hint)}</span></div>`).join("");
 }
 const summary = panel.querySelector("#productImageRoleChecklistSummary");
-if (summary) summary.textContent = `${count}/${MAX_PRODUCT_IMAGES} product image slot${count === 1 ? "" : "s"} filled.`;
+if (summary) summary.textContent = `${count}/${MAX_PRODUCT_IMAGES} product image slot${count===1 ? "":"s"} filled.`;
 const duplicateEl = panel.querySelector("#productDuplicateImageWarning");
 const duplicates = findDuplicateImageUrls();
 if (duplicateEl) {
 duplicateEl.style.display = duplicates.length ? "block" : "none";
-duplicateEl.className = `status-note ${duplicates.length ? 'warning' : ''}`;
+duplicateEl.className = `status-note ${duplicates.length ? 'warning':''}`;
 duplicateEl.textContent = duplicates.length
-? `Duplicate image warning: ${duplicates.length} repeated image URL${duplicates.length === 1 ? "" : "s"} found. Remove duplicates before publishing.`
+? `Duplicate image warning:${duplicates.length} repeated image URL${duplicates.length===1 ? "":"s"} found. Remove duplicates before publishing.`
 : "";
 }
 }
@@ -786,7 +786,7 @@ action: "create",
 source_type: "product_update",
 source_id: String(productId),
 caption_template_key: merchandiseOrigin.includes("vintage") ? "vintage_find" : "finished_product",
-title: `New Devil n Dove product: ${name}`,
+title: `New Devil n Dove product:${name}`,
 summary,
 image_urls: imageUrls,
 link_url: linkUrl,
@@ -806,10 +806,10 @@ const panel = document.createElement("div");
 panel.id = "productSocialShortcutPanel";
 panel.className = "dd-product-social-shortcut-panel small";
 panel.innerHTML = `
-      <strong>Social shortcut:</strong>
-      <span id="productSocialShortcutStatus">Save the draft, then queue it for social review.</span>
-      <button class="btn" type="button" id="queueProductSocialFromEditorButton">Post this product</button>
-    `;
+<strong>Social shortcut:</strong>
+<span id="productSocialShortcutStatus">Save the draft,then queue it for social review.</span>
+<button class="btn"type="button"id="queueProductSocialFromEditorButton">Post this product</button>
+`;
 const submitArea = form.querySelector('button[type="submit"]')?.parentElement;
 if (submitArea?.parentElement) submitArea.parentElement.insertBefore(panel, submitArea.nextSibling);
 else form.appendChild(panel);
@@ -967,7 +967,7 @@ const latestFingerprint = JSON.stringify(collectProductPayload({ forceDraft: tru
 const productId = Number(data?.product?.product_id || payload.product_id || 0);
 if (latestFingerprint === fingerprint) {
 clearBrowserRecovery();
-setAutosaveStatus(`Autosaved draft${productId ? ` #${productId}` : ""} at ${new Date().toLocaleTimeString()}.`, "saved");
+setAutosaveStatus(`Autosaved draft${productId ? ` #${productId}`:""} at ${new Date().toLocaleTimeString()}.`, "saved");
 } else {
 autosaveQueuedAfterFlight = true;
 persistBrowserRecovery(collectProductPayload({ forceDraft: true }));
@@ -976,7 +976,7 @@ setAutosaveStatus("First save finished; saving newer changes next…", "pending"
 document.dispatchEvent(new CustomEvent("dd:product-autosaved", { detail: { product: data.product || null, reason } }));
 } catch (error) {
 const recoveryNote = browserCopySaved ? " Your unsaved draft is kept in this browser; use Recover browser copy if you reload." : " Keep this page open and copy your text before reloading.";
-setAutosaveStatus(`Autosave failed: ${error.message || "unknown error"}${recoveryNote}`, "error");
+setAutosaveStatus(`Autosave failed:${error.message || "unknown error"}${recoveryNote}`, "error");
 } finally {
 autosaveInFlight = false;
 if (autosaveQueuedAfterFlight) {
@@ -993,11 +993,11 @@ const panel = document.createElement("div");
 panel.id = "productAutosavePanel";
 panel.className = "dd-product-autosave-panel small";
 panel.innerHTML = `
-      <strong>Draft autosave:</strong>
-      <span id="productAutosaveStatus" data-tone="muted">Autosave starts after product name and type are filled.</span>
-      <button class="btn" type="button" id="productAutosaveNowButton">Autosave now</button>
-      <button class="btn" type="button" id="productAutosaveRecoverButton" hidden>Recover browser copy</button>
-    `;
+<strong>Draft autosave:</strong>
+<span id="productAutosaveStatus"data-tone="muted">Autosave starts after product name and type are filled.</span>
+<button class="btn"type="button"id="productAutosaveNowButton">Autosave now</button>
+<button class="btn"type="button"id="productAutosaveRecoverButton"hidden>Recover browser copy</button>
+`;
 form.insertBefore(panel, form.firstElementChild || null);
 autosaveStatusEl = panel.querySelector("#productAutosaveStatus");
 autosaveRecoverButton = panel.querySelector("#productAutosaveRecoverButton");
@@ -1063,20 +1063,20 @@ const savedProduct = data?.product || {};
 const savedNumber = Number(savedProduct.product_number || 0);
 const savedSku = normalizeText(savedProduct.sku || "");
 const identityLabel = [savedNumber ? `DD${savedNumber}` : "", savedSku].filter(Boolean).join(" · ");
-setMessage(`${data.message || "Product draft saved successfully."}${identityLabel ? ` Saved as ${identityLabel}.` : ""}`);
-lastAutosaveFingerprint = JSON.stringify(collectProductPayload({ forceDraft: true }));
+setMessage(`${data.message || "Product draft saved successfully."}${identityLabel ? ` Saved as ${identityLabel}.`:""}`);
+lastAutosaveFingerprint=JSON.stringify(collectProductPayload({ forceDraft:true }));
 clearBrowserRecovery();
-setAutosaveStatus("Saved. You can continue editing this draft or clear the editor.", "saved");
-document.dispatchEvent(new CustomEvent("dd:product-created", { detail: { product: data.product || null } }));
-document.dispatchEvent(new CustomEvent("dd:product-editor-target", {
-detail: { product: data.product || null, product_id: Number(data?.product?.product_id || 0) }
+setAutosaveStatus("Saved. You can continue editing this draft or clear the editor.","saved");
+document.dispatchEvent(new CustomEvent("dd:product-created",{ detail:{ product:data.product || null } }));
+document.dispatchEvent(new CustomEvent("dd:product-editor-target",{
+detail:{ product:data.product || null,product_id:Number(data?.product?.product_id || 0) }
 }));
-} catch (error) {
-setMessage(error.message || "Failed to create product.", true);
-} finally {
-if (submitButton) {
-submitButton.disabled = false;
-submitButton.textContent = originalButtonText || "Save Draft Product";
+} catch (error){
+setMessage(error.message || "Failed to create product.",true);
+} finally{
+if (submitButton){
+submitButton.disabled=false;
+submitButton.textContent=originalButtonText || "Save Draft Product";
 }
 }
 });

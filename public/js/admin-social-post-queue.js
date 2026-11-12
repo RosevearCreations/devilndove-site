@@ -2,16 +2,16 @@
 // Brief description: Operations admin panel for review-first social posting queue, scheduling,
 // dry-run payload previews, caption variants, duplicate warnings, and API publishing when credentials exist.
 
-document.addEventListener('DOMContentLoaded', () => {
-  const mount = document.getElementById('socialPostQueueAdminMount');
-  if (!mount || !window.DDAuth) return;
+document.addEventListener('DOMContentLoaded',()=>{
+const mount=document.getElementById('socialPostQueueAdminMount');
+if (!mount || !window.DDAuth) return;
 
-  function esc(value) {
-    return String(value ?? '')
-      .replace(/&/g, '&amp;')
-      .replace(/</g, '&lt;')
-      .replace(/>/g, '&gt;')
-      .replace(/"/g, '&quot;')
+function esc(value){
+return String(value ?? '')
+.replace(/&/g,'&amp;')
+.replace(/</g,'&lt;')
+.replace(/>/g,'&gt;')
+.replace(/"/g, '&quot;')
       .replace(/'/g, '&#39;');
   }
   function parseJson(value, fallback) { try { return JSON.parse(value || ''); } catch { return fallback; } }
@@ -347,60 +347,60 @@ document.addEventListener('DOMContentLoaded', () => {
       </div>
       <div class="social-queue-grid" style="margin-top:12px">
         <label>Source type<select id="socialSourceType"><option value="crafting_process">Crafting process update</option><option value="job_update">Job/process update</option><option value="product_story">Product story</option><option value="workshop_update">Workshop update</option><option value="before_after">Before/after progress</option><option value="event">Event</option><option value="customer_delivery">Customer delivery</option></select></label>
-        <label>Optional source/job ID<input id="socialSourceId" placeholder="Example: order/job/product id"></label>
+        <label>Optional source/job ID<input id="socialSourceId" placeholder="Example:order/job/product id"></label>
         <label>Post title<input id="socialPostTitle" placeholder="Fresh from the Devil n Dove workshop"></label>
         <label>Related link<input id="socialPostLink" placeholder="https://devilndove.com/... or product URL"></label>
-      </div>
-      <div class="social-queue-grid" style="margin-top:12px">
-        <label>Caption template<select id="socialCaptionTemplate"><option value="">Basic caption / no template</option></select></label>
-        <label>Content pillar<input id="socialContentPillar" placeholder="behind_the_scenes, finished_goods, local_presence..."></label>
-        <label>Call to action<input id="socialCallToAction" placeholder="Follow along, shop the piece, ask about custom work..."></label>
-        <label>UTM campaign<input id="socialUtmCampaign" placeholder="making_story, finished_product, local_market..."></label>
-      </div>
-      <label style="display:block;margin-top:10px">Summary / behind-the-scenes caption starter<textarea id="socialPostSummary" rows="4" placeholder="What we made, what went right, what went sideways, and why it was fun..."></textarea></label>
-      <label style="display:block;margin-top:10px">Image URLs, one per line<textarea id="socialPostImages" rows="3" placeholder="https://assets.devilndove.com/products/..."></textarea></label>
-      <div class="social-queue-grid" style="margin-top:12px">
-        <label>Video URL, optional<input id="socialPostVideo" placeholder="https://assets.devilndove.com/social/...mp4"></label>
-        <label>Schedule date/time<input id="socialPostScheduledAt" type="datetime-local"></label>
-        <label>Schedule timezone<input id="socialPostTimezone" value="America/Toronto"></label>
-      </div>
-      <details style="margin-top:12px"><summary>Optional platform-specific captions</summary>
-        <p class="small">Leave blank to use the main caption. X is trimmed shorter automatically.</p>
-        <div class="social-queue-grid">
-          <label>Facebook caption<textarea id="socialFacebookCaption" rows="3"></textarea></label>
-          <label>Instagram caption<textarea id="socialInstagramCaption" rows="3"></textarea></label>
-          <label>TikTok caption<textarea id="socialTikTokCaption" rows="3"></textarea></label>
-          <label>X caption<textarea id="socialXCaption" rows="3" maxlength="280"></textarea></label>
-          <label>YouTube caption<textarea id="socialYouTubeCaption" rows="3"></textarea></label>
-          <label>Pinterest caption<textarea id="socialPinterestCaption" rows="3"></textarea></label>
-        </div>
-      </details>
-      <div class="social-queue-platforms" style="display:flex;gap:12px;flex-wrap:wrap;margin-top:10px">
-        ${['facebook','instagram','tiktok','x','youtube','pinterest'].map((platform) => `<label class="small"><input type="checkbox" data-social-platform value="${platform}" ${['facebook','instagram','tiktok','x'].includes(platform) ? 'checked' : ''}> ${platform}</label>`).join('')}
-      </div>
-      <div class="social-queue-grid" style="margin-top:12px">
-        <label>Hashtags<input id="socialPostHashtags" value="DevilnDove,HandmadeOntario,WorkshopMade,SmallBusinessCanada"></label>
-        <label>Notes<input id="socialPostNotes" placeholder="Internal note, reminder, or platform caution"></label>
-      </div>
-      <label class="small" style="display:block;margin-top:10px"><input type="checkbox" id="socialReadyNow"> Mark as approved/ready immediately</label>
-      <div class="dd-product-draft-media-actions" style="margin-top:10px">
-        <button class="btn primary" type="button" id="socialQueueCreateButton">Queue social post</button>
-        <button class="btn" type="button" id="socialQueuePreviewTemplateButton">Preview template caption</button>
-        <button class="btn" type="button" id="socialQueueRecentMediaButton">Draft from recent media</button><span class="small">API publishing uses Cloudflare environment variables only; secrets are never stored in public files.</span>
-      </div>
-      <details style="margin-top:12px"><summary>Admin-editable caption template editor</summary>
-        <div class="social-queue-grid" style="margin-top:12px">
-          <label>Template key<input id="socialTemplateEditKey" placeholder="finished_product"></label>
-          <label>Display name<input id="socialTemplateEditName" placeholder="Finished product / shop-ready"></label>
-          <label>Content pillar<input id="socialTemplateEditPillar" value="workshop_update"></label>
-          <label>Platforms<input id="socialTemplateEditPlatforms" value="facebook,instagram"></label>
-        </div>
-        <div class="social-queue-grid" style="margin-top:12px">
-          <label>Default hashtags<input id="socialTemplateEditHashtags" value="#DevilnDove #HandmadeOntario"></label>
-          <label>Call to action<input id="socialTemplateEditCta" placeholder="Ask us about making something similar."></label>
-          <label>Active<select id="socialTemplateEditActive"><option value="1">Active</option><option value="0">Inactive</option></select></label>
-        </div>
-        <label style="display:block;margin-top:10px">Body template<textarea id="socialTemplateEditBody" rows="4">{title}
+</div>
+<div class="social-queue-grid"style="margin-top:12px">
+<label>Caption template<select id="socialCaptionTemplate"><option value="">Basic caption / no template</option></select></label>
+<label>Content pillar<input id="socialContentPillar"placeholder="behind_the_scenes, finished_goods, local_presence..."></label>
+<label>Call to action<input id="socialCallToAction"placeholder="Follow along, shop the piece, ask about custom work..."></label>
+<label>UTM campaign<input id="socialUtmCampaign"placeholder="making_story, finished_product, local_market..."></label>
+</div>
+<label style="display:block;margin-top:10px">Summary / behind-the-scenes caption starter<textarea id="socialPostSummary"rows="4"placeholder="What we made, what went right, what went sideways, and why it was fun..."></textarea></label>
+<label style="display:block;margin-top:10px">Image URLs,one per line<textarea id="socialPostImages"rows="3"placeholder="https://assets.devilndove.com/products/..."></textarea></label>
+<div class="social-queue-grid"style="margin-top:12px">
+<label>Video URL,optional<input id="socialPostVideo"placeholder="https://assets.devilndove.com/social/...mp4"></label>
+<label>Schedule date/time<input id="socialPostScheduledAt"type="datetime-local"></label>
+<label>Schedule timezone<input id="socialPostTimezone"value="America/Toronto"></label>
+</div>
+<details style="margin-top:12px"><summary>Optional platform-specific captions</summary>
+<p class="small">Leave blank to use the main caption. X is trimmed shorter automatically.</p>
+<div class="social-queue-grid">
+<label>Facebook caption<textarea id="socialFacebookCaption"rows="3"></textarea></label>
+<label>Instagram caption<textarea id="socialInstagramCaption"rows="3"></textarea></label>
+<label>TikTok caption<textarea id="socialTikTokCaption"rows="3"></textarea></label>
+<label>X caption<textarea id="socialXCaption"rows="3"maxlength="280"></textarea></label>
+<label>YouTube caption<textarea id="socialYouTubeCaption"rows="3"></textarea></label>
+<label>Pinterest caption<textarea id="socialPinterestCaption"rows="3"></textarea></label>
+</div>
+</details>
+<div class="social-queue-platforms"style="display:flex;gap:12px;flex-wrap:wrap;margin-top:10px">
+${['facebook','instagram','tiktok','x','youtube','pinterest'].map((platform)=> `<label class="small"><input type="checkbox" data-social-platform value="${platform}" ${['facebook','instagram','tiktok','x'].includes(platform) ? 'checked' : ''}> ${platform}</label>`).join('')}
+</div>
+<div class="social-queue-grid"style="margin-top:12px">
+<label>Hashtags<input id="socialPostHashtags"value="DevilnDove,HandmadeOntario,WorkshopMade,SmallBusinessCanada"></label>
+<label>Notes<input id="socialPostNotes"placeholder="Internal note, reminder, or platform caution"></label>
+</div>
+<label class="small"style="display:block;margin-top:10px"><input type="checkbox"id="socialReadyNow"> Mark as approved/ready immediately</label>
+<div class="dd-product-draft-media-actions"style="margin-top:10px">
+<button class="btn primary"type="button"id="socialQueueCreateButton">Queue social post</button>
+<button class="btn"type="button"id="socialQueuePreviewTemplateButton">Preview template caption</button>
+<button class="btn"type="button"id="socialQueueRecentMediaButton">Draft from recent media</button><span class="small">API publishing uses Cloudflare environment variables only;secrets are never stored in public files.</span>
+</div>
+<details style="margin-top:12px"><summary>Admin-editable caption template editor</summary>
+<div class="social-queue-grid"style="margin-top:12px">
+<label>Template key<input id="socialTemplateEditKey"placeholder="finished_product"></label>
+<label>Display name<input id="socialTemplateEditName"placeholder="Finished product / shop-ready"></label>
+<label>Content pillar<input id="socialTemplateEditPillar"value="workshop_update"></label>
+<label>Platforms<input id="socialTemplateEditPlatforms"value="facebook,instagram"></label>
+</div>
+<div class="social-queue-grid"style="margin-top:12px">
+<label>Default hashtags<input id="socialTemplateEditHashtags"value="#DevilnDove #HandmadeOntario"></label>
+<label>Call to action<input id="socialTemplateEditCta"placeholder="Ask us about making something similar."></label>
+<label>Active<select id="socialTemplateEditActive"><option value="1">Active</option><option value="0">Inactive</option></select></label>
+</div>
+<label style="display:block;margin-top:10px">Body template<textarea id="socialTemplateEditBody"rows="4">{title}
 
 {summary}
 
@@ -409,12 +409,12 @@ document.addEventListener('DOMContentLoaded', () => {
 {link}
 
 {hashtags}</textarea></label>
-        <label style="display:block;margin-top:10px">Template notes<input id="socialTemplateEditNotes" placeholder="When to use this template"></label>
-        <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:10px"><button class="btn primary" type="button" id="socialTemplateSaveButton">Save caption template</button><button class="btn" type="button" id="socialTemplateClearButton">Clear editor</button></div>
-      </details>
-      <div id="socialPostQueueMessage" class="small" style="display:none;margin-top:10px"></div>
-      <div id="socialPostQueueResults"></div>
-    </div>`;
+<label style="display:block;margin-top:10px">Template notes<input id="socialTemplateEditNotes"placeholder="When to use this template"></label>
+<div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:10px"><button class="btn primary"type="button"id="socialTemplateSaveButton">Save caption template</button><button class="btn"type="button"id="socialTemplateClearButton">Clear editor</button></div>
+</details>
+<div id="socialPostQueueMessage"class="small"style="display:none;margin-top:10px"></div>
+<div id="socialPostQueueResults"></div>
+</div>`;
 
   document.getElementById('socialQueueLoadButton')?.addEventListener('click', load);
   document.getElementById('socialQueueCreateButton')?.addEventListener('click', createPost);
@@ -465,4 +465,4 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 /* Build 671: CAIP source selection; private reference-only drafts. */
-(()=>{"use strict";const e=e=>document.getElementById(e),t=e=>String(e??"").trim(),a=e("dd671-social-creator");if(!a)return;let r=[],i=[],n=0,s=!1;function o(t,a=!1){const r=e("dd671Status");r.textContent=t,r.style.color=a?"#f8b4b4":""}async function c(e,t={}){if(!window.DDAuth?.apiFetch)throw Error("Admin sign-in is required.");const a=await window.DDAuth.apiFetch(e,{cache:"no-store",...t}),r=await a.json().catch((()=>({})));if(!a.ok||!0!==r.ok)throw Error(r.error||`Request failed (${a.status})`);return r}function d(e,t){const a=document.createElement(e);return a.textContent=t,a}async function u(){n=Number(e("dd671Project").value)||0,i=[];const t=e("dd671Assets");if(t.replaceChildren(d("legend","Tag source media")),!n)return void t.append(d("p","Choose a project first."));o("Loading source media (private references only)…");const a=await c(`/api/admin/caip-evidence-review?creative_project_id=${n}`);if(i=(a.assets||[]).filter((e=>Number(e.creative_project_id)===n&&"archived"!==e.asset_status)),i.length){for(const e of i.slice(0,80)){const a=d("label","");a.className="dd671-asset";const r=document.createElement("input");r.type="checkbox",r.value=String(e.creative_asset_id),r.name="dd671Asset";const i=document.createElement("span");i.append(d("strong",e.original_filename||e.asset_key||`Asset ${e.creative_asset_id}`));const n=d("small",`${e.media_type||"media"} · rights ${e.rights_status||"unverified"} · consent ${e.consent_state||"unverified"} · privacy ${e.privacy_state||"unverified"}`);i.append(n),a.append(r,i),t.append(a)}i.length>80&&t.append(d("p","Showing first 80 assets. Open CAIP for the complete library.")),o(`${i.length} actual source asset(s) found. Select the ones to reference in the social draft.`)}else t.append(d("p","No source assets. Upload or link media through CAIP first."))}a.addEventListener("submit",(async function(d){if(d.preventDefault(),s)return;const u=r.find((e=>Number(e.creative_project_id)===n)),l=[...a.querySelectorAll('input[name="dd671Asset"]:checked')].map((e=>Number(e.value))),p=new Set(i.map((e=>Number(e.creative_asset_id)))),m=[...a.querySelectorAll(".dd671-platforms input:checked")].map((e=>e.value));if(!u||!l.length||l.some((e=>!p.has(e))))return o("Choose a real project and at least one of its CAIP source assets.",!0);if(!m.length)return o("Choose at least one intended social platform.",!0);if(!e("dd671Confirm").checked)return o("Confirm the manual rights and consent review requirement.",!0);s=!0,e("dd671Create").disabled=!0,o("Saving a private review draft; no publishing will occur…");try{const a=l.join(","),r=await c("/api/admin/social-post-queue",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({action:"create",source_type:"caip_project",source_id:String(n),title:t(e("dd671Title").value),summary:t(e("dd671Summary").value),target_platforms:m,post_status:"draft",image_urls:[],video_url:"",notes:`Build 671 source references: CAIP project ${n}; creative_asset_ids ${a}. Private raw originals are NOT publication-ready. Verify rights, consent, derivative approval and intended account before any provider publish.`})}),i=r.result?.social_post_queue_id;o(`Draft ${i||""} saved for review. No media transferred and nothing published.`),e("dd671Form").reset()}catch(e){o(e.message||"Draft save failed; inspect the queue before retrying.",!0)}finally{s=!1,e("dd671Create").disabled=!1}})),e("dd671Project").addEventListener("change",(()=>u().catch((e=>o(e.message,!0))))),async function(){o("Loading current and previous CAIP projects…");const t=await c("/api/admin/caip-evidence-review");r=t.projects||[];const a=e("dd671Project");a.replaceChildren(d("option","Choose an existing CAIP project"));for(const e of r){const t=d("option",`${e.project_title||e.product_name||e.creative_project_key||"CAIP project"} · ${e.project_status||"status unknown"}`);t.value=String(e.creative_project_id),a.append(t)}e("dd671Create").disabled=!1,o(`${r.length} source project(s) available. Choose one to tag media.`);const i=Number(new URLSearchParams(location.search).get("creative_project_id")||0);r.some((e=>Number(e.creative_project_id)===i))&&(a.value=String(i),await u())}().catch((e=>o(e.message,!0)))})();
+(()=>{"use strict";const e=e=>document.getElementById(e),t=e=>String(e??"").trim(),a=e("dd671-social-creator");if(!a)return;let r=[],i=[],n=0,s=!1;function o(t,a=!1){const r=e("dd671Status");r.textContent=t,r.style.color=a?"#f8b4b4":""}async function c(e,t={}){if(!window.DDAuth?.apiFetch)throw Error("Admin sign-in is required.");const a=await window.DDAuth.apiFetch(e,{cache:"no-store",...t}),r=await a.json().catch((()=>({})));if(!a.ok||!0!==r.ok)throw Error(r.error||`Request failed (${a.status})`);return r}function d(e,t){const a=document.createElement(e);return a.textContent=t,a}async function u(){n=Number(e("dd671Project").value)||0,i=[];const t=e("dd671Assets");if(t.replaceChildren(d("legend","Tag source media")),!n)return void t.append(d("p","Choose a project first."));o("Loading source media (private references only)…");const a=await c(`/api/admin/caip-evidence-review?creative_project_id=${n}`);if(i=(a.assets||[]).filter((e=>Number(e.creative_project_id)===n&&"archived"!==e.asset_status)),i.length){for(const e of i.slice(0,80)){const a=d("label","");a.className="dd671-asset";const r=document.createElement("input");r.type="checkbox",r.value=String(e.creative_asset_id),r.name="dd671Asset";const i=document.createElement("span");i.append(d("strong",e.original_filename||e.asset_key||`Asset ${e.creative_asset_id}`));const n=d("small",`${e.media_type||"media"} · rights ${e.rights_status||"unverified"} · consent ${e.consent_state||"unverified"} · privacy ${e.privacy_state||"unverified"}`);i.append(n),a.append(r,i),t.append(a)}i.length>80&&t.append(d("p","Showing first 80 assets. Open CAIP for the complete library.")),o(`${i.length} actual source asset(s) found. Select the ones to reference in the social draft.`)}else t.append(d("p","No source assets. Upload or link media through CAIP first."))}a.addEventListener("submit",(async function(d){if(d.preventDefault(),s)return;const u=r.find((e=>Number(e.creative_project_id)===n)),l=[...a.querySelectorAll('input[name="dd671Asset"]:checked')].map((e=>Number(e.value))),p=new Set(i.map((e=>Number(e.creative_asset_id)))),m=[...a.querySelectorAll(".dd671-platforms input:checked")].map((e=>e.value));if(!u||!l.length||l.some((e=>!p.has(e))))return o("Choose a real project and at least one of its CAIP source assets.",!0);if(!m.length)return o("Choose at least one intended social platform.",!0);if(!e("dd671Confirm").checked)return o("Confirm the manual rights and consent review requirement.",!0);s=!0,e("dd671Create").disabled=!0,o("Saving a private review draft; no publishing will occur…");try{const a=l.join(","),r=await c("/api/admin/social-post-queue",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({action:"create",source_type:"caip_project",source_id:String(n),title:t(e("dd671Title").value),summary:t(e("dd671Summary").value),target_platforms:m,post_status:"draft",image_urls:[],video_url:"",notes:`Build 671 source references:CAIP project ${n};creative_asset_ids ${a}. Private raw originals are NOT publication-ready. Verify rights,consent,derivative approval and intended account before any provider publish.`})}),i=r.result?.social_post_queue_id;o(`Draft ${i||""} saved for review. No media transferred and nothing published.`),e("dd671Form").reset()}catch(e){o(e.message||"Draft save failed; inspect the queue before retrying.",!0)}finally{s=!1,e("dd671Create").disabled=!1}})),e("dd671Project").addEventListener("change",(()=>u().catch((e=>o(e.message,!0))))),async function(){o("Loading current and previous CAIP projects…");const t=await c("/api/admin/caip-evidence-review");r=t.projects||[];const a=e("dd671Project");a.replaceChildren(d("option","Choose an existing CAIP project"));for(const e of r){const t=d("option",`${e.project_title||e.product_name||e.creative_project_key||"CAIP project"} · ${e.project_status||"status unknown"}`);t.value=String(e.creative_project_id),a.append(t)}e("dd671Create").disabled=!1,o(`${r.length} source project(s) available. Choose one to tag media.`);const i=Number(new URLSearchParams(location.search).get("creative_project_id")||0);r.some((e=>Number(e.creative_project_id)===i))&&(a.value=String(i),await u())}().catch((e=>o(e.message,!0)))})();
