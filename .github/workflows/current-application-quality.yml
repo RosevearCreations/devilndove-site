@@ -1081,6 +1081,8 @@ jobs:
         run: node scripts/build696_financial_independent_correction_aging_master_continuity_contract.mjs
       - name: Build 697 independent evidence reconciliation, owner escalation review and Master renewal continuity regression
         run: node scripts/build697_independent_reconciliation_aging_resolution_master_renewal_contract.mjs
+      - name: Build 698 original source repair proof intake, owner financial recovery, Master drift, mobile Shop and camera-first Product regression
+        run: node scripts/build698_financial_source_repair_mobile_shop_camera_contract.mjs
       - name: JavaScript syntax
         run: |
           node --check functions/_middleware.js

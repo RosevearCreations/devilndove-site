@@ -1320,7 +1320,7 @@
       "reference_screen": "Unassigned / contextual module",
       "reason": "Not individually approved for a revamp; inspect actual signed-in UI and owner acceptance before changing.",
       "evidence": {
-        "byte_length": 17008,
+        "byte_length": 19250,
         "stylesheets": 1,
         "scripts": 9,
         "forms": 1,
@@ -1590,7 +1590,7 @@
       "reference_screen": "Product Management",
       "reason": "Build 557 now provides the four-area Product Entry 2.0 shell. Preserve until real owner visual acceptance or an observed functional correction is requested.",
       "evidence": {
-        "byte_length": 158813,
+        "byte_length": 159335,
         "stylesheets": 38,
         "scripts": 43,
         "forms": 1,
@@ -1635,7 +1635,7 @@
       "reference_screen": "Product Management",
       "reason": "Existing compact Product browser and low-read recovery were previously revamped; preserve behavior and styling.",
       "evidence": {
-        "byte_length": 61396,
+        "byte_length": 61505,
         "stylesheets": 2,
         "scripts": 22,
         "forms": 2,
@@ -2070,10 +2070,10 @@
       "reference_screen": "Settings & Configuration",
       "reason": "Existing social authorization and draft boundaries must remain intact; integration redesign is queued separately.",
       "evidence": {
-        "byte_length": 80344,
+        "byte_length": 84272,
         "stylesheets": 3,
         "scripts": 11,
-        "forms": 28,
+        "forms": 29,
         "has_viewport": true
       },
       "owner_visual_acceptance": "PENDING"

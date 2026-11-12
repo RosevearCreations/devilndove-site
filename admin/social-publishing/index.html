@@ -304,6 +304,47 @@
 <p id="dd693Result" role="status" aria-live="polite">No Build 693 owner receipt recorded.</p>
 <p class="small">All actions require authenticated owner review and durable readback. No automatic replay, repair, financial certification, receiver activation or claim of continuously CONNECTED infrastructure is made.</p>
 </section>
+<section class="card" id="dd698-finance" aria-labelledby="dd698-finance-title">
+<p class="eyebrow">Build 698 · Source-repair proof intake / owner financial recovery / signed Master drift</p>
+<h2 id="dd698-finance-title">Original Source Repair Proof Intake, Financial Escalation Recovery Evidence &amp; Master Renewal Drift Detection</h2>
+<p>Original financial source repair cannot be inferred from Build 697's second signature or an owner review. Record a source-linked external repair document digest as <strong>unverified intake</strong>, follow up escalations with non-closure dispositions, and recheck Master receipt continuity. An independently verified actual source repair requires a separate external authority.</p>
+<button class="btn secondary" type="button" id="dd698Refresh">Refresh original source evidence</button>
+<button class="btn secondary" type="button" id="dd698Export">Export protected bounded source proof</button>
+<p id="dd698Status" role="status" aria-live="polite">HOLD · Select exact financial campaign.</p>
+<p class="small" id="dd698Stats">External source repair and Master drift are not yet inspected.</p>
+<h3>Independently reconciled original mismatches</h3>
+<ol class="clean" id="dd698Sources"><li>Requires original Build 697 signed reconciliation.</li></ol>
+<h3>Owner financial escalation recovery follow-up</h3>
+<ol class="clean" id="dd698Recovery"><li>Requires original owner escalation resolution review.</li></ol>
+<h3>Master renewal drift</h3>
+<ol class="clean" id="dd698Master"><li>Current exact independently accepted Master must be inspected.</li></ol>
+<form id="dd698Form">
+<label>Manual owner decision<select class="input" id="dd698Decision" required>
+<option value="intake_source_repair_proof">Intake external source-repair proof document (unverified; original HOLD remains)</option>
+<option value="record_escalation_recovery">Record recovery evidence follow-up (not actual incident closure)</option>
+<option value="record_master_drift">Record Master renewal drift readback (not a new external signature)</option>
+</select></label>
+<label>Original exact source receipt / escalation / Master continuity
+<select class="input" id="dd698Source" required><option value="">Select original source-bound evidence</option></select></label>
+<label>Recovery follow-up disposition
+<select class="input" id="dd698Disposition">
+<option value="recovery_evidence_requested">Independent external recovery proof requested</option>
+<option value="followup_reissued">Owner follow-up reissued</option>
+</select></label>
+<label>External original document reference (source intake only)
+<input class="input" id="dd698Reference" maxlength="160" autocomplete="off"></label>
+<label>External source document SHA-256, 64 lowercase hexadecimal characters
+<input class="input" id="dd698Digest" maxlength="64" minlength="64" spellcheck="false" autocomplete="off"></label>
+<label>Original external document observed at (UTC conversion)
+<input class="input" id="dd698Observed" type="datetime-local"></label>
+<label>Original owner review note (20–400 characters)
+<textarea class="input" id="dd698Note" maxlength="400" minlength="20" rows="3" required></textarea></label>
+<label><input type="checkbox" id="dd698Reviewed" required> We reviewed the exact source and understand that document intake is not cryptographic source repair verification, escalations remain open, and signed Master renewal does not prove a continuously CONNECTED system.</label>
+<button class="btn secondary" type="submit" id="dd698Submit">Record durable protected owner decision</button>
+</form>
+<p id="dd698Result" role="status" aria-live="polite">No Build 698 owner review recorded.</p>
+<p class="small">No automatic financial certification, source mismatch clearance, independent external replay, D1 schema migration, background polling or live provider writes. Source and Master repairs remain HOLD without independent proof.</p>
+</section>
 <section class="card" id="dd697-finance" aria-labelledby="dd697-title">
 <p class="eyebrow">Build 697 · Independently reconciled source evidence, escalation resolution review and Master attestation continuity</p>
 <h2 id="dd697-title">Independent Correction Reconciliation, Financial Escalation Resolution Review &amp; Master Attestation Renewal Continuity</h2>

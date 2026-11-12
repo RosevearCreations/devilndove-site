@@ -16,7 +16,7 @@
     "max_js_bytes": 600000,
     "max_css_bytes": 500000,
     "max_html_bytes": 500000,
-    "max_runtime_source_bytes": 18954000,
+    "max_runtime_source_bytes": 19010000,
     "max_runtime_source_files": 1854,
     "max_inline_data_uri_bytes": 650000
   },
@@ -33,6 +33,19 @@
     "production_mutation": false
   },
   "budget_reviews": [
+    {
+      "build": 698,
+      "date": "2026-11-12",
+      "scope": "Fail-closed independent original source-repair document intake, manual financial escalation recovery, source-bound Master renewal drift readback; products-first mobile Shop; camera-first phone Product draft with collision-safe Temporary DD identity, existing R2 photo/video storage, internal video review and one-tap Admin shortcuts",
+      "prior_limit_bytes": 18954000,
+      "new_limit_bytes": 19010000,
+      "delta_bytes": 56000,
+      "delta_percent": 0.2955,
+      "runtime_file_limit_unchanged": 1854,
+      "review_reason": "Reviewed constrained 56,000-byte (<0.296%) allowance for Build 698 source-bound owner financial projections and Admin forms, mobile Shop first-screen product visibility, and reusing existing product mobile-capture and Cloudflare R2 upload paths. No new cloud vendor, no new runtime files, no D1 migration, unsafe publication, automatic source repair, unchecked replay, false financial certification or continuous CONNECTED assertion. Existing per-file source budgets, zero-D1 release proof, exact development/main tree checks and live resources proof remain enforced.",
+      "owner_financial_approval": "NOT_INFERRED",
+      "production_runtime_master_acceptance": "EVIDENCE_GATED_HOLD"
+    },
     {
       "build": 697,
       "date": "2026-11-12",
