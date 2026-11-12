@@ -926,6 +926,80 @@ li.textContent='No independently evidenced previous owner acceptance available.'
 closures.appendChild(li);}
 chooseCases690();
 }
+let audit691=null;
+function chooseSources691(){
+const select=$('dd691Source');if(!select)return;
+select.replaceChildren(new Option('Choose an exact source receipt',''));
+const action=$('dd691Decision')?.value,v=audit691;
+if(!v?.history_complete)return;
+if(action==='escalate_replay_aging'){
+for(const x of v.replay_exception_aging||[]){
+if(!x.reference_receipt_id||!x.case_id||x.escalation_recorded||
+x.age_minutes===null||x.age_minutes<120)continue;
+select.add(new Option('Aged '+x.age_minutes+' min · '+x.case_id+' · receipt #'+
+x.reference_receipt_id,x.case_id+'|'+x.reference_receipt_id+'|0'));
+}
+}else if(action==='escalate_renewal_gap'){
+for(const x of v.renewal?.gap_evidence||[]){
+if(!x.source_pins_match||x.owner_escalation_recorded||x.gap_minutes<=20)continue;
+select.add(new Option('Gap '+x.gap_minutes+' min · '+x.older_receipt_id+
+' → '+x.newer_receipt_id,'|'+x.older_receipt_id+'|'+x.newer_receipt_id));
+}
+}else if(action==='accept_closure_continuity'&&v.master_accepted_now){
+for(const x of v.owner_closure_evidence||[]){
+if(!x.reference_receipt_id||!x.case_id||x.owner_continuity_accepted)continue;
+select.add(new Option('Original owner closure · '+x.case_id+
+' · receipt #'+x.reference_receipt_id,x.case_id+'|'+x.reference_receipt_id+'|0'));
+}
+}
+}
+function draw691(data){
+if(!$('dd691-finance'))return;
+const v=data.financial691||null;audit691=v;
+$('dd691Status').textContent=v?.campaign_queue_id?
+v.status+' · bounded evidence '+(v.history_complete?'COMPLETE':'HOLD')+
+' · current Master '+(v.master_accepted_now?'INDEPENDENTLY REVERIFIED':'HOLD')+
+' · live connection HOLD · financial certification HOLD':
+'HOLD · Select and refresh a protected financial campaign.';
+$('dd691Stats').textContent=v?.campaign_queue_id?
+'Replay exceptions '+v.replay_exception_count+' · overdue '+v.overdue_count+
+' · critical aging '+v.critical_aged_count+
+' · awaiting owner aging escalation '+v.unreviewed_overdue_count+
+' · accepted owner closures '+(v.closure_count-v.pending_owner_closure_acceptance)+
+' / '+v.closure_count:'No bounded owner evidence yet.';
+const rn=v?.renewal;
+$('dd691Renewal').textContent=rn?
+'Sampled '+(rn.sampled_at||'unknown')+' · '+rn.status+
+' · seconds to signed receipt expiry '+(rn.seconds_to_expiry??'unknown')+
+' · recorded gaps '+rn.gap_count+
+' · pending owner gap review '+rn.unreviewed_gap_count+
+' · historical signatures not reverified · gaps are not evidence of a runtime outage.':
+'Historical independent Master receipt evidence HOLD.';
+const put=(id,items,label)=>{
+const list=$(id);list.replaceChildren();
+for(const item of items||[]){const li=document.createElement('li');li.textContent=label(item);
+list.appendChild(li);}
+if(!list.childElementCount){const li=document.createElement('li');
+li.textContent='No matching bounded evidence has been recorded for this category.';
+list.appendChild(li);}
+};
+put('dd691Exceptions',v?.replay_exception_aging,x=>
+x.age_status+' · '+x.issue_code+' · '+(x.case_id||'unpaired evidence')+
+' · original receipt #'+(x.reference_receipt_id||'unknown')+
+' · '+(x.age_minutes===null?'age unknown':x.age_minutes+' min')+
+' · owner escalation '+(x.escalation_recorded?'RECORDED':'REQUIRED IF OVERDUE')+
+' · evidence repair HOLD');
+put('dd691Gaps',rn?.gap_evidence,x=>
+'Recorded interval '+x.gap_minutes+' min · older receipt #'+x.older_receipt_id+
+' · newer receipt #'+x.newer_receipt_id+' · source pin '+(x.source_pins_match?'MATCH':'HOLD')+
+' · owner review '+(x.owner_escalation_recorded?'RECORDED':'PENDING')+
+' · runtime outage not established');
+put('dd691Closures',v?.owner_closure_evidence,x=>
+x.case_id+' · prior owner closure #'+x.reference_receipt_id+
+' · current Master '+(x.current_master_rechecked?'VERIFIED':'HOLD')+
+' · owner continuity '+(x.owner_continuity_accepted?'RECORDED':'NOT RECORDED'));
+chooseSources691();
+}
 async function refresh(){
 const id=Number($('dd685Campaign').value);
 if(!id){state=null;$('dd685Status').textContent='HOLD · Select a campaign.';}
@@ -936,6 +1010,7 @@ draw687(d);
 draw688(d);
 draw689(d);
 draw690(d);
+draw691(d);
 if(!id)return;
 if(!v||v.queue_id!==id)throw Error('Fresh exact financial evidence was not returned.');
 state=v;
@@ -963,7 +1038,7 @@ await refresh();
 document.addEventListener('DOMContentLoaded',()=>{
 if(!$('dd685-finance'))return;
 (async()=>{try{
-const d=await api(null);draw686(d);draw687(d);draw688(d);draw689(d);draw690(d);const seen=new Set();
+const d=await api(null);draw686(d);draw687(d);draw688(d);draw689(d);draw690(d);draw691(d);const seen=new Set();
 for(const q of d.queue||[])if(q.utm_campaign&&!seen.has(q.social_post_queue_id)){
 seen.add(q.social_post_queue_id);
 $('dd685Campaign').add(new Option(q.utm_campaign+' · #'+q.social_post_queue_id,q.social_post_queue_id));
@@ -979,6 +1054,46 @@ $('dd688Refresh').addEventListener('click',()=>void refresh());
 $('dd689Refresh').addEventListener('click',()=>void refresh());
 
 $('dd690Refresh').addEventListener('click',()=>void refresh());
+$('dd691Refresh').addEventListener('click',()=>void refresh());
+$('dd691Decision').addEventListener('change',chooseSources691);
+$('dd691Form').addEventListener('submit',async event=>{
+event.preventDefault();const btn=$('dd691Submit');btn.disabled=true;
+try{
+if(!state?.queue_id||!audit691?.history_complete)throw Error('Complete exact protected evidence required.');
+if(!$('dd691Reviewed').checked)throw Error('Explicit owner review required.');
+const [caseId,refStr,newerStr]=$('dd691Source').value.split('|');
+const ref=Number(refStr),newer=Number(newerStr),decision=$('dd691Decision').value;
+if(!Number.isSafeInteger(ref)||ref<=0)throw Error('Select an exact source receipt.');
+if(decision==='accept_closure_continuity'&&!audit691.master_accepted_now)
+throw Error('Current independently reverified signed Master required. HOLD.');
+const note=$('dd691Note').value.trim();
+if(note.length<20||note.length>400)throw Error('Enter a 20–400 character owner evidence note.');
+const result=await api({action:'owner_finance_continuity_691',social_post_queue_id:state.queue_id,
+decision,case_id:caseId||'',reference_receipt_id:ref,newer_receipt_id:newer,
+expected_fingerprint_sha256:state.fingerprint_sha256,
+expected_source_revision:state.source_revision,
+expected_master_receipt_id:state.verified_master_receipt_id,
+owner_reviewed:true,resolution_note:note},state.queue_id);
+$('dd691Result').textContent=result.result.status+' · durable owner receipt #'+
+result.result.receipt_id+' · external Master and certified financial state remain separately gated.';
+$('dd691Reviewed').checked=false;$('dd691Note').value='';
+await refresh();
+}catch(e){$('dd691Result').textContent='HOLD · '+e.message;}finally{btn.disabled=false;}
+});
+$('dd691Export').addEventListener('click',async()=>{
+try{
+const id=Number($('dd685Campaign').value);
+if(!id||!state?.queue_id||state.queue_id!==id)throw Error('Select and refresh the exact campaign first.');
+if(!window.DDAuth?.apiFetch)throw Error('Signed-in Admin session required.');
+const r=await window.DDAuth.apiFetch(endpoint+'?export=financial691&campaign_queue_id='+encodeURIComponent(id));
+if(!r.ok)throw Error('Protected owner export refused. HTTP '+r.status);
+const blob=await r.blob(),url=URL.createObjectURL(blob),a=document.createElement('a');
+a.href=url;a.download='devilndove-finance-continuity-'+id+'-691.json';
+document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1000);
+$('dd691Result').textContent='Protected owner continuity report exported with unresolved HOLD evidence.';
+}catch(e){$('dd691Result').textContent='HOLD · '+e.message;}
+});
+
 $('dd690Decision').addEventListener('change',chooseCases690);
 $('dd690Form').addEventListener('submit',async e=>{
 e.preventDefault();
