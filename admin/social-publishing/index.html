@@ -71,6 +71,7 @@
 <button id="dd685Refresh" type="button" class="btn secondary">Check stored receipt freshness</button>
 <p id="dd685Status" role="status" aria-live="polite">Choose a campaign to inspect exact signed receipt age. HOLD until independently verified.</p>
 <p id="dd685Clock" class="small" role="status">No valid Master acceptance expiry available.</p>
+<label><input id="dd685RecheckReviewed" type="checkbox"> Owner confirms the selected campaign and requests fresh independent Master evidence.</label>
 <button id="dd685Revalidate" type="button" class="btn primary">Owner-supervised signed Master recheck</button>
 <form id="dd685Recovery"><h3>Owner exception audit &amp; recovery</h3>
 <label>Decision<select id="dd685Decision" class="input" required><option value="open">Open verified issue</option><option value="close">Close after newer signed Master proof</option></select></label>
@@ -383,6 +384,7 @@
 <script src="/public/js/site-auth-ui.js?v=440"></script>
 <script src="/public/js/admin-self-protect.js?v=440"></script>
 <script src="/public/js/admin-social-platform-preflight.js"></script>
+<script src="/public/js/admin-finance-freshness-685.js"></script>
 <script src="/public/js/admin-social-oauth-acceptance-v85.js"></script>
 <script src="/public/js/admin-social-product-automation.js"></script>
 <script src="/public/js/admin-social-post-queue.js"></script>
