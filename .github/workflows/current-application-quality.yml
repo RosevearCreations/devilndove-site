@@ -1051,6 +1051,8 @@ jobs:
         run: node scripts/build678_independent_marketing_roi_contract.mjs
       - name: Build 679 verified product costs and master HOLD contract
         run: node scripts/build679_verified_campaign_net_contract.mjs
+      - name: Build 683 independent finance signer, signed Master correlation and owner closure contract
+        run: node scripts/build683_financial_signer_master_closure_contract.mjs
       - name: JavaScript syntax
         run: |
           node --check functions/_middleware.js

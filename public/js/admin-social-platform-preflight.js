@@ -1,3 +1,82 @@
+
+// Build 683: private signer/Master intake UI.
+(()=>{'use strict';const $=id=>document.getElementById(id);let latest=null;
+async function api(payload,id){
+ if(!window.DDAuth?.apiFetch)throw Error('Authenticated Admin session required.');
+ const q=!payload&&id?'?campaign_queue_id='+encodeURIComponent(id):'';
+ const res=await DDAuth.apiFetch('/api/admin/social-post-queue'+q,payload?{method:'POST',body:JSON.stringify(payload)}:undefined);
+ const data=await res.json();if(!res.ok||!data.ok)throw Error(data.error||'Financial evidence unavailable');return data;
+}
+async function refresh(){
+ const id=Number($('dd683Campaign').value);if(!id){latest=null;$('dd683Status').textContent='HOLD · Select campaign.';return}
+ try{
+ const d=await api(null,id),v=d.financial683||{},b=d.financial682||{};latest=v;
+ $('dd683Status').textContent='Signer: '+(v.signer?.status||'HOLD')+' #'+(v.signer?.receipt_id||'—')+
+ ' · Master: '+(v.master?.status||'HOLD')+' #'+(v.master?.receipt_id||'—')+
+ ' · Discrepancies: '+(b.cases||[]).map(x=>x.code).join(', ')+
+ ' · Connection: '+(v.master_connection||'HOLD')+' · Accounting certification: HOLD';
+ const select=$('dd683Case');select.replaceChildren(new Option('Choose previously reviewed case',''));
+ const seen=new Set();for(const item of b.reviews||[])if(!seen.has(item.case_code)){
+ seen.add(item.case_code);select.add(new Option(item.case_code,item.case_code));}
+ }catch(e){latest=null;$('dd683Status').textContent='HOLD · '+e.message;}
+}
+const claim=(kind)=>{
+ if(!latest?.source_revision||!latest.fingerprint_sha256||!latest.campaign)throw Error('Select an exact current source with configured revision.');
+ const n=kind==='source'?'Source':'Master',nonce=$('dd683'+n+'Nonce'),time=$('dd683'+n+'Time');
+ if(!nonce.value)nonce.value=crypto.randomUUID();
+ if(!time.value)time.value=new Date().toISOString();
+ if(kind==='source'){
+ if(!latest.signer?.signer_id)throw Error('Independent financial signer has not been enrolled in server environment.');
+ return {version:1,source:'devilndove',campaign:latest.campaign,queue_id:latest.queue_id,
+ source_revision:latest.source_revision,fingerprint_sha256:latest.fingerprint_sha256,
+ signer_id:latest.signer.signer_id,nonce:nonce.value.trim(),issued_at:time.value.trim()};
+ }
+ if(!latest.signer?.receipt_id||!latest.signer?.nonce)throw Error('Independently signed source receipt is required before Master claim.');
+ return {version:1,source:'devilndove',campaign:latest.campaign,queue_id:latest.queue_id,
+ source_revision:latest.source_revision,fingerprint_sha256:latest.fingerprint_sha256,
+ source_signer_receipt_id:latest.signer.receipt_id,source_signer_nonce:latest.signer.nonce,
+ master_revision:$('dd683MasterRevision').value.trim(),nonce:nonce.value.trim(),issued_at:time.value.trim()};
+};
+async function submit(action,extras){
+ const id=Number($('dd683Campaign').value);if(!id)throw Error('Choose campaign.');
+ const result=await api({action,social_post_queue_id:id,...extras});
+ $('dd683Result').textContent=(result.result?.status||'Saved')+' · Receipt #'+(result.result?.receipt_id||'—')+
+ ' · Independent runtime connection and audited profitability remain HOLD.';
+ await refresh();
+}
+document.addEventListener('DOMContentLoaded',()=>{
+ if(!$('dd683-finance'))return;
+ (async()=>{try{const d=await api(),seen=new Set();for(const q of d.queue||[])if(q.utm_campaign&&!seen.has(q.utm_campaign)){
+ seen.add(q.utm_campaign);$('dd683Campaign').add(new Option(q.utm_campaign+' · #'+q.social_post_queue_id,q.social_post_queue_id));
+ }}catch(e){$('dd683Status').textContent='HOLD · '+e.message}})();
+ $('dd683Campaign').addEventListener('change',()=>void refresh());
+ $('dd683Refresh').addEventListener('click',()=>void refresh());
+ for(const kind of ['Source','Master'])$('dd683Prepare'+kind).addEventListener('click',()=>{
+ try{const text=JSON.stringify(claim(kind.toLowerCase()));$('dd683Claim').textContent=text;
+ $('dd683Result').textContent='Copy this exact UTF-8 JSON to the independently controlled Ed25519 signer. Private signing keys never enter this site.'}
+ catch(e){$('dd683Result').textContent='HOLD · '+e.message}
+ });
+ $('dd683Source').addEventListener('submit',async e=>{e.preventDefault();try{
+ await submit('admit_financial_signer_683',{nonce:$('dd683SourceNonce').value.trim(),
+ issued_at:$('dd683SourceTime').value.trim(),signature:$('dd683SourceSignature').value.trim(),
+ owner_reviewed:$('dd683SourceReviewed').checked});
+ $('dd683SourceSignature').value='';$('dd683SourceReviewed').checked=false;
+ }catch(x){$('dd683Result').textContent='HOLD · '+x.message}});
+ $('dd683Master').addEventListener('submit',async e=>{e.preventDefault();try{
+ await submit('correlate_financial_master_683',{nonce:$('dd683MasterNonce').value.trim(),
+ issued_at:$('dd683MasterTime').value.trim(),master_revision:$('dd683MasterRevision').value.trim(),
+ signature:$('dd683MasterSignature').value.trim(),owner_reviewed:$('dd683MasterReviewed').checked});
+ $('dd683MasterSignature').value='';$('dd683MasterReviewed').checked=false;
+ }catch(x){$('dd683Result').textContent='HOLD · '+x.message}});
+ $('dd683Closure').addEventListener('submit',async e=>{e.preventDefault();try{
+ await submit('close_financial_discrepancy_683',{case_code:$('dd683Case').value,
+ resolution_note:$('dd683Note').value.trim(),expected_fingerprint_sha256:latest?.fingerprint_sha256,
+ owner_reviewed:$('dd683ClosureReviewed').checked});
+ $('dd683ClosureReviewed').checked=false;
+ }catch(x){$('dd683Result').textContent='HOLD · '+x.message}});
+});
+})();
+
 // Build 682 source-owned financial export & owner discrepancy audit.
 (()=>{'use strict';const $=id=>document.getElementById(id);let pin='';
 async function api(payload,query=''){
