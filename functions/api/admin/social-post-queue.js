@@ -3012,11 +3012,11 @@ const rows692=Array.isArray(ownerRows)?ownerRows:[],
 bounded=!!prior?.history_complete&&rows692.length<=60;
 const dated=value=>{const t=Date.parse(value||'');return Number.isFinite(t)&&t<=now+300000?t:null;};
 const minutesSince=value=>{const t=dated(value);return t===null?null:Math.max(0,Math.floor((now-t)/60000));};
-const expiry=dated(current?.expires_at),currentMaster=Number(current?.verified_master_receipt_id);
+const expiry=Date.parse(current?.expires_at||''),currentMaster=Number(current?.verified_master_receipt_id);
 const historicalIds=new Set((prior?.renewal?.historical_source_receipt_ids||[])
 .filter(x=>Number.isSafeInteger(Number(x))&&Number(x)>0).map(Number));
 const masterCurrent=!!current?.master_fresh&&!!prior?.master_accepted_now&&
-expiry!==null&&expiry>now&&Number.isSafeInteger(currentMaster)&&currentMaster>0&&
+Number.isFinite(expiry)&&expiry>now&&Number.isSafeInteger(currentMaster)&&currentMaster>0&&
 currentMaster===Number(prior?.renewal?.current_verified_receipt_id)&&
 historicalIds.has(currentMaster)&&!!prior?.renewal?.historical_source_pin_matches;
 const actions=(prior?.owner_actions||[]).filter(x=>
