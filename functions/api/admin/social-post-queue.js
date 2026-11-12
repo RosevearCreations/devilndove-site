@@ -4385,7 +4385,7 @@ const receiptChanged=!!(Number.isSafeInteger(masterPrior)&&masterPrior>0&&
 Number.isSafeInteger(masterCurrent)&&masterCurrent>0&&masterPrior!==masterCurrent);
 const sourceRevisionChanged=!!(current?.source_revision&&
 prior?.master?.source_revision&&current.source_revision!==prior.master.source_revision);
-const masterDrift=receiptChanged||sourceRevisionChanged||!freshCurrent;
+const masterDrift=receiptChanged||sourceRevisionChanged||!freshCurrent||prior?.master_accepted_now!==true;
 const renewals=(prior?.master?.items||[]).filter(x=>x.renewal_review_recorded&&x.renewal_receipt_id)
 .map(x=>({older_receipt_id:x.older_receipt_id,newer_receipt_id:x.newer_receipt_id,
 renewal_receipt_id:Number(x.renewal_receipt_id),prior_continuity_receipt_id:Number(x.prior_continuity_receipt_id),
@@ -4469,7 +4469,9 @@ recovery:{eligible_owner_cases:recoveries.length,pending_followup_count:recoveri
 items:recoveries.slice(0,40),external_financial_remediation_proven:false},
 master:{observed_master_receipt_id:freshCurrent?masterCurrent:null,
 prior_master_receipt_id:Number.isSafeInteger(masterPrior)&&masterPrior>0?masterPrior:null,
-receipt_changed:receiptChanged,source_revision_changed:sourceRevisionChanged,drift_detected:masterDrift,
+receipt_changed:receiptChanged,source_revision_changed:sourceRevisionChanged,
+prior_master_acceptance_missing:prior?.master_accepted_now!==true,
+drift_detected:masterDrift,
 fresh_independent_master_receipt_now:freshCurrent,items:renewals.slice(0,40),
 pending_drift_review_count:renewals.filter(x=>!x.drift_review_recorded).length,
 new_independent_signature_verified:false,continuous_connection_verified:false},
@@ -4522,8 +4524,8 @@ extra={case_id:caseId,followup_disposition:disposition,external_remediation_veri
 }else if(kind==='record_master_drift'){
 candidate=report.master.items.find(x=>x.older_receipt_id===ref&&x.newer_receipt_id===newer&&
 x.renewal_receipt_id===prev&&!x.drift_review_recorded);
-if(!candidate||Number(p.expected_master_receipt_id)!==current.verified_master_receipt_id||
-Number(p.expected_prior_master_receipt_id)!==report.master.prior_master_receipt_id)
+if(!candidate||Number(p.expected_master_receipt_id||0)!==Number(current.verified_master_receipt_id||0)||
+Number(p.expected_prior_master_receipt_id||0)!==Number(report.master.prior_master_receipt_id||0))
 throw Error('Exact prior Master renewal and current independently signed receipt continuity required. HOLD.');
 status='owner_master_renewal_drift_recheck_698';
 extra={observed_master_receipt_id:current.verified_master_receipt_id,
