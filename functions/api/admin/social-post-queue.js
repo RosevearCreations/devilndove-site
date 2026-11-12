@@ -3,6 +3,7 @@
 // This is review-first. It prepares platform-ready captions and records manual/API posting status,
 // but does not auto-post until official OAuth/API keys are configured and approved for each platform.
 
+import {claim684,nonce684,fresh684,verify684,same684,endpoint684,lookup684} from '../_lib/finance684.mjs';
 import { auditAdminAction, captureRuntimeIncident, getAdminUserFromRequest, getDb, jsonResponse, normalizeText } from '../_lib/adminAudit.js';
 
 
@@ -1903,6 +1904,109 @@ async function ownerClosure683(db,env,user,p){
  master_accepted:false,connection:'HOLD',publication_performed:false};
 }
 
+
+// Build 684: append-only D1 receipts; no browser-supplied CONNECTED or Master acceptance claim.
+async function append684(db,user,id,platform,status,nonce,data){
+ const result=await db.prepare("INSERT INTO social_post_attempts (social_post_queue_id,platform_key,attempt_status,external_post_id,response_json,attempted_by_user_id,notes) SELECT ?,?,?,?,?,?,? WHERE NOT EXISTS (SELECT 1 FROM social_post_attempts WHERE platform_key=? AND external_post_id=?)")
+ .bind(id,platform,status,nonce,JSON.stringify(data),user.user_id,'Exact external signed financial evidence; independent runtime telemetry separate.',platform,nonce).run();
+ if(!result?.success||Number(result?.meta?.changes)!==1)throw Error('Duplicate, uncommitted or replayed signed receipt. HOLD.');
+ const found=rows(await db.prepare("SELECT social_post_attempt_id FROM social_post_attempts WHERE platform_key=? AND external_post_id=? LIMIT 2").bind(platform,nonce).all());
+ if(found.length!==1)throw Error('Durable unique financial receipt not confirmed. HOLD.');
+ return Number(found[0].social_post_attempt_id);
+}
+const pin684=v=>({queue_id:v.queue_id,campaign:v.campaign,source_revision:v.source_revision,
+ fingerprint_sha256:v.fingerprint_sha256,source_signer_receipt_id:v.signer?.receipt_id});
+async function financial684(db,env,id){
+ const n=Number(id);if(!Number.isSafeInteger(n)||n<1)return {status:'HOLD_SELECT_CAMPAIGN',signer_enrolled:false,master_accepted:false,connection:'HOLD'};
+ const source=await financial683(db,env,n),base=await finance682(db,env,n);
+ const data=rows(await db.prepare("SELECT social_post_attempt_id,platform_key,external_post_id,response_json,attempted_at FROM social_post_attempts WHERE social_post_queue_id=? AND platform_key IN ('finance_enrollment_684','finance_acceptance_684','finance_continuity_684') ORDER BY social_post_attempt_id DESC LIMIT 121").bind(n).all());
+ const complete=source.complete&&base.complete&&data.length<=120;
+ const er=data.find(x=>x.platform_key==='finance_enrollment_684'),e=safeJson(er?.response_json,{}),ec=e.claim||{};
+ const pinned=pin684(source),enrolled=!!complete&&source.signer?.status==='INDEPENDENT_SIGNER_ADMITTED'&&
+ same684(ec,pinned)&&ec.signer_id===normalizeText(env?.FINANCIAL_EVIDENCE_SIGNER_ID_683)&&
+ nonce684(ec.nonce)&&fresh684(ec.issued_at,30*86400000)&&
+ await verify684(normalizeText(env?.FINANCIAL_EVIDENCE_SIGNER_PUBLIC_KEY_683),claim684('enrollment',ec),e.signature);
+ const ar=data.find(x=>x.platform_key==='finance_acceptance_684'),a=safeJson(ar?.response_json,{}),ac=a.claim||{};
+ const accepted=!!enrolled&&source.master_correlated&&same684(ac,pinned)&&
+ ac.enrollment_receipt_id===Number(er.social_post_attempt_id)&&
+ ac.master_signed_receipt_id===source.master.receipt_id&&
+ ac.master_revision===source.master.master_revision&&ac.decision==='accepted'&&
+ nonce684(ac.request_nonce)&&fresh684(ac.issued_at,1200000)&&fresh684(a.checked_at,1200000)&&
+ typeof ac.receiver_receipt_id==='string'&&/^[A-Za-z0-9_.:-]{10,120}$/.test(ac.receiver_receipt_id)&&
+ await verify684(normalizeText(env?.AI_DATA_MASTER_ACK_PUBLIC_KEY),claim684('acceptance',ac),a.signature);
+ const closures=data.filter(x=>x.platform_key==='finance_continuity_684').slice(0,25).map(x=>{
+  const c=safeJson(x.response_json,{});
+  return {case_code:x.external_post_id,receipt_id:x.social_post_attempt_id,recorded_at:x.attempted_at,
+   current:!!accepted&&c.fingerprint_sha256===source.fingerprint_sha256&&
+   c.source_signer_receipt_id===source.signer.receipt_id&&
+   c.enrollment_receipt_id===Number(er?.social_post_attempt_id)&&
+   c.master_signed_receipt_id===source.master.receipt_id&&
+   c.master_acceptance_receipt_id===Number(ar?.social_post_attempt_id)};
+ });
+ return {status:!complete?'HOLD_AUDIT_INCOMPLETE':accepted?'INDEPENDENT_MASTER_ACCEPTANCE_VERIFIED':'HOLD_MASTER_RUNTIME_ACCEPTANCE',
+  campaign:source.campaign,queue_id:n,source_revision:source.source_revision,
+  fingerprint_sha256:source.fingerprint_sha256,source_signer_receipt_id:source.signer?.receipt_id||null,
+  signer_id:source.signer?.signer_id||null,signer_nonce:source.signer?.nonce||null,
+  master_signed_receipt_id:source.master?.receipt_id||null,master_revision:source.master?.master_revision||null,
+  signer_enrolled:!!enrolled,enrollment_receipt_id:enrolled?Number(er.social_post_attempt_id):null,
+  master_accepted:!!accepted,master_acceptance_receipt_id:accepted?Number(ar.social_post_attempt_id):null,
+  receiver_receipt_id:accepted?ac.receiver_receipt_id:null,
+  receiver_configured:!!endpoint684(env),source_owner_accepted:!!base.source_owner_accepted,
+  source_blockers:base.cases.filter(c=>!c.code.startsWith('MASTER_')).map(c=>c.code),
+  closed_cases:closures,connection:'HOLD_INDEPENDENT_CONTINUOUS_RUNTIME_TELEMETRY',
+  profitability_certified:false,publication_performed:false};
+}
+async function enroll684(db,env,user,p){
+ const id=Number(p.social_post_queue_id),v=await financial684(db,env,id),nonce=normalizeText(p.nonce),
+ issued_at=normalizeText(p.issued_at),signature=normalizeText(p.signature);
+ if(p.owner_reviewed!==true||!v.source_owner_accepted||v.source_blockers?.length||
+ !v.source_signer_receipt_id||!v.signer_id||!v.source_revision||!nonce684(nonce)||!fresh684(issued_at))
+ throw Error('Owner-accepted exact source, independent existing signer, nonce and current time required. HOLD.');
+ if(p.expected_fingerprint_sha256!==v.fingerprint_sha256)throw Error('Source fingerprint changed. Refresh before signer enrollment.');
+ const claim=claim684('enrollment',{...pin684({queue_id:id,campaign:v.campaign,source_revision:v.source_revision,
+ fingerprint_sha256:v.fingerprint_sha256,signer:{receipt_id:v.source_signer_receipt_id}}),signer_id:v.signer_id,nonce,issued_at});
+ if(!await verify684(normalizeText(env?.FINANCIAL_EVIDENCE_SIGNER_PUBLIC_KEY_683),claim,signature))
+ throw Error('Original independent financial signer did not sign exact runtime enrollment. HOLD.');
+ const receipt_id=await append684(db,user,id,'finance_enrollment_684','independent_signer_runtime_enrolled_684',nonce,{claim,signature,checked_at:new Date().toISOString()});
+ return {status:'independent_signer_runtime_enrolled_684',receipt_id,master_accepted:false,publication_performed:false};
+}
+async function accept684(db,env,user,p){
+ const id=Number(p.social_post_queue_id),v=await financial684(db,env,id);
+ if(p.owner_reviewed!==true||!v.signer_enrolled||!v.master_signed_receipt_id||
+ v.source_blockers?.length||p.expected_fingerprint_sha256!==v.fingerprint_sha256)
+ throw Error('Fresh independent signer, exact signed Master receipt and owner review required. HOLD.');
+ const evidence=await lookup684(env,{queue_id:id,campaign:v.campaign,source_revision:v.source_revision,
+ fingerprint_sha256:v.fingerprint_sha256,source_signer_receipt_id:v.source_signer_receipt_id,
+ enrollment_receipt_id:v.enrollment_receipt_id,master_signed_receipt_id:v.master_signed_receipt_id,
+ master_revision:v.master_revision});
+ const receipt_id=await append684(db,user,id,'finance_acceptance_684','independent_master_runtime_accepted_684',
+ evidence.claim.request_nonce,evidence);
+ return {status:'independent_master_runtime_accepted_684',receipt_id,master_accepted:true,
+ connection:'HOLD_INDEPENDENT_CONTINUOUS_RUNTIME_TELEMETRY',publication_performed:false};
+}
+async function continuity684(db,env,user,p){
+ const id=Number(p.social_post_queue_id),v=await financial684(db,env,id),base=await finance682(db,env,id),
+ code=normalizeText(p.case_code),note=normalizeText(p.resolution_note);
+ if(p.owner_reviewed!==true||!v.master_accepted||!v.signer_enrolled||!v.source_owner_accepted||
+ v.source_blockers?.length||p.expected_fingerprint_sha256!==v.fingerprint_sha256||
+ !['MASTER_RECEIPT_NOT_CURRENT','MASTER_INDEPENDENT_ADMISSION_UNVERIFIED'].includes(code)||
+ note.length<20||note.length>400||!base.cases.some(c=>c.code===code))
+ throw Error('Current independent Master acceptance and exactly reviewed discrepancy required for owner closure. HOLD.');
+ const old=base.reviews.find(x=>x.case_code===code&&x.current_evidence);
+ if(!old)throw Error('Original fingerprint-pinned owner discrepancy review missing. HOLD.');
+ const earlier=v.closed_cases.find(x=>x.case_code===code&&x.current);
+ if(earlier)throw Error('Current discrepancy already closed; replay refused.');
+ const nonce='case-'+crypto.randomUUID()+'-'+crypto.randomUUID();
+ const receipt_id=await append684(db,user,id,'finance_continuity_684','owner_finance_continuity_closed_684',nonce,{
+  case_code:code,fingerprint_sha256:v.fingerprint_sha256,source_signer_receipt_id:v.source_signer_receipt_id,
+  enrollment_receipt_id:v.enrollment_receipt_id,master_signed_receipt_id:v.master_signed_receipt_id,
+  master_acceptance_receipt_id:v.master_acceptance_receipt_id,
+  prior_owner_review_receipt_id:old.receipt_id,owner_user_id:user.user_id,resolution_note:note,
+  master_accepted:true,profitability_certified:false});
+ return {status:'owner_finance_continuity_closed_684',receipt_id,master_accepted:true,
+ connection:'HOLD_INDEPENDENT_CONTINUOUS_RUNTIME_TELEMETRY',publication_performed:false};
+}
+
 // Build 682 — source-only financial export and owner discrepancy audit.
 async function finance682(db,env,id){
  const n=Number(id);
@@ -1983,7 +2087,7 @@ if(params.get('export')==='financial682'){
  'Cache-Control':'private, no-store','X-Content-Type-Options':'nosniff'}});
 }
 const data = await summarize(db, context.env);
-return jsonResponse({ ok: true, ...data, receipts673:await receipts673(db),engagement675:await engagement675(db),financial676:await financial676(db), financial678:await financialSummary678(db,context.request.headers.get('x-campaign-queue-id')||new URL(context.request.url).searchParams.get('campaign_queue_id')), financial679:await campaignNet679(db,new URL(context.request.url).searchParams.get('campaign_queue_id')), financial680:await finance680(db,context.env,new URL(context.request.url).searchParams.get('campaign_queue_id')), financial681:await finance681(db,context.env,new URL(context.request.url).searchParams.get('campaign_queue_id')), financial682:await finance682(db,context.env,new URL(context.request.url).searchParams.get('campaign_queue_id')), financial683:await financial683(db,context.env,new URL(context.request.url).searchParams.get('campaign_queue_id')), queue: data.queue.map(normalizeQueueRow), mode: 'review_first_api_when_configured' }, 200, { 'Cache-Control': 'no-store' });
+return jsonResponse({ ok: true, ...data, receipts673:await receipts673(db),engagement675:await engagement675(db),financial676:await financial676(db), financial678:await financialSummary678(db,context.request.headers.get('x-campaign-queue-id')||new URL(context.request.url).searchParams.get('campaign_queue_id')), financial679:await campaignNet679(db,new URL(context.request.url).searchParams.get('campaign_queue_id')), financial680:await finance680(db,context.env,new URL(context.request.url).searchParams.get('campaign_queue_id')), financial681:await finance681(db,context.env,new URL(context.request.url).searchParams.get('campaign_queue_id')), financial682:await finance682(db,context.env,new URL(context.request.url).searchParams.get('campaign_queue_id')), financial683:await financial683(db,context.env,new URL(context.request.url).searchParams.get('campaign_queue_id')), financial684:await financial684(db,context.env,new URL(context.request.url).searchParams.get('campaign_queue_id')), queue: data.queue.map(normalizeQueueRow), mode: 'review_first_api_when_configured' }, 200, { 'Cache-Control': 'no-store' });
 } catch (error) {
 await captureRuntimeIncident(context.env, context.request, {
 incident_scope: 'admin_social',
@@ -2035,6 +2139,9 @@ else if (action === 'owner_discrepancy_review_682') result = await ownerDiscrepa
 else if (action === 'admit_financial_signer_683') result = await admission683(db,context.env,adminUser,payload);
 else if (action === 'correlate_financial_master_683') result = await masterCorrelation683(db,context.env,adminUser,payload);
 else if (action === 'close_financial_discrepancy_683') result = await ownerClosure683(db,context.env,adminUser,payload);
+else if (action === 'enroll_finance_signer_684') result = await enroll684(db,context.env,adminUser,payload);
+else if (action === 'verify_finance_master_684') result = await accept684(db,context.env,adminUser,payload);
+else if (action === 'close_finance_continuity_684') result = await continuity684(db,context.env,adminUser,payload);
 else if (action === 'expense_attestation_678') result = await expenseAttestation678(db,context.env,adminUser,payload,recordApiAttempt);
 else if (action === 'owner_marketing_signoff_678') result = await ownerSignoff678(db,adminUser,payload,recordApiAttempt);
 else throw new Error(`Unsupported social queue action: ${action}`);
