@@ -26,7 +26,9 @@ const review=(id,decision,case_id,evidence,at='2026-11-12T12:58:00Z')=>({
 social_post_attempt_id:id,attempt_status:decision==='escalate_breach'?
 'owner_sla_breach_escalated_688':'owner_recovery_signoff_recorded_688',attempted_at:at,
 response_json:JSON.stringify({decision,case_id,evidence_receipt_id:evidence,
-fingerprint_sha256:fingerprint,owner_user_id:2,owner_reviewed:true,
+fingerprint_sha256:fingerprint,source_revision:'signed-source-123',
+independent_master_receipt_id:decision==='signoff_closure'?82:null,
+owner_user_id:2,owner_reviewed:true,
 resolution_note:'Owner inspected exact protected evidence; follow up is required.'})});
 let s=assessFinance688(current,sla,receipts,[],now);
 assert.equal(s.status,'OWNER_SLA_BREACH_REVIEW_REQUIRED');
