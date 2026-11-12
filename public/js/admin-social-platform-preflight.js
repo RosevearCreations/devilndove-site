@@ -661,11 +661,47 @@ state.master_fresh=false;state.status='HOLD_EXPIRED_MASTER_RECEIPT';
 $('dd685Status').textContent='HOLD_EXPIRED_MASTER_RECEIPT · Owner revalidation required. Connection remains HOLD.';
 }
 }
+function draw686(d){
+if(!$('dd686-finance'))return;
+const snapshot=d.financial685?.alerts686||null,global=d.financialRecoveryQueue686;
+$('dd686Status').textContent=snapshot?
+snapshot.level+' · '+snapshot.alerts.map(x=>x.code).join(' / ')+
+' · server observation '+snapshot.observed_at+' · connection HOLD · financial certification HOLD':
+'Select a campaign for current signed evidence. Portfolio incidents require owner review.';
+const alerts=$('dd686Alerts');alerts.replaceChildren();
+if(snapshot){
+for(const a of snapshot.alerts){
+const p=document.createElement('p');p.className='small';
+p.textContent=a.level+' · '+a.code+' · '+a.action;alerts.appendChild(p);
+}
+if(!snapshot.alerts.length){const p=document.createElement('p');p.textContent='No receipt alert at this server observation; ongoing runtime telemetry remains HOLD.';alerts.appendChild(p);}
+}else{const p=document.createElement('p');p.textContent='Choose a campaign to check signed receipt aging.';alerts.appendChild(p);}
+$('dd686Escalate').disabled=!snapshot?.source_drift;
+$('dd686Coverage').textContent=global?
+(global.history_complete?'Bounded incident scan complete for recorded history. ':'HOLD: older incident history exceeds bounded scan; queue may be incomplete. ')+
+'Open visible cases: '+global.total_visible_open+' · other campaigns are NOT independently revalidated by this view.':
+'Owner incident history unavailable. HOLD.';
+const list=$('dd686Queue');list.replaceChildren();
+if(!global?.cases?.length){const li=document.createElement('li');li.textContent='No visible open incidents in the bounded ledger; this is not proof of Master connection.';list.appendChild(li);return;}
+for(const item of global.cases){
+const li=document.createElement('li');
+const b=document.createElement('button');b.type='button';b.className='btn secondary';
+b.textContent=item.priority+' · '+item.campaign+' · '+item.issue_code+
+' · '+(item.age_minutes===null?'age unverified':item.age_minutes+' min old')+
+' · Review campaign #'+item.queue_id;
+b.addEventListener('click',()=>{const select=$('dd685Campaign'),value=String(item.queue_id);
+if(!Array.from(select.options).some(o=>o.value===value))select.add(new Option(item.campaign+' · #'+value,value));
+select.value=value;void refresh();});
+li.appendChild(b);list.appendChild(li);
+}
+}
 async function refresh(){
 const id=Number($('dd685Campaign').value);
-if(!id){state=null;$('dd685Status').textContent='HOLD · Select a campaign.';return;}
+if(!id){state=null;$('dd685Status').textContent='HOLD · Select a campaign.';}
 try{
-const d=await api(null,id),v=d.financial685;
+const d=await api(null,id||0),v=d.financial685;
+draw686(d);
+if(!id)return;
 if(!v||v.queue_id!==id)throw Error('Fresh exact financial evidence was not returned.');
 state=v;
 $('dd685Status').textContent=(v.master_fresh?'VERIFIED_CURRENT':'HOLD')+
@@ -692,7 +728,7 @@ await refresh();
 document.addEventListener('DOMContentLoaded',()=>{
 if(!$('dd685-finance'))return;
 (async()=>{try{
-const d=await api(null);const seen=new Set();
+const d=await api(null);draw686(d);const seen=new Set();
 for(const q of d.queue||[])if(q.utm_campaign&&!seen.has(q.social_post_queue_id)){
 seen.add(q.social_post_queue_id);
 $('dd685Campaign').add(new Option(q.utm_campaign+' · #'+q.social_post_queue_id,q.social_post_queue_id));
@@ -700,6 +736,20 @@ $('dd685Campaign').add(new Option(q.utm_campaign+' · #'+q.social_post_queue_id,
 }catch(e){$('dd685Status').textContent='HOLD · '+e.message;}})();
 $('dd685Campaign').addEventListener('change',()=>void refresh());
 $('dd685Refresh').addEventListener('click',()=>void refresh());
+$('dd686Refresh').addEventListener('click',()=>void refresh());
+$('dd686Escalate').addEventListener('click',async()=>{
+try{
+if(!state?.alerts686?.source_drift)throw Error('Current signed source/Master drift must be read back first.');
+if(!$('dd685Reviewed').checked)throw Error('Owner must review exact source evidence in the Build 685 form.');
+const note=$('dd685Note').value.trim();
+if(note.length<20||note.length>400)throw Error('Add a substantial 20–400 character owner evidence note.');
+await send('owner_finance_recovery_685',{decision:'open',issue_code:state.status,
+case_id:'',resolution_note:note,expected_master_acceptance_receipt_id:state.verified_master_receipt_id});
+$('dd685Reviewed').checked=false;
+$('dd686Result').textContent='Owner drift incident saved in append-only evidence. Independent Master acceptance remains HOLD.';
+}catch(e){$('dd686Result').textContent='HOLD · '+e.message;}
+});
+
 $('dd685Revalidate').addEventListener('click',async()=>{
 try{
 if(!$('dd685RecheckReviewed').checked)throw Error('Owner must confirm the independent Master recheck.');
