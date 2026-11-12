@@ -20,3 +20,40 @@
 @media(max-width:520px){#shopProducts{width:100%;gap:14px!important}#shopProducts .shop-product-card{width:100%;max-width:100%}#shopProducts .shop-card-main-image{aspect-ratio:4/5!important}#shopProducts .shop-card-content{padding:14px!important}#shopProducts .shop-card-actions>.btn{flex-basis:100%;min-width:0;white-space:normal;overflow-wrap:anywhere}}
 @media(min-width:521px) and (max-width:850px){#shopProducts .shop-card-actions>.btn{flex-basis:100%;min-width:0;white-space:normal}}
 @media(prefers-reduced-motion:reduce){#shopProducts .shop-product-card{transition:none!important}}
+
+/* Build 698: catalog first on phones. Supplemental discovery still follows the products. */
+@media(max-width:700px){
+ body[data-dd-shop-products-first="698"] .hero.public-service-hero{
+   display:block;min-height:0!important;padding:12px!important;margin:8px 0!important;
+ }
+ body[data-dd-shop-products-first="698"] .hero.public-service-hero .public-service-hero-copy{
+   min-height:0!important;padding:2px!important;
+ }
+ body[data-dd-shop-products-first="698"] .hero.public-service-hero h1{
+   font-size:clamp(1.23rem,5vw,1.6rem);line-height:1.2;margin:0 0 5px;
+ }
+ body[data-dd-shop-products-first="698"] .hero.public-service-hero p{
+   margin:0!important;font-size:.86rem;line-height:1.35;
+ }
+ body[data-dd-shop-products-first="698"] .hero.public-service-hero .public-service-hero-media{
+   display:none!important;
+ }
+ body[data-dd-shop-products-first="698"] #shop698SearchPanel{
+   padding:12px!important;margin-bottom:10px!important;
+ }
+ body[data-dd-shop-products-first="698"] #shop698SearchPanel h2{
+   font-size:1.1rem;margin:0 0 9px;
+ }
+ body[data-dd-shop-products-first="698"] #shop698SearchPanel .grid.cols-4{
+   grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:8px!important;
+ }
+ body[data-dd-shop-products-first="698"] #shop698SearchPanel .grid.cols-4>div:first-child{
+   grid-column:1/-1!important;
+ }
+ body[data-dd-shop-products-first="698"] #shop698SearchPanel .shop-quick-chips{margin-top:8px}
+ body[data-dd-shop-products-first="698"] #shop698SearchPanel .shop-quick-chips .btn{padding:6px 9px}
+ body[data-dd-shop-products-first="698"] #shopResultsSection{
+   scroll-margin-top:12px;margin-top:0!important;
+ }
+ body[data-dd-shop-products-first="698"] #shop698ProductsHeading{font-size:1.2rem}
+}

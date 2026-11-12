@@ -536,7 +536,7 @@ export async function onRequestPost(context) {
     const weightGrams = weightGramsRaw ? parseWholeNumber(weightGramsRaw, 0) : null;
     const resourceLinksRaw = normalizeText(form.get("resource_links_json"));
     const captureEntryModeRaw = normalizeText(form.get("capture_entry_mode")).toLowerCase();
-    const captureEntryMode = ["full", "wizard"].includes(captureEntryModeRaw) ? captureEntryModeRaw : "full";
+    const captureEntryMode = ["full", "wizard", "camera"].includes(captureEntryModeRaw) ? captureEntryModeRaw : "full";
     const creativeProjectId = Math.max(0, Number(form.get("creative_project_id") || 0) || 0);
 
     if (!Number.isInteger(priceCents) || priceCents < 0) {
@@ -589,7 +589,7 @@ export async function onRequestPost(context) {
       if (!existing) return json({ ok: false, error: "Draft product not found." }, 404);
 
       productNumber = Number(existing.product_number || 0);
-      resolvedName = name || captureReference || normalizeText(existing.name) || `Draft product ${productNumber || resolvedProductId}`;
+      resolvedName = name || (captureEntryMode === "camera" ? normalizeText(existing.name) || `Temporary ${formatProductNumberLabel(productNumber || resolvedProductId)}` : captureReference || normalizeText(existing.name) || `Draft product ${productNumber || resolvedProductId}`);
       slug = normalizeText(existing.slug) || slugify(`${resolvedName}-${productNumber || resolvedProductId}`) || `product-${productNumber || resolvedProductId}`;
       sku = skuOverride || normalizeText(existing.sku) || `DND-${String(productNumber || resolvedProductId).padStart(5, "0")}`;
       readyNotes = [
@@ -645,7 +645,7 @@ export async function onRequestPost(context) {
         .run();
     } else {
       productNumber = await allocateNextProductNumber(db);
-      resolvedName = name || captureReference || `Draft product ${productNumber}`;
+      resolvedName = name || (captureEntryMode === "camera" ? `Temporary ${formatProductNumberLabel(productNumber)}` : captureReference || `Draft product ${productNumber}`);
 
       const identity = await resolveNewProductIdentity({
         db,
@@ -657,6 +657,9 @@ export async function onRequestPost(context) {
       });
 
       productNumber = identity.productNumber || productNumber;
+      // The persisted temporary name must use the final allocated DD identity,
+      // even when a concurrent draft consumed the preferred sequence number.
+      if (captureEntryMode === "camera" && !name) resolvedName = `Temporary ${formatProductNumberLabel(productNumber)}`;
       slug = identity.slug || slugify(`${resolvedName}-${productNumber}`) || `product-${productNumber}`;
       sku = identity.sku || buildDefaultSku(productNumber, productNumber);
 

@@ -348,3 +348,138 @@ document.addEventListener('DOMContentLoaded', () => {
   setMode(captureMode);
   loadTodayDrafts();
 });
+
+
+// Build 698 — opt-in camera-first standalone New Product draft. Uses the existing
+// authenticated D1 product creation and R2 image/video endpoints. Never publishes.
+document.addEventListener('DOMContentLoaded',()=>{
+  const panel=document.getElementById('dd698-camera-start');
+  if(!panel)return;
+  const $=id=>document.getElementById(id);
+  const name=$('dd698CameraName'),camera=$('dd698CameraPhoto'),
+    library=$('dd698PhotoLibrary'),video=$('dd698CameraVideo'),
+    preview=$('dd698CameraPreview'),status=$('dd698CameraStatus'),
+    save=$('dd698CameraSave'),clear=$('dd698CameraClear'),
+    link=$('dd698CameraSavedLink');
+  const photos=[];
+  let saving=false;
+  const key=f=>[f.name,f.size,f.lastModified].join('|');
+  const validPhoto=f=>f&&/^image\/(jpeg|png|webp|gif|avif|heic|heif)$/i.test(f.type||'')&&
+    Number(f.size)>0&&Number(f.size)<=10*1024*1024;
+  const videoKind=f=>{
+    const ext=String(f?.name||'').split('.').pop().toLowerCase();
+    const map={mp4:'video/mp4',mov:'video/quicktime',webm:'video/webm'};
+    return map[ext]&&(!f.type||f.type===map[ext])?map[ext]:null;
+  };
+  const sizeLabel=f=>(f.size/1048576).toFixed(1)+' MB';
+  const setMessage=(s,bad=false)=>{status.textContent=s;status.style.color=bad?'#b00020':'';};
+  function render(){
+    const vids=Array.from(video.files||[]),items=photos.map(f=>f.name+' ('+sizeLabel(f)+')');
+    if(vids[0])items.push('Video: '+vids[0].name+' ('+sizeLabel(vids[0])+')');
+    preview.replaceChildren();
+    const p=document.createElement('p');p.className='small';
+    p.textContent=items.length?items.length+' selected media: '+items.join(' · '):
+      'Choose a photo or video to start. No photos or video are saved until Save is pressed.';
+    preview.appendChild(p);
+    save.disabled=saving;
+  }
+  function addPhotos(files){
+    for(const file of Array.from(files||[])){
+      if(!validPhoto(file)){setMessage('Use supported photos of 10 MB or less (JPEG, PNG, WebP, GIF, AVIF or HEIC).',true);continue;}
+      if(photos.some(x=>key(x)===key(file)))continue;
+      if(photos.length>=7){setMessage('This quick draft accepts seven images. Save another batch separately.',true);break;}
+      photos.push(file);
+    }
+    render();
+  }
+  camera.addEventListener('change',()=>{addPhotos(camera.files);camera.value='';});
+  library.addEventListener('change',()=>{addPhotos(library.files);library.value='';});
+  video.addEventListener('change',()=>{
+    const f=video.files?.[0];
+    if(f&&(!videoKind(f)||!f.size||f.size>25*1024*1024)){
+      video.value='';setMessage('Video must be MP4, MOV or WebM and 25 MB or smaller.',true);
+    }
+    render();
+  });
+  clear.addEventListener('click',()=>{
+    if(saving)return;
+    photos.length=0;camera.value='';library.value='';video.value='';render();
+    setMessage('Unsaved media selection cleared. Existing saved drafts were not changed.');
+  });
+  async function parseResponse(response,error){
+    let data=null;try{data=await response.json();}catch{}
+    if(!response.ok||!data?.ok)throw new Error(data?.error||error||'Save failed.');
+    return data;
+  }
+  save.addEventListener('click',async()=>{
+    if(saving)return;
+    const movie=video.files?.[0]||null,display=name.value.trim();
+    if(!photos.length&&!movie&&!display){
+      setMessage('Take a photo, record a video, or enter a quick name first.',true);return;
+    }
+    if(!window.DDAuth?.isLoggedIn?.()||!window.DDAuth.apiFetch){
+      setMessage('Sign in as an Admin before saving a camera-first product.',true);return;
+    }
+    if(movie&&(!videoKind(movie)||movie.size>25*1024*1024)){
+      setMessage('Video must be MP4, MOV or WebM and 25 MB or smaller.',true);return;
+    }
+    saving=true;save.disabled=true;link.replaceChildren();
+    const f=new FormData();f.set('capture_entry_mode','camera');f.set('inventory_quantity','1');
+    f.set('price_cents','0');f.set('name',display);
+    f.set('capture_reference','Camera-first capture '+new Date().toISOString());
+    for(const image of photos)f.append('images',image,image.name);
+    let created=null;
+    try{
+      setMessage('Saving the draft and selected photos to existing Cloudflare storage…');
+      const response=await window.DDAuth.apiFetch('/api/admin/mobile-create-product',{method:'POST',body:f});
+      const data=await parseResponse(response,'Could not save camera-first draft.');
+      const product=data.product||{},productId=Number(product.product_id||0);
+      if(!Number.isSafeInteger(productId)||productId<1)
+        throw Error('Product write outcome unknown. Check drafts before retrying; do not create a duplicate.');
+      created=productId;
+      const label=data.product_number_label||('DD'+String(product.product_number||productId));
+      const savedName=String(product.name||display||('Temporary '+label));
+      const uploaded=Array.isArray(data.uploaded_images)?data.uploaded_images:[];
+      const successes=uploaded.filter(x=>x.ok===true).length;
+      photos.length=0;camera.value='';library.value='';render();
+      const a=document.createElement('a');
+      a.className='btn secondary';a.href='/admin/product-editor/?product_id='+encodeURIComponent(productId);
+      a.textContent='Edit '+label+' in full Product Editor';
+      const b=document.createElement('a');
+      b.className='btn secondary';b.href='/admin/mobile-product/';
+      b.textContent='Open saved draft list';
+      link.replaceChildren(a,document.createTextNode(' '),b);
+      const notes=[label+' saved as '+savedName+' (draft / not published).'];
+      if(uploaded.length!==successes||successes!==Number(data.uploaded_images?.length||0)||
+        successes===0&&Number(f.getAll('images').length)>0){
+        notes.push('Some photos may not have reached R2. Check attachments before uploading again.');
+      }else if(successes) notes.push(successes+' photo(s) uploaded.');
+      if(movie){
+        setMessage(notes.join(' ')+' Attaching video for internal review…');
+        const movieForm=new FormData();
+        movieForm.set('product_id',String(productId));
+        movieForm.set('file',movie,movie.name);
+        movieForm.set('video_title','Unreviewed camera-first product video');
+        try{
+          const movieResponse=await window.DDAuth.apiFetch('/api/admin/product-video-attachments',{method:'POST',body:movieForm});
+          const result=await parseResponse(movieResponse,'Video attachment not confirmed.');
+          if(!Number.isSafeInteger(Number(result.product_video_id))||Number(result.product_video_id)<1)
+            throw Error('Video attachment receipt missing.');
+          notes.push('Video attached for internal review only.');
+          video.value='';
+        }catch(error){
+          notes.push('Video outcome unconfirmed: '+error.message+
+            ' Check Product video attachments before retrying to avoid duplicates.');
+        }
+      }
+      setMessage(notes.join(' '),notes.some(x=>/unconfirmed|Some photos|could not/i.test(x)));
+      name.value='';render();
+      $('mobileRefreshDraftsButton')?.click();
+      $('mobileTodayRefreshButton')?.click();
+    }catch(error){
+      setMessage((created?'Draft #'+created+' saved but later step failed: ':'')+
+        (error?.message||'Unable to save. Check existing drafts before retrying.'),true);
+    }finally{saving=false;render();}
+  });
+  render();
+});
