@@ -656,7 +656,7 @@ document.addEventListener('DOMContentLoaded',()=>{
     if(!window.DDAuth?.isLoggedIn?.()||!window.DDAuth.apiFetch){
       setMessage('Admin login required before saving an original camera draft.',true);return;
     }
-    saving=true;render();
+    saving=true;render();resetProof700();
     try{
       setMessage('Saving or recovering one original camera draft…');
       await createOrRecover();
