@@ -98,7 +98,8 @@ const staleCurrent={...current,master_fresh:false,expires_at:'2026-11-12T14:00:0
 a=assessFinance693(staleCurrent,{...base,master_accepted_now:false},[],now);
 assert.equal(a.master_accepted_now,false);
 assert.equal(a.provenance.current_master_receipt_id,null);
-const mismatch={...base,provenance:{...base.provenance,
+const mismatch={...base,owner_reviews:base.owner_reviews.filter(x=>x.decision!=='record_sla_followup'),
+provenance:{...base.provenance,
 historical_receipt_pairs:[{...base.provenance.historical_receipt_pairs[0],
 provenance_state:'HOLD_SOURCE_PROVENANCE'}]}};
 a=assessFinance693(current,mismatch,[],now);
