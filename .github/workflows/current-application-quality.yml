@@ -1061,6 +1061,8 @@ jobs:
         run: node scripts/build686_finance_aging_drift_priority_contract.mjs
       - name: Build 687 owner recovery SLA, historical signed Master receipt renewal and closure analytics regression
         run: node scripts/build687_finance_sla_renewal_closure_contract.mjs
+      - name: Build 688 financial SLA breach escalation, independent Master renewal chain and owner signoff regression
+        run: node scripts/build688_financial_breach_renewal_signoff_contract.mjs
       - name: JavaScript syntax
         run: |
           node --check functions/_middleware.js
