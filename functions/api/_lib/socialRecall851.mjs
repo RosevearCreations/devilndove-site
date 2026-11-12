@@ -22,6 +22,7 @@ export async function verifyDeviceWitness851(env,record,signature,{queueId,platf
  return signature851(env?.DND_851_DEVICE_WITNESS_PUBLIC_KEY,signature,record,FIELDS_DEVICE,'DND-851-DEVICE-PROVIDER-WITNESS-V1');
 }
 export async function verifyMasterAck851(env,record,signature,{queueId,deviceNonce,ownerEmail,now=Date.now()}={}){
+ if(!env?.DND_851_DEVICE_WITNESS_PUBLIC_KEY||!env?.DND_851_MASTER_RECEIVER_PUBLIC_KEY||env.DND_851_DEVICE_WITNESS_PUBLIC_KEY===env.DND_851_MASTER_RECEIVER_PUBLIC_KEY)return {ok:false,reason:'Independent Master receiver signer must be distinct from original-device witness signer.'};
  if(record?.version!==1||record?.kind!=='master_receiver_runtime_ack'||record?.source!=='devilndove'||record?.revision!==env?.CF_PAGES_COMMIT_SHA||!/^[a-f0-9]{40}$/.test(record?.revision||'')||record?.queue_id!==queueId||!id(queueId)||record?.contract!==CONTRACT_851||record?.consumer!=='ai-data-platform'||!safe(record?.receiver_id)||record?.device_nonce!==deviceNonce||!safe(record?.device_nonce)||record?.decision!=='scoped_pilot_accepted'||!safe(record?.verifier_id)||!safe(record?.nonce)||record.nonce===deviceNonce||record.verifier_id.toLowerCase()===String(ownerEmail||'').toLowerCase()||!freshness(record?.observed_at,now))return {ok:false,reason:'Exact independent Master receiver runtime ACK and current source custody are required.'};
  return signature851(env?.DND_851_MASTER_RECEIVER_PUBLIC_KEY,signature,record,FIELDS_ACK,'DND-851-AIDATA-RUNTIME-ACK-V1');
 }
