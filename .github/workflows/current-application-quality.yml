@@ -1059,6 +1059,8 @@ jobs:
         run: node scripts/build685_financial_receipt_freshness_recovery_contract.mjs
       - name: Build 686 financial receipt age warnings, exact Master drift and owner recovery queue regression
         run: node scripts/build686_finance_aging_drift_priority_contract.mjs
+      - name: Build 687 owner recovery SLA, historical signed Master receipt renewal and closure analytics regression
+        run: node scripts/build687_finance_sla_renewal_closure_contract.mjs
       - name: JavaScript syntax
         run: |
           node --check functions/_middleware.js

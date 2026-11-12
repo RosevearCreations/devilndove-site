@@ -2238,6 +2238,93 @@ total_visible_open:open.length,cases:open.slice(0,30),
 connection:'HOLD_INDEPENDENT_CONTINUOUS_RUNTIME_TELEMETRY',automated_escalation:false};
 }
 
+// Build 687: bounded, read-only owner SLA and historical financial receipt analytics.
+// The two-hour target is advisory, not an enforceable SLA. Historical D1 entries are
+// NOT independently reverified current Master acceptance; only financial685 can do that.
+export function assessFinance687(current,incidentRows,acceptanceRows,now=Date.now(),targetMinutes=120){
+const minutes=(value)=>{const t=Date.parse(value||'');return Number.isFinite(t)&&t<=now+300000?
+Math.max(0,Math.floor((now-t)/60000)):null;};
+const valid=Number.isSafeInteger(Number(current?.queue_id))&&Number(current.queue_id)>0;
+const target=Number.isSafeInteger(targetMinutes)&&targetMinutes>=30&&targetMinutes<=1440?targetMinutes:120;
+const rawCases=Array.isArray(incidentRows)?incidentRows:[],rawReceipts=Array.isArray(acceptanceRows)?acceptanceRows:[];
+const complete=!!current?.history_complete&&rawCases.length<=120&&rawReceipts.length<=80;
+const cases=new Map();
+for(const r of rawCases.slice().reverse()){
+const d=safeJson(r.response_json,{});
+if(!/^incident-[A-Za-z0-9_-]{16,100}$/.test(d.case_id||''))continue;
+if(!['owner_exception_opened_685','owner_exception_evidence_closed_685'].includes(r.attempt_status))continue;
+const old=cases.get(d.case_id)||{case_id:d.case_id};
+if(r.attempt_status==='owner_exception_opened_685'){
+old.opened_at=r.attempted_at;old.issue_code=d.issue_code;
+old.opened_acceptance_receipt_id=Number(d.opened_acceptance_receipt_id||0);
+old.fingerprint_sha256=d.fingerprint_sha256||null;old.open_id=Number(r.social_post_attempt_id);
+old.status='OPEN';
+}else{
+old.closed_at=r.attempted_at;old.close_id=Number(r.social_post_attempt_id);
+old.closed_fingerprint=d.fingerprint_sha256||null;
+old.newer_master_receipt_id=Number(d.verified_master_acceptance_receipt_id||0);
+old.closed_opened_acceptance_id=Number(d.opened_acceptance_receipt_id||0);
+old.status='OWNER_CLOSURE_RECORDED';
+}
+cases.set(d.case_id,old);
+}
+const open=[],closed=[];let invalid=0;
+for(const c of cases.values()){
+const opening=minutes(c.opened_at),closing=minutes(c.closed_at);
+if(!c.opened_at||!Number.isFinite(opening)){invalid++;continue;}
+if(c.status==='OPEN'){
+const state=opening>=target?'OVERDUE':opening>=Math.floor(target*0.75)?'DUE_SOON':'WITHIN_TARGET';
+open.push({case_id:c.case_id,issue_code:c.issue_code,opened_at:c.opened_at,
+open_receipt_id:c.open_id,age_minutes:opening,sla_state:state,
+due_at:new Date(Date.parse(c.opened_at)+target*60000).toISOString()});
+}else if(c.status==='OWNER_CLOSURE_RECORDED'&&Number.isFinite(closing)&&
+closing<=opening&&c.closed_fingerprint===c.fingerprint_sha256&&
+c.closed_opened_acceptance_id===c.opened_acceptance_receipt_id&&
+c.newer_master_receipt_id>c.opened_acceptance_receipt_id){
+closed.push({case_id:c.case_id,closure_receipt_id:c.close_id,
+newer_master_receipt_id:c.newer_master_receipt_id,elapsed_minutes:opening-closing,
+within_advisory_target:opening-closing<=target,
+historical_status:'OWNER_CLOSURE_RECORDED_NOT_CURRENT_MASTER_PROOF'});
+}else invalid++;
+}
+open.sort((a,b)=>(a.sla_state==='OVERDUE'?0:a.sla_state==='DUE_SOON'?1:2)-
+(b.sla_state==='OVERDUE'?0:b.sla_state==='DUE_SOON'?1:2)||
+b.age_minutes-a.age_minutes);
+const receipts=rawReceipts.map(r=>{const d=safeJson(r.response_json,{});
+return{receipt_id:Number(r.social_post_attempt_id),
+recorded_at:r.attempted_at,issued_at:d.claim?.issued_at||null,
+state:Number(r.social_post_attempt_id)===Number(current?.verified_master_receipt_id)&&current.master_fresh?
+'CURRENT_INDEPENDENT_SIGNATURE_REVERIFIED':'RECORDED_HISTORY_NOT_CURRENTLY_REVERIFIED'};
+});
+const last=receipts[0]||null;
+return{status:!valid?'HOLD_SELECT_CAMPAIGN':!complete||invalid>0?'HOLD_BOUNDED_HISTORY_INCOMPLETE':'OWNER_REVIEW_ANALYTICS_ONLY',
+campaign_queue_id:valid?Number(current.queue_id):null,observed_at:new Date(now).toISOString(),
+history_complete:complete&&invalid===0,partial_history:!complete||invalid>0,
+advisory_target_minutes:target,advisory_only:true,
+open_count:open.length,overdue_count:open.filter(x=>x.sla_state==='OVERDUE').length,
+due_soon_count:open.filter(x=>x.sla_state==='DUE_SOON').length,
+closed_count:closed.length,closed_within_target_count:closed.filter(x=>x.within_advisory_target).length,
+mean_recorded_closure_minutes:closed.length?Math.round(closed.reduce((s,x)=>s+x.elapsed_minutes,0)/closed.length):null,
+invalid_or_unpaired_history_count:invalid,owner_followups:open.slice(0,25),
+renewal:{recorded_receipt_count:receipts.length,recorded_renewal_count:Math.max(0,receipts.length-1),
+history_complete:rawReceipts.length<=80,latest_recorded_receipt_id:last?.receipt_id||null,
+current_verified_receipt_id:current?.master_fresh?current.verified_master_receipt_id:null,
+current_status:current?.master_fresh?'CURRENT_SIGNED_MASTER_EVIDENCE':'HOLD_INDEPENDENT_MASTER_RECHECK',
+expires_at:current?.master_fresh?current.expires_at:null,
+receipts:receipts.slice(0,8),background_renewal:false},
+master_accepted_now:!!current?.master_fresh&&complete&&invalid===0,
+connection:'HOLD_INDEPENDENT_CONTINUOUS_RUNTIME_TELEMETRY',
+profitability_certified:false,automatic_case_closure:false};
+}
+async function finance687(db,env,id){
+const n=Number(id);
+if(!Number.isSafeInteger(n)||n<1)return assessFinance687({queue_id:0,history_complete:false},[],[]);
+const current=await financial685(db,env,n);
+const incidents=rows(await db.prepare("SELECT social_post_attempt_id,attempt_status,response_json,attempted_at FROM social_post_attempts WHERE social_post_queue_id=? AND platform_key='finance_exception_685' ORDER BY social_post_attempt_id DESC LIMIT 121").bind(n).all());
+const receipts=rows(await db.prepare("SELECT social_post_attempt_id,response_json,attempted_at FROM social_post_attempts WHERE social_post_queue_id=? AND platform_key='finance_acceptance_684' ORDER BY social_post_attempt_id DESC LIMIT 81").bind(n).all());
+return assessFinance687(current,incidents,receipts);
+}
+
 // Build 682 — source-only financial export and owner discrepancy audit.
 async function finance682(db,env,id){
 const n=Number(id);
@@ -2318,7 +2405,7 @@ return new Response(JSON.stringify(evidence,null,2),{status:200,headers:{
 'Cache-Control':'private, no-store','X-Content-Type-Options':'nosniff'}});
 }
 const data=await summarize(db,context.env);
-return jsonResponse({ ok:true,...data,receipts673:await receipts673(db),engagement675:await engagement675(db),financial676:await financial676(db),financial678:await financialSummary678(db,context.request.headers.get('x-campaign-queue-id')||new URL(context.request.url).searchParams.get('campaign_queue_id')),financial679:await campaignNet679(db,new URL(context.request.url).searchParams.get('campaign_queue_id')),financial680:await finance680(db,context.env,new URL(context.request.url).searchParams.get('campaign_queue_id')),financial681:await finance681(db,context.env,new URL(context.request.url).searchParams.get('campaign_queue_id')),financial682:await finance682(db,context.env,new URL(context.request.url).searchParams.get('campaign_queue_id')),financial683:await financial683(db,context.env,new URL(context.request.url).searchParams.get('campaign_queue_id')),financial684:await financial684(db,context.env,new URL(context.request.url).searchParams.get('campaign_queue_id')),financial685:await financial685(db,context.env,new URL(context.request.url).searchParams.get('campaign_queue_id')),financialRecoveryQueue686:await globalFinanceQueue686(db),queue:data.queue.map(normalizeQueueRow),mode:'review_first_api_when_configured'},200,{ 'Cache-Control':'no-store'});
+return jsonResponse({ ok:true,...data,receipts673:await receipts673(db),engagement675:await engagement675(db),financial676:await financial676(db),financial678:await financialSummary678(db,context.request.headers.get('x-campaign-queue-id')||new URL(context.request.url).searchParams.get('campaign_queue_id')),financial679:await campaignNet679(db,new URL(context.request.url).searchParams.get('campaign_queue_id')),financial680:await finance680(db,context.env,new URL(context.request.url).searchParams.get('campaign_queue_id')),financial681:await finance681(db,context.env,new URL(context.request.url).searchParams.get('campaign_queue_id')),financial682:await finance682(db,context.env,new URL(context.request.url).searchParams.get('campaign_queue_id')),financial683:await financial683(db,context.env,new URL(context.request.url).searchParams.get('campaign_queue_id')),financial684:await financial684(db,context.env,new URL(context.request.url).searchParams.get('campaign_queue_id')),financial685:await financial685(db,context.env,new URL(context.request.url).searchParams.get('campaign_queue_id')),financialRecoveryQueue686:await globalFinanceQueue686(db),financial687:await finance687(db,context.env,new URL(context.request.url).searchParams.get('campaign_queue_id')),queue:data.queue.map(normalizeQueueRow),mode:'review_first_api_when_configured'},200,{ 'Cache-Control':'no-store'});
 } catch (error){
 await captureRuntimeIncident(context.env,context.request,{
 incident_scope:'admin_social',
