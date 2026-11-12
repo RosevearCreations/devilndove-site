@@ -1071,6 +1071,8 @@ jobs:
         run: node scripts/build691_financial_aging_gap_owner_closure_contract.mjs
       - name: Build 692 financial escalation SLA follow-up, historical Master provenance and owner closure audit continuity regression
         run: node scripts/build692_financial_sla_provenance_closure_contract.mjs
+      - name: Build 693 owner financial SLA follow-up aging, Master provenance revalidation and acceptance history regression
+        run: node scripts/build693_financial_sla_aging_provenance_owner_history_contract.mjs
       - name: JavaScript syntax
         run: |
           node --check functions/_middleware.js
