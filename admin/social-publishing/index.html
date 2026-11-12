@@ -74,20 +74,20 @@
 <label>Signer timestamp (UTC ISO 8601)<input class="input" id="dd683SourceTime" required placeholder="2026-11-12T05:00:00.000Z"></label>
 <label>Signed source claim (Ed25519 signature, base64)<textarea class="input" id="dd683SourceSignature" rows="2" required></textarea></label>
 <label><input id="dd683SourceReviewed" type="checkbox" required> Owner checked exact current source and independent signer custody.</label>
-<button class="btn primary" type="submit">Admit signer receipt</button></form>
+<button type="button" class="btn secondary" id="dd683PrepareSource">Prepare exact signer claim</button> <button class="btn primary" type="submit">Admit signer receipt</button></form>
 <form id="dd683Master"><h3>2. Correlate independently signed Master receipt</h3>
 <label>Master revision<input class="input" id="dd683MasterRevision" required maxlength="120"></label>
 <label>One-time Master nonce<input class="input" id="dd683MasterNonce" required minlength="16" maxlength="100"></label>
 <label>Master timestamp (UTC ISO 8601)<input class="input" id="dd683MasterTime" required placeholder="2026-11-12T05:00:00.000Z"></label>
 <label>AI Data signed exact source receipt (Ed25519 base64)<textarea class="input" id="dd683MasterSignature" rows="2" required></textarea></label>
 <label><input id="dd683MasterReviewed" type="checkbox" required> Owner checked the independent source receipt and Master signature.</label>
-<button class="btn primary" type="submit">Correlate signed Master receipt</button></form>
+<button type="button" class="btn secondary" id="dd683PrepareMaster">Prepare exact Master claim</button> <button class="btn primary" type="submit">Correlate signed Master receipt</button></form>
 <form id="dd683Closure"><h3>3. Owner discrepancy evidence closure</h3>
 <label>Previously reviewed discrepancy<select id="dd683Case" class="input" required><option value="">Choose reviewed case</option></select></label>
 <label>Resolution evidence note<textarea class="input" id="dd683Note" rows="3" minlength="20" maxlength="400" required></textarea></label>
 <label><input id="dd683ClosureReviewed" type="checkbox" required> Owner confirmed current source fingerprint and both signed receipt IDs.</label>
 <button class="btn primary" type="submit">Close verified evidence discrepancy</button></form>
-<p id="dd683Result" role="status" aria-live="polite">Independent signing and active Master admission are external requirements; no automated receipt generation occurs.</p>
+<p class="small">Copy the exact JSON below into an independently controlled signing process. Never enter private keys here.</p><pre id="dd683Claim" tabindex="0" style="white-space:pre-wrap;overflow-wrap:anywhere"></pre><p id="dd683Result" role="status" aria-live="polite">Independent signing and active Master admission are external requirements; no automated receipt generation occurs.</p>
 </section>
 <section class="card" id="dd682-finance" aria-labelledby="dd682-title">
  <p class="eyebrow">Build 682 · Source-owned audit export</p><h2 id="dd682-title">Financial evidence export &amp; Master discrepancy review</h2>
