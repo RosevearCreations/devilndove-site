@@ -403,7 +403,7 @@ const built=createPanel('action-recovery',definition,++ordinal);built.trigger.cl
 }
 return ordinal;
 }
-function refresh(){
+function refresh() {
 ensureStylesheet();
 const path=normalizedPath();
 ensureHelpCentreLauncher(path);
