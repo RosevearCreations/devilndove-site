@@ -4582,8 +4582,10 @@ const n=Number(current?.queue_id),selected=Number.isSafeInteger(n)&&n>0,
 rows700=Array.isArray(historyRows)?historyRows:[],
 trust=!!signer?.id&&!!signer?.key&&!!signer?.thirdId&&!!signer?.thirdKey&&
 !!signer?.custodianId&&!!signer?.reconcilerId&&
+!!signer?.custodianKey&&!!signer?.reconcilerKey&&
 signer.id!==signer.thirdId&&signer.id!==signer.custodianId&&
-signer.id!==signer.reconcilerId&&signer.key!==signer.thirdKey;
+signer.id!==signer.reconcilerId&&signer.key!==signer.thirdKey&&
+signer.key!==signer.custodianKey&&signer.key!==signer.reconcilerKey;
 const cases=(prior?.independent_verification?.items||[])
 .filter(x=>x.independent_document_signature_verified&&x.independent_witness_receipt_id)
 .map(x=>({older_receipt_id:Number(x.older_receipt_id),
@@ -4677,6 +4679,8 @@ thirdId:normalizeText(env?.FINANCIAL_SOURCE_REPAIR_VERIFIER_ID_699),
 thirdKey:normalizeText(env?.FINANCIAL_SOURCE_REPAIR_VERIFIER_PUBLIC_KEY_699),
 custodianId:normalizeText(env?.FINANCIAL_SOURCE_CORRECTION_SIGNER_ID_696),
 reconcilerId:normalizeText(env?.FINANCIAL_SOURCE_RECONCILIATION_SIGNER_ID_697),
+custodianKey:normalizeText(env?.FINANCIAL_SOURCE_CORRECTION_CUSTODIAN_PUBLIC_KEY_696),
+reconcilerKey:normalizeText(env?.FINANCIAL_SOURCE_RECONCILIATION_PUBLIC_KEY_697),
 originAuthorized:!!env?.FINANCIAL_SOURCE_LIVE_READBACK_ORIGIN_700
 });
 }
@@ -4686,6 +4690,8 @@ const configured=new URL(String(input||'')),allow=new URL(String(origin||''));
 if(configured.protocol!=='https:'||allow.protocol!=='https:'||
 configured.origin!==allow.origin||configured.username||configured.password||
 configured.hash||allow.pathname!=='/'||allow.search||allow.hash||
+!/^[a-z0-9-]+(?:\.[a-z0-9-]+)+$/i.test(configured.hostname)||
+/^[0-9.]+$/.test(configured.hostname)||/\.(?:local|internal|localhost)$/i.test(configured.hostname)||
 /^(localhost|127\.|10\.|192\.168\.|172\.(1[6-9]|2\d|3[01])\.)/i.test(configured.hostname))
 return null;
 return configured;
