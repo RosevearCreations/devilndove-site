@@ -1388,6 +1388,99 @@ render('dd696Master',v?.master_closure?.items,x=>
 ' · continuity '+(x.current_master_continuity_recorded?'RECORDED':'SOURCE/MASTER HOLD'));
 chooseSources696();
 }
+
+let audit697=null;
+function chooseSources697(){
+const select=$('dd697Source');if(!select)return;
+select.replaceChildren(new Option('Choose source-bound prior receipt',''));
+const kind=$('dd697Decision').value,v=audit697,
+signed=kind==='reconcile_correction_evidence';
+for(const id of ['dd697Signer','dd697Nonce','dd697Issued','dd697Signature'])
+$(id).required=signed;
+$('dd697Prepare').disabled=!signed;
+$('dd697Disposition').disabled=kind!=='review_escalation_resolution';
+$('dd697Claim').value='';
+if(!v?.history_complete)return;
+if(signed){
+for(const x of v.reconciliation?.items||[]){
+if(x.independent_reconciliation_recorded)continue;
+select.add(new Option('Custodian #'+x.custodian_attestation_receipt_id+
+' · original source #'+x.older_receipt_id+' / #'+x.newer_receipt_id,
+x.older_receipt_id+'|'+x.newer_receipt_id+'|'+x.custodian_attestation_receipt_id+'|'));
+}
+}else if(kind==='review_escalation_resolution'){
+for(const x of v.aging?.items||[]){
+if(x.owner_review_recorded)continue;
+select.add(new Option(x.case_id+' · prior owner escalation #'+x.escalation_receipt_id,
+x.original_resolution_receipt_id+'|0|'+x.escalation_receipt_id+'|'+x.case_id));
+}
+}else if(kind==='renew_master_attestation'){
+for(const x of v.master?.items||[]){
+if(!x.eligible_for_renewal||x.renewal_review_recorded)continue;
+select.add(new Option('Signed Master continuity #'+x.prior_continuity_receipt_id+
+' · original source #'+x.older_receipt_id+' / #'+x.newer_receipt_id,
+x.older_receipt_id+'|'+x.newer_receipt_id+'|'+x.prior_continuity_receipt_id+'|'));
+}
+}
+}
+function claimFor697(){
+if(!state?.queue_id||!audit697?.history_complete||
+$('dd697Decision').value!=='reconcile_correction_evidence')
+throw Error('Select exact current signed custodian reconciliation evidence.');
+const [refStr,newerStr,priorStr]=$('dd697Source').value.split('|');
+const ref=Number(refStr),newer=Number(newerStr),prior=Number(priorStr);
+const item=(audit697.reconciliation?.items||[]).find(x=>
+x.older_receipt_id===ref&&x.newer_receipt_id===newer&&
+x.custodian_attestation_receipt_id===prior&&!x.independent_reconciliation_recorded);
+const signer=$('dd697Signer').value.trim(),nonce=$('dd697Nonce').value.trim(),
+issued=$('dd697Issued').value.trim();
+if(!item||!audit697.reconciliation.signer_configured||
+signer!==audit697.reconciliation.expected_reconciler_id||
+!/^[A-Za-z0-9_-]{16,100}$/.test(nonce)||!issued)
+throw Error('Original authenticated custodian receipt and distinct independent reconciler signer configuration required. HOLD.');
+return{v:1,purpose:'devilndove_finance_independent_reconciliation_697',source:'devilndove',
+queue_id:state.queue_id,older_receipt_id:ref,newer_receipt_id:newer,
+custodian_attestation_receipt_id:prior,
+fingerprint_sha256:state.fingerprint_sha256,source_revision:state.source_revision,
+reconciler_id:signer,nonce,issued_at:issued,
+decision:'evidence_pair_reconciled_not_source_repair'};
+}
+function draw697(d){
+if(!$('dd697-finance'))return;
+const v=d.financial697||null;audit697=v;
+$('dd697Status').textContent=v?.campaign_queue_id?
+v.status+' · bounded evidence '+(v.history_complete?'COMPLETE':'HOLD')+
+' · source repair HOLD · independently current Master '+(v.master_accepted_now?'VERIFIED':'HOLD')+
+' · audited financials and continuous connection HOLD':
+'HOLD · Choose and refresh exact financial campaign.';
+$('dd697Stats').textContent=v?.campaign_queue_id?
+'Original mismatches '+v.reconciliation.original_mismatch_count+
+' · two-party signed reconciliations '+v.reconciliation.independently_reconciled_count+
+' · distinct reconciler '+(v.reconciliation.signer_configured?'CONFIGURED':'HOLD')+
+' · owner escalation reviews pending '+v.aging.pending_resolution_review_count+
+' · signed Master renewal reviews pending '+v.master.pending_renewal_review_count:
+'Original Build 697 source-bound evidence unavailable.';
+function render(id,items,fn){
+const el=$(id);el.replaceChildren();
+for(const x of items||[]){const li=document.createElement('li');li.textContent=fn(x);el.appendChild(li);}
+if(!el.childElementCount){const li=document.createElement('li');li.textContent='No eligible original evidence in bounded history.';el.appendChild(li);}
+}
+render('dd697Corrections',v?.reconciliation?.items,x=>
+'Custodian #'+x.custodian_attestation_receipt_id+' · original #'+x.older_receipt_id+
+' / #'+x.newer_receipt_id+' · second-party reconciliation '+
+(x.independent_reconciliation_recorded?'AUTHENTICATED #'+x.reconciliation_receipt_id:'PENDING')+
+' · source repair HOLD');
+render('dd697Aging',v?.aging?.items,x=>
+x.case_id+' · escalation #'+x.escalation_receipt_id+
+' · owner resolution review '+(x.owner_review_recorded?'RECORDED #'+x.owner_review_receipt_id:'PENDING')+
+' · external incident remediation HOLD');
+render('dd697Master',v?.master?.items,x=>
+'Original #'+x.older_receipt_id+' / #'+x.newer_receipt_id+
+' · prior continuity #'+(x.prior_continuity_receipt_id||'—')+
+' · renewal '+(x.renewal_review_recorded?'OWNER REVIEW RECORDED':'SOURCE/MASTER HOLD')+
+' · no new external signature inferred');
+chooseSources697();
+}
 async function refresh(){
 const id=Number($('dd685Campaign').value);
 if(!id){state=null;$('dd685Status').textContent='HOLD · Select a campaign.';}
@@ -1404,6 +1497,7 @@ draw693(d);
 draw694(d);
 draw695(d);
 draw696(d);
+draw697(d);
 if(!id)return;
 if(!v||v.queue_id!==id)throw Error('Fresh exact financial evidence was not returned.');
 state=v;
@@ -1431,7 +1525,7 @@ await refresh();
 document.addEventListener('DOMContentLoaded',()=>{
 if(!$('dd685-finance'))return;
 (async()=>{try{
-const d=await api(null);draw686(d);draw687(d);draw688(d);draw689(d);draw690(d);draw691(d);draw692(d);draw693(d);draw694(d);draw695(d);draw696(d);const seen=new Set();
+const d=await api(null);draw686(d);draw687(d);draw688(d);draw689(d);draw690(d);draw691(d);draw692(d);draw693(d);draw694(d);draw695(d);draw696(d);draw697(d);const seen=new Set();
 for(const q of d.queue||[])if(q.utm_campaign&&!seen.has(q.social_post_queue_id)){
 seen.add(q.social_post_queue_id);
 $('dd685Campaign').add(new Option(q.utm_campaign+' · #'+q.social_post_queue_id,q.social_post_queue_id));
@@ -1453,6 +1547,66 @@ $('dd693Refresh').addEventListener('click',()=>void refresh());
 $('dd694Refresh').addEventListener('click',()=>void refresh());
 $('dd695Refresh').addEventListener('click',()=>void refresh());
 $('dd696Refresh').addEventListener('click',()=>void refresh());
+$('dd697Refresh').addEventListener('click',()=>void refresh());
+$('dd697Decision').addEventListener('change',chooseSources697);
+chooseSources697();
+$('dd697Prepare').addEventListener('click',()=>{
+try{
+const claim=claimFor697();$('dd697Claim').value=JSON.stringify(claim);
+$('dd697Result').textContent='Exact claim prepared. Obtain a signed reply from a DIFFERENT independent reconciler. Original source repair remains HOLD.';
+}catch(e){$('dd697Result').textContent='HOLD · '+e.message;}
+});
+$('dd697Form').addEventListener('submit',async e=>{
+e.preventDefault();const btn=$('dd697Submit');btn.disabled=true;
+try{
+if(!state?.queue_id||!audit697?.history_complete)
+throw Error('Refresh exact complete bounded source history first.');
+if(!$('dd697Reviewed').checked)throw Error('Explicit original owner review required.');
+const [a,b,c,caseId]=$('dd697Source').value.split('|'),
+ref=Number(a),newer=Number(b),prior=Number(c),
+decision=$('dd697Decision').value,note=$('dd697Note').value.trim();
+if(!Number.isSafeInteger(ref)||ref<1||!Number.isSafeInteger(prior)||prior<1||
+note.length<20||note.length>400)
+throw Error('Choose exact prior evidence and provide 20–400 character owner review.');
+let fields={};
+if(decision==='reconcile_correction_evidence'){
+const claim=claimFor697();
+if($('dd697Claim').value!==JSON.stringify(claim))
+throw Error('Canonical original claim changed. Prepare fresh independent signature.');
+fields={reconciler_id:claim.reconciler_id,nonce:claim.nonce,
+issued_at:claim.issued_at,signature:$('dd697Signature').value.trim()};
+}else if(decision==='review_escalation_resolution')
+fields={case_id:caseId,disposition:$('dd697Disposition').value};
+else if(decision==='renew_master_attestation')
+fields={expected_master_receipt_id:state.verified_master_receipt_id};
+const d=await api({action:'owner_finance_review_697',
+social_post_queue_id:state.queue_id,decision,reference_receipt_id:ref,
+newer_receipt_id:newer,prior_receipt_id:prior,
+expected_fingerprint_sha256:state.fingerprint_sha256,
+expected_source_revision:state.source_revision,owner_reviewed:true,
+resolution_note:note,...fields},state.queue_id);
+$('dd697Result').textContent=d.result.status+' · durable source-bound receipt #'+
+d.result.receipt_id+' · original source repair, audited financials and connection HOLD.';
+$('dd697Reviewed').checked=false;$('dd697Note').value='';
+$('dd697Signature').value='';$('dd697Claim').value='';
+await refresh();
+}catch(e){$('dd697Result').textContent='HOLD · '+e.message;}
+finally{btn.disabled=false;}
+});
+$('dd697Export').addEventListener('click',async()=>{
+try{
+const id=Number($('dd685Campaign').value);
+if(!id||!state?.queue_id||id!==state.queue_id)throw Error('Refresh exact original campaign.');
+if(!window.DDAuth?.apiFetch)throw Error('Authenticated Admin required.');
+const r=await window.DDAuth.apiFetch(endpoint+'?export=financial697&campaign_queue_id='+encodeURIComponent(id));
+if(!r.ok)throw Error('Protected export failed. HTTP '+r.status);
+const blob=await r.blob(),url=URL.createObjectURL(blob),a=document.createElement('a');
+a.href=url;a.download='devilndove-finance-reconciliation-'+id+'-697.json';
+document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1000);
+$('dd697Result').textContent='Protected source-bound evidence exported. Independent source repair remains HOLD.';
+}catch(e){$('dd697Result').textContent='HOLD · '+e.message;}
+});
+
 $('dd696Decision').addEventListener('change',chooseSources696);
 chooseSources696();
 $('dd696Prepare').addEventListener('click',()=>{
