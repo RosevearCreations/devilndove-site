@@ -1055,6 +1055,8 @@ jobs:
         run: node scripts/build683_financial_signer_master_closure_contract.mjs
       - name: Build 684 independent signer enrollment, exact remote Master admission and closure continuity regression
         run: node scripts/build684_finance_runtime_acceptance_contract.mjs
+      - name: Build 685 financial receipt freshness, Master revalidation and owner recovery regression
+        run: node scripts/build685_financial_receipt_freshness_recovery_contract.mjs
       - name: JavaScript syntax
         run: |
           node --check functions/_middleware.js
