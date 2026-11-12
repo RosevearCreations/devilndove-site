@@ -2070,6 +2070,115 @@ return{status:'owner_finance_continuity_closed_684',receipt_id,master_accepted:t
 connection:'HOLD_INDEPENDENT_CONTINUOUS_RUNTIME_TELEMETRY',publication_performed:false};
 }
 
+
+// Build 685 — read-only receipt aging, signed Master revalidation and owner-controlled recovery.
+// No background receiver calls, unverified CONNECTED flag, private keys, or financial certification.
+export function assess685(v,evidence,now=Date.now()){
+const c=evidence?.claim||{},checked=evidence?.checked_at;
+const checkedMs=typeof checked==='string'?Date.parse(checked):NaN;
+const issuedMs=typeof c.issued_at==='string'?Date.parse(c.issued_at):NaN;
+const age=Number.isFinite(checkedMs)?Math.max(0,now-checkedMs):null;
+const exact=!!(c&&same684(c,v)&&c.enrollment_receipt_id===v.enrollment_receipt_id&&
+c.master_signed_receipt_id===v.master_signed_receipt_id&&c.master_revision===v.master_revision);
+const validTime=Number.isFinite(checkedMs)&&Number.isFinite(issuedMs)&&
+checkedMs<=now+300000&&issuedMs<=now+300000&&checkedMs>=issuedMs-300000;
+let issue='VERIFIED_CURRENT';
+if(!v?.queue_id)issue='HOLD_SELECT_CAMPAIGN';
+else if(!v.source_owner_accepted||v.source_blockers?.length)issue='HOLD_SOURCE_REVIEW';
+else if(!v.signer_enrolled)issue='HOLD_SIGNER_ENROLLMENT';
+else if(!v.receiver_configured)issue='HOLD_MASTER_RECEIVER';
+else if(!evidence?.signature||!evidence?.claim)issue='HOLD_MISSING_MASTER_RECEIPT';
+else if(!exact)issue='HOLD_SOURCE_RECEIPT_DRIFT';
+else if(!validTime)issue='HOLD_INVALID_RECEIPT_CLOCK';
+else if(age>1200000||now-issuedMs>1200000)issue='HOLD_EXPIRED_MASTER_RECEIPT';
+else if(!v.master_accepted)issue='HOLD_SIGNATURE_REVALIDATION';
+return{status:issue,master_fresh:issue==='VERIFIED_CURRENT',age_seconds:age===null?null:Math.floor(age/1000),
+last_checked_at:Number.isFinite(checkedMs)?new Date(checkedMs).toISOString():null,
+expires_at:validTime?new Date(Math.min(checkedMs,issuedMs)+1200000).toISOString():null,
+source_match:exact};
+}
+async function financial685(db,env,id){
+const v=await financial684(db,env,id),n=Number(id);
+if(!Number.isSafeInteger(n)||n<1)return{...assess685(v,null),connection:'HOLD',exceptions:[]};
+const ar=await db.prepare("SELECT social_post_attempt_id,response_json,attempted_at FROM social_post_attempts WHERE social_post_queue_id=? AND platform_key='finance_acceptance_684' ORDER BY social_post_attempt_id DESC LIMIT 1").bind(n).first();
+const evidence=safeJson(ar?.response_json,{}),state=assess685(v,evidence);
+const all=rows(await db.prepare("SELECT social_post_attempt_id,attempt_status,response_json,attempted_at FROM social_post_attempts WHERE social_post_queue_id=? AND platform_key='finance_exception_685' ORDER BY social_post_attempt_id DESC LIMIT 121").bind(n).all());
+const seen=new Set(),exceptions=[];
+for(const row of all){
+const d=safeJson(row.response_json,{});
+if(!/^incident-[A-Za-z0-9_-]{16,100}$/.test(d.case_id||'')||seen.has(d.case_id))continue;
+seen.add(d.case_id);
+exceptions.push({case_id:d.case_id,issue_code:d.issue_code,status:row.attempt_status,
+receipt_id:Number(row.social_post_attempt_id),recorded_at:row.attempted_at,
+opened_acceptance_receipt_id:Number(d.opened_acceptance_receipt_id||0),
+fingerprint_sha256:d.fingerprint_sha256||null});
+}
+const bounded=all.length<=120;
+return{...state,status:bounded?state.status:'HOLD_EXCEPTION_HISTORY_LIMIT',
+master_fresh:bounded&&state.master_fresh,queue_id:n,campaign:v.campaign,
+source_revision:v.source_revision,fingerprint_sha256:v.fingerprint_sha256,
+signer_enrolled:v.signer_enrolled,receiver_configured:v.receiver_configured,
+last_master_receipt_id:Number(ar?.social_post_attempt_id||0),
+verified_master_receipt_id:bounded&&state.master_fresh?v.master_acceptance_receipt_id:null,
+source_signer_receipt_id:v.source_signer_receipt_id,master_signed_receipt_id:v.master_signed_receipt_id,
+open_cases:exceptions.filter(x=>x.status==='owner_exception_opened_685'),
+exceptions:exceptions.slice(0,40),history_complete:bounded,
+connection:'HOLD_INDEPENDENT_CONTINUOUS_RUNTIME_TELEMETRY',
+profitability_certified:false,publication_performed:false};
+}
+async function revalidate685(db,env,user,p){
+const id=Number(p.social_post_queue_id),before=await financial685(db,env,id);
+if(!before.history_complete||p.owner_reviewed!==true||!before.signer_enrolled||
+p.expected_fingerprint_sha256!==before.fingerprint_sha256)
+throw Error('Current independent signer, exact source revision and owner approval required. HOLD.');
+const receipt=await accept684(db,env,user,p); // independently signed nonce-bound HTTPS receiver evidence
+const after=await financial685(db,env,id);
+if(!after.master_fresh||after.verified_master_receipt_id!==receipt.receipt_id)
+throw Error('New Master acceptance was not durably and independently reverified. HOLD.');
+return{status:'independent_master_revalidated_685',receipt_id:receipt.receipt_id,
+expires_at:after.expires_at,open_exceptions:after.open_cases.length,
+connection:'HOLD_INDEPENDENT_CONTINUOUS_RUNTIME_TELEMETRY',publication_performed:false};
+}
+async function recovery685(db,env,user,p){
+const id=Number(p.social_post_queue_id),v=await financial685(db,env,id);
+const decision=normalizeText(p.decision),note=normalizeText(p.resolution_note),caseId=normalizeText(p.case_id);
+if(p.owner_reviewed!==true||!v.history_complete||!v.queue_id||!v.fingerprint_sha256||
+p.expected_fingerprint_sha256!==v.fingerprint_sha256||note.length<20||note.length>400)
+throw Error('Owner review, current source fingerprint and substantial recovery note required. HOLD.');
+let payload,status;
+if(decision==='open'){
+if(v.master_fresh||p.issue_code!==v.status||v.open_cases.some(x=>x.issue_code===v.status))
+throw Error('No new independently observed issue or an active case already exists. HOLD.');
+payload={case_id:'incident-'+crypto.randomUUID(),issue_code:v.status,
+fingerprint_sha256:v.fingerprint_sha256,source_revision:v.source_revision,
+opened_acceptance_receipt_id:v.last_master_receipt_id,
+source_signer_receipt_id:v.source_signer_receipt_id,owner_user_id:user.user_id,
+resolution_note:note,master_accepted:false,profitability_certified:false};
+status='owner_exception_opened_685';
+}else if(decision==='close'){
+const original=v.open_cases.find(x=>x.case_id===caseId);
+if(!original||!v.master_fresh||!v.verified_master_receipt_id||
+v.verified_master_receipt_id<=original.opened_acceptance_receipt_id||
+Number(p.expected_master_acceptance_receipt_id)!==v.verified_master_receipt_id)
+throw Error('Closure requires an open exception and a newer, current independently signed Master receipt. HOLD.');
+payload={case_id:original.case_id,issue_code:original.issue_code,
+fingerprint_sha256:v.fingerprint_sha256,source_revision:v.source_revision,
+opened_acceptance_receipt_id:original.opened_acceptance_receipt_id,
+verified_master_acceptance_receipt_id:v.verified_master_receipt_id,
+source_signer_receipt_id:v.source_signer_receipt_id,owner_user_id:user.user_id,
+resolution_note:note,master_accepted:true,profitability_certified:false};
+status='owner_exception_evidence_closed_685';
+}else throw Error('Unsupported owner exception recovery decision.');
+const nonce='finance-recovery-'+crypto.randomUUID()+'-'+crypto.randomUUID();
+const receipt_id=await append684(db,user,id,'finance_exception_685',status,nonce,payload);
+const readback=await financial685(db,env,id);
+const recorded=readback.exceptions.find(x=>x.receipt_id===receipt_id&&x.case_id===payload.case_id);
+if(!recorded||recorded.status!==status)throw Error('Recovery decision not verified in durable readback. HOLD.');
+return{status,receipt_id,case_id:payload.case_id,issue_code:payload.issue_code,
+master_accepted:status==='owner_exception_evidence_closed_685'&&readback.master_fresh,
+connection:'HOLD_INDEPENDENT_CONTINUOUS_RUNTIME_TELEMETRY',publication_performed:false};
+}
+
 // Build 682 — source-only financial export and owner discrepancy audit.
 async function finance682(db,env,id){
 const n=Number(id);
@@ -2150,7 +2259,7 @@ return new Response(JSON.stringify(evidence,null,2),{status:200,headers:{
 'Cache-Control':'private, no-store','X-Content-Type-Options':'nosniff'}});
 }
 const data=await summarize(db,context.env);
-return jsonResponse({ ok:true,...data,receipts673:await receipts673(db),engagement675:await engagement675(db),financial676:await financial676(db),financial678:await financialSummary678(db,context.request.headers.get('x-campaign-queue-id')||new URL(context.request.url).searchParams.get('campaign_queue_id')),financial679:await campaignNet679(db,new URL(context.request.url).searchParams.get('campaign_queue_id')),financial680:await finance680(db,context.env,new URL(context.request.url).searchParams.get('campaign_queue_id')),financial681:await finance681(db,context.env,new URL(context.request.url).searchParams.get('campaign_queue_id')),financial682:await finance682(db,context.env,new URL(context.request.url).searchParams.get('campaign_queue_id')),financial683:await financial683(db,context.env,new URL(context.request.url).searchParams.get('campaign_queue_id')),financial684:await financial684(db,context.env,new URL(context.request.url).searchParams.get('campaign_queue_id')),queue:data.queue.map(normalizeQueueRow),mode:'review_first_api_when_configured'},200,{ 'Cache-Control':'no-store'});
+return jsonResponse({ ok:true,...data,receipts673:await receipts673(db),engagement675:await engagement675(db),financial676:await financial676(db),financial678:await financialSummary678(db,context.request.headers.get('x-campaign-queue-id')||new URL(context.request.url).searchParams.get('campaign_queue_id')),financial679:await campaignNet679(db,new URL(context.request.url).searchParams.get('campaign_queue_id')),financial680:await finance680(db,context.env,new URL(context.request.url).searchParams.get('campaign_queue_id')),financial681:await finance681(db,context.env,new URL(context.request.url).searchParams.get('campaign_queue_id')),financial682:await finance682(db,context.env,new URL(context.request.url).searchParams.get('campaign_queue_id')),financial683:await financial683(db,context.env,new URL(context.request.url).searchParams.get('campaign_queue_id')),financial684:await financial684(db,context.env,new URL(context.request.url).searchParams.get('campaign_queue_id')),financial685:await financial685(db,context.env,new URL(context.request.url).searchParams.get('campaign_queue_id')),queue:data.queue.map(normalizeQueueRow),mode:'review_first_api_when_configured'},200,{ 'Cache-Control':'no-store'});
 } catch (error){
 await captureRuntimeIncident(context.env,context.request,{
 incident_scope:'admin_social',
@@ -2205,6 +2314,8 @@ else if (action==='close_financial_discrepancy_683') result=await ownerClosure68
 else if (action==='enroll_finance_signer_684') result=await enroll684(db,context.env,adminUser,payload);
 else if (action==='verify_finance_master_684') result=await accept684(db,context.env,adminUser,payload);
 else if (action==='close_finance_continuity_684') result=await continuity684(db,context.env,adminUser,payload);
+else if (action==='revalidate_finance_master_685') result=await revalidate685(db,context.env,adminUser,payload);
+else if (action==='owner_finance_recovery_685') result=await recovery685(db,context.env,adminUser,payload);
 else if (action==='expense_attestation_678') result=await expenseAttestation678(db,context.env,adminUser,payload,recordApiAttempt);
 else if (action==='owner_marketing_signoff_678') result=await ownerSignoff678(db,adminUser,payload,recordApiAttempt);
 else throw new Error(`Unsupported social queue action: ${action}`);
