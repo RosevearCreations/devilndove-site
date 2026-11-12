@@ -16,7 +16,7 @@
     "max_js_bytes": 600000,
     "max_css_bytes": 500000,
     "max_html_bytes": 500000,
-    "max_runtime_source_bytes": 19079000,
+    "max_runtime_source_bytes": 19144000,
     "max_runtime_source_files": 1854,
     "max_inline_data_uri_bytes": 650000
   },
@@ -33,6 +33,20 @@
     "production_mutation": false
   },
   "budget_reviews": [
+    {
+      "build": 700,
+      "date": "2026-11-12",
+      "scope": "Same-owner original physical phone field acceptance without simulated device assertions, actual D1 linked attachment and Cloudflare R2 HEAD checks, manual owner confirmation and local JSON evidence export; independently configured fourth signer read-only HTTPS source-of-record verification and protected observed source ledger while keeping financial certification HOLD.",
+      "prior_limit_bytes": 19079000,
+      "new_limit_bytes": 19144000,
+      "delta_bytes": 65000,
+      "delta_percent": 0.3407,
+      "runtime_file_limit_unchanged": 1854,
+      "review_reason": "Reviewed bounded 65,000-byte source allowance (<0.341%) for Admin physical field checklist, exact original Cloudflare R2 HEAD inspection and fourth distinct signer source-of-record manual readback. Existing D1/R2 only, no new schema or storage vendor, no fabricated device test, no auto repair/financial certification, no automatic acceptance or continuous CONNECTED. Keep zero-Production-D1 CI gates and exact SHA Cloudflare live proof.",
+      "physical_device_test_accepted": "NOT_INFERRED",
+      "external_source_credentials": "CONFIG_REQUIRED",
+      "accounting_repair_verified": "HOLD"
+    },
     {
       "build": 699,
       "date": "2026-11-12",
