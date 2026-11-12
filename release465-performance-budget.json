@@ -16,7 +16,7 @@
     "max_js_bytes": 600000,
     "max_css_bytes": 500000,
     "max_html_bytes": 500000,
-    "max_runtime_source_bytes": 18667000,
+    "max_runtime_source_bytes": 18692000,
     "max_runtime_source_files": 1854,
     "max_inline_data_uri_bytes": 650000
   },
@@ -33,6 +33,19 @@
     "production_mutation": false
   },
   "budget_reviews": [
+    {
+      "build": 689,
+      "date": "2026-11-12",
+      "scope": "Read-only exact prior owner escalation/signoff receipt replay, protected Master renewal drift evidence reconciliation, append-only owner audit acceptance continuity and JSON reporting",
+      "prior_limit_bytes": 18667000,
+      "new_limit_bytes": 18692000,
+      "delta_bytes": 25000,
+      "delta_percent": 0.1339,
+      "runtime_file_limit_unchanged": 1854,
+      "review_reason": "A narrowly reviewed 25,000-byte (<0.135%) increase supports Build 689 exact source/receipt owner audit replay, no request-time DDL, no new production runtime source files and no external automatic execution. All independent file-count, individual file size, media and Cloudflare production/live integrity gates remain in force. Actual CI enforces this cap. Does not establish independent Master acceptance, CONNECTED status or certified profitability.",
+      "owner_financial_approval": "NOT_INFERRED",
+      "production_runtime_master_acceptance": "EVIDENCE_GATED_HOLD"
+    },
     {
       "build": 688,
       "date": "2026-11-12",

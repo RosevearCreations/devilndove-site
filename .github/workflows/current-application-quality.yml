@@ -1063,6 +1063,8 @@ jobs:
         run: node scripts/build687_finance_sla_renewal_closure_contract.mjs
       - name: Build 688 financial SLA breach escalation, independent Master renewal chain and owner signoff regression
         run: node scripts/build688_financial_breach_renewal_signoff_contract.mjs
+      - name: Build 689 evidence replay, signed receipt renewal drift and owner audit acceptance regression
+        run: node scripts/build689_financial_replay_renewal_audit_continuity_contract.mjs
       - name: JavaScript syntax
         run: |
           node --check functions/_middleware.js
