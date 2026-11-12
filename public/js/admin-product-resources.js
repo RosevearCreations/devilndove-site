@@ -250,7 +250,7 @@ const select=document.getElementById('productResourcesProduct');
 if (select) select.value=String(safeProductId);
 // Embedded Product Editor uses an explicit manual-load budget. A Product
 // Save must not silently wake an additional D1 resource scan there.
-if (autoLoad && (mountEl.dataset.manualLoad !=='true'|| initialLoadStarted) && window.DDAuth?.isLoggedIn()) loadData();
+if (autoLoad && (mountEl.dataset.manualLoad !== 'true' || initialLoadStarted) && window.DDAuth?.isLoggedIn()) loadData();
 }
 
 function renderProducts(){
