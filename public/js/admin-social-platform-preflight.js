@@ -1244,6 +1244,55 @@ x.case_id+' · original audit #'+x.prior_owner_audit_receipt_id+
 ' · continuity '+(x.continuity_acknowledged?'RECORDED':'PENDING'));
 chooseSources694();
 }
+let audit695=null;
+function chooseSources695(){
+const s=$('dd695Source');if(!s)return;
+s.replaceChildren(new Option('Choose original source receipt pair',''));
+const correction=$('dd695Decision').value==='intake_source_correction',v=audit695;
+for(const id of ['dd695Custodian','dd695Reference','dd695Digest','dd695Observed'])
+$(id).required=correction;
+if(!v?.history_complete)return;
+for(const x of (correction?v.source_correction?.items:v.master_closure?.items)||[]){
+if(!correction&&(!x.eligible_for_master_revalidation||x.revalidated_for_current_master))continue;
+s.add(new Option('Original #'+x.older_receipt_id+' / #'+x.newer_receipt_id+
+(correction?' · mismatch · HOLD':' · prior closure #'+x.original_owner_closure_receipt_id),
+x.older_receipt_id+'|'+x.newer_receipt_id+'|'+(x.original_owner_closure_receipt_id||0)));
+}
+}
+function draw695(d){
+if(!$('dd695-finance'))return;
+const v=d.financial695||null;audit695=v;
+$('dd695Status').textContent=v?.campaign_queue_id?
+v.status+' · bounded history '+(v.history_complete?'COMPLETE':'HOLD')+
+' · current Master '+(v.master_accepted_now?'SIGNED / ACCEPTED':'HOLD')+
+' · external correction unverified · continuous connection HOLD':
+'HOLD · Select and refresh an original financial campaign.';
+$('dd695Stats').textContent=v?.campaign_queue_id?
+'Follow-up due '+v.aging.due_count+' · critical '+v.aging.critical_count+
+' · mismatched source pairs '+v.source_correction.mismatch_count+
+' · unverified external references '+v.source_correction.evidence_intake_count+
+' · current Master revalidations pending '+v.master_closure.pending_count:
+'Original source-bound financial owner history unavailable.';
+function render(id,items,fn){
+const ul=$(id);ul.replaceChildren();
+for(const x of items||[]){const li=document.createElement('li');li.textContent=fn(x);ul.appendChild(li);}
+if(!ul.childElementCount){const li=document.createElement('li');li.textContent='No source-bound entries in bounded history.';ul.appendChild(li);}
+}
+render('dd695Aging',v?.aging?.items,x=>x.case_id+
+' · original owner recheck #'+(x.source_recheck_receipt_id||'—')+
+' · owner resolution #'+(x.owner_resolution_receipt_id||'—')+
+' · age '+(x.age_minutes??'unknown')+' min · '+
+(x.owner_followup_critical?'CRITICAL OWNER REVIEW':x.owner_followup_due?'OWNER REVIEW DUE':'MONITOR')+
+' · underlying repair not proven');
+render('dd695Correction',v?.source_correction?.items,x=>
+'Original #'+x.older_receipt_id+' / #'+x.newer_receipt_id+
+' · source mismatch HOLD · correction not independently verified');
+render('dd695Master',v?.master_closure?.items,x=>
+'Original #'+x.older_receipt_id+' / #'+x.newer_receipt_id+
+' · prior owner closure #'+(x.original_owner_closure_receipt_id||'—')+
+' · '+(x.revalidated_for_current_master?'OWNER REVALIDATION RECORDED':x.eligible_for_master_revalidation?'REVALIDATION REQUIRED':'SOURCE/MASTER HOLD'));
+chooseSources695();
+}
 async function refresh(){
 const id=Number($('dd685Campaign').value);
 if(!id){state=null;$('dd685Status').textContent='HOLD · Select a campaign.';}
@@ -1285,7 +1334,7 @@ await refresh();
 document.addEventListener('DOMContentLoaded',()=>{
 if(!$('dd685-finance'))return;
 (async()=>{try{
-const d=await api(null);draw686(d);draw687(d);draw688(d);draw689(d);draw690(d);draw691(d);draw692(d);draw693(d);draw694(d);const seen=new Set();
+const d=await api(null);draw686(d);draw687(d);draw688(d);draw689(d);draw690(d);draw691(d);draw692(d);draw693(d);draw694(d);draw695(d);const seen=new Set();
 for(const q of d.queue||[])if(q.utm_campaign&&!seen.has(q.social_post_queue_id)){
 seen.add(q.social_post_queue_id);
 $('dd685Campaign').add(new Option(q.utm_campaign+' · #'+q.social_post_queue_id,q.social_post_queue_id));
@@ -1305,6 +1354,52 @@ $('dd691Refresh').addEventListener('click',()=>void refresh());
 $('dd692Refresh').addEventListener('click',()=>void refresh());
 $('dd693Refresh').addEventListener('click',()=>void refresh());
 $('dd694Refresh').addEventListener('click',()=>void refresh());
+$('dd695Refresh').addEventListener('click',()=>void refresh());
+$('dd695Decision').addEventListener('change',chooseSources695);
+chooseSources695();
+$('dd695Form').addEventListener('submit',async e=>{
+e.preventDefault();const btn=$('dd695Submit');btn.disabled=true;
+try{
+if(!state?.queue_id||!audit695?.history_complete)throw Error('Exact original campaign and complete source history required.');
+if(!$('dd695Reviewed').checked)throw Error('Original owner review required.');
+const [a,b,c]=$('dd695Source').value.split('|'),ref=Number(a),newer=Number(b),
+decision=$('dd695Decision').value,note=$('dd695Note').value.trim();
+if(!Number.isSafeInteger(ref)||ref<1||!Number.isSafeInteger(newer)||newer<1)
+throw Error('Select exact original source receipt pair.');
+if(note.length<20||note.length>400)throw Error('Enter a substantial 20–400 character owner note.');
+const externalTime=$('dd695Observed').value;
+if(decision==='intake_source_correction'&&!externalTime)throw Error('Original external evidence observed time required.');
+const d=await api({action:'owner_finance_review_695',social_post_queue_id:state.queue_id,
+decision,reference_receipt_id:ref,newer_receipt_id:newer,
+expected_prior_closure_receipt_id:Number(c),
+expected_fingerprint_sha256:state.fingerprint_sha256,
+expected_source_revision:state.source_revision,
+expected_master_receipt_id:state.verified_master_receipt_id,
+external_custodian_id:$('dd695Custodian').value.trim(),
+external_evidence_reference:$('dd695Reference').value.trim(),
+external_evidence_sha256:$('dd695Digest').value.trim().toLowerCase(),
+external_observed_at:externalTime?new Date(externalTime).toISOString():null,
+owner_reviewed:true,resolution_note:note},state.queue_id);
+$('dd695Result').textContent=d.result.status+' · durable owner receipt #'+d.result.receipt_id+
+' · source repair, continuous connection and financial certification HOLD.';
+$('dd695Note').value='';$('dd695Reviewed').checked=false;await refresh();
+}catch(err){$('dd695Result').textContent='HOLD · '+err.message;}
+finally{btn.disabled=false;}
+});
+$('dd695Export').addEventListener('click',async()=>{
+try{
+const id=Number($('dd685Campaign').value);
+if(!id||!state?.queue_id||state.queue_id!==id)throw Error('Refresh exact protected financial campaign.');
+if(!window.DDAuth?.apiFetch)throw Error('Authenticated Admin required.');
+const r=await window.DDAuth.apiFetch(endpoint+'?export=financial695&campaign_queue_id='+encodeURIComponent(id));
+if(!r.ok)throw Error('Protected export denied. HTTP '+r.status);
+const b=await r.blob(),url=URL.createObjectURL(b),a=document.createElement('a');
+a.href=url;a.download='devilndove-finance-review-'+id+'-695.json';
+document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1000);
+$('dd695Result').textContent='Protected evidence exported; independent correction still unverified.';
+}catch(err){$('dd695Result').textContent='HOLD · '+err.message;}
+});
+
 $('dd694Decision').addEventListener('change',chooseSources694);
 $('dd694Form').addEventListener('submit',async event=>{
 event.preventDefault();const btn=$('dd694Submit');btn.disabled=true;
