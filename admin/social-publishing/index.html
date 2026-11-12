@@ -304,6 +304,49 @@
 <p id="dd693Result" role="status" aria-live="polite">No Build 693 owner receipt recorded.</p>
 <p class="small">All actions require authenticated owner review and durable readback. No automatic replay, repair, financial certification, receiver activation or claim of continuously CONNECTED infrastructure is made.</p>
 </section>
+<section class="card" id="dd696-finance" aria-labelledby="dd696-title">
+<p class="eyebrow">Build 696 · Independent correction, aging escalation &amp; Master continuity</p>
+<h2 id="dd696-title">Independent Source Correction Verification, Financial Aging Escalation Follow-Up &amp; Master Closure Continuity</h2>
+<p>A configured independent Ed25519 custodian must sign the exact original Build 695 intake to authenticate correction evidence. Signature verification is not proof that the original mismatched source has been repaired. Owner escalation requires an aged original resolution; closure continuity requires current independently accepted Master proof.</p>
+<button class="btn secondary" type="button" id="dd696Refresh">Refresh protected source evidence</button>
+<button class="btn secondary" type="button" id="dd696Export">Export bounded source and owner proof JSON</button>
+<p id="dd696Status" role="status" aria-live="polite">HOLD · Select exact campaign and refresh.</p>
+<p class="small" id="dd696Stats">No source/custodian evidence loaded.</p>
+<h3>Original correction evidence and independent signature verification</h3>
+<ol class="clean" id="dd696Corrections"><li>Signature verification requires configured external custodian authority.</li></ol>
+<h3>Financial owner aging escalation</h3>
+<ol class="clean" id="dd696Aging"><li>Only original due owner cases can be escalated.</li></ol>
+<h3>Signed Master closure continuity</h3>
+<ol class="clean" id="dd696Master"><li>Fresh independent Master acceptance is required.</li></ol>
+<form id="dd696Form">
+<h3>Record verified evidence or original owner follow-up</h3>
+<label>Exact decision<select class="input" id="dd696Decision" required>
+<option value="verify_correction_attestation">Authenticate independently signed correction intake (source mismatch remains HOLD)</option>
+<option value="escalate_aging_followup">Record source-linked owner aging escalation follow-up</option>
+<option value="recheck_master_continuity">Record signed Master closure continuity recheck</option>
+</select></label>
+<label>Original receipt/case evidence
+<select class="input" id="dd696Source" required><option value="">Select original source-bound evidence</option></select></label>
+<p class="small">For signature verification, obtain the signed claim from the separate custodian. Do not paste a private signing key. No unsigned or owner-created claim can clear source HOLD.</p>
+<label>External signer identifier (signed intake only)
+<input class="input" id="dd696Signer" maxlength="120" autocomplete="off" spellcheck="false"></label>
+<label>External one-time challenge nonce (16–100 characters)
+<input class="input" id="dd696Nonce" maxlength="100" autocomplete="off" spellcheck="false"></label>
+<label>Signed UTC issue time (ISO 8601)
+<input class="input" id="dd696Issued" maxlength="40" autocomplete="off" spellcheck="false" placeholder="2026-11-12T18:00:00.000Z"></label>
+<button class="btn secondary" id="dd696Prepare" type="button">Prepare exact claim for external signing</button>
+<label>Exact canonical claim to be signed by independent custodian
+<textarea class="input" id="dd696Claim" rows="5" readonly spellcheck="false"></textarea></label>
+<label>External Ed25519 signature (base64/base64url; never the private key)
+<textarea class="input" id="dd696Signature" rows="2" maxlength="120" spellcheck="false"></textarea></label>
+<label>Original owner review note (20–400 characters)
+<textarea class="input" id="dd696Note" minlength="20" maxlength="400" rows="3" required></textarea></label>
+<label><input type="checkbox" id="dd696Reviewed" required> We reviewed exact original source and receipts. External signature authenticates only its exact claim, not source repair, financial certification, or an always-connected Master.</label>
+<button class="btn secondary" id="dd696Submit" type="submit">Append protected owner evidence receipt</button>
+</form>
+<p id="dd696Result" role="status" aria-live="polite">No Build 696 owner action recorded.</p>
+<p class="small">Fail-closed on missing independent signer, stale evidence, changed source, duplicate receipt, or Master drift. No background polling, request-time D1 migration, external source write, financial certification or automatic HOLD release.</p>
+</section>
 <section class="card" id="dd695-finance" aria-labelledby="dd695-title">
 <p class="eyebrow">Build 695 · Source-bound resolution aging and correction</p>
 <h2 id="dd695-title">Financial Resolution Ledger Aging, Independent Source Correction Evidence Intake &amp; Master Closure Revalidation</h2>
