@@ -2529,6 +2529,17 @@ const db=getDb(context.env);
 if (!db) return jsonResponse({ ok:false,error:'Database binding is not configured.'},500);
 try{
 const params=new URL(context.request.url).searchParams;
+if(params.get('export')==='financial688'){
+const n=Number(params.get('campaign_queue_id'));
+if(!Number.isSafeInteger(n)||n<1)return jsonResponse({ok:false,error:'Select a valid campaign for protected Build 688 owner report.'},400,{'Cache-Control':'no-store'});
+const report=await finance688(db,context.env,n);
+return new Response(JSON.stringify({report_type:'FINANCIAL_OWNER_RECOVERY_688',
+owner_signoff_report:report,current_master_proof_independent:true,
+historical_acceptance_is_not_current_proof:true,financial_certified:false},null,2),{
+status:200,headers:{'Content-Type':'application/json; charset=utf-8',
+'Content-Disposition':'attachment; filename="devilndove-financial-owner-recovery-'+n+'-688.json"',
+'Cache-Control':'private, no-store','X-Content-Type-Options':'nosniff'}});
+}
 if(params.get('export')==='financial682'){
 const evidence=await finance682(db,context.env,params.get('campaign_queue_id'));
 if(!evidence.campaign||!evidence.complete)return jsonResponse({ok:false,error:'Complete campaign evidence required for protected export.'},409,{'Cache-Control':'no-store'});
