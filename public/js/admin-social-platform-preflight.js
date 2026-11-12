@@ -1077,6 +1077,91 @@ place('dd692Closures',v?.closure?.evidence,x=>
 ' · 692 audit '+(x.owner_audit_reconciled?'RECORDED':'NOT RECORDED'));
 chooseSources692();
 }
+let audit693=null;
+function chooseSources693(){
+const select=$('dd693Source');if(!select)return;
+select.replaceChildren(new Option('Choose exact source evidence',''));
+const action=$('dd693Decision')?.value,v=audit693;
+if(!v?.history_complete)return;
+if(action==='repeat_sla_followup'){
+for(const x of v.followups?.items||[]){
+if(!x.followup_receipt_id||!x.case_id||x.repeat_followup_recorded||
+x.age_minutes===null||x.age_minutes<120)continue;
+select.add(new Option(x.age_status+' · '+x.case_id+
+' · prior follow-up #'+x.followup_receipt_id,
+x.case_id+'|'+x.followup_receipt_id+'|0'));
+}
+}else if(action==='review_provenance_exception'){
+for(const x of v.provenance?.pairs||[]){
+if(x.source_pins_match||x.exception_review_recorded)continue;
+select.add(new Option('HOLD source pins · pair #'+x.older_receipt_id+
+' → #'+x.newer_receipt_id,'|'+x.older_receipt_id+'|'+x.newer_receipt_id));
+}
+}else if(action==='revalidate_master_provenance'&&v.provenance?.current_master_independently_reverified){
+for(const x of v.provenance?.pairs||[]){
+if(!x.source_pins_match||!x.previous_owner_receipt_id||x.revalidation_recorded)continue;
+select.add(new Option('Current-source recheck · pair #'+x.older_receipt_id+
+' → #'+x.newer_receipt_id,'|'+x.older_receipt_id+'|'+x.newer_receipt_id));
+}
+}else if(action==='accept_owner_audit_history'&&v.master_accepted_now){
+for(const x of v.audit?.history||[]){
+if(!x.case_id||!x.prior_owner_audit_receipt_id||x.owner_acceptance_recorded)continue;
+select.add(new Option('Prior audit · '+x.case_id+
+' · receipt #'+x.prior_owner_audit_receipt_id,
+x.case_id+'|'+x.prior_owner_audit_receipt_id+'|0'));
+}
+}
+}
+function draw693(d){
+if(!$('dd693-finance'))return;
+const v=d.financial693||null;audit693=v;
+$('dd693Status').textContent=v?.campaign_queue_id?
+v.status+' · bounded owner ledger '+(v.history_complete?'COMPLETE':'HOLD')+
+' · current independently signed Master '+(v.master_accepted_now?'VERIFIED':'HOLD')+
+' · continuous connection HOLD · audited profitability HOLD':
+'HOLD · Select an exact financial campaign and refresh protected evidence.';
+$('dd693Stats').textContent=v?.campaign_queue_id?
+'Follow-ups '+v.followups.record_count+' · overdue '+v.followups.overdue_count+
+' · critical '+v.followups.critical_count+
+' · pending overdue '+v.followups.pending_overdue_count+
+' · source exceptions '+v.provenance.source_exception_count+
+' · owner audit acceptances '+v.audit.owner_accepted_count+' / '+v.audit.prior_acceptance_count:
+'Financial owner audit history unavailable.';
+const pr=v?.provenance;
+$('dd693Provenance').textContent=pr?
+'Current signed Master #'+(pr.current_master_receipt_id||'—')+
+' · independent current verification '+(pr.current_master_independently_reverified?'YES':'HOLD')+
+' · historical pairs '+pr.historical_pair_count+
+' · pending provenance rechecks '+pr.pending_owner_revalidation_count+
+' · unresolved source mismatches '+pr.source_exception_count+
+' · historical signatures not reverified; no runtime outage or continuous connection proof.':
+'Current independent Master acceptance unavailable.';
+const render=(id,items,fn)=>{
+const list=$(id);list.replaceChildren();
+for(const x of items||[]){const li=document.createElement('li');li.textContent=fn(x);
+list.appendChild(li);}
+if(!list.childElementCount){const li=document.createElement('li');
+li.textContent='No matching evidence in the current bounded audit window.';
+list.appendChild(li);}
+};
+render('dd693Followups',v?.followups?.items,x=>
+x.age_status+' · '+x.case_id+' · prior owner follow-up #'+x.followup_receipt_id+
+' · age '+(x.age_minutes??'unknown')+' minutes'+
+' · next owner review '+(x.repeat_followup_recorded?'RECORDED':'PENDING')+
+' · underlying financial issue remains evidence-gated');
+render('dd693Pairs',pr?.pairs,x=>
+x.revalidation_state+' · older #'+x.older_receipt_id+
+' / newer #'+x.newer_receipt_id+
+' · previous owner #'+(x.previous_owner_receipt_id||'—')+
+' · exception review '+(x.exception_review_recorded?'RECORDED':'PENDING')+
+' · new provenance review '+(x.revalidation_recorded?'RECORDED':'PENDING'));
+render('dd693Acceptance',v?.audit?.history,x=>
+x.case_id+' · prior audit #'+x.prior_owner_audit_receipt_id+
+' · original continuity #'+x.original_continuity_receipt_id+
+' · current independently signed Master '+(x.current_signed_master_rechecked?'VERIFIED':'HOLD')+
+' · owner acceptance '+(x.owner_acceptance_recorded?'RECORDED':'NOT RECORDED'));
+chooseSources693();
+}
 async function refresh(){
 const id=Number($('dd685Campaign').value);
 if(!id){state=null;$('dd685Status').textContent='HOLD · Select a campaign.';}
@@ -1089,6 +1174,7 @@ draw689(d);
 draw690(d);
 draw691(d);
 draw692(d);
+draw693(d);
 if(!id)return;
 if(!v||v.queue_id!==id)throw Error('Fresh exact financial evidence was not returned.');
 state=v;
@@ -1116,7 +1202,7 @@ await refresh();
 document.addEventListener('DOMContentLoaded',()=>{
 if(!$('dd685-finance'))return;
 (async()=>{try{
-const d=await api(null);draw686(d);draw687(d);draw688(d);draw689(d);draw690(d);draw691(d);draw692(d);const seen=new Set();
+const d=await api(null);draw686(d);draw687(d);draw688(d);draw689(d);draw690(d);draw691(d);draw692(d);draw693(d);const seen=new Set();
 for(const q of d.queue||[])if(q.utm_campaign&&!seen.has(q.social_post_queue_id)){
 seen.add(q.social_post_queue_id);
 $('dd685Campaign').add(new Option(q.utm_campaign+' · #'+q.social_post_queue_id,q.social_post_queue_id));
@@ -1134,6 +1220,56 @@ $('dd689Refresh').addEventListener('click',()=>void refresh());
 $('dd690Refresh').addEventListener('click',()=>void refresh());
 $('dd691Refresh').addEventListener('click',()=>void refresh());
 $('dd692Refresh').addEventListener('click',()=>void refresh());
+$('dd693Refresh').addEventListener('click',()=>void refresh());
+$('dd693Decision').addEventListener('change',chooseSources693);
+$('dd693Form').addEventListener('submit',async e=>{
+e.preventDefault();const button=$('dd693Submit');button.disabled=true;
+try{
+if(!state?.queue_id||!audit693?.history_complete)
+throw Error('Exact, complete owner receipt ledger required.');
+if(!$('dd693Reviewed').checked)throw Error('Explicit owner review consent required.');
+const [caseId,refStr,newerStr]=$('dd693Source').value.split('|'),
+ref=Number(refStr),newer=Number(newerStr),
+decision=$('dd693Decision').value,note=$('dd693Note').value.trim();
+if(!Number.isSafeInteger(ref)||ref<1)throw Error('Select an exact source-bound owner receipt.');
+if(note.length<20||note.length>400)throw Error('Record 20–400 characters of reviewed owner evidence.');
+if((decision==='revalidate_master_provenance'||decision==='accept_owner_audit_history')&&
+!audit693.provenance.current_master_independently_reverified)
+throw Error('Current independently signed Master acceptance required. HOLD.');
+if(decision==='accept_owner_audit_history'&&!audit693.master_accepted_now)
+throw Error('Unresolved provenance or Master HOLD prevents owner audit acceptance.');
+const prior=decision==='revalidate_master_provenance'?
+(audit693.provenance?.pairs||[]).find(x=>x.older_receipt_id===ref&&
+x.newer_receipt_id===newer)?.previous_owner_receipt_id:null;
+const d=await api({action:'owner_finance_audit_693',
+social_post_queue_id:state.queue_id,decision,case_id:caseId||'',
+reference_receipt_id:ref,newer_receipt_id:newer,
+prior_owner_review_receipt_id:prior,
+expected_fingerprint_sha256:state.fingerprint_sha256,
+expected_source_revision:state.source_revision,
+expected_master_receipt_id:state.verified_master_receipt_id,
+owner_reviewed:true,resolution_note:note},state.queue_id);
+$('dd693Result').textContent=d.result.status+' · durable owner audit receipt #'+
+d.result.receipt_id+' · external Master connection and financial certification remain separately gated.';
+$('dd693Reviewed').checked=false;$('dd693Note').value='';
+await refresh();
+}catch(error){$('dd693Result').textContent='HOLD · '+error.message;}
+finally{button.disabled=false;}
+});
+$('dd693Export').addEventListener('click',async()=>{
+try{
+const id=Number($('dd685Campaign').value);
+if(!id||!state?.queue_id||id!==state.queue_id)throw Error('Select and refresh an exact campaign.');
+if(!window.DDAuth?.apiFetch)throw Error('Authenticated Admin session required.');
+const r=await window.DDAuth.apiFetch(endpoint+'?export=financial693&campaign_queue_id='+encodeURIComponent(id));
+if(!r.ok)throw Error('Protected audit export refused. HTTP '+r.status);
+const blob=await r.blob(),url=URL.createObjectURL(blob),a=document.createElement('a');
+a.href=url;a.download='devilndove-finance-audit-'+id+'-693.json';
+document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1000);
+$('dd693Result').textContent='Protected bounded owner audit history exported with all unresolved HOLD evidence.';
+}catch(error){$('dd693Result').textContent='HOLD · '+error.message;}
+});
+
 $('dd692Decision').addEventListener('change',chooseSources692);
 $('dd692Form').addEventListener('submit',async event=>{
 event.preventDefault();const btn=$('dd692Submit');btn.disabled=true;

@@ -270,6 +270,40 @@
 <p id="dd692Result" role="status" aria-live="polite">No Build 692 owner review recorded.</p>
 <p class="small">History is bounded and refreshed only on request. Missing or stale proof stays HOLD; automatic escalation, external replay, financial certification and continuous CONNECTED claims are not performed.</p>
 </section>
+<section class="card" id="dd693-finance" aria-labelledby="dd693-title">
+<p class="eyebrow">Build 693 · Financial SLA aging and evidence history</p>
+<h2 id="dd693-title">Follow-up aging, Master receipt provenance revalidation &amp; owner audit acceptance</h2>
+<p>Review the aging of completed Build 692 owner follow-ups, unresolved historical receipt-pair discrepancies, and exact prior owner closure audit decisions. Source fingerprint matches are historical records, not fresh signature verification. Owner audit acceptance requires a freshly independently verified signed Master receipt.</p>
+<button class="btn secondary" type="button" id="dd693Refresh">Refresh exact owner financial evidence</button>
+<button class="btn secondary" type="button" id="dd693Export">Export protected audit history JSON</button>
+<p role="status" aria-live="polite" id="dd693Status">HOLD · Select and refresh an exact campaign.</p>
+<p class="small" id="dd693Stats">No current owner follow-up or audit continuity figures loaded.</p>
+<h3>Financial SLA follow-up aging</h3>
+<ol class="clean" id="dd693Followups" aria-label="Owner follow-up evidence and aging"><li>No current follow-up ledger loaded.</li></ol>
+<h3>Independent Master provenance exceptions and revalidation</h3>
+<p class="small" id="dd693Provenance">Independent Master receipt revalidation not loaded.</p>
+<ol class="clean" id="dd693Pairs" aria-label="Historical receipt-pair provenance and exception rechecks"><li>No bounded receipt provenance available.</li></ol>
+<h3>Original owner audit acceptance history</h3>
+<ol class="clean" id="dd693Acceptance" aria-label="Owner financial closure audit acceptance history"><li>No owner acceptance records loaded.</li></ol>
+<form id="dd693Form">
+<h3>Record evidence-bound owner decision</h3>
+<label>Owner decision
+<select class="input" id="dd693Decision" required>
+<option value="repeat_sla_followup">Review an overdue owner SLA follow-up</option>
+<option value="review_provenance_exception">Document an unresolved Master provenance exception (HOLD)</option>
+<option value="revalidate_master_provenance">Acknowledge source-pinned Master provenance with fresh current signed proof</option>
+<option value="accept_owner_audit_history">Accept prior owner closure audit history with fresh current signed proof</option>
+</select></label>
+<label>Exact case and original evidence receipt
+<select class="input" id="dd693Source" required><option value="">Select exact source-bound evidence</option></select></label>
+<label>Owner evidence review note (20–400 characters)
+<textarea class="input" id="dd693Note" rows="3" minlength="20" maxlength="400" required></textarea></label>
+<label><input type="checkbox" id="dd693Reviewed" required> We inspected the original source and prior owner receipts, their timestamps, and fresh independent Master acceptance where required. This is a protected owner decision only.</label>
+<button class="btn secondary" id="dd693Submit" type="submit">Record audited owner decision</button>
+</form>
+<p id="dd693Result" role="status" aria-live="polite">No Build 693 owner receipt recorded.</p>
+<p class="small">All actions require authenticated owner review and durable readback. No automatic replay, repair, financial certification, receiver activation or claim of continuously CONNECTED infrastructure is made.</p>
+</section>
 <section class="card" id="dd684-finance" aria-labelledby="dd684-title">
 <p class="eyebrow">Build 684 · Independent financial runtime verification</p>
 <h2 id="dd684-title">Signer enrollment, verified Master acceptance &amp; financial closure continuity</h2>
