@@ -529,7 +529,7 @@ renderProductionPreview();
 
 function hydrateLinks(){
 state.links=state.links.map((x)=>{
-const resource=state.resources.find((r)=> r.item_kind===x.resource_kind && r.source_key===x.source_key) || x.resource ||{};
+const resource=state.resources.find((r)=> r.item_kind===x.resource_kind && r.source_key===x.source_key) || x.resource || {};
 return{
 ...x,
 resource,
