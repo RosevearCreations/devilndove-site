@@ -107,6 +107,40 @@ document.addEventListener("DOMContentLoaded", async () => {
       resultsSection.classList.remove('shop-filter-arrival');
     }
   }
+  // Build 699: actual client viewport assessment, no guessed screen height and
+  // no forced scroll. If the first Product is still below the fold, expose a
+  // deliberate See Products anchor. Never mark empty results as viewport PASS.
+  const browseOptions699=document.getElementById('shop699BrowseOptions');
+  const jumpProducts699=document.getElementById('shop699JumpProducts');
+  if(browseOptions699&&window.matchMedia?.('(max-width:700px)').matches)
+    browseOptions699.open=false;
+  function measureFirstProduct699(){
+    if(!document.body?.dataset||!productsEl)return;
+    const mobile=window.matchMedia?.('(max-width:700px)').matches??window.innerWidth<=700;
+    if(!mobile){
+      document.body.dataset.ddShopFirstProductViewport699='DESKTOP_NOT_APPLICABLE';
+      if(jumpProducts699)jumpProducts699.hidden=true;
+      return;
+    }
+    const first=productsEl.querySelector('.shop-product-card');
+    if(!first){
+      document.body.dataset.ddShopFirstProductViewport699='NO_PRODUCT_RESULT';
+      if(jumpProducts699)jumpProducts699.hidden=true;
+      return;
+    }
+    const rect=first.getBoundingClientRect(),viewport=window.innerHeight;
+    const visible=Number.isFinite(viewport)&&viewport>0&&rect.top<viewport&&rect.bottom>0;
+    document.body.dataset.ddShopFirstProductViewport699=visible?'VISIBLE_IN_FIRST_VIEWPORT':'BELOW_FIRST_VIEWPORT';
+    document.body.dataset.ddShopFirstProductTop699=Number.isFinite(rect.top)?String(Math.round(rect.top)):'UNKNOWN';
+    document.body.dataset.ddShopViewportHeight699=Number.isFinite(viewport)?String(Math.round(viewport)):'UNKNOWN';
+    if(jumpProducts699)jumpProducts699.hidden=visible;
+  }
+  function scheduleFirstProductMeasure699(){
+    if(typeof window.requestAnimationFrame==='function')
+      window.requestAnimationFrame(()=>measureFirstProduct699());
+    else measureFirstProduct699();
+  }
+  window.addEventListener('resize',scheduleFirstProductMeasure699,{passive:true});
   function buildUrl() {
     const filters = readFilters();
     const url = new URL('/api/products', window.location.origin);
@@ -300,6 +334,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     renderColorFilter(data?.filter_groups || {});
     renderPolicyFaq();
     presentProducts(products, { summaryText });
+    scheduleFirstProductMeasure699();
     if (data?.warning) setStatus(data.warning, fromCache ? 'warning' : 'info');
     else if (!fromCache) setStatus('');
     return products;
@@ -322,6 +357,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       renderPayload(data);
       writeFiltersToUrl();
       placeResultsForIntent();
+      scheduleFirstProductMeasure699();
       notifyShopData(data, { fromCache: false });
       if(!focusedArrivalHandled && initialFocusProducts){focusedArrivalHandled=true;setTimeout(()=>resultsSection?.scrollIntoView({behavior:'smooth',block:'start'}),30);}
       saveSnapshot(url, { data });

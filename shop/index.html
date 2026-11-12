@@ -10,13 +10,13 @@
 <link href="https://devilndove.com/shop/" rel="canonical">
 <link href="/css/styles.css?v=448" rel="stylesheet">
 <link href="/css/storefront-merchandising.css?v=448" rel="stylesheet">
-<link href="/css/shop-uniform-cards-489.css?v=698" rel="stylesheet">
+<link href="/css/shop-uniform-cards-489.css?v=699" rel="stylesheet">
 <link href="/css/product-card-unified-504.css?v=504" rel="stylesheet">
 <link href="/assets/mark.png" rel="icon" type="image/png">
 <meta content="Devil n Dove" property="og:site_name"><meta content="website" property="og:type"><meta content="Shop Devil n Dove | Handmade, Vintage, Collectibles &amp; Oddities" property="og:title"><meta content="Shop Devil n Dove handmade pieces, vintage finds, collectibles, oddities, tools, and digital creations from our Southern Ontario, Canada workshop." property="og:description"><meta content="https://devilndove.com/shop/" property="og:url"><meta content="https://devilndove.com/assets/images/site/shop-item-specific-collage.webp" property="og:image"><meta content="Devil n Dove handmade, vintage, soap, candle, and jewelry collection" property="og:image:alt"><meta content="summary_large_image" name="twitter:card">
 <script id="pageStructuredData" type="application/ld+json">{"@context":"https://schema.org","@type":"CollectionPage","name":"Shop handmade, vintage and collectible products","url":"https://devilndove.com/shop/","description":"Shop Devil n Dove handmade pieces, vintage finds, collectibles, oddities, tools, and digital creations from our Southern Ontario, Canada workshop.","isPartOf":{"@type":"WebSite","name":"Devil n Dove","url":"https://devilndove.com/"}}</script>
 </head>
-<body data-media-managed-page="/shop/" data-dd-shop-products-first="698">
+<body data-media-managed-page="/shop/" data-dd-shop-products-first="698" data-dd-shop-viewport-contract="699">
 <div class="container">
 <div class="nav">
 <div class="brand"><img alt="Devil n Dove logo" height="360" src="/assets/logo-clear-nav.webp" width="360"><div><div style="font-weight:800;letter-spacing:.2px;line-height:1.1">Devil n Dove</div><div class="small">Storefront • Collections • Collages</div></div></div>
@@ -27,14 +27,18 @@
 
 <div class="card" id="shop698SearchPanel" style="margin-bottom:12px">
 <h2 style="margin-top:0">Find products</h2>
-<p class="small">Start simple. Search by item, material, gift idea, colour, or a word you remember.</p>
-<div class="grid cols-4" style="gap:12px">
-<div style="grid-column:span 2"><label class="small" for="shopSearchInput">Search</label><input id="shopSearchInput" placeholder="Earrings, ring, resin, gift, vintage..." type="search"></div>
+<p class="small" id="shop699SearchHint">Search by item, material, gift idea, or colour.</p>
+<div class="shop699-primary-search">
+<label class="small" for="shopSearchInput">Search our Products</label><input id="shopSearchInput" placeholder="Earrings, ring, resin, gift, vintage..." type="search" enterkeyhint="search">
+<div class="shop699-primary-actions"><button class="btn primary" id="shopSearchButton" type="button">Search</button><button class="btn" id="shopResetButton" type="button">Reset</button><a class="btn secondary" id="shop699JumpProducts" href="#shopResultsSection" hidden>See Products</a></div>
+</div>
+<details id="shop699BrowseOptions" class="shop699-optional-filters" open>
+<summary>More browsing options · category, sort, availability and quick filters</summary>
+<div class="grid cols-4" style="gap:12px;margin-top:10px">
 <div><label class="small" for="shopCategoryFilter">Category</label><select id="shopCategoryFilter"><option value="">All categories</option></select></div>
 <div><label class="small" for="shopSortFilter">Sort</label><select id="shopSortFilter"><option value="featured">Featured</option><option value="price_asc">Price: low to high</option><option value="price_desc">Price: high to low</option><option value="newest">Newest</option><option value="name">Name A–Z</option></select></div>
 <div><label class="small" for="shopAvailabilityFilter">Availability</label><select id="shopAvailabilityFilter"><option value="">All availability</option><option value="available">Available now</option><option value="out_of_stock">Out of stock</option><option value="check">Check availability</option></select></div>
 </div>
-<div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:12px"><button class="btn primary" id="shopSearchButton" type="button">Search</button><button class="btn" id="shopResetButton" type="button">Reset</button></div>
 <div aria-label="Quick shop filters" class="shop-quick-chips"><button class="btn secondary" data-shop-quick="handmade" type="button">Handmade</button><button class="btn secondary" data-shop-quick="vintage" type="button">Vintage &amp; finds</button><button class="btn secondary" data-shop-quick="under25" type="button">Under $25</button><button class="btn secondary" data-shop-quick="gifts" type="button">Gift ideas</button><a class="btn secondary" href="/pickup/">Local pickup</a></div>
 <details class="shop-advanced-filters" style="margin-top:14px"><summary><strong>Advanced filters</strong> — optional</summary>
 <div class="grid cols-4" style="gap:12px;margin-top:12px">
@@ -48,6 +52,7 @@
 <div><label class="small" for="shopMaxPrice">Maximum price (CAD cents)</label><input id="shopMaxPrice" min="0" step="1" type="number"></div>
 </div>
 <label class="small" style="display:block;margin-top:10px"><input id="shopShippingOnly" type="checkbox"> Show items that need shipping</label>
+</details>
 </details>
 </div>
 
@@ -100,7 +105,7 @@
 <script src="/public/js/gift-card-storefront.js?v=448"></script>
 <script src="/public/js/recently-viewed-products.js?v=448"></script>
 <script src="/public/js/product-media-fallback.js?v=59"></script>
-<script src="/public/js/shop.js?v=467b75-set10-brand-v3-195"></script>
+<script src="/public/js/shop.js?v=467b75-set10-brand-v3-195&b699=1"></script>
 <script src="/public/js/storefront-search-collections.js?v=75"></script>
 <script src="/public/js/storefront-discovery-paths.js?v=467b107"></script>
 <script src="/public/js/storefront-merchandising.js?v=448"></script>

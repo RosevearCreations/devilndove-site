@@ -1551,6 +1551,69 @@ render('dd698Master',v?.master?.items,x=>
 ' · no new independent signature inferred');
 chooseSources698();
 }
+
+let audit699=null;
+function select699(){
+const el=$('dd699Source');if(!el)return;
+el.replaceChildren(new Option('Choose original source repair proof intake',''));
+if(!audit699?.history_complete)return;
+for(const x of audit699.independent_verification?.items||[]){
+if(x.independent_document_signature_verified||!x.external_document_sha256)continue;
+el.add(new Option('Original intake #'+x.repair_intake_receipt_id+
+' · source #'+x.older_receipt_id+' / #'+x.newer_receipt_id,
+x.older_receipt_id+'|'+x.newer_receipt_id+'|'+x.repair_intake_receipt_id));
+}
+}
+function claimFor699(){
+if(!state?.queue_id||!audit699?.history_complete)
+throw Error('Refresh exact current financial campaign first.');
+const [a,b,c]=$('dd699Source').value.split('|').map(Number);
+const x=(audit699.independent_verification?.items||[]).find(item=>
+item.older_receipt_id===a&&item.newer_receipt_id===b&&
+item.repair_intake_receipt_id===c&&!item.independent_document_signature_verified);
+const signer=$('dd699Signer').value.trim(),nonce=$('dd699Nonce').value.trim(),
+issued=$('dd699Issued').value.trim();
+if(!x||!x.external_document_sha256||!audit699.independent_verification.signer_configured||
+signer!==audit699.independent_verification.expected_verifier_id||
+!/^[A-Za-z0-9_-]{16,100}$/.test(nonce)||!issued)
+throw Error('Exact Build 698 intake and configured third-party verifier required. HOLD.');
+return{v:1,purpose:'devilndove_independent_source_repair_document_witness_699',
+source:'devilndove',queue_id:state.queue_id,
+older_receipt_id:a,newer_receipt_id:b,repair_intake_receipt_id:c,
+external_document_sha256:x.external_document_sha256,external_reference:x.external_reference,
+source_revision:state.source_revision,fingerprint_sha256:state.fingerprint_sha256,
+independent_verifier_id:signer,nonce,issued_at:issued,
+decision:'document_provenance_authenticated_live_source_repair_unverified'};
+}
+function draw699(d){
+if(!$('dd699-finance'))return;
+audit699=d.financial699||null;const v=audit699;
+$('dd699Status').textContent=v?.campaign_queue_id?
+v.status+' · original bounded history '+(v.history_complete?'COMPLETE':'HOLD')+
+' · live source repair HOLD · financial certification HOLD':
+'HOLD · Select current original financial campaign.';
+$('dd699Stats').textContent=v?.campaign_queue_id?
+'Original mismatches '+v.independent_verification.original_mismatch_count+
+' · repair document intake '+v.independent_verification.document_intake_count+
+' · independent signed document '+v.independent_verification.independently_signed_document_count+
+' · pending signatures '+v.independent_verification.pending_signature_count+
+' · distinct verifier '+(v.independent_verification.signer_configured?'CONFIGURED':'HOLD')+
+' · source readback verified '+v.independent_verification.source_readback_verified_count:
+'Original independently signed document evidence not loaded.';
+const list=$('dd699Cases');list.replaceChildren();
+for(const x of v?.independent_verification?.items||[]){
+const li=document.createElement('li');
+li.textContent='Original intake #'+x.repair_intake_receipt_id+' · source #'+
+x.older_receipt_id+' / #'+x.newer_receipt_id+' · SHA-256 '+
+(x.external_document_sha256||'not available')+
+' · distinct verifier signature '+(x.independent_document_signature_verified?
+'VERIFIED #'+x.independent_witness_receipt_id:'PENDING')+
+' · live repair source readback HOLD';
+list.appendChild(li);
+}
+if(!list.childElementCount){const li=document.createElement('li');li.textContent='No exact original source repair intake in complete bounded history.';list.appendChild(li);}
+select699();
+}
 async function refresh(){
 const id=Number($('dd685Campaign').value);
 if(!id){state=null;$('dd685Status').textContent='HOLD · Select a campaign.';}
@@ -1569,6 +1632,7 @@ draw695(d);
 draw696(d);
 draw697(d);
 draw698(d);
+draw699(d);
 if(!id)return;
 if(!v||v.queue_id!==id)throw Error('Fresh exact financial evidence was not returned.');
 state=v;
@@ -1596,7 +1660,7 @@ await refresh();
 document.addEventListener('DOMContentLoaded',()=>{
 if(!$('dd685-finance'))return;
 (async()=>{try{
-const d=await api(null);draw686(d);draw687(d);draw688(d);draw689(d);draw690(d);draw691(d);draw692(d);draw693(d);draw694(d);draw695(d);draw696(d);draw697(d);draw698(d);const seen=new Set();
+const d=await api(null);draw686(d);draw687(d);draw688(d);draw689(d);draw690(d);draw691(d);draw692(d);draw693(d);draw694(d);draw695(d);draw696(d);draw697(d);draw698(d);draw699(d);const seen=new Set();
 for(const q of d.queue||[])if(q.utm_campaign&&!seen.has(q.social_post_queue_id)){
 seen.add(q.social_post_queue_id);
 $('dd685Campaign').add(new Option(q.utm_campaign+' · #'+q.social_post_queue_id,q.social_post_queue_id));
@@ -1620,6 +1684,53 @@ $('dd695Refresh').addEventListener('click',()=>void refresh());
 $('dd696Refresh').addEventListener('click',()=>void refresh());
 $('dd697Refresh').addEventListener('click',()=>void refresh());
 $('dd698Refresh').addEventListener('click',()=>void refresh());
+$('dd699Refresh').addEventListener('click',()=>void refresh());
+$('dd699Prepare').addEventListener('click',()=>{
+try{
+$('dd699Claim').value=JSON.stringify(claimFor699());
+$('dd699Result').textContent='Exact original-source document witness claim prepared for a DISTINCT independent signer. Never paste private keys. Live repair remains HOLD.';
+}catch(e){$('dd699Result').textContent='HOLD · '+e.message;}
+});
+$('dd699Form').addEventListener('submit',async e=>{
+e.preventDefault();const button=$('dd699Submit');button.disabled=true;
+try{
+if(!$('dd699Reviewed').checked)throw Error('Explicit original owner review is required.');
+const claim=claimFor699();
+if($('dd699Claim').value!==JSON.stringify(claim))
+throw Error('Original claim changed. Prepare a fresh independent signature.');
+const note=$('dd699Note').value.trim();
+if(note.length<20||note.length>400)throw Error('Original review note must be 20–400 characters.');
+const d=await api({action:'owner_finance_review_699',
+social_post_queue_id:state.queue_id,older_receipt_id:claim.older_receipt_id,
+newer_receipt_id:claim.newer_receipt_id,
+repair_intake_receipt_id:claim.repair_intake_receipt_id,
+expected_fingerprint_sha256:state.fingerprint_sha256,
+expected_source_revision:state.source_revision,
+independent_verifier_id:claim.independent_verifier_id,
+nonce:claim.nonce,issued_at:claim.issued_at,signature:$('dd699Signature').value.trim(),
+owner_reviewed:true,resolution_note:note},state.queue_id);
+$('dd699Result').textContent=d.result.status+' · protected original signed document witness receipt #'+
+d.result.receipt_id+' · live original source repair NOT verified.';
+$('dd699Reviewed').checked=false;$('dd699Note').value='';
+$('dd699Signature').value='';$('dd699Claim').value='';
+await refresh();
+}catch(error){$('dd699Result').textContent='HOLD · '+error.message;}
+finally{button.disabled=false;}
+});
+$('dd699Export').addEventListener('click',async()=>{
+try{
+const id=Number($('dd685Campaign').value);
+if(!id||!state?.queue_id||id!==state.queue_id)throw Error('Select exact original financial campaign.');
+if(!window.DDAuth?.apiFetch)throw Error('Authenticated Admin required.');
+const response=await window.DDAuth.apiFetch(endpoint+'?export=financial699&campaign_queue_id='+encodeURIComponent(id));
+if(!response.ok)throw Error('Protected export denied. HTTP '+response.status);
+const blob=await response.blob(),url=URL.createObjectURL(blob),a=document.createElement('a');
+a.href=url;a.download='devilndove-finance-source-witness-'+id+'-699.json';
+document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1000);
+$('dd699Result').textContent='Protected original signed document evidence exported. Live source repair remains HOLD.';
+}catch(error){$('dd699Result').textContent='HOLD · '+error.message;}
+});
+
 $('dd698Decision').addEventListener('change',chooseSources698);
 chooseSources698();
 $('dd698Form').addEventListener('submit',async event=>{
