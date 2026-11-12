@@ -215,7 +215,7 @@ mountEl.innerHTML=`
       </div>
     `;
 
-document.getElementById('productResourcesLoadButton')?.addEventListener('click',startInitialLoad);
+document.getElementById('productResourcesLoadButton')?.addEventListener('click', startInitialLoad);
 document.getElementById('productResourcesProfitabilityRecheckButton')?.addEventListener('click',()=> loadData({ bootstrap:true,resources:false }));
 document.getElementById('productResourcesProduct')?.addEventListener('change',onProductChange);
 document.getElementById('productResourcesSearch')?.addEventListener('input',scheduleResourceSearch);
@@ -828,5 +828,5 @@ setMessage('Product resource reads are paused to protect the D1 daily budget. Ch
 }
 // Inventory Operations initializes on normal DOM readiness. The Product Editor
 // imports this module only on explicit owner action, after DOMContentLoaded.
-if (document.readyState==='loading') document.addEventListener('DOMContentLoaded',initializeProductResources,{ once:true });
+if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded',initializeProductResources,{ once:true });
 else initializeProductResources();
