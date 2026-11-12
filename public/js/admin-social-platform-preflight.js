@@ -1614,6 +1614,52 @@ list.appendChild(li);
 if(!list.childElementCount){const li=document.createElement('li');li.textContent='No exact original source repair intake in complete bounded history.';list.appendChild(li);}
 select699();
 }
+
+let audit700=null;
+function select700(){
+const el=$('dd700FinanceSource');if(!el)return;
+el.replaceChildren(new Option('Select original independently signed source witness',''));
+if(!audit700?.history_complete)return;
+for(const x of audit700.readback?.items||[]){
+if(x.source_readback_recorded)continue;
+el.add(new Option('Original intake #'+x.repair_intake_receipt_id+
+' · independent document witness #'+x.independent_document_witness_receipt_id,
+[x.older_receipt_id,x.newer_receipt_id,x.repair_intake_receipt_id,
+x.independent_document_witness_receipt_id].join('|')));
+}
+}
+function draw700(d){
+if(!$('dd700-finance'))return;
+const v=d.financial700||null;audit700=v;
+$('dd700FinanceStatus').textContent=v?.campaign_queue_id?
+v.status+' · original source revision evidence '+(v.history_complete?'COMPLETE':'HOLD')+
+' · financial bookkeeping closure HOLD':
+'HOLD · Select original campaign and refresh.';
+$('dd700FinanceStats').textContent=v?.campaign_queue_id?
+'Eligible original witness cases '+v.readback.eligible_cases+
+' · independent live source receipts '+v.readback.source_receipt_count+
+' · waiting '+v.readback.pending_count+
+' · source verifier '+(v.readback.configured?'CONFIGURED':'HOLD')+
+' · accounting correction and certification HOLD':
+'No exact independent live source-of-record receipt.';
+const list=$('dd700FinanceCases');list.replaceChildren();
+for(const x of v?.readback?.items||[]){
+const li=document.createElement('li');
+li.textContent='Original source #'+x.older_receipt_id+' / #'+x.newer_receipt_id+
+' · document intake #'+x.repair_intake_receipt_id+
+' · independent document witness #'+x.independent_document_witness_receipt_id+
+' · source snapshot '+(x.source_readback_independently_signed?
+'INDEPENDENTLY SIGNED RECEIPT #'+x.source_readback_receipt_id:'NOT READ BACK')+
+' · financial close HOLD';
+list.appendChild(li);
+}
+if(!list.childElementCount){
+const li=document.createElement('li');
+li.textContent='No eligible independently signed document witness from Build 699.';
+list.appendChild(li);
+}
+select700();
+}
 async function refresh(){
 const id=Number($('dd685Campaign').value);
 if(!id){state=null;$('dd685Status').textContent='HOLD · Select a campaign.';}
@@ -1633,6 +1679,7 @@ draw696(d);
 draw697(d);
 draw698(d);
 draw699(d);
+draw700(d);
 if(!id)return;
 if(!v||v.queue_id!==id)throw Error('Fresh exact financial evidence was not returned.');
 state=v;
@@ -1660,7 +1707,7 @@ await refresh();
 document.addEventListener('DOMContentLoaded',()=>{
 if(!$('dd685-finance'))return;
 (async()=>{try{
-const d=await api(null);draw686(d);draw687(d);draw688(d);draw689(d);draw690(d);draw691(d);draw692(d);draw693(d);draw694(d);draw695(d);draw696(d);draw697(d);draw698(d);draw699(d);const seen=new Set();
+const d=await api(null);draw686(d);draw687(d);draw688(d);draw689(d);draw690(d);draw691(d);draw692(d);draw693(d);draw694(d);draw695(d);draw696(d);draw697(d);draw698(d);draw699(d);draw700(d);const seen=new Set();
 for(const q of d.queue||[])if(q.utm_campaign&&!seen.has(q.social_post_queue_id)){
 seen.add(q.social_post_queue_id);
 $('dd685Campaign').add(new Option(q.utm_campaign+' · #'+q.social_post_queue_id,q.social_post_queue_id));
@@ -1685,6 +1732,51 @@ $('dd696Refresh').addEventListener('click',()=>void refresh());
 $('dd697Refresh').addEventListener('click',()=>void refresh());
 $('dd698Refresh').addEventListener('click',()=>void refresh());
 $('dd699Refresh').addEventListener('click',()=>void refresh());
+
+$('dd700FinanceRefresh').addEventListener('click',()=>void refresh());
+$('dd700FinanceForm').addEventListener('submit',async event=>{
+event.preventDefault();
+const submit=$('dd700FinanceSubmit');submit.disabled=true;
+try{
+if(!audit700?.history_complete||!state?.queue_id)
+throw Error('Refresh the complete protected original source chain first.');
+if(!$('dd700FinanceReviewed').checked)
+throw Error('Original owner must explicitly approve one external read-only source request.');
+const [older,newer,intake,witness]=$('dd700FinanceSource').value.split('|').map(Number);
+if(![older,newer,intake,witness].every(n=>Number.isSafeInteger(n)&&n>0))
+throw Error('Select exact independent document witness and original source receipts.');
+const note=$('dd700FinanceNote').value.trim();
+if(note.length<20||note.length>400)throw Error('Owner reason must be 20–400 characters.');
+$('dd700FinanceResult').textContent='Requesting one original external source-of-record readback. No automatic retries…';
+const d=await api({action:'owner_live_source_readback_700',
+social_post_queue_id:state.queue_id,
+older_receipt_id:older,newer_receipt_id:newer,
+repair_intake_receipt_id:intake,independent_document_witness_receipt_id:witness,
+expected_fingerprint_sha256:state.fingerprint_sha256,
+expected_source_revision:state.source_revision,
+owner_reviewed:true,resolution_note:note},state.queue_id);
+$('dd700FinanceResult').textContent=d.result.status+' · independently signed original live source receipt #'+
+d.result.receipt_id+' · financial bookkeeping closure NOT inferred.';
+$('dd700FinanceReviewed').checked=false;$('dd700FinanceNote').value='';
+await refresh();
+}catch(error){$('dd700FinanceResult').textContent='HOLD · '+error.message;}
+finally{submit.disabled=false;}
+});
+$('dd700FinanceExport').addEventListener('click',async()=>{
+try{
+const id=Number($('dd685Campaign').value);
+if(!id||!state?.queue_id||id!==state.queue_id)
+throw Error('Refresh the exact current campaign first.');
+if(!window.DDAuth?.apiFetch)throw Error('Admin sign-in required.');
+const r=await window.DDAuth.apiFetch(endpoint+'?export=financial700&campaign_queue_id='+encodeURIComponent(id));
+if(!r.ok)throw Error('Protected export denied. HTTP '+r.status);
+const blob=await r.blob(),url=URL.createObjectURL(blob),link=document.createElement('a');
+link.href=url;link.download='devilndove-finance-live-source-'+id+'-700.json';
+document.body.appendChild(link);link.click();link.remove();setTimeout(()=>URL.revokeObjectURL(url),1000);
+$('dd700FinanceResult').textContent='Protected live-source evidence exported. Original financial close still HOLD.';
+}catch(error){$('dd700FinanceResult').textContent='HOLD · '+error.message;}
+});
+
 $('dd699Prepare').addEventListener('click',()=>{
 try{
 $('dd699Claim').value=JSON.stringify(claimFor699());

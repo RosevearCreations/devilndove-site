@@ -304,6 +304,27 @@
 <p id="dd693Result" role="status" aria-live="polite">No Build 693 owner receipt recorded.</p>
 <p class="small">All actions require authenticated owner review and durable readback. No automatic replay, repair, financial certification, receiver activation or claim of continuously CONNECTED infrastructure is made.</p>
 </section>
+<section class="card" id="dd700-finance" aria-labelledby="dd700-finance-title">
+<p class="eyebrow">Build 700 · Independent live original financial source-of-record readback</p>
+<h2 id="dd700-finance-title">Read the real external original source — never infer financial repair</h2>
+<p>A document signature is not a source repair. This read-only owner-gated step requests a fresh, independently signed JSON snapshot directly from the preconfigured pinned HTTPS source-of-record origin, using a one-time nonce. The fourth signer must be independent of Builds 696, 697 and 699. If the source connector, signer, consent, freshness or receipts are missing, this remains <strong>HOLD</strong>.</p>
+<p class="small">No external source URL or bearer credential is entered here. Configure the external trusted source endpoint and independent public verifier key server-side only. No financial ledger updates, provider replay, automated clearance or continuous CONNECTED assertion.</p>
+<button class="btn secondary" type="button" id="dd700FinanceRefresh">Refresh protected live source gate</button>
+<button class="btn secondary" type="button" id="dd700FinanceExport">Export original signed source readback ledger</button>
+<p id="dd700FinanceStatus" role="status" aria-live="polite">HOLD · No independently retrieved source-of-record snapshot.</p>
+<p id="dd700FinanceStats" class="small">External source and signer credentials are environment-gated.</p>
+<ol id="dd700FinanceCases" class="clean"><li>Requires exact Build 699 independently signed repair document witness.</li></ol>
+<form id="dd700FinanceForm">
+<label>Original eligible independently signed document witness
+<select class="input" id="dd700FinanceSource" required><option value="">Select original source case</option></select></label>
+<label>Owner note (20–400 characters)
+<textarea class="input" id="dd700FinanceNote" minlength="20" maxlength="400" rows="3" placeholder="Why are we requesting the original independent source readback?"></textarea></label>
+<label><input type="checkbox" id="dd700FinanceReviewed" required> We approve a one-time read-only GET to the independently configured source-of-record and understand a verified snapshot alone does not certify repaired financial statements, close existing incidents, or show a continuous connection.</label>
+<button class="btn secondary" type="submit" id="dd700FinanceSubmit">Request original source-of-record readback (owner gated)</button>
+</form>
+<p id="dd700FinanceResult" role="status" aria-live="polite">No original source readback recorded. No automatic retries.</p>
+<p class="small">A passing external signed source response creates a protected observation receipt only. Independent bookkeeping acceptance, original discrepancy closure and accounting certification remain separate protected decisions.</p>
+</section>
 <section class="card" id="dd699-finance" aria-labelledby="dd699-finance-title">
 <p class="eyebrow">Build 699 · Third-party original financial repair-document provenance</p>
 <h2 id="dd699-finance-title">Independent Original Source Repair Document Verification</h2>

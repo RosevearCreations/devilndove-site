@@ -24,6 +24,29 @@ function slugify(value) {
 
 // Build 699: one stable camera draft token is safe to replay after an unknown
 // network outcome. No client-provided product ID or draft name is authoritative.
+// Build 700: only actual authenticated D1 links and Cloudflare R2 HEAD may
+// count as field evidence. Never infer an accepted phone trial from a mock.
+export function camera700MediaKey(productId,kind,stored){
+ const id=Number(productId),value=String(stored||'');
+ if(!Number.isSafeInteger(id)||id<1||value.length>700)return null;
+ const prefix=kind==='photo'?'products/'+id+'/camera699/':
+   kind==='video'?'products/'+id+'/video/camera699-':null;
+ if(!prefix)return null;
+ const at=value.lastIndexOf(prefix);
+ if(at<0||(at>0&&value.charAt(at-1)!=='/'))return null;
+ const key=value.slice(at),stem=key.slice(prefix.length);
+ if(kind==='photo'&&!/^[a-f0-9]{64}\.(?:jpg|jpeg|png|webp|gif|avif|heic|heif)$/.test(stem))return null;
+ if(kind==='video'&&!/^[a-f0-9]{64}\.(?:mp4|mov|webm)$/.test(stem))return null;
+ return key;
+}
+export function camera700SummarizeReadback(photoRows,videoRows){
+ const items=[...photoRows,...videoRows],unverified=items.filter(x=>x.confirmed!==true);
+ return{status:photoRows.length&&items.length&&!unverified.length?'MEDIA_R2_D1_READBACK_CONFIRMED':
+ 'HOLD_MEDIA_INCOMPLETE_OR_UNVERIFIED',photo_count:photoRows.length,
+ video_count:videoRows.length,confirmed_count:items.length-unverified.length,
+ unverified_count:unverified.length,media:items,device_accepted:false,
+ field_trial_accepted:false,publication_performed:false};
+}
 export function cameraCaptureToken699(v){
  const s=String(v||'').trim();
  return /^camera699-[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/.test(s)?s:null;
@@ -553,6 +576,52 @@ export async function onRequestPost(context) {
       form = await request.formData();
     } catch {
       return json({ ok: false, error: "Expected multipart/form-data upload." }, 400);
+    }
+
+    // Build 700 owner-directed field proof: an explicit read-only check of
+    // the ORIGINAL camera draft, its linked media, and actual R2 HEAD state.
+    if(form.get('action')==='camera700_readback'){
+      const origin=request.headers.get('Origin');
+      if(origin&&origin!==new URL(request.url).origin)
+        return json({ok:false,error:'Same-origin original device proof required.'},403);
+      const id=Number(form.get('product_id')),
+        token=cameraCaptureToken699(form.get('capture_reference'));
+      if(!Number.isSafeInteger(id)||id<1||!token)
+        return json({ok:false,error:'Original draft ID and capture token required.'},400);
+      const product=await db.prepare("SELECT product_id,product_number,name,status,capture_entry_mode,capture_reference,capture_created_by_user_id FROM products WHERE product_id=? LIMIT 1")
+        .bind(id).first();
+      if(!product||product.status!=='draft'||product.capture_entry_mode!=='camera'||
+        product.capture_reference!==token||Number(product.capture_created_by_user_id)!==Number(adminUser.user_id))
+        return json({ok:false,error:'Original same-owner camera capture evidence mismatch. HOLD.'},403);
+      const bucket=env.PRODUCT_MEDIA_BUCKET||env.MEDIA_BUCKET||env.R2_PRODUCT_MEDIA;
+      if(!bucket||typeof bucket.head!=='function')
+        return json({ok:false,error:'Actual Cloudflare R2 HEAD readback unavailable; no field acceptance can be inferred.'},503);
+      const p=await db.prepare("SELECT product_image_id,image_url FROM product_images WHERE product_id=? ORDER BY product_image_id ASC LIMIT 25")
+        .bind(id).all(),v=await db.prepare("SELECT product_video_id,object_key,publication_status,file_size_bytes FROM product_video_attachments WHERE product_id=? ORDER BY product_video_id ASC LIMIT 25")
+        .bind(id).all();
+      const photos=(p.results||[]),videos=(v.results||[]);
+      const inspect=async(row,kind)=>{
+        const key=camera700MediaKey(id,kind,kind==='photo'?row.image_url:row.object_key);
+        let head=null;
+        if(key)try{head=await bucket.head(key)}catch{}
+        const bytes=Number(head?.size||0),
+         confirmed=!!key&&bytes>0&&
+          (kind==='photo'||row.publication_status==='internal_review'&&
+          Number(row.file_size_bytes)===bytes);
+        return{kind,attachment_id:Number(kind==='photo'?row.product_image_id:row.product_video_id),
+          r2_key:key,r2_bytes:bytes,confirmed,publication_status:kind==='video'?
+          row.publication_status:'draft_only'};
+      };
+      const photoProof=[],videoProof=[];
+      for(const row of photos)photoProof.push(await inspect(row,'photo'));
+      for(const row of videos)videoProof.push(await inspect(row,'video'));
+      const result=camera700SummarizeReadback(photoProof,videoProof);
+      if(photos.length>=25||videos.length>=25)result.status='HOLD_BOUNDED_MEDIA_HISTORY_LIMIT';
+      return json({ok:true,product_id:id,product_number_label:formatProductNumberLabel(product.product_number||id),
+        capture_reference_verified:true,original_owner_verified:true,
+        r2_head_checked:true,inspected_at:new Date().toISOString(),
+        bounded_rows:photos.length<25&&videos.length<25,
+        ...result},200);
     }
 
     // Build 699: attachment-only retries do NOT rewrite the original product,
