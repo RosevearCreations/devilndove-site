@@ -1075,6 +1075,8 @@ jobs:
         run: node scripts/build693_financial_sla_aging_provenance_owner_history_contract.mjs
       - name: Build 694 financial SLA resolution ledger, independent Master provenance closure and owner acceptance continuity regression
         run: node scripts/build694_financial_resolution_master_provenance_owner_continuity_contract.mjs
+      - name: Build 695 original financial ledger aging, source correction evidence intake and independent Master closure revalidation regression
+        run: node scripts/build695_financial_resolution_aging_source_correction_master_revalidation_contract.mjs
       - name: JavaScript syntax
         run: |
           node --check functions/_middleware.js
