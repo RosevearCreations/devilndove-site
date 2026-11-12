@@ -404,23 +404,23 @@ const built=createPanel('action-recovery',definition,++ordinal);built.trigger.cl
 return ordinal;
 }
 function refresh() {
-ensureStylesheet();
-const path=normalizedPath();
-ensureHelpCentreLauncher(path);
-let ordinal=0;
-for (const rule of DD_CONTEXT_HELP_RULES){
-if (rule.path !==path) continue;
-const target=resolveTarget(rule);
-const definition=DD_CONTEXT_HELP_LIBRARY[rule.help];
-if (target && definition) attach(target,rule.help,definition,++ordinal);
-}
-document.querySelectorAll('[data-context-help]').forEach((target)=>{
-const key=target.dataset.contextHelp || 'local-help';
-const definition=DD_CONTEXT_HELP_LIBRARY[key] || localDefinition(target,key);
-if (definition) attach(target,key,definition,++ordinal);
-});
-ordinal = ensurePageLevelHelp(path, ordinal);
-ordinal=ensureActionRecoveryHelp(path, ordinal);
+  ensureStylesheet();
+  const path = normalizedPath();
+  ensureHelpCentreLauncher(path);
+  let ordinal = 0;
+  for (const rule of DD_CONTEXT_HELP_RULES) {
+    if (rule.path !== path) continue;
+    const target = resolveTarget(rule);
+    const definition = DD_CONTEXT_HELP_LIBRARY[rule.help];
+    if (target && definition) attach(target, rule.help, definition, ++ordinal);
+  }
+  document.querySelectorAll('[data-context-help]').forEach((target) => {
+    const key = target.dataset.contextHelp || 'local-help';
+    const definition = DD_CONTEXT_HELP_LIBRARY[key] || localDefinition(target, key);
+    if (definition) attach(target, key, definition, ++ordinal);
+  });
+  ordinal = ensurePageLevelHelp(path, ordinal);
+  ordinal = ensureActionRecoveryHelp(path, ordinal);
 }
 function helpOwnedNode(node){
 const el=node?.nodeType===1 ? node :node?.parentElement;
