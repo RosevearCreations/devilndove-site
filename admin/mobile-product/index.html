@@ -64,6 +64,28 @@
         </div>
         <p class="small" id="dd698CameraStatus" role="status" aria-live="polite">Admin sign-in and internet connection required. A failed upload keeps the original DD draft for safe manual retry.</p>
         <p class="small" id="dd699Progress" role="status" aria-live="polite">Original capture identity not yet allocated.</p>
+
+<section id="dd700FieldProof" class="card" aria-labelledby="dd700FieldHeading" style="margin-top:14px;padding:12px">
+<p class="eyebrow">Build 700 · Original phone device acceptance · Owner field proof</p>
+<h3 id="dd700FieldHeading">Check the actual saved phone draft and Cloudflare attachments</h3>
+<p class="small">Only a real phone session with original uploaded files can count as field acceptance. This check reads the same-owner D1 draft attachments and Cloudflare R2 object HEADs; it never creates a Product, signs off a device, or publishes anything. Photos or videos that have not been uploaded remain unverified.</p>
+<button class="btn secondary" id="dd700Readback" type="button">Verify original D1 / R2 media attachments</button>
+<p id="dd700ReadbackStatus" role="status" aria-live="polite">HOLD · Select or save one original camera draft before reading its media.</p>
+<div id="dd700ReadbackDetails" class="small" aria-live="polite"></div>
+<fieldset style="margin:12px 0;padding:10px;border:1px solid currentColor">
+<legend>Physical phone trial — owner must confirm each observed result</legend>
+<label class="small" style="display:block"><input type="checkbox" data-dd700-check="phone" /> Camera opened on a physical phone (not a simulated browser).</label>
+<label class="small" style="display:block"><input type="checkbox" data-dd700-check="draft" /> One exact Temporary DD draft was created and appeared in saved drafts.</label>
+<label class="small" style="display:block"><input type="checkbox" data-dd700-check="photo" /> Original phone photo was captured and the image was visible after reloading.</label>
+<label class="small" style="display:block"><input type="checkbox" data-dd700-check="recovery" /> An interrupted/uncertain media upload was manually retried on the same draft; no duplicate Product appeared.</label>
+<label class="small" style="display:block"><input type="checkbox" data-dd700-check="video" /> If video was captured, its original attachment remained private and required review.</label>
+</fieldset>
+<label class="small" for="dd700DeviceNotes">Actual test notes (device/OS/browser and results — do not include passwords or personal data)</label>
+<textarea id="dd700DeviceNotes" class="input" rows="3" maxlength="600" placeholder="e.g. Android Firefox · camera photo attached, offline retry restored, video skipped"></textarea>
+<button class="btn secondary" id="dd700Export" type="button">Export field trial evidence (local JSON)</button>
+<p class="small" id="dd700ExportStatus" role="status" aria-live="polite">Owner field acceptance is NOT recorded until a real-phone trial and independent Cloudflare media readback are both complete. This is a local evidence export, not an automatic deployment gate.</p>
+</section>
+
         <button class="btn secondary" type="button" id="dd699Resume" hidden>Resume original saved draft</button>
         <p class="small" id="dd698CameraSavedLink"></p>
       </section>
