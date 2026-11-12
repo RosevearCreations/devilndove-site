@@ -4615,6 +4615,9 @@ d.source_revision===current?.source_revision&&
 d.fingerprint_sha256===current?.fingerprint_sha256&&
 d.source_discrepancies_remaining===0&&d.source_repair_claimed===true&&
 d.independent_source_signature_verified===true&&
+d.owner_reviewed===true&&Number.isSafeInteger(Number(d.owner_user_id))&&
+Number(d.owner_user_id)>0&&typeof d.resolution_note==='string'&&
+d.resolution_note.length>=20&&d.resolution_note.length<=400&&
 d.original_financial_certified===false&&
 d.continuous_connection_verified===false&&
 /^[A-Za-z0-9+/_=-]{80,120}$/.test(d.signature||'');
@@ -4681,7 +4684,8 @@ custodianId:normalizeText(env?.FINANCIAL_SOURCE_CORRECTION_SIGNER_ID_696),
 reconcilerId:normalizeText(env?.FINANCIAL_SOURCE_RECONCILIATION_SIGNER_ID_697),
 custodianKey:normalizeText(env?.FINANCIAL_SOURCE_CORRECTION_CUSTODIAN_PUBLIC_KEY_696),
 reconcilerKey:normalizeText(env?.FINANCIAL_SOURCE_RECONCILIATION_PUBLIC_KEY_697),
-originAuthorized:!!env?.FINANCIAL_SOURCE_LIVE_READBACK_ORIGIN_700
+originAuthorized:!!sourceOrigin700(env?.FINANCIAL_SOURCE_LIVE_READBACK_URL_700,
+env?.FINANCIAL_SOURCE_LIVE_READBACK_ORIGIN_700)
 });
 }
 export function sourceOrigin700(input,origin){
@@ -4702,11 +4706,12 @@ const n=Number(p.social_post_queue_id),current=await financial685(db,env,n),
 report=await finance700(db,env,n),
 older=Number(p.older_receipt_id),newer=Number(p.newer_receipt_id),
 intake=Number(p.repair_intake_receipt_id),
-witness=Number(p.independent_document_witness_receipt_id);
+witness=Number(p.independent_document_witness_receipt_id),note=normalizeText(p.resolution_note);
 if(!current.queue_id||!report.history_complete||p.owner_reviewed!==true||
 p.expected_source_revision!==current.source_revision||
-p.expected_fingerprint_sha256!==current.fingerprint_sha256)
-throw Error('Exact current original financial source and owner review required. HOLD.');
+p.expected_fingerprint_sha256!==current.fingerprint_sha256||
+note.length<20||note.length>400)
+throw Error('Exact current original financial source, 20–400 character owner reason and review required. HOLD.');
 const x=report.readback.items.find(x=>x.older_receipt_id===older&&
 x.newer_receipt_id===newer&&x.repair_intake_receipt_id===intake&&
 x.independent_document_witness_receipt_id===witness&&!x.source_readback_recorded);
@@ -4770,7 +4775,7 @@ const payload={...signed,signature,
 independent_source_signature_verified:true,
 original_financial_certified:false,
 continuous_connection_verified:false,
-owner_user_id:user.user_id,owner_reviewed:true};
+owner_user_id:user.user_id,owner_reviewed:true,resolution_note:note};
 const receiptId=await append684(db,user,n,'finance_owner_review_700',
 'independent_live_source_snapshot_readback_700',
 'finance700-'+n+'-'+older+'-'+newer+'-'+intake+'-'+witness,payload);
