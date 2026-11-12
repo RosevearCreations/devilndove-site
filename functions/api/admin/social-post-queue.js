@@ -2735,6 +2735,12 @@ current_independently_reverified_receipt_id:verifiedNow?current.verified_master_
 current_receipt_in_bounded_history:currentReceiptPresent,
 historical_chain_pin_matches:historicalIntegrity,
 record_count:renewalHistory.length,
+source_pinned_receipt_ids:renewalHistory.filter(x=>x.observed_source_pin_match).map(x=>x.receipt_id),
+renewal_gap_evidence:renewalHistory.flatMap((x,i)=>x.previous_interval_minutes>20&&i>0?
+[{older_receipt_id:x.receipt_id,newer_receipt_id:renewalHistory[i-1].receipt_id,
+older_recorded_at:x.recorded_at,newer_recorded_at:renewalHistory[i-1].recorded_at,
+gap_minutes:x.previous_interval_minutes,source_pins_match:!!x.observed_source_pin_match&&
+!!renewalHistory[i-1].observed_source_pin_match}]:[]),
 historical_gap_over_20_minutes_count:renewalHistory.filter(x=>
 x.previous_interval_minutes!==null&&x.previous_interval_minutes>20).length,
 recent_history:renewalHistory.slice(0,12),background_polling:false,
