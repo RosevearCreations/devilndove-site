@@ -3349,7 +3349,9 @@ items:slaFollowups.slice(0,40)},
 provenance:{current_master_receipt_id:signedNow?currentMaster:null,
 current_master_independently_reverified:signedNow,source_revision:current?.source_revision||null,
 source_fingerprint_sha256:current?.fingerprint_sha256||null,
-historical_pair_count:sourcePairs.length,source_exception_count:exceptionHolds,
+historical_pair_count:sourcePairs.length,
+historical_source_receipt_ids:[...historicalIds].filter(x=>Number.isSafeInteger(x)&&x>0).slice(0,80),
+source_exception_count:exceptionHolds,
 pending_exception_review_count:pendingExceptionReview,
 pending_owner_revalidation_count:pendingProvenance,
 pairs:sourcePairs.slice(0,40),historical_signatures_reverified:false,
@@ -3431,6 +3433,238 @@ historical_signatures_reverified:false,financial_certified:false,
 connection:'HOLD_INDEPENDENT_CONTINUOUS_RUNTIME_TELEMETRY'};
 }
 
+// Build 694 — durable exact-source owner resolution ledger. A recorded decision
+// does NOT repair a live incident, reverify historical signatures or certify finance.
+export function assessFinance694(current,prior,ownerRows,now=Date.now()){
+const n=Number(current?.queue_id),selected=Number.isSafeInteger(n)&&n>0;
+const rows694=Array.isArray(ownerRows)?ownerRows:[],
+bounded=!!prior?.history_complete&&rows694.length<=60;
+const dated=value=>{const t=Date.parse(value||'');return Number.isFinite(t)&&t<=now+300000?t:null;};
+const age=value=>{const t=dated(value);return t===null?null:Math.max(0,Math.floor((now-t)/60000));};
+const expiry=Date.parse(current?.expires_at||''),masterId=Number(current?.verified_master_receipt_id);
+const historical=new Set((prior?.provenance?.historical_source_receipt_ids||[])
+.map(Number).filter(x=>Number.isSafeInteger(x)&&x>0));
+const signedNow=!!current?.master_fresh&&!!prior?.master_accepted_now&&
+Number.isFinite(expiry)&&expiry>now&&Number.isSafeInteger(masterId)&&masterId>0&&
+historical.has(masterId)&&masterId===Number(prior?.provenance?.current_master_receipt_id)&&
+!!prior?.provenance?.current_master_independently_reverified;
+const priorOwner=(prior?.owner_history||[]).filter(x=>
+x.state==='OWNER_REVIEW_RECORDED_HISTORICAL_NOT_EXTERNAL_CERTIFICATION');
+const acceptedAudit=(prior?.audit?.history||[]).filter(x=>x.owner_acceptance_recorded)
+.map(x=>{
+const proof=priorOwner.find(r=>r.decision==='accept_owner_audit_history'&&
+r.case_id===x.case_id&&Number(r.reference_receipt_id)===Number(x.prior_owner_audit_receipt_id));
+return{case_id:x.case_id,prior_owner_audit_receipt_id:Number(x.prior_owner_audit_receipt_id),
+owner_acceptance_receipt_id:proof?Number(proof.receipt_id):null,
+owner_accepted_at:proof?.recorded_at||null,
+historically_accepted:!!proof,continuity_acknowledged:false,
+current_independent_master_rechecked:signedNow};
+});
+const auditByCase=new Map(acceptedAudit.filter(x=>x.historically_accepted)
+.map(x=>[x.case_id,x]));
+const reviewedFollowups=new Map(priorOwner.filter(x=>x.decision==='repeat_sla_followup')
+.map(x=>[Number(x.reference_receipt_id),x]));
+const resolution=(prior?.followups?.items||[]).filter(x=>x.repeat_followup_recorded).map(x=>{
+const proof=reviewedFollowups.get(Number(x.followup_receipt_id)),
+accepted=auditByCase.get(x.case_id);
+return{case_id:x.case_id,followup_receipt_id:Number(x.followup_receipt_id),
+original_escalation_receipt_id:Number(x.original_escalation_receipt_id),
+recheck_receipt_id:proof?Number(proof.receipt_id):null,
+rechecked_at:proof?.recorded_at||null,
+age_minutes:age(proof?.recorded_at),
+linked_owner_acceptance_receipt_id:accepted?.owner_acceptance_receipt_id||null,
+eligible_for_owner_resolution:!!proof&&!!accepted&&signedNow&&
+Number(prior?.provenance?.source_exception_count||0)===0,
+owner_resolution_recorded:false,
+external_sla_breach_remedied:false,source_incident_repaired:false};
+});
+const provenance=(prior?.provenance?.pairs||[]).map(x=>{
+const recheck=priorOwner.find(y=>y.decision==='revalidate_master_provenance'&&
+Number(y.reference_receipt_id)===Number(x.older_receipt_id)&&
+Number(y.newer_receipt_id)===Number(x.newer_receipt_id));
+const mismatch=!!x.exception_review_recorded&&!x.source_pins_match;
+const bothHistorical=historical.has(Number(x.older_receipt_id))&&
+historical.has(Number(x.newer_receipt_id));
+return{older_receipt_id:Number(x.older_receipt_id),
+newer_receipt_id:Number(x.newer_receipt_id),
+recorded_gap_minutes:Number(x.recorded_gap_minutes),
+older_recorded_at:x.older_recorded_at,newer_recorded_at:x.newer_recorded_at,
+source_pins_match:!!x.source_pins_match&&bothHistorical,
+exception_review_recorded:!!x.exception_review_recorded,
+review_receipt_id:recheck?Number(recheck.receipt_id):null,
+revalidated_at:recheck?.recorded_at||null,
+eligible_for_owner_provenance_closure:!!x.source_pins_match&&bothHistorical&&
+!!x.revalidation_recorded&&!!recheck&&signedNow&&!mismatch,
+status:!x.source_pins_match||!bothHistorical?
+'HOLD_INDEPENDENT_SOURCE_PROVENANCE_CORRECTION':
+!x.revalidation_recorded||!recheck?
+'HOLD_PRIOR_INDEPENDENT_MASTER_REVALIDATION':
+signedNow?'REVALIDATED_SOURCE_PIN_OWNER_CLOSURE_REVIEW_ONLY':'HOLD_FRESH_SIGNED_MASTER',
+owner_provenance_closure_recorded:false,
+original_exception_repaired:false,historical_signatures_reverified:false};
+});
+const resolutionById=new Map(resolution.filter(x=>x.recheck_receipt_id)
+.map(x=>[x.recheck_receipt_id,x]));
+const provenanceByKey=new Map(provenance.map(x=>[x.older_receipt_id+'|'+x.newer_receipt_id,x]));
+const auditByReceipt=new Map(acceptedAudit.filter(x=>x.owner_acceptance_receipt_id)
+.map(x=>[x.owner_acceptance_receipt_id,x]));
+let invalid=0,priorId=Infinity,priorTime=Infinity;
+const seen=new Set(),history=[];
+for(const row of rows694){
+const id=Number(row.social_post_attempt_id),d=safeJson(row.response_json,{}),
+ref=Number(d.reference_receipt_id),second=Number(d.newer_receipt_id),
+time=dated(row.attempted_at),type=d.decision;
+const expected=({record_sla_resolution:'owner_sla_resolution_recorded_694',
+close_revalidated_provenance:'owner_master_provenance_closure_recorded_694',
+accept_owner_continuity:'owner_acceptance_continuity_recorded_694'})[type];
+const source=type==='record_sla_resolution'?resolutionById.get(ref):
+type==='close_revalidated_provenance'?provenanceByKey.get(ref+'|'+second):
+type==='accept_owner_continuity'?auditByReceipt.get(ref):null;
+const sourceAt=dated(type==='record_sla_resolution'?source?.rechecked_at:
+type==='close_revalidated_provenance'?source?.revalidated_at:source?.owner_accepted_at);
+const paired=type==='record_sla_resolution'?!!source&&
+source.case_id===d.case_id&&
+source.linked_owner_acceptance_receipt_id===Number(d.linked_owner_acceptance_receipt_id)&&
+!!source.linked_owner_acceptance_receipt_id:
+type==='close_revalidated_provenance'?!!source&&d.case_id===null&&
+Number(d.prior_revalidation_receipt_id)===source.review_receipt_id&&
+!!source.review_receipt_id&&source.source_pins_match:
+type==='accept_owner_continuity'?!!source&&
+source.case_id===d.case_id&&
+Number(d.prior_owner_audit_receipt_id)===source.prior_owner_audit_receipt_id:false;
+const key=type+'|'+ref+'|'+(type==='close_revalidated_provenance'?second:0);
+const valid=Number.isSafeInteger(id)&&id>0&&id>ref&&id<priorId&&
+time!==null&&time<=priorTime&&sourceAt!==null&&time>=sourceAt&&
+row.attempt_status===expected&&paired&&!seen.has(key)&&
+historical.has(Number(d.master_receipt_id))&&Number(d.master_receipt_id)>0&&
+d.fingerprint_sha256===current?.fingerprint_sha256&&
+d.source_revision===current?.source_revision&&
+d.owner_reviewed===true&&Number.isSafeInteger(Number(d.owner_user_id))&&
+Number(d.owner_user_id)>0&&typeof d.resolution_note==='string'&&
+d.resolution_note.length>=20&&d.resolution_note.length<=400;
+if(valid)seen.add(key);else invalid++;
+history.push({receipt_id:id,decision:type||null,reference_receipt_id:ref,
+case_id:d.case_id||null,newer_receipt_id:Number.isSafeInteger(second)&&second>0?second:null,
+recorded_at:row.attempted_at,master_receipt_id:Number(d.master_receipt_id)||null,
+owner_user_id:Number(d.owner_user_id)||null,
+state:valid?'OWNER_RESOLUTION_LEDGER_RECORDED_NOT_EXTERNAL_CERTIFICATION':'HOLD_OWNER_RESOLUTION_LEDGER_DRIFT'});
+priorId=id;priorTime=time===null?-Infinity:time;
+}
+const done=decision=>new Set(history.filter(x=>x.decision===decision&&
+x.state==='OWNER_RESOLUTION_LEDGER_RECORDED_NOT_EXTERNAL_CERTIFICATION')
+.map(x=>x.reference_receipt_id+'|'+(decision==='close_revalidated_provenance'?x.newer_receipt_id:0)));
+const doneSla=done('record_sla_resolution'),
+doneProvenance=done('close_revalidated_provenance'),
+doneAudit=done('accept_owner_continuity');
+for(const x of resolution)x.owner_resolution_recorded=!!x.recheck_receipt_id&&
+doneSla.has(x.recheck_receipt_id+'|0');
+for(const x of provenance)x.owner_provenance_closure_recorded=
+doneProvenance.has(x.older_receipt_id+'|'+x.newer_receipt_id);
+for(const x of acceptedAudit)x.continuity_acknowledged=!!x.owner_acceptance_receipt_id&&
+doneAudit.has(x.owner_acceptance_receipt_id+'|0');
+const holdMismatch=provenance.filter(x=>!x.source_pins_match).length;
+const unresolvedSla=resolution.filter(x=>x.eligible_for_owner_resolution&&!x.owner_resolution_recorded).length;
+const unresolvedProvenance=provenance.filter(x=>x.eligible_for_owner_provenance_closure&&
+!x.owner_provenance_closure_recorded).length;
+const unresolvedContinuity=acceptedAudit.filter(x=>x.historically_accepted&&
+!x.continuity_acknowledged).length;
+const complete=selected&&bounded&&invalid===0;
+return{status:!selected?'HOLD_SELECT_CAMPAIGN':!bounded||invalid?
+'HOLD_OWNER_RESOLUTION_LEDGER_HISTORY':holdMismatch?
+'HOLD_INDEPENDENT_PROVENANCE_EXCEPTION_CORRECTION':!signedNow?
+'HOLD_FRESH_INDEPENDENT_MASTER_ACCEPTANCE':unresolvedSla?
+'OWNER_FINANCIAL_SLA_RESOLUTION_REVIEW_REQUIRED':unresolvedProvenance?
+'OWNER_INDEPENDENT_MASTER_PROVENANCE_CLOSURE_REVIEW_REQUIRED':unresolvedContinuity?
+'OWNER_AUDIT_CONTINUITY_REVIEW_REQUIRED':'OWNER_RESOLUTION_LEDGER_REVIEW_ONLY',
+campaign_queue_id:selected?n:null,observed_at:new Date(now).toISOString(),
+history_complete:complete,
+resolution:{record_count:resolution.length,pending_owner_resolution_count:unresolvedSla,
+owner_resolved_count:resolution.filter(x=>x.owner_resolution_recorded).length,
+items:resolution.slice(0,40),external_remediation_proven:false},
+provenance:{source_exception_hold_count:holdMismatch,
+eligible_owner_closure_count:provenance.filter(x=>x.eligible_for_owner_provenance_closure).length,
+pending_owner_closure_count:unresolvedProvenance,
+source_pinned_historical_receipt_count:historical.size,
+current_independent_master_receipt_id:signedNow?masterId:null,
+current_independently_verified:signedNow,
+pairs:provenance.slice(0,40),historical_signatures_reverified:false,
+external_source_correction_proven:false,recorded_gap_proves_outage:false},
+owner_audit:{historical_acceptance_count:acceptedAudit.length,
+pending_continuity_count:unresolvedContinuity,
+owner_continuity_recorded_count:acceptedAudit.filter(x=>x.continuity_acknowledged).length,
+history:acceptedAudit.slice(0,30)},
+owner_resolution_history:history.slice(0,40),invalid_owner_history_count:invalid,
+master_accepted_now:signedNow&&complete&&holdMismatch===0,
+connection:'HOLD_INDEPENDENT_CONTINUOUS_RUNTIME_TELEMETRY',
+financial_certified:false,auto_sla_resolution:false,
+auto_master_provenance_closure:false,auto_owner_acceptance:false,
+external_master_replay_performed:false};
+}
+async function finance694(db,env,id){
+const n=Number(id);
+if(!Number.isSafeInteger(n)||n<1)
+return assessFinance694({queue_id:0},{history_complete:false},[]);
+const current=await financial685(db,env,n),prior=await finance693(db,env,n);
+const owner=rows(await db.prepare("SELECT social_post_attempt_id,attempt_status,response_json,attempted_at FROM social_post_attempts WHERE social_post_queue_id=? AND platform_key='finance_owner_resolution_694' ORDER BY social_post_attempt_id DESC LIMIT 61").bind(n).all());
+return assessFinance694(current,prior,owner);
+}
+async function ownerResolution694(db,env,user,p){
+const n=Number(p.social_post_queue_id),current=await financial685(db,env,n),
+state=await finance694(db,env,n),decision=normalizeText(p.decision),
+caseId=normalizeText(p.case_id)||null,ref=Number(p.reference_receipt_id),
+second=Number(p.newer_receipt_id),note=normalizeText(p.resolution_note);
+if(!current.queue_id||!state.history_complete||!state.master_accepted_now||
+p.owner_reviewed!==true||!current.fingerprint_sha256||
+p.expected_fingerprint_sha256!==current.fingerprint_sha256||
+p.expected_source_revision!==current.source_revision||
+Number(p.expected_master_receipt_id)!==current.verified_master_receipt_id||
+!Number.isSafeInteger(ref)||ref<=0||note.length<20||note.length>400)
+throw Error('Exact current independent Master acceptance, original source and substantial owner review required. HOLD.');
+let match=null,status='',linkedAcceptance=null,revalidation=null,priorOwnerAudit=null;
+if(decision==='record_sla_resolution'){
+match=state.resolution.items.find(x=>x.case_id===caseId&&
+x.recheck_receipt_id===ref&&x.eligible_for_owner_resolution&&
+!x.owner_resolution_recorded);
+linkedAcceptance=match?.linked_owner_acceptance_receipt_id||null;
+status='owner_sla_resolution_recorded_694';
+}else if(decision==='close_revalidated_provenance'){
+match=state.provenance.pairs.find(x=>x.older_receipt_id===ref&&
+x.newer_receipt_id===second&&x.eligible_for_owner_provenance_closure&&
+!x.owner_provenance_closure_recorded);
+revalidation=match?.review_receipt_id||null;
+status='owner_master_provenance_closure_recorded_694';
+}else if(decision==='accept_owner_continuity'){
+match=state.owner_audit.history.find(x=>x.case_id===caseId&&
+x.owner_acceptance_receipt_id===ref&&x.historically_accepted&&
+!x.continuity_acknowledged);
+priorOwnerAudit=match?.prior_owner_audit_receipt_id||null;
+status='owner_acceptance_continuity_recorded_694';
+}else throw Error('Unsupported Build 694 owner resolution decision. HOLD.');
+if(!match)throw Error('Stale, missing, unpaired, already reviewed or unverified source evidence. HOLD.');
+const payload={decision,case_id:decision==='close_revalidated_provenance'?null:caseId,
+reference_receipt_id:ref,
+newer_receipt_id:decision==='close_revalidated_provenance'?second:null,
+linked_owner_acceptance_receipt_id:linkedAcceptance,
+prior_revalidation_receipt_id:revalidation,prior_owner_audit_receipt_id:priorOwnerAudit,
+master_receipt_id:current.verified_master_receipt_id,
+fingerprint_sha256:current.fingerprint_sha256,source_revision:current.source_revision,
+owner_user_id:user.user_id,owner_reviewed:true,resolution_note:note,
+source_incident_repaired:false,financial_certified:false,
+continuous_connection_verified:false,historical_signatures_reverified:false};
+const nonce='finance694-'+decision+'-'+ref+
+(decision==='close_revalidated_provenance'?'-'+second:'');
+const receipt_id=await append684(db,user,n,'finance_owner_resolution_694',status,nonce,payload);
+const after=await finance694(db,env,n);
+if(!after.owner_resolution_history.some(x=>x.receipt_id===receipt_id&&
+x.decision===decision&&x.reference_receipt_id===ref&&
+x.state==='OWNER_RESOLUTION_LEDGER_RECORDED_NOT_EXTERNAL_CERTIFICATION'))
+throw Error('Exact owner resolution not validated by durable protected readback. HOLD.');
+return{status,receipt_id,reference_receipt_id:ref,case_id:caseId,
+master_accepted_now:after.master_accepted_now,
+external_remediation_proven:false,financial_certified:false,
+connection:'HOLD_INDEPENDENT_CONTINUOUS_RUNTIME_TELEMETRY'};
+}
+
 // Build 682 — source-only financial export and owner discrepancy audit.
 async function finance682(db,env,id){
 const n=Number(id);
@@ -3503,6 +3737,18 @@ const db=getDb(context.env);
 if (!db) return jsonResponse({ ok:false,error:'Database binding is not configured.'},500);
 try{
 const params=new URL(context.request.url).searchParams;
+if(params.get('export')==='financial694'){
+const n=Number(params.get('campaign_queue_id'));
+if(!Number.isSafeInteger(n)||n<1)return jsonResponse({ok:false,error:'Exact financial campaign required for owner resolution ledger export.'},400,{'Cache-Control':'no-store'});
+const report=await finance694(db,context.env,n);
+return new Response(JSON.stringify({report_type:'FINANCIAL_RESOLUTION_MASTER_PROVENANCE_OWNER_CONTINUITY_694',
+owner_resolution_report:report,historical_signatures_reverified:false,
+runtime_connection:'HOLD_INDEPENDENT_CONTINUOUS_RUNTIME_TELEMETRY',
+financial_certified:false,external_remediation_proven:false},null,2),{
+status:200,headers:{'Content-Type':'application/json; charset=utf-8',
+'Content-Disposition':'attachment; filename="devilndove-finance-resolution-'+n+'-694.json"',
+'Cache-Control':'private, no-store','X-Content-Type-Options':'nosniff'}});
+}
 if(params.get('export')==='financial693'){
 const n=Number(params.get('campaign_queue_id'));
 if(!Number.isSafeInteger(n)||n<1)return jsonResponse({ok:false,error:'Exact campaign required for protected owner financial audit export.'},400,{'Cache-Control':'no-store'});
@@ -3581,7 +3827,7 @@ return new Response(JSON.stringify(evidence,null,2),{status:200,headers:{
 'Cache-Control':'private, no-store','X-Content-Type-Options':'nosniff'}});
 }
 const data=await summarize(db,context.env);
-return jsonResponse({ ok:true,...data,receipts673:await receipts673(db),engagement675:await engagement675(db),financial676:await financial676(db),financial678:await financialSummary678(db,context.request.headers.get('x-campaign-queue-id')||new URL(context.request.url).searchParams.get('campaign_queue_id')),financial679:await campaignNet679(db,new URL(context.request.url).searchParams.get('campaign_queue_id')),financial680:await finance680(db,context.env,new URL(context.request.url).searchParams.get('campaign_queue_id')),financial681:await finance681(db,context.env,new URL(context.request.url).searchParams.get('campaign_queue_id')),financial682:await finance682(db,context.env,new URL(context.request.url).searchParams.get('campaign_queue_id')),financial683:await financial683(db,context.env,new URL(context.request.url).searchParams.get('campaign_queue_id')),financial684:await financial684(db,context.env,new URL(context.request.url).searchParams.get('campaign_queue_id')),financial685:await financial685(db,context.env,new URL(context.request.url).searchParams.get('campaign_queue_id')),financialRecoveryQueue686:await globalFinanceQueue686(db),financial687:await finance687(db,context.env,new URL(context.request.url).searchParams.get('campaign_queue_id')),financial688:await finance688(db,context.env,new URL(context.request.url).searchParams.get('campaign_queue_id')),financial689:await finance689(db,context.env,new URL(context.request.url).searchParams.get('campaign_queue_id')),financial690:await finance690(db,context.env,new URL(context.request.url).searchParams.get('campaign_queue_id')),financial691:await finance691(db,context.env,new URL(context.request.url).searchParams.get('campaign_queue_id')),financial692:await finance692(db,context.env,new URL(context.request.url).searchParams.get('campaign_queue_id')),financial693:await finance693(db,context.env,new URL(context.request.url).searchParams.get('campaign_queue_id')),queue:data.queue.map(normalizeQueueRow),mode:'review_first_api_when_configured'},200,{ 'Cache-Control':'no-store'});
+return jsonResponse({ ok:true,...data,receipts673:await receipts673(db),engagement675:await engagement675(db),financial676:await financial676(db),financial678:await financialSummary678(db,context.request.headers.get('x-campaign-queue-id')||new URL(context.request.url).searchParams.get('campaign_queue_id')),financial679:await campaignNet679(db,new URL(context.request.url).searchParams.get('campaign_queue_id')),financial680:await finance680(db,context.env,new URL(context.request.url).searchParams.get('campaign_queue_id')),financial681:await finance681(db,context.env,new URL(context.request.url).searchParams.get('campaign_queue_id')),financial682:await finance682(db,context.env,new URL(context.request.url).searchParams.get('campaign_queue_id')),financial683:await financial683(db,context.env,new URL(context.request.url).searchParams.get('campaign_queue_id')),financial684:await financial684(db,context.env,new URL(context.request.url).searchParams.get('campaign_queue_id')),financial685:await financial685(db,context.env,new URL(context.request.url).searchParams.get('campaign_queue_id')),financialRecoveryQueue686:await globalFinanceQueue686(db),financial687:await finance687(db,context.env,new URL(context.request.url).searchParams.get('campaign_queue_id')),financial688:await finance688(db,context.env,new URL(context.request.url).searchParams.get('campaign_queue_id')),financial689:await finance689(db,context.env,new URL(context.request.url).searchParams.get('campaign_queue_id')),financial690:await finance690(db,context.env,new URL(context.request.url).searchParams.get('campaign_queue_id')),financial691:await finance691(db,context.env,new URL(context.request.url).searchParams.get('campaign_queue_id')),financial692:await finance692(db,context.env,new URL(context.request.url).searchParams.get('campaign_queue_id')),financial693:await finance693(db,context.env,new URL(context.request.url).searchParams.get('campaign_queue_id')),financial694:await finance694(db,context.env,new URL(context.request.url).searchParams.get('campaign_queue_id')),queue:data.queue.map(normalizeQueueRow),mode:'review_first_api_when_configured'},200,{ 'Cache-Control':'no-store'});
 } catch (error){
 await captureRuntimeIncident(context.env,context.request,{
 incident_scope:'admin_social',
@@ -3644,6 +3890,7 @@ else if (action==='owner_finance_reconcile_690') result=await ownerReconcile690(
 else if (action==='owner_finance_continuity_691') result=await ownerContinuity691(db,context.env,adminUser,payload);
 else if (action==='owner_finance_followup_692') result=await ownerFollowup692(db,context.env,adminUser,payload);
 else if (action==='owner_finance_audit_693') result=await ownerAudit693(db,context.env,adminUser,payload);
+else if (action==='owner_finance_resolution_694') result=await ownerResolution694(db,context.env,adminUser,payload);
 else if (action==='expense_attestation_678') result=await expenseAttestation678(db,context.env,adminUser,payload,recordApiAttempt);
 else if (action==='owner_marketing_signoff_678') result=await ownerSignoff678(db,adminUser,payload,recordApiAttempt);
 else throw new Error(`Unsupported social queue action: ${action}`);
