@@ -16,7 +16,7 @@
     "max_js_bytes": 600000,
     "max_css_bytes": 500000,
     "max_html_bytes": 500000,
-    "max_runtime_source_bytes": 18898000,
+    "max_runtime_source_bytes": 18954000,
     "max_runtime_source_files": 1854,
     "max_inline_data_uri_bytes": 650000
   },
@@ -33,6 +33,19 @@
     "production_mutation": false
   },
   "budget_reviews": [
+    {
+      "build": 697,
+      "date": "2026-11-12",
+      "scope": "Distinct second-party independent Ed25519 evidence reconciliation of authenticated Build 696 custodian receipts, original aged financial escalation owner resolution review, current signed Master attestation renewal continuity and protected source-bound Admin export",
+      "prior_limit_bytes": 18898000,
+      "new_limit_bytes": 18954000,
+      "delta_bytes": 56000,
+      "delta_percent": 0.2963,
+      "runtime_file_limit_unchanged": 1854,
+      "review_reason": "Reviewed limited 56,000-byte (<0.297%) source allowance for independent reconciler public-key exact-signature verification, bounded original owner evidence readback and Admin manual controls. Signer must differ from original custodian; external source repair remains HOLD. Owner review does not close actual source incidents or mint a new Master signature. No D1 migration, external provider write, background polling, financial certification, continuous CONNECTED assertion, bypass of source caps or production proof gates.",
+      "owner_financial_approval": "NOT_INFERRED",
+      "production_runtime_master_acceptance": "EVIDENCE_GATED_HOLD"
+    },
     {
       "build": 696,
       "date": "2026-11-12",
