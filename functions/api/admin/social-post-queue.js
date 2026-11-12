@@ -1922,7 +1922,7 @@ async function financial684(db,env,id){
  const data=rows(await db.prepare("SELECT social_post_attempt_id,platform_key,external_post_id,response_json,attempted_at FROM social_post_attempts WHERE social_post_queue_id=? AND platform_key IN ('finance_enrollment_684','finance_acceptance_684','finance_continuity_684') ORDER BY social_post_attempt_id DESC LIMIT 121").bind(n).all());
  const complete=source.complete&&base.complete&&data.length<=120;
  const er=data.find(x=>x.platform_key==='finance_enrollment_684'),e=safeJson(er?.response_json,{}),ec=e.claim||{};
- const pinned=pin684(source),enrolled=!!complete&&source.signer?.status==='INDEPENDENT_SIGNER_ADMITTED'&&
+ const pinned=pin684(source),enrolled=!!complete&&base.source_owner_accepted&&!base.cases.some(c=>!c.code.startsWith('MASTER_'))&&source.signer?.status==='INDEPENDENT_SIGNER_ADMITTED'&&
  same684(ec,pinned)&&ec.signer_id===normalizeText(env?.FINANCIAL_EVIDENCE_SIGNER_ID_683)&&
  nonce684(ec.nonce)&&fresh684(ec.issued_at,30*86400000)&&
  await verify684(normalizeText(env?.FINANCIAL_EVIDENCE_SIGNER_PUBLIC_KEY_683),claim684('enrollment',ec),e.signature);
