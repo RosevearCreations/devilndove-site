@@ -657,6 +657,9 @@ export async function onRequestPost(context) {
       });
 
       productNumber = identity.productNumber || productNumber;
+      // The persisted temporary name must use the final allocated DD identity,
+      // even when a concurrent draft consumed the preferred sequence number.
+      if (captureEntryMode === "camera" && !name) resolvedName = `Temporary ${formatProductNumberLabel(productNumber)}`;
       slug = identity.slug || slugify(`${resolvedName}-${productNumber}`) || `product-${productNumber}`;
       sku = identity.sku || buildDefaultSku(productNumber, productNumber);
 
