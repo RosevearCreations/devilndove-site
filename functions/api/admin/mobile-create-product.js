@@ -30,9 +30,25 @@ function slugify(value) {
 export function camera700MediaKey(productId,kind,stored){
  const id=Number(productId),value=String(stored||'');
  if(!Number.isSafeInteger(id)||id<1||value.length>700)return null;
- const escaped='products/'+id+'/';
- const rx=kind==='photo'
-   ?new RegExp('(?:^|/)('+escaped+'camera699/[a-f0-9]{64}\\.(?:jpg|jpeg|png|webp|gif|avif|heic|heif))
+ const prefix=kind==='photo'?'products/'+id+'/camera699/':
+   kind==='video'?'products/'+id+'/video/camera699-':null;
+ if(!prefix)return null;
+ const at=value.lastIndexOf(prefix);
+ if(at<0||(at>0&&value.charAt(at-1)!=='/'))return null;
+ const key=value.slice(at),stem=key.slice(prefix.length);
+ if(kind==='photo'&&!/^[a-f0-9]{64}\.(?:jpg|jpeg|png|webp|gif|avif|heic|heif)$/.test(stem))return null;
+ if(kind==='video'&&!/^[a-f0-9]{64}\.(?:mp4|mov|webm)$/.test(stem))return null;
+ return key;
+}
+export function camera700SummarizeReadback(photoRows,videoRows){
+ const items=[...photoRows,...videoRows],unverified=items.filter(x=>x.confirmed!==true);
+ return{status:photoRows.length&&items.length&&!unverified.length?'MEDIA_R2_D1_READBACK_CONFIRMED':
+ 'HOLD_MEDIA_INCOMPLETE_OR_UNVERIFIED',photo_count:photoRows.length,
+ video_count:videoRows.length,confirmed_count:items.length-unverified.length,
+ unverified_count:unverified.length,media:items,device_accepted:false,
+ field_trial_accepted:false,publication_performed:false};
+}
+export function cameraCaptureToken699(v){
  const s=String(v||'').trim();
  return /^camera699-[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/.test(s)?s:null;
 }
