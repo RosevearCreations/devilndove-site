@@ -122,7 +122,7 @@ for(const id of ['dd698-camera-start','dd698CameraSave','dd699New','dd699Resume'
 assert.match(mobile,new RegExp('id="'+id+'"'));
 for(const rx of [/dd_camera699_active_draft/,/localStorage\.setItem\(STORE/,
  /createOrRecover\(\)/,/camera699_upload_only/,/uploadPhotos\(\)/,/uploadVideo\(\)/,
- /camera699-\+'\+crypto\.randomUUID\(\)/,/same_original_draft/,
+ /camera699-'\+crypto\.randomUUID\(\)/,/same_original_draft/,
  /publication_performed/,/product_video_id/,/photos\.splice\(i,1\)/])
  if(rx.source!=='publication_performed')assert.match(client,rx);
 // Products-first DOM order and explicit mobile fold measurement/accessible fallback.
