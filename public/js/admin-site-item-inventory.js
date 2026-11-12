@@ -32,7 +32,7 @@ let seedLoadPromise=null;
 let listLoadPromise=null;
 let inventoryPage=1;
 let inventoryTotalPages=1;
-const inventoryPageSize=40;
+const inventoryPageSize = 40;
 const INVENTORY_DRAFT_KEY='dd_inventory_form_draft_v244';
 
 
@@ -1062,7 +1062,7 @@ item_description:document.getElementById('siteInventoryItemDescription')?.value 
 inventory_process_id:Number(document.getElementById('siteInventoryCategoryPreset')?.value || 0),
 category:String(document.getElementById('siteInventoryCategory')?.value || '').trim().toLowerCase(),
 workstation_role:String(document.getElementById('siteInventoryWorkstationRole')?.value || 'associated').trim().toLowerCase(),
-workstation_site_item_inventory_ids:workstationIds,
+workstation_site_item_inventory_ids: workstationIds,
 workstation_site_item_inventory_id:workstationIds[0] || 0,
 current_location_site_item_inventory_id:Number(document.getElementById('siteInventoryCurrentLocation')?.value || 0),
 image_url:document.getElementById('siteInventoryImageUrl')?.value || '',
@@ -1407,7 +1407,7 @@ item_name:value('item_name') || original.item_name,
 inventory_process_id:Number(value('inventory_process_id') || 0),
 category:processName && !/^unassigned/i.test(processName) ? processName.toLowerCase() :'',
 workstation_role:String(value('workstation_role') || original.workstation_role || 'associated').trim().toLowerCase(),
-workstation_site_item_inventory_ids:workstationIds,
+workstation_site_item_inventory_ids: workstationIds,
 workstation_site_item_inventory_id:workstationIds[0] || 0,
 current_location_site_item_inventory_id:Math.max(0,Number(value('current_location_site_item_inventory_id') || 0)),
 supplier_name:value('supplier_name') || '',
@@ -1641,7 +1641,7 @@ if (search) search.value=deepSearch;
 // Workstation/category and unit choices must exist before the cards/table render.
 // Rendering the list first produced rows whose selects only contained their fallback item.
 loadSeedOptions()
-.then(()=> loadList({ force:true }))
+.then(() => loadList({ force: true }))
 .catch(()=> loadList({ force:true }));
 }
 
