@@ -2281,7 +2281,8 @@ due_at:new Date(Date.parse(c.opened_at)+target*60000).toISOString()});
 closing<=opening&&c.closed_fingerprint===c.fingerprint_sha256&&
 c.closed_opened_acceptance_id===c.opened_acceptance_receipt_id&&
 c.newer_master_receipt_id>c.opened_acceptance_receipt_id){
-closed.push({case_id:c.case_id,closure_receipt_id:c.close_id,
+closed.push({case_id:c.case_id,open_receipt_id:c.open_id,closure_receipt_id:c.close_id,
+fingerprint_sha256:c.fingerprint_sha256,issue_code:c.issue_code,
 newer_master_receipt_id:c.newer_master_receipt_id,elapsed_minutes:opening-closing,
 within_advisory_target:opening-closing<=target,
 historical_status:'OWNER_CLOSURE_RECORDED_NOT_CURRENT_MASTER_PROOF'});
@@ -2304,6 +2305,7 @@ advisory_target_minutes:target,advisory_only:true,
 open_count:open.length,overdue_count:open.filter(x=>x.sla_state==='OVERDUE').length,
 due_soon_count:open.filter(x=>x.sla_state==='DUE_SOON').length,
 closed_count:closed.length,closed_within_target_count:closed.filter(x=>x.within_advisory_target).length,
+closed_cases:closed.slice(0,25),
 mean_recorded_closure_minutes:closed.length?Math.round(closed.reduce((s,x)=>s+x.elapsed_minutes,0)/closed.length):null,
 invalid_or_unpaired_history_count:invalid,owner_followups:open.slice(0,25),
 renewal:{recorded_receipt_count:receipts.length,recorded_renewal_count:Math.max(0,receipts.length-1),
