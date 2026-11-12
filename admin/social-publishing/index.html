@@ -304,6 +304,38 @@
 <p id="dd693Result" role="status" aria-live="polite">No Build 693 owner receipt recorded.</p>
 <p class="small">All actions require authenticated owner review and durable readback. No automatic replay, repair, financial certification, receiver activation or claim of continuously CONNECTED infrastructure is made.</p>
 </section>
+<section class="card" id="dd695-finance" aria-labelledby="dd695-title">
+<p class="eyebrow">Build 695 · Source-bound resolution aging and correction</p>
+<h2 id="dd695-title">Financial Resolution Ledger Aging, Independent Source Correction Evidence Intake &amp; Master Closure Revalidation</h2>
+<p>Review aged owner resolutions, capture externally originated source-correction references without asserting verified repair, and revalidate a Build 694 closure against a fresh independently signed Master receipt. No automatic repair or financial certification.</p>
+<button class="btn secondary" type="button" id="dd695Refresh">Refresh protected Build 695 evidence</button>
+<button class="btn secondary" type="button" id="dd695Export">Export protected Build 695 JSON</button>
+<p id="dd695Status" role="status" aria-live="polite">HOLD · Select original campaign evidence.</p>
+<p class="small" id="dd695Stats">No original financial source review loaded.</p>
+<h3>Owner resolution aging · 120-minute follow-up and 240-minute critical</h3>
+<ol class="clean" id="dd695Aging"><li>Refresh exact source-bound ledger.</li></ol>
+<h3>Source correction evidence intake · not independent verification</h3>
+<ol class="clean" id="dd695Correction"><li>Source mismatch remains HOLD.</li></ol>
+<h3>Existing owner Master closure revalidation</h3>
+<ol class="clean" id="dd695Master"><li>Fresh signed Master acceptance required.</li></ol>
+<form id="dd695Form">
+<h3>Append original owner review</h3>
+<label>Review decision<select class="input" id="dd695Decision" required>
+<option value="intake_source_correction">Record source custodian correction evidence (unverified)</option>
+<option value="revalidate_master_closure">Revalidate an existing source-pinned Master closure</option>
+</select></label>
+<label>Exact historical receipt pair<select class="input" id="dd695Source" required><option value="">Choose original evidence</option></select></label>
+<label>External custodian identifier (intake only)<input class="input" id="dd695Custodian" maxlength="120" autocomplete="off"></label>
+<label>Original external evidence reference (intake only)<input class="input" id="dd695Reference" maxlength="160" autocomplete="off"></label>
+<label>Original evidence SHA-256 (intake only)<input class="input" id="dd695Digest" minlength="64" maxlength="64" autocomplete="off" spellcheck="false"></label>
+<label>External evidence observed at (intake only)<input class="input" id="dd695Observed" type="datetime-local"></label>
+<label>Original owner evidence note (20–400 characters)<textarea class="input" id="dd695Note" rows="3" minlength="20" maxlength="400" required></textarea></label>
+<label><input type="checkbox" id="dd695Reviewed" required> We reviewed original evidence and understand an external correction reference is unverified and does not release HOLD.</label>
+<button class="btn secondary" type="submit" id="dd695Submit">Record durable owner review</button>
+</form>
+<p id="dd695Result" role="status" aria-live="polite">No Build 695 owner review recorded.</p>
+<p class="small">No source auto-repair, external replay, historical signature re-verification, continuous CONNECTED assertion, financial certification, migration or background polling.</p>
+</section>
 <section class="card" id="dd694-finance" aria-labelledby="dd694-title">
 <p class="eyebrow">Build 694 · Financial resolution and continuity</p>
 <h2 id="dd694-title">Financial SLA resolution ledger, independent Master provenance closure review &amp; owner acceptance continuity</h2>
