@@ -204,6 +204,39 @@
 <p role="status" aria-live="polite" id="dd690Result">No Build 690 owner decision recorded.</p>
 <p class="small">Refresh is manual; no continuous background telemetry, provider replay, Master renewal automation, incident auto-close, or financial certification occurs.</p>
 </section>
+<section class="card" id="dd691-finance" aria-labelledby="dd691-title">
+<p class="eyebrow">Build 691 · Financial exception aging &amp; continuity</p>
+<h2 id="dd691-title">Replay-exception aging, recorded Master receipt gap escalation &amp; owner closure evidence</h2>
+<p>Read-only, manually refreshed evidence ages unresolved replay cases against an advisory 120-minute review target. It also flags gaps between recorded signed Master receipts; a recording gap is <strong>not</strong> proof the receiver was offline. Owner actions are append-only acknowledgments, never automatic evidence repair or independent Master acceptance.</p>
+<button class="btn secondary" type="button" id="dd691Refresh">Refresh bounded age and receipt evidence</button>
+<button class="btn secondary" type="button" id="dd691Export">Export protected owner audit JSON</button>
+<p id="dd691Status" role="status" aria-live="polite">HOLD · Select a financial campaign and refresh its original signed evidence.</p>
+<p id="dd691Stats" class="small">No current age, gap or closure summary loaded.</p>
+<h3>Exception age and owner followup</h3>
+<ol class="clean" id="dd691Exceptions" aria-label="Exact replay-exception aging"><li>Evidence has not been refreshed.</li></ol>
+<h3>Master renewal history gaps</h3>
+<p class="small" id="dd691Renewal">Historical receipt intervals have not been inspected.</p>
+<ol class="clean" id="dd691Gaps" aria-label="Source-bound signed receipt gaps"><li>No signed receipt history loaded.</li></ol>
+<h3>Prior owner closure evidence</h3>
+<ol class="clean" id="dd691Closures" aria-label="Exact owner closure continuity receipts"><li>No independently evidenced owner closure loaded.</li></ol>
+<form id="dd691Form">
+<h3>Record an owner evidence followup</h3>
+<label>Owner action
+<select class="input" id="dd691Decision" required>
+<option value="escalate_replay_aging">Escalate aged replay exception for owner followup</option>
+<option value="escalate_renewal_gap">Escalate signed Master receipt history gap for review</option>
+<option value="accept_closure_continuity">Accept current, independently evidenced owner closure continuity</option>
+</select></label>
+<label>Exact original evidence receipts
+<select class="input" id="dd691Source" required><option value="">Select a verified source reference</option></select></label>
+<label>Owner review note (20–400 characters)
+<textarea class="input" id="dd691Note" rows="3" minlength="20" maxlength="400" required></textarea></label>
+<label><input type="checkbox" id="dd691Reviewed" required> We reviewed the original case or paired receipts, source identity, and any currently signed Master proof. This does not repair, certify, or automatically close evidence.</label>
+<button class="btn secondary" id="dd691Submit" type="submit">Record owner followup evidence</button>
+</form>
+<p id="dd691Result" role="status" aria-live="polite">No Build 691 owner action recorded.</p>
+<p class="small">All timestamps come from the server's latest manual observation. Unpaired or incomplete evidence stays on HOLD. No background polling, provider replay, CONNECTED assertion, financial certification or automatic owner closure is performed.</p>
+</section>
 <section class="card" id="dd684-finance" aria-labelledby="dd684-title">
 <p class="eyebrow">Build 684 · Independent financial runtime verification</p>
 <h2 id="dd684-title">Signer enrollment, verified Master acceptance &amp; financial closure continuity</h2>
