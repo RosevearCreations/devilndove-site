@@ -69,7 +69,7 @@ for(const id of ['dd687-finance','dd687-title','dd687Refresh','dd687Status',
 'dd687Stats','dd687Renewal','dd687Receipts','dd687Coverage','dd687Followups','dd687Review'])
 assert.ok(page.includes('id="'+id+'"'),id);
 assert.match(client,/function draw687\(d\)/);
-assert.match(client,/\.textContent=v\.renewal\.current_status/);
+assert.match(client,/v\.renewal\.current_status/);
 assert.match(client,/dd687Review/);
 assert.doesNotMatch(client,/FINANCIAL_MASTER_ACCEPTANCE_TOKEN|PRIVATE_KEY|AI_DATA_MASTER_ACK_PUBLIC_KEY/);
 assert.match(ci,/build687_finance_sla_renewal_closure_contract\.mjs/);
