@@ -3204,6 +3204,230 @@ external_master_replay_performed:false,financial_certified:false,
 connection:'HOLD_INDEPENDENT_CONTINUOUS_RUNTIME_TELEMETRY'};
 }
 
+// Build 693: bounded owner SLA follow-up aging, source-pinned provenance
+// exception recheck and append-only owner acceptance history. No external replay.
+export function assessFinance693(current,prior,ownerRows,now=Date.now()){
+const selected=Number.isSafeInteger(Number(current?.queue_id))&&Number(current.queue_id)>0;
+const rows693=Array.isArray(ownerRows)?ownerRows:[],bounded=!!prior?.history_complete&&rows693.length<=60;
+const dated=v=>{const t=Date.parse(v||'');return Number.isFinite(t)&&t<=now+300000?t:null;};
+const age=v=>{const t=dated(v);return t===null?null:Math.max(0,Math.floor((now-t)/60000));};
+const expiry=Date.parse(current?.expires_at||'');
+const currentMaster=Number(current?.verified_master_receipt_id);
+const signedNow=!!current?.master_fresh&&!!prior?.master_accepted_now&&
+Number.isFinite(expiry)&&expiry>now&&Number.isSafeInteger(currentMaster)&&currentMaster>0&&
+currentMaster===Number(prior?.provenance?.current_exact_master_receipt_id)&&
+!!prior?.provenance?.current_signature_verified_independently;
+const priorReceipts=(prior?.owner_reviews||[]).filter(x=>
+x.state==='OWNER_REVIEW_RECORDED_NO_EXTERNAL_MASTER_CERTIFICATION');
+const slaSources=priorReceipts.filter(x=>x.decision==='record_sla_followup'&&
+x.case_id&&Number(x.reference_receipt_id)>0);
+const slaFollowups=slaSources.map(x=>{
+const elapsed=age(x.recorded_at);
+return{case_id:x.case_id,followup_receipt_id:Number(x.receipt_id),
+original_escalation_receipt_id:Number(x.reference_receipt_id),
+owner_user_id:Number(x.owner_user_id||0),recorded_at:x.recorded_at,
+age_minutes:elapsed,age_status:elapsed===null?'HOLD_UNKNOWN_AGE':
+elapsed>=240?'CRITICAL_AGED':elapsed>=120?'OVERDUE_RECHECK':
+elapsed>=90?'DUE_SOON':'WITHIN_ADVISORY_TARGET',
+repeat_followup_recorded:false,source_exception_repaired:false};
+});
+const sourcePairs=(prior?.provenance?.historical_receipt_pairs||[]).map(x=>({
+older_receipt_id:Number(x.older_receipt_id),
+newer_receipt_id:Number(x.newer_receipt_id),
+recorded_gap_minutes:Number(x.gap_minutes),
+provenance_state:x.provenance_state,
+source_pins_match:x.provenance_state===
+'HISTORICAL_SOURCE_RECEIPT_PINS_MATCH_NOT_SIGNATURE_REVERIFIED',
+older_recorded_at:x.older_recorded_at,
+newer_recorded_at:x.newer_recorded_at,
+previous_owner_provenance_reviewed:!!x.owner_provenance_reviewed,
+revalidation_recorded:false,exception_review_recorded:false,
+historical_signatures_reverified:false}));
+const review692ByPair=new Map(priorReceipts.filter(x=>x.decision==='review_master_provenance')
+.map(x=>[x.reference_receipt_id+'|'+x.newer_receipt_id,x]));
+for(const x of sourcePairs){
+const old=review692ByPair.get(x.older_receipt_id+'|'+x.newer_receipt_id);
+x.previous_owner_receipt_id=old?Number(old.receipt_id):null;
+x.revalidation_state=x.source_pins_match?
+(signedNow&&!!old?'CURRENT_MASTER_RECHECK_ELIGIBLE':'HOLD_FRESH_MASTER_OR_PRIOR_OWNER_REVIEW'):
+'HOLD_SOURCE_RECEIPT_EXCEPTION';
+}
+const priorClosures=priorReceipts.filter(x=>x.decision==='reconcile_closure_audit'&&x.case_id)
+.map(x=>({case_id:x.case_id,prior_owner_audit_receipt_id:Number(x.receipt_id),
+original_continuity_receipt_id:Number(x.reference_receipt_id),
+recorded_at:x.recorded_at,owner_user_id:Number(x.owner_user_id||0),
+owner_acceptance_recorded:false,current_signed_master_rechecked:signedNow}));
+const followByReceipt=new Map(slaFollowups.map(x=>[x.followup_receipt_id,x]));
+const pairByKey=new Map(sourcePairs.map(x=>[x.older_receipt_id+'|'+x.newer_receipt_id,x]));
+const closureByReceipt=new Map(priorClosures.map(x=>[x.prior_owner_audit_receipt_id,x]));
+let invalid=0,previousId=Infinity,previousTime=Infinity;
+const seen=new Set(),ownerHistory=[];
+for(const row of rows693){
+const id=Number(row.social_post_attempt_id),
+d=safeJson(row.response_json,{}),at=dated(row.attempted_at),
+ref=Number(d.reference_receipt_id),newer=Number(d.newer_receipt_id),
+status=({repeat_sla_followup:'owner_followup_aging_reviewed_693',
+review_provenance_exception:'owner_provenance_exception_reviewed_693',
+revalidate_master_provenance:'owner_master_provenance_revalidated_693',
+accept_owner_audit_history:'owner_audit_acceptance_recorded_693'})[d.decision],
+key=d.decision+'|'+ref+'|'+(d.decision?.includes('provenance')?newer:0),
+source=d.decision==='repeat_sla_followup'?followByReceipt.get(ref):
+d.decision==='review_provenance_exception'||d.decision==='revalidate_master_provenance'?
+pairByKey.get(ref+'|'+newer):
+d.decision==='accept_owner_audit_history'?closureByReceipt.get(ref):null,
+sourceAt=dated(d.decision==='repeat_sla_followup'?source?.recorded_at:
+d.decision==='review_provenance_exception'||d.decision==='revalidate_master_provenance'?
+source?.newer_recorded_at:source?.recorded_at);
+const paired=d.decision==='repeat_sla_followup'?!!source&&source.case_id===d.case_id&&
+source.age_minutes!==null&&source.age_minutes>=120:
+d.decision==='review_provenance_exception'?!!source&&!source.source_pins_match&&d.case_id===null:
+d.decision==='revalidate_master_provenance'?!!source&&source.source_pins_match&&
+!!source.previous_owner_receipt_id&&
+Number(d.prior_owner_review_receipt_id)===source.previous_owner_receipt_id&&
+d.case_id===null&&Number(d.master_receipt_id)>0:
+d.decision==='accept_owner_audit_history'?!!source&&source.case_id===d.case_id&&
+Number(d.master_receipt_id)>0:false;
+const requiresCurrent=d.decision==='revalidate_master_provenance'||
+d.decision==='accept_owner_audit_history';
+const valid=Number.isSafeInteger(id)&&id>0&&id>ref&&id<previousId&&
+at!==null&&at<=previousTime&&sourceAt!==null&&at>=sourceAt&&
+row.attempt_status===status&&paired&&!seen.has(key)&&
+(!requiresCurrent||Number.isSafeInteger(Number(d.master_receipt_id))&&
+Number(d.master_receipt_id)>0)&&
+d.fingerprint_sha256===current?.fingerprint_sha256&&
+d.source_revision===current?.source_revision&&
+d.owner_reviewed===true&&Number.isSafeInteger(Number(d.owner_user_id))&&
+Number(d.owner_user_id)>0&&typeof d.resolution_note==='string'&&
+d.resolution_note.length>=20&&d.resolution_note.length<=400;
+if(valid)seen.add(key);else invalid++;
+ownerHistory.push({receipt_id:id,decision:d.decision||null,case_id:d.case_id||null,
+reference_receipt_id:ref,newer_receipt_id:Number.isSafeInteger(newer)&&newer>0?newer:null,
+master_receipt_id:Number.isSafeInteger(Number(d.master_receipt_id))&&
+Number(d.master_receipt_id)>0?Number(d.master_receipt_id):null,
+recorded_at:row.attempted_at,owner_user_id:Number(d.owner_user_id||0),
+state:valid?'OWNER_REVIEW_RECORDED_HISTORICAL_NOT_EXTERNAL_CERTIFICATION':'HOLD_OWNER_REVIEW_DRIFT'});
+previousId=id;previousTime=at===null?-Infinity:at;
+}
+const done=(decision)=>new Set(ownerHistory.filter(x=>x.decision===decision&&
+x.state==='OWNER_REVIEW_RECORDED_HISTORICAL_NOT_EXTERNAL_CERTIFICATION')
+.map(x=>x.reference_receipt_id+'|'+(decision.includes('provenance')?x.newer_receipt_id:0)));
+const doneSla=done('repeat_sla_followup'),doneException=done('review_provenance_exception'),
+doneRecheck=done('revalidate_master_provenance'),doneAudit=done('accept_owner_audit_history');
+for(const x of slaFollowups)x.repeat_followup_recorded=doneSla.has(x.followup_receipt_id+'|0');
+for(const x of sourcePairs){
+x.exception_review_recorded=doneException.has(x.older_receipt_id+'|'+x.newer_receipt_id);
+x.revalidation_recorded=doneRecheck.has(x.older_receipt_id+'|'+x.newer_receipt_id);
+}
+for(const x of priorClosures)x.owner_acceptance_recorded=
+doneAudit.has(x.prior_owner_audit_receipt_id+'|0');
+const unknownAges=slaFollowups.filter(x=>x.age_minutes===null).length;
+const pendingOverdue=slaFollowups.filter(x=>x.age_minutes!==null&&x.age_minutes>=120&&
+!x.repeat_followup_recorded).length;
+const exceptionHolds=sourcePairs.filter(x=>!x.source_pins_match).length;
+const pendingExceptionReview=sourcePairs.filter(x=>!x.source_pins_match&&
+!x.exception_review_recorded).length;
+const pendingProvenance=sourcePairs.filter(x=>x.source_pins_match&&
+!x.revalidation_recorded).length;
+const complete=selected&&bounded&&invalid===0;
+return{status:!selected?'HOLD_SELECT_CAMPAIGN':!bounded||invalid?
+'HOLD_OWNER_AUDIT_HISTORY':unknownAges?'HOLD_FOLLOWUP_AGE_UNVERIFIABLE':
+pendingOverdue?'OWNER_SLA_AGING_RECHECK_REQUIRED':
+pendingExceptionReview?'HOLD_PROVENANCE_EXCEPTION_OWNER_REVIEW':
+exceptionHolds?'HOLD_PROVENANCE_SOURCE_REVALIDATION':
+pendingProvenance?'OWNER_MASTER_PROVENANCE_RECHECK_REQUIRED':
+!signedNow?'HOLD_CURRENT_INDEPENDENT_MASTER':'OWNER_AUDIT_ACCEPTANCE_REVIEW_ONLY',
+campaign_queue_id:selected?Number(current.queue_id):null,
+observed_at:new Date(now).toISOString(),history_complete:complete,
+followups:{advisory_target_minutes:120,record_count:slaFollowups.length,
+overdue_count:slaFollowups.filter(x=>x.age_minutes!==null&&x.age_minutes>=120).length,
+critical_count:slaFollowups.filter(x=>x.age_status==='CRITICAL_AGED').length,
+pending_overdue_count:pendingOverdue,unknown_age_count:unknownAges,
+items:slaFollowups.slice(0,40)},
+provenance:{current_master_receipt_id:signedNow?currentMaster:null,
+current_master_independently_reverified:signedNow,source_revision:current?.source_revision||null,
+source_fingerprint_sha256:current?.fingerprint_sha256||null,
+historical_pair_count:sourcePairs.length,source_exception_count:exceptionHolds,
+pending_exception_review_count:pendingExceptionReview,
+pending_owner_revalidation_count:pendingProvenance,
+pairs:sourcePairs.slice(0,40),historical_signatures_reverified:false,
+recorded_gap_proves_outage:false,continuous_runtime_verified:false},
+audit:{prior_acceptance_count:priorClosures.length,
+owner_accepted_count:priorClosures.filter(x=>x.owner_acceptance_recorded).length,
+pending_owner_acceptance_count:priorClosures.filter(x=>!x.owner_acceptance_recorded).length,
+history:priorClosures.slice(0,30)},
+owner_history:ownerHistory.slice(0,40),invalid_owner_history_count:invalid,
+master_accepted_now:signedNow&&complete&&exceptionHolds===0,
+connection:'HOLD_INDEPENDENT_CONTINUOUS_RUNTIME_TELEMETRY',
+financial_certified:false,auto_sla_followup:false,auto_source_repair:false,
+auto_owner_acceptance:false,external_master_replay_performed:false};
+}
+async function finance693(db,env,id){
+const n=Number(id);
+if(!Number.isSafeInteger(n)||n<1)
+return assessFinance693({queue_id:0},{history_complete:false},[]);
+const current=await financial685(db,env,n),prior=await finance692(db,env,n);
+const audits=rows(await db.prepare("SELECT social_post_attempt_id,attempt_status,response_json,attempted_at FROM social_post_attempts WHERE social_post_queue_id=? AND platform_key='finance_owner_audit_693' ORDER BY social_post_attempt_id DESC LIMIT 61").bind(n).all());
+return assessFinance693(current,prior,audits);
+}
+async function ownerAudit693(db,env,user,p){
+const n=Number(p.social_post_queue_id),current=await financial685(db,env,n),
+report=await finance693(db,env,n),
+decision=normalizeText(p.decision),caseId=normalizeText(p.case_id)||null,
+ref=Number(p.reference_receipt_id),newer=Number(p.newer_receipt_id),
+note=normalizeText(p.resolution_note);
+if(!current.queue_id||!report.history_complete||!current.fingerprint_sha256||
+p.owner_reviewed!==true||p.expected_fingerprint_sha256!==current.fingerprint_sha256||
+p.expected_source_revision!==current.source_revision||
+!Number.isSafeInteger(ref)||ref<=0||note.length<20||note.length>400)
+throw Error('Exact current source, bounded history and substantial explicit owner review required. HOLD.');
+let candidate=null,status='',masterId=null,previousReviewId=null;
+if(decision==='repeat_sla_followup'){
+candidate=report.followups.items.find(x=>x.case_id===caseId&&x.followup_receipt_id===ref&&
+x.age_minutes!==null&&x.age_minutes>=120&&!x.repeat_followup_recorded);
+status='owner_followup_aging_reviewed_693';
+}else if(decision==='review_provenance_exception'){
+candidate=report.provenance.pairs.find(x=>x.older_receipt_id===ref&&
+x.newer_receipt_id===newer&&!x.source_pins_match&&!x.exception_review_recorded);
+status='owner_provenance_exception_reviewed_693';
+}else if(decision==='revalidate_master_provenance'){
+if(!report.provenance.current_master_independently_reverified||
+Number(p.expected_master_receipt_id)!==current.verified_master_receipt_id)
+throw Error('Fresh independently reverified current Master acceptance required. HOLD.');
+candidate=report.provenance.pairs.find(x=>x.older_receipt_id===ref&&
+x.newer_receipt_id===newer&&x.source_pins_match&&
+x.previous_owner_receipt_id&&!x.revalidation_recorded);
+status='owner_master_provenance_revalidated_693';
+masterId=current.verified_master_receipt_id;previousReviewId=candidate?.previous_owner_receipt_id||null;
+}else if(decision==='accept_owner_audit_history'){
+if(!report.master_accepted_now||
+Number(p.expected_master_receipt_id)!==current.verified_master_receipt_id)
+throw Error('Current independent Master verification and clear source provenance required. HOLD.');
+candidate=report.audit.history.find(x=>x.case_id===caseId&&
+x.prior_owner_audit_receipt_id===ref&&!x.owner_acceptance_recorded);
+status='owner_audit_acceptance_recorded_693';masterId=current.verified_master_receipt_id;
+}else throw Error('Unsupported Build 693 financial owner action. HOLD.');
+if(!candidate)throw Error('Owner case is stale, already recorded, unpaired or insufficiently sourced. HOLD.');
+const payload={decision,case_id:decision.includes('provenance')?null:caseId,
+reference_receipt_id:ref,newer_receipt_id:decision.includes('provenance')?newer:null,
+prior_owner_review_receipt_id:previousReviewId,master_receipt_id:masterId,
+fingerprint_sha256:current.fingerprint_sha256,source_revision:current.source_revision,
+owner_user_id:user.user_id,owner_reviewed:true,resolution_note:note,
+historical_signatures_reverified:false,source_exception_repaired:false,
+independent_connection_verified:false,financial_certified:false};
+const nonce='finance693-'+decision+'-'+ref+
+(decision.includes('provenance')?'-'+newer:'');
+const receipt_id=await append684(db,user,n,'finance_owner_audit_693',status,nonce,payload);
+const after=await finance693(db,env,n);
+if(!after.owner_history.some(x=>x.receipt_id===receipt_id&&
+x.decision===decision&&x.reference_receipt_id===ref&&
+x.state==='OWNER_REVIEW_RECORDED_HISTORICAL_NOT_EXTERNAL_CERTIFICATION'))
+throw Error('Exact append-only owner audit was not confirmed by durable readback. HOLD.');
+return{status,receipt_id,reference_receipt_id:ref,case_id:caseId,
+master_accepted_now:after.master_accepted_now,
+historical_signatures_reverified:false,financial_certified:false,
+connection:'HOLD_INDEPENDENT_CONTINUOUS_RUNTIME_TELEMETRY'};
+}
+
 // Build 682 — source-only financial export and owner discrepancy audit.
 async function finance682(db,env,id){
 const n=Number(id);
@@ -3276,6 +3500,18 @@ const db=getDb(context.env);
 if (!db) return jsonResponse({ ok:false,error:'Database binding is not configured.'},500);
 try{
 const params=new URL(context.request.url).searchParams;
+if(params.get('export')==='financial693'){
+const n=Number(params.get('campaign_queue_id'));
+if(!Number.isSafeInteger(n)||n<1)return jsonResponse({ok:false,error:'Exact campaign required for protected owner financial audit export.'},400,{'Cache-Control':'no-store'});
+const report=await finance693(db,context.env,n);
+return new Response(JSON.stringify({report_type:'FINANCIAL_SLA_AGING_PROVENANCE_OWNER_HISTORY_693',
+owner_evidence_report:report,historical_signatures_reverified:false,
+continuous_runtime_connection:'HOLD_INDEPENDENT_CONTINUOUS_RUNTIME_TELEMETRY',
+profitability_certified:false},null,2),{status:200,headers:{
+'Content-Type':'application/json; charset=utf-8',
+'Content-Disposition':'attachment; filename="devilndove-finance-audit-'+n+'-693.json"',
+'Cache-Control':'private, no-store','X-Content-Type-Options':'nosniff'}});
+}
 if(params.get('export')==='financial692'){
 const n=Number(params.get('campaign_queue_id'));
 if(!Number.isSafeInteger(n)||n<1)return jsonResponse({ok:false,error:'Exact campaign required for protected owner SLA export.'},400,{'Cache-Control':'no-store'});
@@ -3342,7 +3578,7 @@ return new Response(JSON.stringify(evidence,null,2),{status:200,headers:{
 'Cache-Control':'private, no-store','X-Content-Type-Options':'nosniff'}});
 }
 const data=await summarize(db,context.env);
-return jsonResponse({ ok:true,...data,receipts673:await receipts673(db),engagement675:await engagement675(db),financial676:await financial676(db),financial678:await financialSummary678(db,context.request.headers.get('x-campaign-queue-id')||new URL(context.request.url).searchParams.get('campaign_queue_id')),financial679:await campaignNet679(db,new URL(context.request.url).searchParams.get('campaign_queue_id')),financial680:await finance680(db,context.env,new URL(context.request.url).searchParams.get('campaign_queue_id')),financial681:await finance681(db,context.env,new URL(context.request.url).searchParams.get('campaign_queue_id')),financial682:await finance682(db,context.env,new URL(context.request.url).searchParams.get('campaign_queue_id')),financial683:await financial683(db,context.env,new URL(context.request.url).searchParams.get('campaign_queue_id')),financial684:await financial684(db,context.env,new URL(context.request.url).searchParams.get('campaign_queue_id')),financial685:await financial685(db,context.env,new URL(context.request.url).searchParams.get('campaign_queue_id')),financialRecoveryQueue686:await globalFinanceQueue686(db),financial687:await finance687(db,context.env,new URL(context.request.url).searchParams.get('campaign_queue_id')),financial688:await finance688(db,context.env,new URL(context.request.url).searchParams.get('campaign_queue_id')),financial689:await finance689(db,context.env,new URL(context.request.url).searchParams.get('campaign_queue_id')),financial690:await finance690(db,context.env,new URL(context.request.url).searchParams.get('campaign_queue_id')),financial691:await finance691(db,context.env,new URL(context.request.url).searchParams.get('campaign_queue_id')),financial692:await finance692(db,context.env,new URL(context.request.url).searchParams.get('campaign_queue_id')),queue:data.queue.map(normalizeQueueRow),mode:'review_first_api_when_configured'},200,{ 'Cache-Control':'no-store'});
+return jsonResponse({ ok:true,...data,receipts673:await receipts673(db),engagement675:await engagement675(db),financial676:await financial676(db),financial678:await financialSummary678(db,context.request.headers.get('x-campaign-queue-id')||new URL(context.request.url).searchParams.get('campaign_queue_id')),financial679:await campaignNet679(db,new URL(context.request.url).searchParams.get('campaign_queue_id')),financial680:await finance680(db,context.env,new URL(context.request.url).searchParams.get('campaign_queue_id')),financial681:await finance681(db,context.env,new URL(context.request.url).searchParams.get('campaign_queue_id')),financial682:await finance682(db,context.env,new URL(context.request.url).searchParams.get('campaign_queue_id')),financial683:await financial683(db,context.env,new URL(context.request.url).searchParams.get('campaign_queue_id')),financial684:await financial684(db,context.env,new URL(context.request.url).searchParams.get('campaign_queue_id')),financial685:await financial685(db,context.env,new URL(context.request.url).searchParams.get('campaign_queue_id')),financialRecoveryQueue686:await globalFinanceQueue686(db),financial687:await finance687(db,context.env,new URL(context.request.url).searchParams.get('campaign_queue_id')),financial688:await finance688(db,context.env,new URL(context.request.url).searchParams.get('campaign_queue_id')),financial689:await finance689(db,context.env,new URL(context.request.url).searchParams.get('campaign_queue_id')),financial690:await finance690(db,context.env,new URL(context.request.url).searchParams.get('campaign_queue_id')),financial691:await finance691(db,context.env,new URL(context.request.url).searchParams.get('campaign_queue_id')),financial692:await finance692(db,context.env,new URL(context.request.url).searchParams.get('campaign_queue_id')),financial693:await finance693(db,context.env,new URL(context.request.url).searchParams.get('campaign_queue_id')),queue:data.queue.map(normalizeQueueRow),mode:'review_first_api_when_configured'},200,{ 'Cache-Control':'no-store'});
 } catch (error){
 await captureRuntimeIncident(context.env,context.request,{
 incident_scope:'admin_social',
@@ -3404,6 +3640,7 @@ else if (action==='owner_finance_audit_689') result=await ownerAudit689(db,conte
 else if (action==='owner_finance_reconcile_690') result=await ownerReconcile690(db,context.env,adminUser,payload);
 else if (action==='owner_finance_continuity_691') result=await ownerContinuity691(db,context.env,adminUser,payload);
 else if (action==='owner_finance_followup_692') result=await ownerFollowup692(db,context.env,adminUser,payload);
+else if (action==='owner_finance_audit_693') result=await ownerAudit693(db,context.env,adminUser,payload);
 else if (action==='expense_attestation_678') result=await expenseAttestation678(db,context.env,adminUser,payload,recordApiAttempt);
 else if (action==='owner_marketing_signoff_678') result=await ownerSignoff678(db,adminUser,payload,recordApiAttempt);
 else throw new Error(`Unsupported social queue action: ${action}`);
