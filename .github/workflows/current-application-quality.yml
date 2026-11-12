@@ -1077,6 +1077,8 @@ jobs:
         run: node scripts/build694_financial_resolution_master_provenance_owner_continuity_contract.mjs
       - name: Build 695 original financial ledger aging, source correction evidence intake and independent Master closure revalidation regression
         run: node scripts/build695_financial_resolution_aging_source_correction_master_revalidation_contract.mjs
+      - name: Build 696 independent Ed25519 correction attestation, owner aging escalation and fresh Master continuity regression
+        run: node scripts/build696_financial_independent_correction_aging_master_continuity_contract.mjs
       - name: JavaScript syntax
         run: |
           node --check functions/_middleware.js
