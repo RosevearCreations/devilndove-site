@@ -16,7 +16,7 @@
     "max_js_bytes": 600000,
     "max_css_bytes": 500000,
     "max_html_bytes": 500000,
-    "max_runtime_source_bytes": 18860000,
+    "max_runtime_source_bytes": 18898000,
     "max_runtime_source_files": 1854,
     "max_inline_data_uri_bytes": 650000
   },
@@ -33,6 +33,19 @@
     "production_mutation": false
   },
   "budget_reviews": [
+    {
+      "build": 696,
+      "date": "2026-11-12",
+      "scope": "Independent Ed25519 custodian correction-claim verification bound to original Build 695 intake, financial ledger aging escalation owner receipts, fresh signed Master closure continuity, protected Admin claim preparation and export",
+      "prior_limit_bytes": 18860000,
+      "new_limit_bytes": 18898000,
+      "delta_bytes": 38000,
+      "delta_percent": 0.2015,
+      "runtime_file_limit_unchanged": 1854,
+      "review_reason": "Reviewed narrowly constrained 38,000-byte (<0.202%) increase for bounded readback validation of independent custodian Ed25519 source correction attestations, manual owner aging escalation and Master continuity workflows. External signature does not prove source repair; source mismatch stays HOLD. No D1 migration, private key, auto-closure, background polling, provider write, continuous CONNECTED or financial certification. All other per-file, source count, source security and production proof gates remain intact.",
+      "owner_financial_approval": "NOT_INFERRED",
+      "production_runtime_master_acceptance": "EVIDENCE_GATED_HOLD"
+    },
     {
       "build": 695,
       "date": "2026-11-12",
