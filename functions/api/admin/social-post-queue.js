@@ -2370,7 +2370,9 @@ const matched=Number.isSafeInteger(id)&&id>0&&
 ((d.decision==='escalate_breach'&&r.attempt_status==='owner_sla_breach_escalated_688')||
 (d.decision==='signoff_closure'&&r.attempt_status==='owner_recovery_signoff_recorded_688'))&&
 validCases.get(key)===Number(d.evidence_receipt_id)&&
-d.fingerprint_sha256===current.fingerprint_sha256&&
+d.fingerprint_sha256===current.fingerprint_sha256&&d.source_revision===current.source_revision&&
+(d.decision!=='signoff_closure'||Number(d.independent_master_receipt_id)===
+Number(closed.find(x=>x.case_id===d.case_id)?.newer_master_receipt_id))&&
 d.owner_user_id&&d.owner_reviewed===true&&typeof d.resolution_note==='string'&&
 d.resolution_note.length>=20&&d.resolution_note.length<=400&&
 !seen.has(key)&&Number.isFinite(Date.parse(r.attempted_at||''));
@@ -2378,6 +2380,8 @@ if(!matched){badReviews++;continue;}
 seen.add(key);
 signoffs.push({decision:d.decision,case_id:d.case_id,receipt_id:id,
 evidence_receipt_id:Number(d.evidence_receipt_id),recorded_at:r.attempted_at,
+source_revision:d.source_revision,owner_user_id:Number(d.owner_user_id),
+resolution_note:d.resolution_note,
 state:'OWNER_REVIEW_RECORDED_NOT_EXTERNAL_MASTER_ACCEPTANCE'});
 }
 const historyComplete=selected&&bounded&&badReviews===0;
@@ -2534,7 +2538,7 @@ const n=Number(params.get('campaign_queue_id'));
 if(!Number.isSafeInteger(n)||n<1)return jsonResponse({ok:false,error:'Select a valid campaign for protected Build 688 owner report.'},400,{'Cache-Control':'no-store'});
 const report=await finance688(db,context.env,n);
 return new Response(JSON.stringify({report_type:'FINANCIAL_OWNER_RECOVERY_688',
-owner_signoff_report:report,current_master_proof_independent:true,
+owner_signoff_report:report,current_master_proof_independent:report.master_accepted_now,
 historical_acceptance_is_not_current_proof:true,financial_certified:false},null,2),{
 status:200,headers:{'Content-Type':'application/json; charset=utf-8',
 'Content-Disposition':'attachment; filename="devilndove-financial-owner-recovery-'+n+'-688.json"',
