@@ -374,7 +374,7 @@ link.textContent=creator?'ⓘ Creator Help':'ⓘ Customer Help';
 link.setAttribute('aria-label',creator?'Open Creator and Operations Help Centre':'Open Customer Help Centre');
 document.body.appendChild(link);
 }
-function ensurePageLevelHelp(path,ordinal){
+function ensurePageLevelHelp(path, ordinal){
 const heading=document.querySelector('main h1,.hero h1,h1');
 if(!heading || heading.dataset.ddContextHelpAttached || document.querySelector('[data-dd-page-help]')) return ordinal;
 const profile=pageHelpProfile(path);
@@ -389,7 +389,7 @@ built.trigger.insertAdjacentElement('afterend',built.panel);
 heading.dataset.ddContextHelpAttached='page-help';
 return ordinal+1;
 }
-function ensureActionRecoveryHelp(path,ordinal){
+function ensureActionRecoveryHelp(path, ordinal){
 if (!path.startsWith('/admin/')) return ordinal;
 const candidates=[...document.querySelectorAll('button:disabled,button.danger,[aria-disabled="true"]')].filter((button)=>!button.closest('.dd-context-help-panel')&&!button.dataset.ddActionRecoveryHelp).slice(0,16);
 for (const button of candidates){
@@ -419,8 +419,8 @@ const key=target.dataset.contextHelp || 'local-help';
 const definition=DD_CONTEXT_HELP_LIBRARY[key] || localDefinition(target,key);
 if (definition) attach(target,key,definition,++ordinal);
 });
-ordinal=ensurePageLevelHelp(path,ordinal);
-ordinal=ensureActionRecoveryHelp(path,ordinal);
+ordinal = ensurePageLevelHelp(path, ordinal);
+ordinal=ensureActionRecoveryHelp(path, ordinal);
 }
 function helpOwnedNode(node){
 const el=node?.nodeType===1 ? node :node?.parentElement;
