@@ -16,7 +16,7 @@
     "max_js_bytes": 600000,
     "max_css_bytes": 500000,
     "max_html_bytes": 500000,
-    "max_runtime_source_bytes": 18742000,
+    "max_runtime_source_bytes": 18770000,
     "max_runtime_source_files": 1854,
     "max_inline_data_uri_bytes": 650000
   },
@@ -33,6 +33,19 @@
     "production_mutation": false
   },
   "budget_reviews": [
+    {
+      "build": 692,
+      "date": "2026-11-12",
+      "scope": "Bounded owner financial escalation SLA follow-up, source-pinned historical Master renewal provenance audit and evidence-bound owner closure continuity with no-store report",
+      "prior_limit_bytes": 18742000,
+      "new_limit_bytes": 18770000,
+      "delta_bytes": 28000,
+      "delta_percent": 0.1494,
+      "runtime_file_limit_unchanged": 1854,
+      "review_reason": "Reviewed narrow 28,000-byte (<0.150%) allowance supports Build 692 read-only independent evidence projections, append-only authenticated owner reviews and Admin controls within existing runtime files. No schema migration, background polling, external receiver replay, automated owner signoff, private key exposure or invented Master CONNECTED/profitability. CI quality, System Gate, per-file/runtime source caps and exact deployment/live integrity proof remain authoritative.",
+      "owner_financial_approval": "NOT_INFERRED",
+      "production_runtime_master_acceptance": "EVIDENCE_GATED_HOLD"
+    },
     {
       "build": 691,
       "date": "2026-11-12",

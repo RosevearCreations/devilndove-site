@@ -237,6 +237,39 @@
 <p id="dd691Result" role="status" aria-live="polite">No Build 691 owner action recorded.</p>
 <p class="small">All timestamps come from the server's latest manual observation. Unpaired or incomplete evidence stays on HOLD. No background polling, provider replay, CONNECTED assertion, financial certification or automatic owner closure is performed.</p>
 </section>
+<section class="card" id="dd692-finance" aria-labelledby="dd692-title">
+<p class="eyebrow">Build 692 · Financial SLA follow-up &amp; owner audit provenance</p>
+<h2 id="dd692-title">Escalation SLA follow-up, historical Master receipt provenance &amp; closure audit continuity</h2>
+<p>Review overdue and critical owner escalation acknowledgments, exact source-pinned Master renewal receipt pairs, and prior owner closure continuity. A recorded historical receipt pin is not historical signature verification, and receipt gaps alone do not establish receiver outages. No automatic follow-up or closure occurs.</p>
+<button class="btn secondary" type="button" id="dd692Refresh">Refresh protected SLA and receipt evidence</button>
+<button class="btn secondary" type="button" id="dd692Export">Export protected financial audit JSON</button>
+<p id="dd692Status" role="status" aria-live="polite">HOLD · Select a campaign and refresh exact original evidence.</p>
+<p id="dd692Stats" class="small">No SLA or closure continuity figures loaded.</p>
+<h3>Owner escalation SLA follow-ups</h3>
+<ol class="clean" id="dd692Followups" aria-label="Escalated owner cases and follow-up age"><li>Refresh exact campaign evidence to inspect overdue owner cases.</li></ol>
+<h3>Master renewal provenance (recorded receipts)</h3>
+<p class="small" id="dd692Provenance">Current signed Master evidence not sampled.</p>
+<ol class="clean" id="dd692Pairs" aria-label="Historical source-pinned receipt pairs"><li>No bounded recorded receipt pairs loaded.</li></ol>
+<h3>Owner closure audit continuity</h3>
+<ol class="clean" id="dd692Closures" aria-label="Original owner continuity and audit history"><li>No evidence-bound owner closure loaded.</li></ol>
+<form id="dd692Form">
+<h3>Record a protected owner action</h3>
+<label>Decision
+<select class="input" id="dd692Decision" required>
+<option value="record_sla_followup">Record an overdue escalation SLA follow-up</option>
+<option value="review_master_provenance">Review exact historical Master receipt pair provenance</option>
+<option value="reconcile_closure_audit">Reconcile prior owner closure audit with current signed Master</option>
+</select></label>
+<label>Exact source case and original evidence receipt
+<select class="input" id="dd692Source" required><option value="">Select an exact source reference</option></select></label>
+<label>Owner review note (20–400 characters)
+<textarea class="input" id="dd692Note" rows="3" minlength="20" maxlength="400" required></textarea></label>
+<label><input type="checkbox" id="dd692Reviewed" required> We inspected the exact source identity, original case and receipt history, and current Master acceptance where required. This is a durable owner record, not proof of external acceptance.</label>
+<button class="btn secondary" type="submit" id="dd692Submit">Record evidence-bound owner follow-up</button>
+</form>
+<p id="dd692Result" role="status" aria-live="polite">No Build 692 owner review recorded.</p>
+<p class="small">History is bounded and refreshed only on request. Missing or stale proof stays HOLD; automatic escalation, external replay, financial certification and continuous CONNECTED claims are not performed.</p>
+</section>
 <section class="card" id="dd684-finance" aria-labelledby="dd684-title">
 <p class="eyebrow">Build 684 · Independent financial runtime verification</p>
 <h2 id="dd684-title">Signer enrollment, verified Master acceptance &amp; financial closure continuity</h2>
