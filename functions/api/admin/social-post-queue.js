@@ -1936,7 +1936,7 @@ async function financial684(db,env,id){
  await verify684(normalizeText(env?.AI_DATA_MASTER_ACK_PUBLIC_KEY),claim684('acceptance',ac),a.signature);
  const closures=data.filter(x=>x.platform_key==='finance_continuity_684').slice(0,25).map(x=>{
   const c=safeJson(x.response_json,{});
-  return {case_code:x.external_post_id,receipt_id:x.social_post_attempt_id,recorded_at:x.attempted_at,
+  return {case_code:c.case_code,receipt_id:x.social_post_attempt_id,recorded_at:x.attempted_at,
    current:!!accepted&&c.fingerprint_sha256===source.fingerprint_sha256&&
    c.source_signer_receipt_id===source.signer.receipt_id&&
    c.enrollment_receipt_id===Number(er?.social_post_attempt_id)&&
