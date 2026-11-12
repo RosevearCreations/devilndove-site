@@ -16,7 +16,7 @@
     "max_js_bytes": 600000,
     "max_css_bytes": 500000,
     "max_html_bytes": 500000,
-    "max_runtime_source_bytes": 18625000,
+    "max_runtime_source_bytes": 18635000,
     "max_runtime_source_files": 1854,
     "max_inline_data_uri_bytes": 650000
   },
@@ -33,6 +33,19 @@
     "production_mutation": false
   },
   "budget_reviews": [
+    {
+      "build": 686,
+      "date": "2026-11-12",
+      "scope": "Server-clock financial receipt age alerts, fail-closed Master evidence drift owner escalation, bounded append-only multi-campaign owner recovery priority queue, and Admin UI",
+      "prior_limit_bytes": 18625000,
+      "new_limit_bytes": 18635000,
+      "delta_bytes": 10000,
+      "delta_percent": 0.0537,
+      "runtime_file_limit_unchanged": 1854,
+      "review_reason": "Build 686 measured 18,633,938 runtime source bytes in CI versus prior 18,625,000 cap (8,938 over). A constrained 10,000-byte increase (<0.054%) accommodates 8,938 measured bytes and 1,062 headroom; maintains all per-file, file-count, inline media, search, auth, migration and live-deployment proof gates. No extra runtime files added.",
+      "owner_financial_approval": "NOT_INFERRED",
+      "production_runtime_master_acceptance": "EVIDENCE_GATED_HOLD"
+    },
     {
       "build": 685,
       "date": "2026-11-12",
