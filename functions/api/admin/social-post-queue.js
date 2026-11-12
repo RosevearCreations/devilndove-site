@@ -2405,7 +2405,7 @@ historical_renewal_count:Math.max(0,history.length-1),
 latest_history_receipt_id:history[0]?.receipt_id||null,
 current_independently_reverified_receipt_id:current?.master_fresh&&chainComplete?
 Number(current.verified_master_receipt_id):null,
-records:history.slice(0,12),historical_signature_reverification:false,
+records:history.slice(0,12),bounded_receipt_ids:history.map(x=>x.receipt_id),historical_signature_reverification:false,
 automatic_renewal:false},
 master_accepted_now:!!current?.master_fresh&&historyComplete&&chainComplete,
 connection:'HOLD_INDEPENDENT_CONTINUOUS_RUNTIME_TELEMETRY',
@@ -2506,17 +2506,21 @@ const refs=new Map(replay.filter(x=>x.replay_state==='HISTORICAL_OWNER_ACTION_RE
 .map(x=>[x.receipt_id,x]));
 const signedOffCases=(report?.closed_cases||[]).filter(x=>x.owner_signed_off&&
 Number(x.newer_master_receipt_id)===Number(current?.verified_master_receipt_id));
-const caseFor=(decision,caseId)=>{
+const caseFor=(decision,caseId,masterReceipt)=>{
 if(decision==='replay_escalation')return (report?.breaches||[]).find(x=>x.case_id===caseId&&x.owner_reviewed);
-if(decision==='resolve_renewal_drift')return driftCases.find(x=>x.case_id===caseId);
-if(decision==='accept_owner_audit')return signedOffCases.find(x=>x.case_id===caseId);
+const historical=(report?.closed_cases||[]).find(x=>x.case_id===caseId&&x.owner_signed_off&&
+Number(x.newer_master_receipt_id)===Number(masterReceipt));
+if(decision==='resolve_renewal_drift')return historical&&
+['HOLD_SOURCE_RECEIPT_DRIFT','HOLD_INVALID_RECEIPT_CLOCK','HOLD_SIGNATURE_REVALIDATION',
+'HOLD_EXPIRED_MASTER_RECEIPT'].includes(historical.issue_code)?historical:null;
+if(decision==='accept_owner_audit')return historical;
 return null;
 };
 const accepted=[],seen=new Set();
 for(const row of audits){
 const d=safeJson(row.response_json,{}),id=Number(row.social_post_attempt_id),
 at=Date.parse(row.attempted_at||''),source=refs.get(Number(d.reference_receipt_id)),
-matchCase=caseFor(d.decision,d.case_id),
+matchCase=caseFor(d.decision,d.case_id,d.current_master_receipt_id),
 expectedDecision=({replay_escalation:'owner_escalation_replay_689',
 resolve_renewal_drift:'owner_master_renewal_drift_resolved_689',
 accept_owner_audit:'owner_audit_acceptance_689'})[d.decision],
@@ -2528,7 +2532,7 @@ source.decision===(d.decision==='replay_escalation'?'escalate_breach':'signoff_c
 !!matchCase&&
 d.fingerprint_sha256===current?.fingerprint_sha256&&
 d.source_revision===current?.source_revision&&
-Number(d.current_master_receipt_id)===Number(current?.verified_master_receipt_id)&&
+(report?.renewal_audit?.bounded_receipt_ids||[]).includes(Number(d.current_master_receipt_id))&&
 d.owner_reviewed===true&&Number.isSafeInteger(Number(d.owner_user_id))&&
 Number(d.owner_user_id)>0&&typeof d.resolution_note==='string'&&
 d.resolution_note.length>=20&&d.resolution_note.length<=400&&!seen.has(token);
