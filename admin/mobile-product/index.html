@@ -47,9 +47,9 @@
 
 
       <section class="card" id="dd698-camera-start" aria-labelledby="dd698CameraHeading" style="margin:0 0 14px;padding:14px;border:1px solid rgba(115,76,180,.45)">
-        <p class="eyebrow">Build 698 · Camera-first New Product</p>
+        <p class="eyebrow">Build 699 · Resumable Camera-first New Product</p>
         <h2 id="dd698CameraHeading" style="margin:0 0 6px">Take Photo(s)/Video → Save New Draft</h2>
-        <p class="small" style="margin:0 0 12px">Start a product with your phone camera. The server allocates the next real DD number when saved; if no name is entered it becomes <strong>Temporary DD####</strong>. Photos and video are stored using the existing Cloudflare R2 workflow, with a draft in the existing database. Nothing is published automatically.</p>
+        <p class="small" style="margin:0 0 12px">Start a product with your phone camera. The server allocates the next real DD number when saved; if no name is entered it becomes <strong>Temporary DD####</strong>. Save first creates one original draft in the existing database. Photos and video are attached separately to existing Cloudflare R2 storage with safe same-draft retries. Nothing is published automatically.</p>
         <div class="mobile-form-grid" style="margin-bottom:12px">
           <label><span>Optional product name</span><input class="input" id="dd698CameraName" maxlength="160" placeholder="Leave blank for Temporary DD####"></label>
           <label><span>Take photo(s) with camera</span><input class="input" id="dd698CameraPhoto" type="file" accept="image/*" capture="environment" multiple></label>
@@ -60,8 +60,11 @@
         <div style="display:flex;gap:10px;flex-wrap:wrap;margin:12px 0">
           <button class="btn primary" type="button" id="dd698CameraSave">Save camera-first draft</button>
           <button class="btn secondary" type="button" id="dd698CameraClear">Clear selected media</button>
+          <button class="btn secondary" type="button" id="dd699New">Start another Product</button>
         </div>
-        <p class="small" id="dd698CameraStatus" role="status" aria-live="polite">Admin sign-in and internet connection required to save cloud-backed drafts. Existing drafts stay hidden from the public Shop until separately approved.</p>
+        <p class="small" id="dd698CameraStatus" role="status" aria-live="polite">Admin sign-in and internet connection required. A failed upload keeps the original DD draft for safe manual retry.</p>
+        <p class="small" id="dd699Progress" role="status" aria-live="polite">Original capture identity not yet allocated.</p>
+        <button class="btn secondary" type="button" id="dd699Resume" hidden>Resume original saved draft</button>
         <p class="small" id="dd698CameraSavedLink"></p>
       </section>
       <div class="card mobile-wizard-card" style="margin:0;padding:14px;border:1px solid rgba(67,97,238,.18)">
