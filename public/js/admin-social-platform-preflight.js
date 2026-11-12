@@ -1,4 +1,74 @@
 
+// Build 684: browser prepares public claims only; all verification stays server-side.
+(()=>{'use strict';const $=id=>document.getElementById(id);let state=null;
+async function call(payload,id){
+ if(!window.DDAuth?.apiFetch)throw Error('Authenticated Admin required.');
+ const response=await DDAuth.apiFetch('/api/admin/social-post-queue'+(!payload&&id?'?campaign_queue_id='+id:''),
+ payload?{method:'POST',body:JSON.stringify(payload)}:undefined);
+ const value=await response.json();if(!response.ok||!value.ok)throw Error(value.error||'Runtime proof unavailable.');return value;
+}
+async function refresh(){
+ const id=Number($('dd684Campaign').value);if(!id){state=null;$('dd684Status').textContent='HOLD · Select a campaign.';return}
+ try{const d=await call(null,id),v=d.financial684||{};state=v;
+ $('dd684Status').textContent='Signer: '+(v.signer_enrolled?'VERIFIED':'HOLD')+
+ ' · Master acceptance: '+(v.master_accepted?'VERIFIED':'HOLD')+
+ ' · Receiver: '+(v.receiver_configured?'Configured':'HOLD')+
+ ' · Continuity: '+(v.closed_cases||[]).filter(x=>x.current).length+' current closures'+
+ ' · Transport: '+(v.connection||'HOLD')+' · Profit certification: HOLD';
+ const list=$('dd684Case');list.replaceChildren(new Option('Choose a reviewed case',''));
+ const seen=new Set();
+ for(const x of d.financial682?.reviews||[])if(x.current_evidence&&
+ ['MASTER_RECEIPT_NOT_CURRENT','MASTER_INDEPENDENT_ADMISSION_UNVERIFIED'].includes(x.case_code)&&!seen.has(x.case_code)){
+  list.add(new Option(x.case_code,x.case_code));seen.add(x.case_code);}
+ }catch(e){state=null;$('dd684Status').textContent='HOLD · '+e.message;}
+}
+document.addEventListener('DOMContentLoaded',()=>{
+ if(!$('dd684-finance'))return;
+ (async()=>{try{const data=await call(),seen=new Set();
+ for(const q of data.queue||[])if(q.utm_campaign&&!seen.has(q.utm_campaign)){
+ seen.add(q.utm_campaign);$('dd684Campaign').add(new Option(q.utm_campaign+' · #'+q.social_post_queue_id,q.social_post_queue_id));
+ }}catch(e){$('dd684Status').textContent='HOLD · '+e.message}})();
+ $('dd684Campaign').addEventListener('change',()=>void refresh());
+ $('dd684Refresh').addEventListener('click',()=>void refresh());
+ $('dd684Prepare').addEventListener('click',()=>{
+ try{if(!state?.source_signer_receipt_id||!state.signer_id||!state.source_revision)
+ throw Error('Current independently signed source receipt not available.');
+ if(!$('dd684Nonce').value)$('dd684Nonce').value=crypto.randomUUID();
+ if(!$('dd684Time').value)$('dd684Time').value=new Date().toISOString();
+ const c={v:1,purpose:'devilndove_finance_signer_runtime_684',source:'devilndove',
+ queue_id:state.queue_id,campaign:state.campaign,source_revision:state.source_revision,
+ fingerprint_sha256:state.fingerprint_sha256,source_signer_receipt_id:state.source_signer_receipt_id,
+ signer_id:state.signer_id,nonce:$('dd684Nonce').value.trim(),issued_at:$('dd684Time').value.trim()};
+ $('dd684Claim').textContent=JSON.stringify(c);
+ $('dd684Result').textContent='Sign this exact UTF-8 JSON with the independently controlled Ed25519 key. Do not enter private keys.';
+ }catch(e){$('dd684Result').textContent='HOLD · '+e.message}});
+ async function send(action,fields){
+ if(!state?.fingerprint_sha256)throw Error('Refresh current campaign fingerprint.');
+ const d=await call({action,social_post_queue_id:Number($('dd684Campaign').value),
+ expected_fingerprint_sha256:state.fingerprint_sha256,owner_reviewed:true,...fields});
+ $('dd684Result').textContent=(d.result?.status||'Recorded')+' · Receipt #'+(d.result?.receipt_id||'—')+
+ ' · Continuous runtime connection and independent audited profitability remain separate.';
+ await refresh();
+ }
+ $('dd684Enrollment').addEventListener('submit',async e=>{e.preventDefault();try{
+ if(!$('dd684EnrollReviewed').checked)throw Error('Explicit owner review required.');
+ await send('enroll_finance_signer_684',{nonce:$('dd684Nonce').value.trim(),
+ issued_at:$('dd684Time').value.trim(),signature:$('dd684Signature').value.trim()});
+ $('dd684Signature').value='';$('dd684EnrollReviewed').checked=false;
+ }catch(x){$('dd684Result').textContent='HOLD · '+x.message}});
+ $('dd684Master').addEventListener('submit',async e=>{e.preventDefault();try{
+ if(!$('dd684MasterReviewed').checked)throw Error('Owner review required.');
+ await send('verify_finance_master_684',{});$('dd684MasterReviewed').checked=false;
+ }catch(x){$('dd684Result').textContent='HOLD · '+x.message}});
+ $('dd684Continuity').addEventListener('submit',async e=>{e.preventDefault();try{
+ if(!$('dd684CloseReviewed').checked)throw Error('Owner closure review required.');
+ await send('close_finance_continuity_684',{case_code:$('dd684Case').value,
+ resolution_note:$('dd684Note').value.trim()});$('dd684CloseReviewed').checked=false;
+ }catch(x){$('dd684Result').textContent='HOLD · '+x.message}});
+});
+})();
+
+
 // Build 683: private signer/Master intake UI.
 (()=>{'use strict';const $=id=>document.getElementById(id);let latest=null;
 async function api(payload,id){
