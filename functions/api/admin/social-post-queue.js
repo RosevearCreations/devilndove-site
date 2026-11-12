@@ -3876,8 +3876,7 @@ export async function assessFinance696(current,prior,ownerRows,signer={},now=Dat
 const n=Number(current?.queue_id),selected=Number.isSafeInteger(n)&&n>0;
 const rows696=Array.isArray(ownerRows)?ownerRows:[],
 bounded=!!prior?.history_complete&&rows696.length<=60;
-const validDate=t=>typeof t==='string'&&/^\d{4}-\d\d-\d\dT\d\d:\d\d:\d\d(?:\.\d{3})?Z$/.test(t)&&
-Number.isFinite(Date.parse(t))&&Date.parse(t)<=now+300000?Date.parse(t):null;
+const validDate=t=>utcAttemptTime698(t,now);
 const age=t=>{const i=validDate(t);return i===null?null:Math.max(0,Math.floor((now-i)/60000));};
 const masterId=Number(current?.verified_master_receipt_id);
 const masterNow=!!current?.master_fresh&&!!prior?.master_accepted_now&&
@@ -4121,8 +4120,7 @@ decision:'evidence_pair_reconciled_not_source_repair'};
 export async function assessFinance697(current,prior,reviewRows,signer={},now=Date.now()){
 const n=Number(current?.queue_id),selected=Number.isSafeInteger(n)&&n>0;
 const rows697=Array.isArray(reviewRows)?reviewRows:[],bounded=!!prior?.history_complete&&rows697.length<=60;
-const validDate=t=>typeof t==='string'&&/^\d{4}-\d\d-\d\dT\d\d:\d\d:\d\d(?:\.\d{3})?Z$/.test(t)&&
-Number.isFinite(Date.parse(t))&&Date.parse(t)<=now+300000?Date.parse(t):null;
+const validDate=t=>utcAttemptTime698(t,now);
 const currentMasterId=Number(current?.verified_master_receipt_id);
 const currentMaster=!!current?.master_fresh&&!!prior?.master_accepted_now&&
 Number.isSafeInteger(currentMasterId)&&currentMasterId>0&&
@@ -4356,14 +4354,24 @@ connection:'HOLD_INDEPENDENT_CONTINUOUS_RUNTIME_TELEMETRY'};
 }
 
 
+// SQLite CURRENT_TIMESTAMP is UTC without a T/Z suffix. Normalize it to an
+// explicit UTC timestamp before comparing, rather than interpreting local time.
+export function utcAttemptTime698(t,now=Date.now()){
+if(typeof t!=='string')return null;
+const iso=/^\d{4}-\d\d-\d\dT\d\d:\d\d:\d\d(?:\.\d{3})?Z$/.test(t)?t:
+ /^\d{4}-\d\d-\d\d \d\d:\d\d:\d\d$/.test(t)?t.replace(' ','T')+'Z':null;
+if(!iso)return null;
+const ms=Date.parse(iso);
+return Number.isFinite(ms)&&ms<=now+300000?ms:null;
+}
+
 // Build 698 — post-reconciliation original source-repair proof *intake*, source
 // escalation recovery receipts and Master renewal drift detection. External
 // evidence metadata is never a verified repair or a replacement Master signature.
 export function assessFinance698(current,prior,ownerRows,now=Date.now()){
 const n=Number(current?.queue_id),selected=Number.isSafeInteger(n)&&n>0,
 rows698=Array.isArray(ownerRows)?ownerRows:[],bounded=!!prior?.history_complete&&rows698.length<=60;
-const date=t=>typeof t==='string'&&/^\d{4}-\d\d-\d\dT\d\d:\d\d:\d\d(?:\.\d{3})?Z$/.test(t)&&
-Number.isFinite(Date.parse(t))&&Date.parse(t)<=now+300000?Date.parse(t):null;
+const date=t=>utcAttemptTime698(t,now);
 const source=(prior?.reconciliation?.items||[]).filter(x=>x.independent_reconciliation_recorded&&x.reconciliation_receipt_id)
 .map(x=>({older_receipt_id:x.older_receipt_id,newer_receipt_id:x.newer_receipt_id,
 reconciliation_receipt_id:Number(x.reconciliation_receipt_id),
