@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
-import {claim684,nonce684,fresh684,verify684,same684,endpoint684,lookup684} from '../functions/api/_lib/finance684.mjs';
+import {claim684,nonce684,fresh684,verify684,same684,endpoint684,lookup684} from '../functions/api/admin/social-post-queue.js';
 const read=p=>readFileSync(new URL('../'+p,import.meta.url),'utf8');
 const backend=read('functions/api/admin/social-post-queue.js'),html=read('admin/social-publishing/index.html');
 const ui=read('public/js/admin-social-platform-preflight.js');
