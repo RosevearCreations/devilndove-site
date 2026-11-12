@@ -456,6 +456,7 @@ document.addEventListener('DOMContentLoaded',()=>{
     render();setMessage('Unsaved media selection cleared. Existing draft preserved.');
   });
   fresh?.addEventListener('click',()=>{
+    resetProof700();
     if(saving)return;
     photos.length=0;video.value='';camera.value='';library.value='';
     active=null;persist();link.replaceChildren();name.value='';
@@ -552,6 +553,100 @@ document.addEventListener('DOMContentLoaded',()=>{
       return{done:0,missing:1};
     }
   }
+  // Build 700 — a field proof requires a real original phone session plus
+  // an authenticated read-only D1/R2 HEAD readback of the SAME saved draft.
+  // Neither a checkbox nor a simulated test asserts that a device was tested.
+  let field700=null;
+  const proofStatus=$('dd700ReadbackStatus'),proofDetails=$('dd700ReadbackDetails'),
+    proofButton=$('dd700Readback'),proofExport=$('dd700Export'),
+    proofExportStatus=$('dd700ExportStatus'),deviceNotes=$('dd700DeviceNotes');
+  function resetProof700(){
+    field700=null;
+    if(proofDetails)proofDetails.replaceChildren();
+    if(proofStatus)proofStatus.textContent='HOLD · Original field proof not yet read back.';
+    if(proofExportStatus)proofExportStatus.textContent=
+      'No owner device acceptance is inferred from selecting files or a successful deployment.';
+  }
+  function drawProof700(data){
+    proofDetails.replaceChildren();
+    for(const m of data.media||[]){
+      const p=document.createElement('p');
+      p.className='small';p.textContent=m.kind+' attachment #'+m.attachment_id+
+        ' · '+(m.confirmed?'R2 HEAD CONFIRMED':'HOLD NOT CONFIRMED')+
+        ' · '+m.r2_bytes+' R2 bytes · '+m.publication_status;
+      proofDetails.appendChild(p);
+    }
+    const bounded=data.bounded_rows===true,
+      complete=data.status==='MEDIA_R2_D1_READBACK_CONFIRMED'&&
+        bounded&&data.photo_count>0&&data.confirmed_count>0&&data.unverified_count===0;
+    proofStatus.textContent=(complete?'Original D1/R2 attachments confirmed;':'HOLD · Some media or receipt evidence is incomplete;')+
+      ' Photo(s): '+data.photo_count+', private video(s): '+data.video_count+
+      ', confirmed: '+data.confirmed_count+', unverified: '+data.unverified_count+
+      '. This is NOT proof the physical phone trial occurred.';
+  }
+  proofButton?.addEventListener('click',async()=>{
+    if(saving)return;
+    proofButton.disabled=true;resetProof700();
+    try{
+      if(!window.DDAuth?.isLoggedIn?.()||!window.DDAuth.apiFetch)
+        throw Error('Admin sign-in required for original camera field proof.');
+      if(!active?.product_id||!validToken(active.token))
+        throw Error('Select or save an original owner camera draft before readback.');
+      const f=new FormData();
+      f.set('action','camera700_readback');
+      f.set('product_id',String(active.product_id));
+      f.set('capture_reference',active.token);
+      const result=await responseJson(await window.DDAuth.apiFetch('/api/admin/mobile-create-product',
+        {method:'POST',body:f}),'Original Cloudflare D1/R2 media readback unavailable.');
+      if(!result.capture_reference_verified||!result.original_owner_verified||
+        !result.r2_head_checked||result.product_id!==active.product_id)
+        throw Error('Original draft source and R2 HEAD receipt did not match.');
+      field700=result;
+      drawProof700(result);
+    }catch(err){
+      proofStatus.textContent='HOLD · '+err.message;
+      field700=null;
+    }finally{proofButton.disabled=false;}
+  });
+  proofExport?.addEventListener('click',()=>{
+    try{
+      if(!field700?.original_owner_verified||!active?.product_id||
+        Number(field700.product_id)!==Number(active.product_id))
+        throw Error('Read the exact original same-owner D1/R2 evidence first.');
+      const checks={};
+      for(const checkbox of document.querySelectorAll('[data-dd700-check]')){
+        const k=checkbox.getAttribute('data-dd700-check');
+        checks[k]=checkbox.checked===true;
+      }
+      const notes=(deviceNotes?.value||'').trim();
+      const actualPhoto=field700.photo_count>0,
+        mediaConfirmed=field700.status==='MEDIA_R2_D1_READBACK_CONFIRMED'&&
+          field700.unverified_count===0&&field700.bounded_rows===true&&actualPhoto,
+        ownerReported=Object.values(checks).length===5&&
+          Object.values(checks).every(Boolean)&&notes.length>=25;
+      const report={schema:'devilndove_original_phone_field_proof_700',
+        exported_at:new Date().toISOString(),
+        product_id:active.product_id,product_number_label:active.label,
+        evidence_source:'Authenticated same-owner original D1 attachment and R2 HEAD readback',
+        cloudflare_media_readback:field700,
+        physical_phone_owner_checklist:checks,owner_notes:notes,
+        outcome:mediaConfirmed&&ownerReported?
+          'OWNER_REPORTED_FIELD_TRIAL_WITH_R2_RECEIPTS':
+          'HOLD_INCOMPLETE_PHYSICAL_DEVICE_OR_R2_EVIDENCE',
+        authenticated_physical_device_testing_by_assistant:false,
+        independent_owner_review_required:true,
+        production_deployment_proof_separate:true};
+      const blob=new Blob([JSON.stringify(report,null,2)],
+        {type:'application/json'}),url=URL.createObjectURL(blob),
+        download=document.createElement('a');
+      download.href=url;download.download='devilndove-camera-field-700-'+active.product_id+'.json';
+      document.body.appendChild(download);download.click();download.remove();
+      setTimeout(()=>URL.revokeObjectURL(url),1000);
+      proofExportStatus.textContent=report.outcome+
+        ' · LOCAL evidence exported. No automatic server acceptance, certification or publication.';
+    }catch(err){proofExportStatus.textContent='HOLD · '+err.message;}
+  });
+
   save.addEventListener('click',async()=>{
     if(saving)return;
     const movie=video.files?.[0]||null;
@@ -581,7 +676,9 @@ document.addEventListener('DOMContentLoaded',()=>{
         setMessage('Draft '+label+' saved as '+(active.product_name||'Temporary '+label)+' (#'+originalId+'). '+
           pictures.done+' photos and '+clip.done+
           ' video confirmed; all new media complete. Never published automatically.');
-        active=null;persist();name.value='';
+        // Keep one original DD draft identity for immediate R2 HEAD acceptance
+        // and later owner field proof. Only Start Another Product clears it.
+        persist();name.value='';
       }
     }catch(error){
       persist();
