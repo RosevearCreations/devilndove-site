@@ -1580,8 +1580,8 @@ saveState(event.detail?.destinations_confirmed===false?
 'Product saved; destination settings need review. No Etsy write attempted.':
 'Product saved. Checked Etsy drafts now receive a readiness review and final confirmation before one provider action. No unattended Etsy write.','');
 if(etsyAreaVisible557())void refresh();
-});
-document.addEventListener('dd:product-loaded',()=>{if(etsyAreaVisible557())void refresh();});
+  });
+  document.addEventListener('dd:product-loaded',()=>{if(etsyAreaVisible557())void refresh();});
 document.addEventListener('dd:media-inline-updated',event=>{
 if(Number(event.detail?.product_id)!==id)return;
 state.loaded=false;resetOwnerApproval();$('dd500Consent').checked=false;
