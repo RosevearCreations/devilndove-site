@@ -83,6 +83,20 @@
 <p id="dd685History" class="small" aria-live="polite">No exception history loaded.</p>
 <p id="dd685Result" role="status" aria-live="polite">No changes made. All financial acceptance, telemetry and profit-certification gates remain independent.</p>
 </section>
+<section class="card" id="dd686-finance" aria-labelledby="dd686-title">
+<p class="eyebrow">Build 686 · Financial alert triage</p>
+<h2 id="dd686-title">Receipt aging alerts, Master drift escalation &amp; owner priority queue</h2>
+<p>Server-clock warnings highlight expiring signed receipts. The queue ranks open financial incidents without assuming that another campaign has current Master acceptance. All follow-up is explicitly owner-controlled; no background Master polling, auto-closure, financial certification or CONNECTED claims.</p>
+<button id="dd686Refresh" class="btn secondary" type="button">Refresh financial alert priorities</button>
+<p id="dd686Status" role="status" aria-live="polite">Financial alerts: HOLD until the admin evidence readback succeeds.</p>
+<div id="dd686Alerts" aria-live="polite"><p class="small">Select a campaign above to inspect signed receipt expiry.</p></div>
+<h3>Portfolio owner recovery queue</h3>
+<p id="dd686Coverage" class="small">Historical incident scan has not been checked.</p>
+<ol id="dd686Queue" class="clean" aria-label="Prioritized financial recovery cases"><li>Refresh to read open owner incidents.</li></ol>
+<p class="small">For source-fingerprint drift: inspect the selected campaign, add a meaningful owner evidence note to the Build 685 form, then use the action below. This records a protected owner incident; it does not send or accept unsigned Master proof.</p>
+<button id="dd686Escalate" class="btn secondary" type="button">Escalate reviewed Master evidence drift</button>
+<p id="dd686Result" role="status" aria-live="polite">No owner drift escalation recorded.</p>
+</section>
 <section class="card" id="dd684-finance" aria-labelledby="dd684-title">
 <p class="eyebrow">Build 684 · Independent financial runtime verification</p>
 <h2 id="dd684-title">Signer enrollment, verified Master acceptance &amp; financial closure continuity</h2>
