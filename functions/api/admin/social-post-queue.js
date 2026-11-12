@@ -1780,8 +1780,7 @@ async function ownerExceptionAck681(db,user,p){
 
 
 
-// Build 683: externally enrolled financial signer, exact Master receipt and owner-only case closure.
-// Neither this route nor a signed receipt asserts a live CONNECTED Master session.
+// Build 683: signed financial provenance; Master CONNECTED remains HOLD.
 export function financialClaim683(kind,x){
  if(kind==='source')return {version:1,source:'devilndove',campaign:x.campaign,queue_id:x.queue_id,
  source_revision:x.source_revision,fingerprint_sha256:x.fingerprint_sha256,signer_id:x.signer_id,nonce:x.nonce,issued_at:x.issued_at};
