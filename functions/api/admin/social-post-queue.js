@@ -2837,7 +2837,8 @@ kind:'RECORDED_RECEIPT_INTERVAL_NOT_PROVEN_RUNTIME_OUTAGE'}));
 const reconciliation=(prior?.closure_candidates||[]).filter(x=>x.owner_reconciled)
 .map(x=>({case_id:x.case_id,reference_receipt_id:Number(x.receipt_id),
 source_owner_review_state:'PRIOR_OWNER_CLOSURE_RECONCILIATION_RECORDED',
-source_revision:current?.source_revision||null}));
+source_revision:current?.source_revision||null,
+prior_owner_recorded_at:x.recorded_at||null}));
 const historicalMaster=new Set(prior?.renewal?.source_pinned_receipt_ids||[]);
 const validSource=(d)=>d.fingerprint_sha256===current?.fingerprint_sha256&&
 d.source_revision===current?.source_revision;
@@ -2867,14 +2868,15 @@ escalate_renewal_gap:'owner_master_gap_escalated_691',
 accept_closure_continuity:'owner_closure_continuity_accepted_691'})[d.decision],
 key=d.decision+'|'+ref;
 const sourceTime=dated(d.decision==='escalate_replay_aging'?candidate?.recorded_at:
-d.decision==='escalate_renewal_gap'?candidate?.newer_recorded_at:null);
+d.decision==='escalate_renewal_gap'?candidate?.newer_recorded_at:
+candidate?.prior_owner_recorded_at);
 const historicalClosure=d.decision!=='accept_closure_continuity'||
 historicalMaster.has(Number(d.verified_master_receipt_id))&&
 Number(d.verified_master_receipt_id)>0;
 const valid=Number.isSafeInteger(id)&&id>0&&id>ref&&id<previousId&&
 time!==null&&time<=previousTime&&row.attempt_status===status&&
 !!candidate&&validSource(d)&&validOwner(d)&&
-(sourceTime===null||time>=sourceTime)&&
+sourceTime!==null&&time>=sourceTime&&
 (d.decision!=='escalate_renewal_gap'||d.newer_receipt_id===candidate.newer_receipt_id)&&
 historicalClosure&&!used.has(key);
 if(valid)used.add(key);else invalid++;
@@ -2899,6 +2901,7 @@ const gapCases=gaps.map(x=>({...x,owner_escalation_recorded:
 gapEscalated.has(x.older_receipt_id),historical_gap_resolved:false}));
 const closures=reconciliation.map(x=>({...x,owner_continuity_accepted:
 closureAccepted.has(x.reference_receipt_id),current_master_rechecked:acceptedNow}));
+const unknownAges=aged.filter(x=>x.age_minutes===null).length;
 const unresolvedAged=aged.filter(x=>
 x.age_minutes!==null&&x.age_minutes>=120&&
 x.reference_receipt_id&&!x.escalation_recorded).length;
@@ -2908,14 +2911,14 @@ const full=selected&&bounded&&invalid===0;
 const lineage=!!prior?.renewal?.historical_chain_pin_matches&&
 !!prior?.renewal?.current_receipt_in_bounded_history;
 return{status:!selected?'HOLD_SELECT_CAMPAIGN':!bounded||invalid?
-'HOLD_FINANCIAL_CONTINUITY_HISTORY':!lineage?'HOLD_RENEWAL_SOURCE_PIN':
+'HOLD_FINANCIAL_CONTINUITY_HISTORY':!lineage?'HOLD_RENEWAL_SOURCE_PIN':unknownAges?'HOLD_REPLAY_AGE_UNVERIFIABLE':
 unresolvedAged?'OWNER_REPLAY_AGING_ESCALATION_REQUIRED':
 unresolvedGaps?'OWNER_MASTER_RENEWAL_GAP_REVIEW_REQUIRED':
 !acceptedNow?'HOLD_CURRENT_SIGNED_MASTER':
 'OWNER_CLOSURE_EVIDENCE_REVIEW_ONLY',
 campaign_queue_id:selected?Number(current.queue_id):null,
 observed_at:new Date(now).toISOString(),history_complete:full,
-replay_exception_count:exceptions.length,
+replay_exception_count:exceptions.length,unverifiable_age_count:unknownAges,
 critical_aged_count:aged.filter(x=>x.age_status==='CRITICAL_AGED').length,
 overdue_count:aged.filter(x=>['CRITICAL_AGED','OVERDUE_OWNER_REVIEW'].includes(x.age_status)).length,
 unreviewed_overdue_count:unresolvedAged,
