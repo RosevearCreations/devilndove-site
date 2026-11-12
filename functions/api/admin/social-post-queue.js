@@ -2527,7 +2527,8 @@ accept_owner_audit:'owner_audit_acceptance_689'})[d.decision],
 token=d.decision+'|'+d.case_id+'|'+d.reference_receipt_id;
 const valid=Number.isSafeInteger(id)&&id>0&&
 Number.isFinite(at)&&at<=now+300000&&row.attempt_status===expectedDecision&&
-!!source&&source.case_id===d.case_id&&
+!!source&&id>Number(d.reference_receipt_id)&&at>=Date.parse(source.recorded_at||'')&&
+source.case_id===d.case_id&&
 source.decision===(d.decision==='replay_escalation'?'escalate_breach':'signoff_closure')&&
 !!matchCase&&
 d.fingerprint_sha256===current?.fingerprint_sha256&&
