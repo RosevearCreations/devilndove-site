@@ -304,6 +304,37 @@
 <p id="dd693Result" role="status" aria-live="polite">No Build 693 owner receipt recorded.</p>
 <p class="small">All actions require authenticated owner review and durable readback. No automatic replay, repair, financial certification, receiver activation or claim of continuously CONNECTED infrastructure is made.</p>
 </section>
+<section class="card" id="dd699-finance" aria-labelledby="dd699-finance-title">
+<p class="eyebrow">Build 699 · Third-party original financial repair-document provenance</p>
+<h2 id="dd699-finance-title">Independent Original Source Repair Document Verification</h2>
+<p>A third independent Ed25519 signer—not the original Build 696 custodian or Build 697 reconciler—must attest the exact original Build 698 document SHA-256, reference and receipt chain. This authenticates a witness statement about document provenance. <strong>Actual original financial repair remains HOLD</strong> until independently checked against the live source; signing a claim never certifies a financial result or connection.</p>
+<button type="button" class="btn secondary" id="dd699Refresh">Refresh original source chain</button>
+<button type="button" class="btn secondary" id="dd699Export">Export no-store signed witness evidence</button>
+<p id="dd699Status" role="status" aria-live="polite">HOLD · Select original financial campaign.</p>
+<p id="dd699Stats" class="small">Third-party verifier and source readback not loaded.</p>
+<ol id="dd699Cases" class="clean"><li>Requires original Build 698 external repair document intake.</li></ol>
+<form id="dd699Form">
+<label>Original Build 698 document intake receipt
+<select class="input" id="dd699Source" required><option value="">Choose original external source repair proof intake</option></select></label>
+<label>Independent external verifier ID (must differ from Build 696 and 697 signers)
+<input class="input" id="dd699Signer" maxlength="120" autocomplete="off"></label>
+<label>Independent challenge nonce (16–100 characters)
+<input class="input" id="dd699Nonce" maxlength="100" autocomplete="off"></label>
+<label>Independent signed UTC issue time
+<input class="input" id="dd699Issued" maxlength="40" placeholder="2026-11-12T19:00:00.000Z" autocomplete="off"></label>
+<button type="button" class="btn secondary" id="dd699Prepare">Prepare exact canonical claim for independent external signing</button>
+<label>Exact canonical original source repair document witness claim
+<textarea class="input" id="dd699Claim" rows="5" readonly spellcheck="false"></textarea></label>
+<label>Independent verifier Ed25519 signature (base64/base64url)
+<textarea class="input" id="dd699Signature" maxlength="120" rows="2" spellcheck="false"></textarea></label>
+<label>Owner review note (20–400 characters)
+<textarea class="input" id="dd699Note" minlength="20" maxlength="400" rows="3" required></textarea></label>
+<label><input type="checkbox" id="dd699Reviewed" required> We independently checked the document metadata and signature and understand that source repair, profit certification, external source bytes and runtime connection remain unverified.</label>
+<button class="btn secondary" type="submit" id="dd699Submit">Record verified independent document witness receipt</button>
+</form>
+<p id="dd699Result" role="status" aria-live="polite">No Build 699 witness receipt recorded.</p>
+<p class="small">A protected receipt is appended only after current source revision, original 698 intake, a distinct independently configured signer, and exact Ed25519 signature verification pass. No raw signing keys should be entered into this page.</p>
+</section>
 <section class="card" id="dd698-finance" aria-labelledby="dd698-finance-title">
 <p class="eyebrow">Build 698 · Source-repair proof intake / owner financial recovery / signed Master drift</p>
 <h2 id="dd698-finance-title">Original Source Repair Proof Intake, Financial Escalation Recovery Evidence &amp; Master Renewal Drift Detection</h2>
