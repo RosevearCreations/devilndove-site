@@ -113,6 +113,36 @@
 <button id="dd687Review" class="btn secondary" type="button">Open existing owner review and signed recheck controls</button>
 <p class="small">No automatic Master renewal, incident closure, posting, or profit certification is performed. Owner actions remain subject to independent signed evidence and existing Build 685 safeguards.</p>
 </section>
+<section class="card" id="dd688-finance" aria-labelledby="dd688-title">
+<p class="eyebrow">Build 688 · Recovery custody &amp; owner reporting</p>
+<h2 id="dd688-title">SLA breach escalation, signed receipt chain &amp; owner closure signoff</h2>
+<p>Overdue recovery reviews (120-minute advisory target) can be escalated only by a signed-in owner with an exact case evidence receipt and a substantial note. Closure signoff additionally requires a currently independently reverified signed Master receipt matching the original closure. No automatic escalation, financial certification, or CONNECTED claim is made.</p>
+<button id="dd688Refresh" class="btn secondary" type="button">Refresh owner recovery audit</button>
+<button id="dd688Export" class="btn secondary" type="button">Export protected owner report (JSON)</button>
+<p id="dd688Status" role="status" aria-live="polite">HOLD · Select and refresh the current financial campaign.</p>
+<p id="dd688Renewal" class="small">Master receipt renewal audit has not been read.</p>
+<p id="dd688Metrics" class="small">No current owner breach or signoff analysis.</p>
+<h3>Open SLA breach escalation queue</h3>
+<ol id="dd688Breaches" class="clean" aria-label="Exact owner SLA breach cases"><li>Refresh evidence to see current overdue cases.</li></ol>
+<h3>Prior owner closure review receipts</h3>
+<ol id="dd688Signoffs" class="clean" aria-label="Owner closure evidence records"><li>No owner signoff history loaded.</li></ol>
+<form id="dd688OwnerReview">
+<h3>Record a protected owner action</h3>
+<label>Owner action
+<select id="dd688Decision" class="input" required>
+<option value="escalate_breach">Escalate an overdue advisory review</option>
+<option value="signoff_closure">Sign off an independently evidenced closure</option>
+</select></label>
+<label>Exact incident and evidence receipt
+<select id="dd688Case" class="input" required><option value="">Choose a current case</option></select></label>
+<label>Owner review note (20–400 characters)
+<textarea id="dd688Note" class="input" rows="3" minlength="20" maxlength="400" required></textarea></label>
+<label><input id="dd688Reviewed" type="checkbox" required> We reviewed the exact current source, receipt and case history; this action records an owner review, not external Master acceptance.</label>
+<button id="dd688Submit" type="submit" class="btn secondary">Record owner evidence review</button>
+</form>
+<p id="dd688Result" role="status" aria-live="polite">No Build 688 owner review submitted.</p>
+<p class="small">The report includes truthful HOLD flags and historical audit markers. It is an administrative record, not a certified financial statement. No background renewal, polling, posting, or owner signoff occurs.</p>
+</section>
 <section class="card" id="dd684-finance" aria-labelledby="dd684-title">
 <p class="eyebrow">Build 684 · Independent financial runtime verification</p>
 <h2 id="dd684-title">Signer enrollment, verified Master acceptance &amp; financial closure continuity</h2>
