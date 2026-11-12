@@ -16,7 +16,7 @@
     "max_js_bytes": 600000,
     "max_css_bytes": 500000,
     "max_html_bytes": 500000,
-    "max_runtime_source_bytes": 18834000,
+    "max_runtime_source_bytes": 18860000,
     "max_runtime_source_files": 1854,
     "max_inline_data_uri_bytes": 650000
   },
@@ -33,6 +33,19 @@
     "production_mutation": false
   },
   "budget_reviews": [
+    {
+      "build": 695,
+      "date": "2026-11-12",
+      "scope": "Source-pinned financial resolution ledger owner aging, original independent custodian correction reference intake as unverified evidence, current signed Master closure revalidation and protected owner JSON export",
+      "prior_limit_bytes": 18834000,
+      "new_limit_bytes": 18860000,
+      "delta_bytes": 26000,
+      "delta_percent": 0.13805,
+      "runtime_file_limit_unchanged": 1854,
+      "review_reason": "Reviewed constrained 26,000-byte (<0.139%) allowance for Build 695 bounded source-only projections, original owner Admin controls and no-store export. Existing runtime file count and individual source caps unchanged; no D1 schema migration, background polling, source repair, external verification claim, Master replay, financial certification or continuously CONNECTED assertion. Production requires exact SHA checks and independent live-resource proof.",
+      "owner_financial_approval": "NOT_INFERRED",
+      "production_runtime_master_acceptance": "EVIDENCE_GATED_HOLD"
+    },
     {
       "build": 694,
       "date": "2026-11-12",
