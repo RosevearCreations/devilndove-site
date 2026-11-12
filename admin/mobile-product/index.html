@@ -29,7 +29,7 @@
 
     <div class="hero compact-hero">
       <div>
-        <h1>Quick finished product capture</h1>
+        <h1>Quick Product Capture</h1>
         <p>Create one draft product from a phone, upload images directly, add SEO basics, tag the tools and supplies used, and move straight to the next item. Partial entries are allowed so you can save a photo, name, or reference now and finish the details later.</p>
       </div>
     </div>
@@ -45,6 +45,25 @@
       </div>
       <div id="mobileProductMessage" class="small" style="display:none;margin-bottom:12px"></div>
 
+
+      <section class="card" id="dd698-camera-start" aria-labelledby="dd698CameraHeading" style="margin:0 0 14px;padding:14px;border:1px solid rgba(115,76,180,.45)">
+        <p class="eyebrow">Build 698 · Camera-first New Product</p>
+        <h2 id="dd698CameraHeading" style="margin:0 0 6px">Take Photo(s)/Video → Save New Draft</h2>
+        <p class="small" style="margin:0 0 12px">Start a product with your phone camera. The server allocates the next real DD number when saved; if no name is entered it becomes <strong>Temporary DD####</strong>. Photos and video are stored using the existing Cloudflare R2 workflow, with a draft in the existing database. Nothing is published automatically.</p>
+        <div class="mobile-form-grid" style="margin-bottom:12px">
+          <label><span>Optional product name</span><input class="input" id="dd698CameraName" maxlength="160" placeholder="Leave blank for Temporary DD####"></label>
+          <label><span>Take photo(s) with camera</span><input class="input" id="dd698CameraPhoto" type="file" accept="image/*" capture="environment" multiple></label>
+          <label><span>Or add saved photos</span><input class="input" id="dd698PhotoLibrary" type="file" accept="image/*" multiple></label>
+          <label><span>Record/select one video (optional)</span><input class="input" id="dd698CameraVideo" type="file" accept="video/mp4,video/webm,video/quicktime" capture="environment"></label>
+        </div>
+        <div class="small" id="dd698CameraPreview" aria-live="polite">Choose a photo or video to start. Up to seven images (10 MB each) and one MP4, WebM or MOV video (25 MB maximum).</div>
+        <div style="display:flex;gap:10px;flex-wrap:wrap;margin:12px 0">
+          <button class="btn primary" type="button" id="dd698CameraSave">Save camera-first draft</button>
+          <button class="btn secondary" type="button" id="dd698CameraClear">Clear selected media</button>
+        </div>
+        <p class="small" id="dd698CameraStatus" role="status" aria-live="polite">Admin sign-in and internet connection required to save cloud-backed drafts. Existing drafts stay hidden from the public Shop until separately approved.</p>
+        <p class="small" id="dd698CameraSavedLink"></p>
+      </section>
       <div class="card mobile-wizard-card" style="margin:0;padding:14px;border:1px solid rgba(67,97,238,.18)">
         <div class="mobile-wizard-head">
           <div>
