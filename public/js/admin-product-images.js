@@ -71,7 +71,7 @@ return found ? found[1] : 'Gallery/support';
 }
 
 function optionList(options, selected) {
-    return options.map(([value, label]) => `<option value="${escapeHtml(value)}" ${String(selected || '') === value ? 'selected' : ''}>${escapeHtml(label)}</option>`).join('');
+return options.map(([value, label]) => `<option value="${escapeHtml(value)}" ${String(selected || '') === value ? 'selected' : ''}>${escapeHtml(label)}</option>`).join('');
 }
 
 function toOptionalNumber(value) {
@@ -420,7 +420,7 @@ if (previewOnly) return { file, edited: true, crop, resize: { width: canvas.widt
 
 const blob = await canvasToBlob(canvas, 'image/jpeg', options.quality);
 const cleanName = file.name.replace(/\.[^.]+$/, '').replace(/[^a-z0-9_-]+/gi, '-').replace(/^-+|-+$/g, '') || 'product-image';
-    const editedFile = new File([blob], `${cleanName}-${options.preset}.jpg`, { type: 'image/jpeg', lastModified: Date.now() });
+const editedFile = new File([blob], `${cleanName}-${options.preset}.jpg`, { type: 'image/jpeg', lastModified: Date.now() });
 return {
 file: editedFile,
 edited: true,
@@ -444,11 +444,11 @@ if (!target) return;
 if (!imageId) { target.textContent = 'Save this image row before derivative history is available.'; return; }
 target.textContent = 'Loading derivative history...';
 try {
-      const response = await window.DDAuth.apiFetch(`/api/admin/product-image-derivatives?product_image_id=${encodeURIComponent(imageId)}`);
+const response = await window.DDAuth.apiFetch(`/api/admin/product-image-derivatives?product_image_id=${encodeURIComponent(imageId)}`);
 const data = await response.json().catch(() => null);
 if (!response.ok || !data?.ok) throw new Error(data?.error || 'Derivative history failed.');
 const rows = Array.isArray(data.derivatives) ? data.derivatives.slice(0, 6) : [];
-      target.innerHTML = rows.length ? rows.map((item) => `<div class="status-note info derivative-compare-card" style="margin-top:6px"><strong>${escapeHtml(item.derivative_kind || 'variant')}</strong> ${escapeHtml(item.target_width || '')}×${escapeHtml(item.target_height || '')}<div class="derivative-compare-grid"><figure><figcaption>Before</figcaption><img src="${escapeHtml(item.before_image_url || item.source_image_url || '')}" alt="Before derivative"></figure><figure><figcaption>After</figcaption><img src="${escapeHtml(item.derivative_url || '')}" alt="Derivative preview"></figure></div><a href="${escapeHtml(item.derivative_url || '#')}" target="_blank" rel="noopener">${escapeHtml(item.derivative_status || 'preview')}</a><br><span>${escapeHtml(item.generation_method || '')} • ${escapeHtml(item.created_at || item.updated_at || '')}</span><div style="margin-top:6px"><button class="btn small" type="button" data-use-derivative-featured="${escapeHtml(item.product_image_derivative_id || '')}" data-derivative-image-id="${escapeHtml(item.product_image_id || '')}" data-derivative-url="${escapeHtml(item.derivative_url || '')}">Use this derivative as featured image</button></div></div>`).join('') : 'No derivative records yet.';
+target.innerHTML = rows.length ? rows.map((item) => `<div class="status-note info derivative-compare-card" style="margin-top:6px"><strong>${escapeHtml(item.derivative_kind || 'variant')}</strong> ${escapeHtml(item.target_width || '')}×${escapeHtml(item.target_height || '')}<div class="derivative-compare-grid"><figure><figcaption>Before</figcaption><img src="${escapeHtml(item.before_image_url || item.source_image_url || '')}" alt="Before derivative"></figure><figure><figcaption>After</figcaption><img src="${escapeHtml(item.derivative_url || '')}" alt="Derivative preview"></figure></div><a href="${escapeHtml(item.derivative_url || '#')}" target="_blank" rel="noopener">${escapeHtml(item.derivative_status || 'preview')}</a><br><span>${escapeHtml(item.generation_method || '')} • ${escapeHtml(item.created_at || item.updated_at || '')}</span><div style="margin-top:6px"><button class="btn small" type="button" data-use-derivative-featured="${escapeHtml(item.product_image_derivative_id || '')}" data-derivative-image-id="${escapeHtml(item.product_image_id || '')}" data-derivative-url="${escapeHtml(item.derivative_url || '')}">Use this derivative as featured image</button></div></div>`).join('') : 'No derivative records yet.';
 } catch (error) { target.textContent = error.message || 'Derivative history failed.'; }
 }
 
@@ -479,9 +479,9 @@ await loadDerivativeHistoryForRow(rowEl);
 
 function formatBytes(value) {
 const bytes = Number(value || 0);
-    if (bytes < 1024) return `${bytes} B`;
-    if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
-    return `${(bytes / 1024 / 1024).toFixed(2)} MB`;
+if (bytes < 1024) return `${bytes} B`;
+if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
+return `${(bytes / 1024 / 1024).toFixed(2)} MB`;
 }
 
 async function refreshUploadPreview() {
@@ -504,7 +504,7 @@ const info = await inspectLocalImageFile(analysisFile);
 const originalSize = formatBytes(file.size || 0);
 const outputSize = formatBytes(analysisFile.size || file.size || 0);
 const savings = file.size && analysisFile.size ? Math.max(0, Math.round((1 - (analysisFile.size / file.size)) * 100)) : 0;
-      if (note) note.textContent = `${edited.note || 'Original'} • output ${info.width}×${info.height} • ${info.orientation} • ${originalSize} → ${outputSize}${savings ? ` (${savings}% smaller)` : ''} • estimated score ${info.merchandising_score}%.`;
+if (note) note.textContent = `${edited.note || 'Original'} • output ${info.width}×${info.height} • ${info.orientation} • ${originalSize} → ${outputSize}${savings ? ` (${savings}% smaller)` : ''} • estimated score ${info.merchandising_score}%.`;
 return info;
 } catch (error) {
 if (note) note.textContent = error.message || 'Could not preview this edit.';
@@ -517,12 +517,12 @@ const x = clamp(Number(row.crop_x ?? 0.08), 0, 1);
 const y = clamp(Number(row.crop_y ?? 0.08), 0, 1);
 const w = clamp(Number(row.crop_width ?? 0.84), 0.05, 1);
 const h = clamp(Number(row.crop_height ?? 0.84), 0.05, 1);
-    return `left:${Math.round(x*100)}%;top:${Math.round(y*100)}%;width:${Math.round(w*100)}%;height:${Math.round(h*100)}%`;
+return `left:${Math.round(x*100)}%;top:${Math.round(y*100)}%;width:${Math.round(w*100)}%;height:${Math.round(h*100)}%`;
 }
 
 function rowTemplate(row = {}, index = 0) {
 const shotStyle = normalizeText(row.shot_style || 'record').toLowerCase() || 'record';
-    return `
+return `
       <div class="card product-image-sortable-row" data-product-image-row data-product-image-id="${Number(row.product_image_id || 0) || ''}" draggable="true" style="margin-top:12px">
         <div style="display:flex;justify-content:space-between;gap:10px;align-items:center;flex-wrap:wrap">
           <strong>Image Row ${index + 1}</strong>
@@ -616,7 +616,7 @@ const shotStyle = normalizeText(row.shot_style || 'record').toLowerCase() || 're
 
 function collectRowsBase() {
 return Array.from(document.querySelectorAll('[data-product-image-row]')).map((row, index) => {
-      const value = (field) => row.querySelector(`[data-field="${field}"]`)?.value ?? '';
+const value = (field) => row.querySelector(`[data-field="${field}"]`)?.value ?? '';
 return {
 product_image_id: Number(row.getAttribute('data-product-image-id') || 0) || null,
 image_url: normalizeText(value('image_url')),
@@ -672,7 +672,7 @@ const rows = decorateRows(baseRows);
 document.querySelectorAll('[data-product-image-row]').forEach((rowEl, index) => {
 const score = rows[index]?.merchandising_score ?? 0;
 const scoreDisplay = rowEl.querySelector('[data-score-display]');
-      if (scoreDisplay) scoreDisplay.textContent = `${score}% merch`;
+if (scoreDisplay) scoreDisplay.textContent = `${score}% merch`;
 const scoreInput = rowEl.querySelector('[data-field="merchandising_score_display"]');
 if (scoreInput) scoreInput.value = String(score);
 const hintInput = rowEl.querySelector('[data-field="lead_gate_hint"]');
@@ -689,7 +689,7 @@ const previousValue = Number(previous);
 if (!Number.isFinite(currentValue) || !Number.isFinite(previousValue)) return '';
 const delta = currentValue - previousValue;
 if (delta === 0) return 'flat';
-    return `${delta > 0 ? '+' : ''}${delta}`;
+return `${delta > 0 ? '+' : ''}${delta}`;
 }
 
 function renderQualityScore() {
@@ -708,7 +708,7 @@ const weakUnapprovedGalleryImages = rows.filter((row, index) => index > 0 && Num
 const firstOrientation = String(firstImage?.image_orientation || '').toLowerCase();
 const firstWarnings = firstImage ? summarizeImageGuidance(firstImage, true) : ['Choose a first image before publish.'];
 const roleCounts = rows.reduce((acc, row, index) => { const key = normalizeRole(row.image_role, index); acc[key] = Number(acc[key] || 0) + 1; return acc; }, {});
-    const roleSummary = Object.entries(roleCounts).map(([key, count]) => `${roleLabel(key)}: ${count}`).join(' • ');
+const roleSummary = Object.entries(roleCounts).map(([key, count]) => `${roleLabel(key)}: ${count}`).join(' • ');
 const consentNeeded = rows.filter((row) => ['consent_needed', 'blocked'].includes(normalizeText(row.public_use_status))).length;
 const lastSaved = latestSavedSummary || currentScoreHistory[0] || null;
 const priorSaved = currentScoreHistory[1] || null;
@@ -717,14 +717,14 @@ const draftGalleryTrend = lastSaved ? formatTrendDelta(overallScore, Number(last
 const savedLeadTrend = lastSaved && priorSaved ? formatTrendDelta(Number(lastSaved.lead_image_score || 0), Number(priorSaved.lead_image_score || 0)) : '';
 const savedGalleryTrend = lastSaved && priorSaved ? formatTrendDelta(Number(lastSaved.gallery_merchandising_score || 0), Number(priorSaved.gallery_merchandising_score || 0)) : '';
 const recommendedRoles = ['hero_front', 'detail_texture', 'scale_context', 'back_side', 'process_story', 'packaging_pickup', 'material_tool_proof'];
-    const rolePreview = rows.map((row, index) => `${index + 1}. ${roleLabel(normalizeRole(row.image_role || recommendedRoles[index] || 'gallery_support', index))}`).join(' • ');
+const rolePreview = rows.map((row, index) => `${index + 1}. ${roleLabel(normalizeRole(row.image_role || recommendedRoles[index] || 'gallery_support', index))}`).join(' • ');
 const guidance = [
 'Aim for at least 3 images.',
 'Use a square or landscape first image.',
 'Keep the first image bright, sharp, and clean around the edges.',
 'Spread angle groups so the gallery is not mostly duplicates.'
 ];
-    mount.innerHTML = `
+mount.innerHTML = `
       <h4 style="margin-top:0">Photo merchandising before publish</h4>
       <div class="small">${imageCount} image(s) loaded • ${altCoverage} image(s) with usable alt text • average merchandising score ${overallScore}% • lead image score ${firstImageScore}% • duplicate-angle rows ${duplicateAngleGroups}</div>
       <div class="small" style="margin-top:6px">Recommended role preview before save: ${escapeHtml(rolePreview || 'Add images to preview roles.')}</div>
@@ -764,7 +764,7 @@ return closest;
 function render() {
 if (rendered) return;
 rendered = true;
-    mountEl.innerHTML = `
+mountEl.innerHTML = `
       <div class="card" style="margin-top:18px">
         <h3 style="margin-top:0">Product Media Workflow</h3>
         <p class="small" style="margin-top:0">Manage ordered image URLs, direct uploads, asset browsing, alt text, captions, focal points, crop history, and merchandising scores together.</p>
@@ -808,13 +808,13 @@ const info = await refreshUploadPreview() || await inspectLocalImageFile(file);
 const hasExistingRows = Array.from(document.querySelectorAll('[data-product-image-row]')).some((row) => normalizeText(row.querySelector('[data-field="image_url"]')?.value));
 const warnings = summarizeImageGuidance(info, !hasExistingRows);
 if (!info.ok) {
-        setMessage(`Upload guidance: use a square or landscape image at least 800×800. Current edited output is ${info.width}×${info.height}.`, true);
+setMessage(`Upload guidance: use a square or landscape image at least 800×800. Current edited output is ${info.width}×${info.height}.`, true);
 } else if (!hasExistingRows && !info.first_image_ok) {
-        setMessage(`Lead-image guidance: featured image target is 1200×1200 or larger and square/landscape. Current edited output is ${info.width}×${info.height}.`, true);
+setMessage(`Lead-image guidance: featured image target is 1200×1200 or larger and square/landscape. Current edited output is ${info.width}×${info.height}.`, true);
 } else if (warnings.length) {
-        setMessage(`Upload guidance: ${warnings.join(' • ')}. Estimated merchandising score ${info.merchandising_score}%.`, true);
+setMessage(`Upload guidance: ${warnings.join(' • ')}. Estimated merchandising score ${info.merchandising_score}%.`, true);
 } else {
-        setMessage(`Image looks solid for listing use: ${info.width}×${info.height} • est. merchandising ${info.merchandising_score}%.`, false);
+setMessage(`Image looks solid for listing use: ${info.width}×${info.height} • est. merchandising ${info.merchandising_score}%.`, false);
 }
 });
 document.getElementById('productImageEditPreset')?.addEventListener('change', refreshUploadPreview);
@@ -875,7 +875,7 @@ renderQualityScore();
 function reindexRows() {
 document.querySelectorAll('[data-product-image-row]').forEach((row, index) => {
 const title = row.querySelector('strong');
-      if (title) title.textContent = `Image Row ${index + 1}`;
+if (title) title.textContent = `Image Row ${index + 1}`;
 const sort = row.querySelector('[data-field="sort_order"]');
 if (sort) sort.value = String(index);
 const gateHint = row.querySelector('[data-field="lead_gate_hint"]');
@@ -916,7 +916,7 @@ const productId = Number(document.getElementById('productImagesProductId')?.valu
 if (!productId) return setMessage('Enter a valid product ID.', true);
 try {
 setMessage('Loading product images...');
-      const response = await window.DDAuth.apiFetch(`/api/admin/product-images?product_id=${encodeURIComponent(productId)}`);
+const response = await window.DDAuth.apiFetch(`/api/admin/product-images?product_id=${encodeURIComponent(productId)}`);
 const data = await response.json();
 if (!response.ok || !data?.ok) throw new Error(data?.error || 'Failed to load product images.');
 currentScoreHistory = Array.isArray(data.score_history) ? data.score_history : [];
@@ -945,14 +945,14 @@ const editedUpload = await buildEditedUpload(file, false);
 const uploadFile = editedUpload.file || file;
 const localInfo = await inspectLocalImageFile(uploadFile);
 if (!localInfo.ok) {
-      return setMessage(`Use a square or landscape image at least 800×800. Current edited output is ${localInfo.width}×${localInfo.height}.`, true);
+return setMessage(`Use a square or landscape image at least 800×800. Current edited output is ${localInfo.width}×${localInfo.height}.`, true);
 }
 const isFirstImageUpload = !Array.from(document.querySelectorAll('[data-product-image-row]')).some((row) => normalizeText(row.querySelector('[data-field="image_url"]')?.value));
 if (isFirstImageUpload && !localInfo.first_image_ok) {
-      return setMessage(`First listing image should be at least 1200×1200 and square or landscape. Current edited output is ${localInfo.width}×${localInfo.height}.`, true);
+return setMessage(`First listing image should be at least 1200×1200 and square or landscape. Current edited output is ${localInfo.width}×${localInfo.height}.`, true);
 }
 try {
-      setMessage(`Uploading image ${localInfo.width}×${localInfo.height} (${localInfo.orientation}) • est. merchandising ${localInfo.merchandising_score}%.`);
+setMessage(`Uploading image ${localInfo.width}×${localInfo.height} (${localInfo.orientation}) • est. merchandising ${localInfo.merchandising_score}%.`);
 const formData = new FormData();
 formData.append('file', uploadFile);
 formData.append('product_id', String(productId));
@@ -995,7 +995,7 @@ crop_x: editedUpload.crop?.x ?? null,
 crop_y: editedUpload.crop?.y ?? null,
 crop_width: editedUpload.crop?.width ?? null,
 crop_height: editedUpload.crop?.height ?? null,
-        annotation_notes: editedUpload.edited ? `Upload edited: ${editedUpload.note || 'crop/resize applied'}` : '',
+annotation_notes: editedUpload.edited ? `Upload edited: ${editedUpload.note || 'crop/resize applied'}` : '',
 shot_style: 'record',
 merchandising_score: localInfo.merchandising_score,
 first_image_score: localInfo.merchandising_score
@@ -1017,7 +1017,7 @@ listEl.textContent = 'Load a product first to browse uploaded media.';
 return;
 }
 try {
-      const response = await window.DDAuth.apiFetch(`/api/admin/media-assets?product_id=${encodeURIComponent(productId)}&limit=40`);
+const response = await window.DDAuth.apiFetch(`/api/admin/media-assets?product_id=${encodeURIComponent(productId)}&limit=40`);
 const data = await response.json();
 if (!response.ok || !data?.ok) throw new Error(data?.error || 'Failed to load media assets.');
 const assets = Array.isArray(data.assets) ? data.assets : [];
@@ -1053,7 +1053,7 @@ brightness_score: asset.brightness_score,
 contrast_score: asset.contrast_score,
 merchandising_score: asset.merchandising_score ?? asset.first_image_score
 }, true);
-        return `
+return `
           <div class="card" style="margin-top:8px">
             <div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap">
               ${asset.public_url ? `<img src="${escapeHtml(asset.public_url)}" alt="${escapeHtml(asset.original_filename || 'asset')}" style="width:72px;height:72px;object-fit:cover;border-radius:8px" />` : ''}
@@ -1084,9 +1084,9 @@ const height = Number(first.height_px || 0);
 const altText = normalizeText(first.alt_text);
 const score = Number(first.merchandising_score || first.first_image_score || 0);
 if (!['square', 'landscape'].includes(orientation)) return { ok: false, message: 'First image should be square or landscape before saving.' };
-    if (width < 1200 || height < 1200) return { ok: false, message: `First image should be at least 1200×1200. Current first image is ${width || 0}×${height || 0}.` };
+if (width < 1200 || height < 1200) return { ok: false, message: `First image should be at least 1200×1200. Current first image is ${width || 0}×${height || 0}.` };
 if (altText.length < 12) return { ok: false, message: 'First image needs stronger alt text before saving.' };
-    if (score < 72) return { ok: false, message: `Lead image merchandising score is only ${score}%. Improve crop, background, sharpness, or fill before saving.` };
+if (score < 72) return { ok: false, message: `Lead image merchandising score is only ${score}%. Improve crop, background, sharpness, or fill before saving.` };
 return { ok: true };
 }
 
@@ -1121,10 +1121,10 @@ setMessage(error.message || 'Failed to save product images.', true);
 function updateCropFieldsFromBox(row, x, y, w, h) {
 const cropPair = row.querySelector('[data-field="crop_pair"]');
 const cropSize = row.querySelector('[data-field="crop_size"]');
-    if (cropPair) cropPair.value = `${x.toFixed(2)},${y.toFixed(2)}`;
-    if (cropSize) cropSize.value = `${w.toFixed(2)},${h.toFixed(2)}`;
+if (cropPair) cropPair.value = `${x.toFixed(2)},${y.toFixed(2)}`;
+if (cropSize) cropSize.value = `${w.toFixed(2)},${h.toFixed(2)}`;
 const cropBox = row.querySelector('.product-image-crop-preview');
-    if (cropBox) cropBox.style.cssText = `left:${Math.round(x*100)}%;top:${Math.round(y*100)}%;width:${Math.round(w*100)}%;height:${Math.round(h*100)}%`;
+if (cropBox) cropBox.style.cssText = `left:${Math.round(x*100)}%;top:${Math.round(y*100)}%;width:${Math.round(w*100)}%;height:${Math.round(h*100)}%`;
 }
 
 function startCropHandleDrag(event, row, handle) {
@@ -1176,16 +1176,16 @@ const yField = row.querySelector('[data-field="focal_point_y"]');
 if (xField) xField.value = x.toFixed(2);
 if (yField) yField.value = y.toFixed(2);
 const dot = row.querySelector('.product-image-focal-dot');
-      if (dot) { dot.style.left = `${Math.round(x * 100)}%`; dot.style.top = `${Math.round(y * 100)}%`; }
+if (dot) { dot.style.left = `${Math.round(x * 100)}%`; dot.style.top = `${Math.round(y * 100)}%`; }
 const size = 0.84;
 const cropX = Math.max(0, Math.min(1-size, x - size/2));
 const cropY = Math.max(0, Math.min(1-size, y - size/2));
 const cropPair = row.querySelector('[data-field="crop_pair"]');
 const cropSize = row.querySelector('[data-field="crop_size"]');
-      if (cropPair && !cropPair.value) cropPair.value = `${cropX.toFixed(2)},${cropY.toFixed(2)}`;
-      if (cropSize && !cropSize.value) cropSize.value = `${size.toFixed(2)},${size.toFixed(2)}`;
+if (cropPair && !cropPair.value) cropPair.value = `${cropX.toFixed(2)},${cropY.toFixed(2)}`;
+if (cropSize && !cropSize.value) cropSize.value = `${size.toFixed(2)},${size.toFixed(2)}`;
 const cropBox = row.querySelector('.product-image-crop-preview');
-      if (cropBox) cropBox.style.cssText = `left:${Math.round(cropX*100)}%;top:${Math.round(cropY*100)}%;width:${Math.round(size*100)}%;height:${Math.round(size*100)}%`;
+if (cropBox) cropBox.style.cssText = `left:${Math.round(cropX*100)}%;top:${Math.round(cropY*100)}%;width:${Math.round(size*100)}%;height:${Math.round(size*100)}%`;
 renderQualityScore();
 setMessage('Focal point updated on the thumbnail. Save images to keep this crop/focus guidance.');
 return;
@@ -1217,10 +1217,10 @@ const cropX = Math.max(0, Math.min(1-size, focalX - size/2));
 const cropY = Math.max(0, Math.min(1-size, focalY - size/2));
 const cropPair = row.querySelector('[data-field="crop_pair"]');
 const cropSize = row.querySelector('[data-field="crop_size"]');
-      if (cropPair) cropPair.value = `${cropX.toFixed(2)},${cropY.toFixed(2)}`;
-      if (cropSize) cropSize.value = `${size.toFixed(2)},${size.toFixed(2)}`;
+if (cropPair) cropPair.value = `${cropX.toFixed(2)},${cropY.toFixed(2)}`;
+if (cropSize) cropSize.value = `${size.toFixed(2)},${size.toFixed(2)}`;
 const cropBox = row.querySelector('.product-image-crop-preview');
-      if (cropBox) cropBox.style.cssText = `left:${Math.round(cropX*100)}%;top:${Math.round(cropY*100)}%;width:${Math.round(size*100)}%;height:${Math.round(size*100)}%`;
+if (cropBox) cropBox.style.cssText = `left:${Math.round(cropX*100)}%;top:${Math.round(cropY*100)}%;width:${Math.round(size*100)}%;height:${Math.round(size*100)}%`;
 renderQualityScore();
 setMessage('Square crop rectangle set from focal point. Save images to keep it.');
 return;
@@ -1249,7 +1249,7 @@ try {
 const payload = JSON.parse(decodeURIComponent(addAssetBtn.getAttribute('data-add-asset-json') || '%7B%7D'));
 addRow({ ...payload, sort_order: document.querySelectorAll('[data-product-image-row]').length });
 const warnings = summarizeImageGuidance(payload, false);
-        setMessage(warnings.length ? `Selected asset guidance: ${warnings.join(' • ')}.` : 'Asset added to the gallery list.', warnings.length > 0);
+setMessage(warnings.length ? `Selected asset guidance: ${warnings.join(' • ')}.` : 'Asset added to the gallery list.', warnings.length > 0);
 } catch {
 addRow({ image_url: '', sort_order: document.querySelectorAll('[data-product-image-row]').length });
 }
@@ -1263,7 +1263,7 @@ const assetId = Number(deleteAssetBtn.getAttribute('data-delete-asset-id') || 0)
 if (!assetId || !window.confirm('Delete this uploaded asset from R2 and the asset library?')) return;
 try {
 setMessage('Deleting media asset...');
-        const response = await window.DDAuth.apiFetch(`/api/admin/media-assets?media_asset_id=${encodeURIComponent(assetId)}`, { method: 'DELETE' });
+const response = await window.DDAuth.apiFetch(`/api/admin/media-assets?media_asset_id=${encodeURIComponent(assetId)}`, { method: 'DELETE' });
 const data = await response.json();
 if (!response.ok || !data?.ok) throw new Error(data?.error || 'Failed to delete media asset.');
 await loadAssetLibrary();
