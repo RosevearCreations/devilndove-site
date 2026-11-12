@@ -1481,6 +1481,76 @@ render('dd697Master',v?.master?.items,x=>
 ' · no new external signature inferred');
 chooseSources697();
 }
+
+let audit698=null;
+function chooseSources698(){
+const el=$('dd698Source');if(!el)return;
+el.replaceChildren(new Option('Select original source-bound receipt',''));
+const decision=$('dd698Decision').value,v=audit698,
+intake=decision==='intake_source_repair_proof';
+for(const id of ['dd698Reference','dd698Digest','dd698Observed'])
+$(id).required=intake;
+$('dd698Disposition').disabled=decision!=='record_escalation_recovery';
+if(!v?.history_complete)return;
+if(intake){
+for(const x of v.source_repair?.items||[]){
+if(x.repair_proof_intake_recorded)continue;
+el.add(new Option('Signed reconciliation #'+x.reconciliation_receipt_id+
+' · original #'+x.older_receipt_id+' / #'+x.newer_receipt_id,
+x.older_receipt_id+'|'+x.newer_receipt_id+'|'+x.reconciliation_receipt_id+'|'));
+}
+}else if(decision==='record_escalation_recovery'){
+for(const x of v.recovery?.items||[]){
+if(x.recovery_followup_recorded)continue;
+el.add(new Option(x.case_id+' · original owner review #'+x.owner_review_receipt_id,
+x.original_resolution_receipt_id+'|0|'+x.owner_review_receipt_id+'|'+x.case_id));
+}
+}else if(decision==='record_master_drift'){
+for(const x of v.master?.items||[]){
+if(x.drift_review_recorded)continue;
+el.add(new Option('Master renewal #'+x.renewal_receipt_id+
+' · original #'+x.older_receipt_id+' / #'+x.newer_receipt_id,
+x.older_receipt_id+'|'+x.newer_receipt_id+'|'+x.renewal_receipt_id+'|'));
+}
+}
+}
+function draw698(d){
+if(!$('dd698-finance'))return;
+const v=d.financial698||null;audit698=v;
+$('dd698Status').textContent=v?.campaign_queue_id?
+v.status+' · original owner history '+(v.history_complete?'COMPLETE':'HOLD')+
+' · current Master drift '+(v.master.drift_detected?'DETECTED/HOLD':'NOT DETECTED')+
+' · source repair and financial certification HOLD':
+'HOLD · Select and refresh original financial campaign.';
+$('dd698Stats').textContent=v?.campaign_queue_id?
+'Original mismatches '+v.source_repair.original_mismatch_count+
+' · source repair proof intakes pending '+v.source_repair.pending_intake_count+
+' · owner recovery follow-ups pending '+v.recovery.pending_followup_count+
+' · Master renewal drift reviews pending '+v.master.pending_drift_review_count:
+'Original source-bound financial evidence unavailable.';
+function render(id,items,format){
+const el=$(id);el.replaceChildren();
+for(const x of items||[]){const li=document.createElement('li');li.textContent=format(x);el.appendChild(li);}
+if(!el.childElementCount){const li=document.createElement('li');li.textContent='No eligible source-bound entries.';el.appendChild(li);}
+}
+render('dd698Sources',v?.source_repair?.items,x=>
+'Original #'+x.older_receipt_id+' / #'+x.newer_receipt_id+
+' · independent reconciliation #'+x.reconciliation_receipt_id+
+' · external document '+(x.repair_proof_intake_recorded?'INTAKE #'+x.repair_proof_receipt_id:'NOT INTAKEN')+
+' · original source repair HOLD');
+render('dd698Recovery',v?.recovery?.items,x=>
+x.case_id+' · original escalation #'+x.escalation_receipt_id+
+' · owner review #'+x.owner_review_receipt_id+
+' · recovery follow-up '+(x.recovery_followup_recorded?'RECORDED #'+x.recovery_receipt_id:'PENDING')+
+' · independent external remediation HOLD');
+render('dd698Master',v?.master?.items,x=>
+'Renewal #'+x.renewal_receipt_id+' · previous owner continuity #'+x.prior_continuity_receipt_id+
+' · current Master #'+(v?.master?.observed_master_receipt_id||'missing')+
+' · drift '+(v.master.drift_detected?'DETECTED':'NOT DETECTED')+
+' · owner drift review '+(x.drift_review_recorded?'RECORDED':'PENDING')+
+' · no new independent signature inferred');
+chooseSources698();
+}
 async function refresh(){
 const id=Number($('dd685Campaign').value);
 if(!id){state=null;$('dd685Status').textContent='HOLD · Select a campaign.';}
@@ -1498,6 +1568,7 @@ draw694(d);
 draw695(d);
 draw696(d);
 draw697(d);
+draw698(d);
 if(!id)return;
 if(!v||v.queue_id!==id)throw Error('Fresh exact financial evidence was not returned.');
 state=v;
@@ -1525,7 +1596,7 @@ await refresh();
 document.addEventListener('DOMContentLoaded',()=>{
 if(!$('dd685-finance'))return;
 (async()=>{try{
-const d=await api(null);draw686(d);draw687(d);draw688(d);draw689(d);draw690(d);draw691(d);draw692(d);draw693(d);draw694(d);draw695(d);draw696(d);draw697(d);const seen=new Set();
+const d=await api(null);draw686(d);draw687(d);draw688(d);draw689(d);draw690(d);draw691(d);draw692(d);draw693(d);draw694(d);draw695(d);draw696(d);draw697(d);draw698(d);const seen=new Set();
 for(const q of d.queue||[])if(q.utm_campaign&&!seen.has(q.social_post_queue_id)){
 seen.add(q.social_post_queue_id);
 $('dd685Campaign').add(new Option(q.utm_campaign+' · #'+q.social_post_queue_id,q.social_post_queue_id));
@@ -1548,6 +1619,60 @@ $('dd694Refresh').addEventListener('click',()=>void refresh());
 $('dd695Refresh').addEventListener('click',()=>void refresh());
 $('dd696Refresh').addEventListener('click',()=>void refresh());
 $('dd697Refresh').addEventListener('click',()=>void refresh());
+$('dd698Refresh').addEventListener('click',()=>void refresh());
+$('dd698Decision').addEventListener('change',chooseSources698);
+chooseSources698();
+$('dd698Form').addEventListener('submit',async event=>{
+event.preventDefault();const button=$('dd698Submit');button.disabled=true;
+try{
+if(!state?.queue_id||!audit698?.history_complete)
+throw Error('Refresh complete bounded original source before owner review.');
+if(!$('dd698Reviewed').checked)throw Error('Explicit original owner review required.');
+const [a,b,c,caseId]=$('dd698Source').value.split('|'),
+ref=Number(a),newer=Number(b),previous=Number(c),
+decision=$('dd698Decision').value,note=$('dd698Note').value.trim();
+if(!Number.isSafeInteger(ref)||ref<1||!Number.isSafeInteger(previous)||previous<1||
+note.length<20||note.length>400)
+throw Error('Select original source, prior receipt and 20–400 character review note.');
+let extra={};
+if(decision==='intake_source_repair_proof'){
+const observed=$('dd698Observed').value;
+if(!observed)throw Error('External source observed time required.');
+extra={external_reference:$('dd698Reference').value.trim(),
+external_document_sha256:$('dd698Digest').value.trim().toLowerCase(),
+external_observed_at:new Date(observed).toISOString()};
+}else if(decision==='record_escalation_recovery')
+extra={case_id:caseId,followup_disposition:$('dd698Disposition').value};
+else if(decision==='record_master_drift')
+extra={expected_master_receipt_id:state.verified_master_receipt_id,
+expected_prior_master_receipt_id:audit698.master.prior_master_receipt_id};
+const d=await api({action:'owner_finance_review_698',
+social_post_queue_id:state.queue_id,decision,reference_receipt_id:ref,
+newer_receipt_id:newer,prior_receipt_id:previous,
+expected_fingerprint_sha256:state.fingerprint_sha256,
+expected_source_revision:state.source_revision,owner_reviewed:true,
+resolution_note:note,...extra},state.queue_id);
+$('dd698Result').textContent=d.result.status+' · durable original owner receipt #'+
+d.result.receipt_id+' · source repair, independent Master re-attestation and audited finance HOLD.';
+$('dd698Note').value='';$('dd698Reviewed').checked=false;
+await refresh();
+}catch(e){$('dd698Result').textContent='HOLD · '+e.message;}
+finally{button.disabled=false;}
+});
+$('dd698Export').addEventListener('click',async()=>{
+try{
+const id=Number($('dd685Campaign').value);
+if(!id||!state?.queue_id||id!==state.queue_id)throw Error('Refresh exact original campaign.');
+if(!window.DDAuth?.apiFetch)throw Error('Authenticated Admin required.');
+const r=await window.DDAuth.apiFetch(endpoint+'?export=financial698&campaign_queue_id='+encodeURIComponent(id));
+if(!r.ok)throw Error('Protected export denied. HTTP '+r.status);
+const blob=await r.blob(),url=URL.createObjectURL(blob),a=document.createElement('a');
+a.href=url;a.download='devilndove-finance-recovery-'+id+'-698.json';
+document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1000);
+$('dd698Result').textContent='Protected source-bound review exported; original source repair unverified.';
+}catch(e){$('dd698Result').textContent='HOLD · '+e.message;}
+});
+
 $('dd697Decision').addEventListener('change',chooseSources697);
 chooseSources697();
 $('dd697Prepare').addEventListener('click',()=>{
