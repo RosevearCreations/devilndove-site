@@ -1,8 +1,12 @@
 import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
-import {assessFinance698} from '../functions/api/admin/social-post-queue.js';
+import {assessFinance698,utcAttemptTime698} from '../functions/api/admin/social-post-queue.js';
 const read=p=>readFileSync(new URL('../'+p,import.meta.url),'utf8');
 const time=Date.parse('2026-11-12T15:00:00Z'),sourceFingerprint='a'.repeat(64),revision='source-698';
+assert.equal(utcAttemptTime698('2026-11-12 14:59:00',time),Date.parse('2026-11-12T14:59:00Z'));
+assert.equal(utcAttemptTime698('2026-11-12T14:59:00Z',time),Date.parse('2026-11-12T14:59:00Z'));
+assert.equal(utcAttemptTime698('2026-11-12 15:10:00',time),null);
+assert.equal(utcAttemptTime698('2026-11-12T14:59:00',time),null);
 const current={queue_id:9,verified_master_receipt_id:920,master_fresh:true,
 fingerprint_sha256:sourceFingerprint,source_revision:revision};
 const prior={history_complete:true,master_accepted_now:true,
@@ -44,6 +48,8 @@ external_document_sha256:'b'.repeat(64),
 external_reference:'custodian.case.698/a',
 external_observed_at:'2026-11-12T14:50:00Z',
 independent_source_repair_verification:false});
+v=assessFinance698(current,prior,[{...repair,attempted_at:'2026-11-12 14:59:00'}],time);
+assert.equal(v.history_complete,true);
 v=assessFinance698(current,prior,[repair],time);
 assert.equal(v.history_complete,true);
 assert.equal(v.source_repair.pending_intake_count,0);
