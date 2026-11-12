@@ -2764,7 +2764,7 @@ state=await finance690(db,env,n),
 decision=normalizeText(p.decision),caseId=normalizeText(p.case_id),
 note=normalizeText(p.resolution_note),ref=Number(p.reference_receipt_id);
 if(!v.queue_id||!v.history_complete||!state.history_complete||
-!state.ledger_complete||p.owner_reviewed!==true||
+p.owner_reviewed!==true||
 p.expected_fingerprint_sha256!==v.fingerprint_sha256||
 p.expected_source_revision!==v.source_revision||
 !v.fingerprint_sha256||note.length<20||note.length>400||
@@ -2777,7 +2777,7 @@ x.reference_receipt_id===ref&&!x.owner_reviewed);
 issue_code=target?.issue_code||null;
 status='owner_replay_exception_reviewed_690';
 }else if(decision==='reconcile_owner_closure'){
-if(!state.master_accepted_now||state.status!=='OWNER_CLOSURE_RECONCILIATION_REVIEW_ONLY'||
+if(!state.ledger_complete||!state.master_accepted_now||state.status!=='OWNER_CLOSURE_RECONCILIATION_REVIEW_ONLY'||
 Number(p.expected_master_receipt_id)!==v.verified_master_receipt_id)
 throw Error('Current fresh independently signed Master receipt and unbroken replay lineage required. HOLD.');
 target=state.closure_candidates.find(x=>x.case_id===caseId&&
