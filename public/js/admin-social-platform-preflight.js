@@ -737,6 +737,62 @@ if(!list.childElementCount){const li=document.createElement('li');
 li.textContent=v?.history_complete?'No open owner cases in this bounded campaign history.':'No complete owner case proof available; HOLD.';
 list.appendChild(li);}
 }
+let audit688=null;
+function chooseCases688(){
+const select=$('dd688Case');if(!select)return;
+select.replaceChildren(new Option('Select exact current case',''));
+const action=$('dd688Decision')?.value;
+const list=action==='signoff_closure'?audit688?.closed_cases:audit688?.breaches;
+for(const x of list||[]){
+const reviewed=action==='signoff_closure'?x.owner_signed_off:x.owner_reviewed;
+if(reviewed)continue;
+const receipt=action==='signoff_closure'?x.closure_receipt_id:x.open_receipt_id;
+select.add(new Option((action==='signoff_closure'?'Closed':'Overdue')+' · '+x.case_id+
+' · exact receipt #'+receipt,x.case_id+'|'+receipt));
+}
+}
+function draw688(d){
+if(!$('dd688-finance'))return;
+const v=d.financial688;
+audit688=v||null;
+$('dd688Status').textContent=v?.campaign_queue_id?
+v.status+' · bounded incident history '+(v.history_complete?'COMPLETE':'HOLD')+
+' · current independently verified Master '+(v.master_accepted_now?'YES':'HOLD')+
+' · continuous connection HOLD · financial certification HOLD':
+'HOLD · Select a campaign and refresh the protected financial evidence.';
+$('dd688Renewal').textContent=v?.renewal_audit?
+'Historical signed Master receipt chain: '+(v.renewal_audit.lineage_complete?'PINS MATCH':'HOLD / INCOMPLETE')+
+' · recorded receipts '+v.renewal_audit.record_count+
+' · historical renewals '+v.renewal_audit.historical_renewal_count+
+' · current independently reverified receipt #'+(v.renewal_audit.current_independently_reverified_receipt_id||'—')+
+' · historical signatures not reverified by this report.':'No Master receipt chain loaded. HOLD.';
+$('dd688Metrics').textContent=v?.campaign_queue_id?
+'Overdue '+v.breach_count+' · due soon '+v.due_soon_count+
+' · unreviewed breaches '+v.unreviewed_breach_count+
+' · recorded closure signoffs '+v.signoff_count+
+' · awaiting closure signoff '+v.pending_closure_signoff_count+
+' · excluded/stale review entries '+v.invalid_or_stale_review_count:
+'No owner escalation metrics until a campaign is selected.';
+const breaches=$('dd688Breaches');breaches.replaceChildren();
+for(const x of v?.breaches||[]){
+const li=document.createElement('li');
+li.textContent=x.severity+' · '+x.issue_code+' · '+x.case_id+
+' · overdue '+x.age_minutes+' min · due '+x.due_at+
+' · review '+(x.owner_reviewed?'RECORDED':'REQUIRED');breaches.appendChild(li);
+}
+if(!breaches.childElementCount){const li=document.createElement('li');
+li.textContent='No overdue cases in the bounded current view; this does not certify Master acceptance.';
+breaches.appendChild(li);}
+const list=$('dd688Signoffs');list.replaceChildren();
+for(const x of v?.owner_reviews||[]){
+const li=document.createElement('li');li.textContent=x.decision+' · case '+x.case_id+
+' · owner audit #'+x.receipt_id+' · recorded '+x.recorded_at;
+list.appendChild(li);
+}
+if(!list.childElementCount){const li=document.createElement('li');
+li.textContent='No matching owner escalation/signoff receipts recorded in the bounded ledger.';list.appendChild(li);}
+chooseCases688();
+}
 async function refresh(){
 const id=Number($('dd685Campaign').value);
 if(!id){state=null;$('dd685Status').textContent='HOLD · Select a campaign.';}
@@ -744,6 +800,7 @@ try{
 const d=await api(null,id||0),v=d.financial685;
 draw686(d);
 draw687(d);
+draw688(d);
 if(!id)return;
 if(!v||v.queue_id!==id)throw Error('Fresh exact financial evidence was not returned.');
 state=v;
@@ -771,7 +828,7 @@ await refresh();
 document.addEventListener('DOMContentLoaded',()=>{
 if(!$('dd685-finance'))return;
 (async()=>{try{
-const d=await api(null);draw686(d);draw687(d);const seen=new Set();
+const d=await api(null);draw686(d);draw687(d);draw688(d);const seen=new Set();
 for(const q of d.queue||[])if(q.utm_campaign&&!seen.has(q.social_post_queue_id)){
 seen.add(q.social_post_queue_id);
 $('dd685Campaign').add(new Option(q.utm_campaign+' · #'+q.social_post_queue_id,q.social_post_queue_id));
@@ -781,6 +838,47 @@ $('dd685Campaign').addEventListener('change',()=>void refresh());
 $('dd685Refresh').addEventListener('click',()=>void refresh());
 $('dd686Refresh').addEventListener('click',()=>void refresh());
 $('dd687Refresh').addEventListener('click',()=>void refresh());
+
+$('dd688Refresh').addEventListener('click',()=>void refresh());
+$('dd688Decision').addEventListener('change',chooseCases688);
+$('dd688OwnerReview').addEventListener('submit',async e=>{
+e.preventDefault();
+const button=$('dd688Submit');button.disabled=true;
+try{
+if(!state?.queue_id||!audit688?.history_complete)
+throw Error('Refresh exact selected campaign and complete the owner audit history first.');
+if(!$('dd688Reviewed').checked)throw Error('Explicit owner evidence review is required.');
+const choice=$('dd688Case').value,pos=choice.lastIndexOf('|');
+if(pos<1)throw Error('Choose the exact current incident evidence receipt.');
+const note=$('dd688Note').value.trim();
+if(note.length<20||note.length>400)throw Error('Enter a 20–400 character evidence note.');
+const action=$('dd688Decision').value;
+const answer=await api({action:'owner_finance_review_688',
+social_post_queue_id:state.queue_id,decision:action,case_id:choice.slice(0,pos),
+expected_evidence_receipt_id:Number(choice.slice(pos+1)),
+expected_fingerprint_sha256:state.fingerprint_sha256,owner_reviewed:true,
+resolution_note:note},state.queue_id);
+$('dd688Result').textContent=answer.result.status+' · durable owner audit receipt #'+
+answer.result.receipt_id+' · Master acceptance/financial certification are separate evidence gates.';
+$('dd688Reviewed').checked=false;$('dd688Note').value='';
+await refresh();
+}catch(error){$('dd688Result').textContent='HOLD · '+error.message;}
+finally{button.disabled=false;}
+});
+$('dd688Export').addEventListener('click',async()=>{
+try{
+const id=Number($('dd685Campaign').value);
+if(!id||!state?.queue_id||id!==state.queue_id)throw Error('Refresh a selected campaign first.');
+if(!window.DDAuth?.apiFetch)throw Error('Admin authentication is unavailable.');
+const res=await window.DDAuth.apiFetch(endpoint+'?export=financial688&campaign_queue_id='+encodeURIComponent(id));
+if(!res.ok)throw Error('Protected report export was refused. HTTP '+res.status);
+const blob=await res.blob(),url=URL.createObjectURL(blob);
+const a=document.createElement('a');a.href=url;a.download='devilndove-financial-owner-recovery-'+id+'-688.json';
+document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1000);
+$('dd688Result').textContent='Protected owner evidence report prepared. Historical status does not certify Master acceptance.';
+}catch(error){$('dd688Result').textContent='HOLD · '+error.message;}
+});
+
 $('dd687Review').addEventListener('click',()=>{
 $('dd685Recovery').scrollIntoView({behavior:'smooth',block:'start'});
 $('dd685Note').focus({preventScroll:true});
