@@ -1475,7 +1475,7 @@ let original={};
 try{ original=JSON.parse(saveRowBtn.getAttribute('data-item') || '{}');} catch{}
 if (!id || !row) return;
 try{
-validateInventoryUnitInputs470(row,true);
+validateInventoryUnitInputs470(row, true);
 const payload=readEditableRowPayload(row,original);
 saveRowBtn.disabled=true;saveRowBtn.textContent='Saving…';
 const response=await window.DDAuth.apiFetch('/api/admin/site-item-inventory',{ method:'PATCH',body:JSON.stringify(payload) });
