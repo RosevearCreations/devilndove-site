@@ -62,6 +62,33 @@
 <div class="table-scroll" tabindex="0"><table><thead><tr><th>Campaign</th><th>Evidence</th><th>Source reference</th><th>CAD</th><th>Recorded</th><th>Certification</th></tr></thead><tbody id="dd676Rows"></tbody></table></div>
 </section>
 
+
+<section class="card" id="dd684-finance" aria-labelledby="dd684-title">
+<p class="eyebrow">Build 684 · Independent financial runtime verification</p>
+<h2 id="dd684-title">Signer enrollment, verified Master acceptance &amp; financial closure continuity</h2>
+<p>Signer custody is proven by an exact externally signed claim. Master acceptance is fetched from a separately configured, pinned HTTPS receiver and checked against the matching source, signer and Master receipts. A successful acceptance is not proof of continuously connected infrastructure or an audited financial statement.</p>
+<label>Campaign<select class="input" id="dd684Campaign"><option value="">Choose a campaign</option></select></label>
+<button class="btn secondary" type="button" id="dd684Refresh">Refresh signed proof status</button>
+<p id="dd684Status" role="status" aria-live="polite">Signer enrollment and runtime Master acceptance: HOLD.</p>
+<form id="dd684Enrollment"><h3>1. Prove independent signer custody</h3>
+<label>One-time enrollment nonce<input class="input" id="dd684Nonce" required minlength="16" maxlength="100"></label>
+<label>UTC timestamp<input class="input" id="dd684Time" required placeholder="2026-11-12T05:00:00.000Z"></label>
+<button class="btn secondary" id="dd684Prepare" type="button">Prepare exact claim for external signing</button>
+<pre id="dd684Claim" tabindex="0" style="white-space:pre-wrap;overflow-wrap:anywhere"></pre>
+<label>External signer Ed25519 signature (base64)<textarea class="input" id="dd684Signature" required rows="2"></textarea></label>
+<label><input id="dd684EnrollReviewed" type="checkbox" required> Owner reviewed signer custody and current source fingerprint.</label>
+<button class="btn primary" type="submit">Verify and record signer enrollment</button></form>
+<form id="dd684Master"><h3>2. Verify Master runtime acceptance</h3>
+<p class="small">The server makes a read-only, authenticated GET to the pre-approved Master receiver and verifies the signed, nonce-bound answer. This cannot be simulated from a browser form. Unconfigured Master receivers remain HOLD.</p>
+<label><input id="dd684MasterReviewed" type="checkbox" required> Owner requests an independent Master acceptance check for these exact receipts.</label>
+<button class="btn primary" type="submit">Verify live Master acceptance</button></form>
+<form id="dd684Continuity"><h3>3. Close owner-reviewed evidence discrepancy</h3>
+<label>Previously reviewed case<select class="input" id="dd684Case" required><option value="">Choose a reviewed case</option></select></label>
+<label>Resolution evidence<textarea class="input" id="dd684Note" minlength="20" maxlength="400" rows="3" required></textarea></label>
+<label><input id="dd684CloseReviewed" type="checkbox" required> Owner checked the latest signed Master acceptance and exact source receipt IDs.</label>
+<button class="btn primary" type="submit">Record verified owner continuity closure</button></form>
+<p id="dd684Result" role="status" aria-live="polite">No new runtime evidence recorded. No private signing keys are accepted or stored.</p>
+</section>
 <section class="card" id="dd683-finance" aria-labelledby="dd683-title">
 <p class="eyebrow">Build 683 · Independently signed finance evidence</p>
 <h2 id="dd683-title">Financial signer, Master receipt &amp; discrepancy closure</h2>
