@@ -793,6 +793,74 @@ if(!list.childElementCount){const li=document.createElement('li');
 li.textContent='No matching owner escalation/signoff receipts recorded in the bounded ledger.';list.appendChild(li);}
 chooseCases688();
 }
+let audit689=null;
+function chooseAudit689(){
+const select=$('dd689Source');if(!select)return;
+select.replaceChildren(new Option('Select matching current owner receipt',''));
+const decision=$('dd689Decision')?.value;
+if(!audit689?.history_complete||!audit689?.master_accepted_now)return;
+const prior=audit689.owner_action_history||[];
+let options=[];
+if(decision==='replay_escalation')options=prior.filter(x=>x.decision==='escalate_breach'&&
+x.replay_state==='HISTORICAL_OWNER_ACTION_REPLAY_MATCH').map(x=>({
+case_id:x.case_id,receipt_id:x.receipt_id}));
+else if(decision==='resolve_renewal_drift')options=(audit689.drift_resolution_candidates||[])
+.filter(x=>!x.owner_resolution_recorded&&x.reference_receipt_id)
+.map(x=>({case_id:x.case_id,receipt_id:x.reference_receipt_id}));
+else if(decision==='accept_owner_audit')options=(audit689.audit_acceptance_candidates||[])
+.filter(x=>!x.owner_audit_accepted&&x.reference_receipt_id)
+.map(x=>({case_id:x.case_id,receipt_id:x.reference_receipt_id}));
+for(const x of options){
+if((audit689.owner_audit_receipts||[]).some(a=>a.decision===decision&&
+a.reference_receipt_id===x.receipt_id))continue;
+select.add(new Option(x.case_id+' · owner evidence #'+x.receipt_id,
+x.case_id+'|'+x.receipt_id));
+}
+}
+function draw689(d){
+if(!$('dd689-finance'))return;
+const v=d.financial689||null;
+audit689=v;
+$('dd689Status').textContent=v?.campaign_queue_id?
+v.status+' · replay history '+(v.history_complete?'COMPLETE':'HOLD')+
+' · source Master '+(v.master_accepted_now?'CURRENT VERIFIED':'HOLD')+
+' · connection HOLD · certified profit HOLD':
+'HOLD · Select a campaign and read current protected financial evidence.';
+$('dd689Renewal').textContent=v?.renewal?
+'Renewal continuity: '+v.renewal.status+
+' · last recorded Master #'+(v.renewal.latest_recorded_receipt_id||'—')+
+' · currently reverified #'+(v.renewal.current_reverified_receipt_id||'—')+
+' · source drift '+(v.renewal.source_drift?'FLAGGED':'not flagged')+
+' · historical signatures not independently reverified here.':
+'No signed Master renewal lineage loaded.';
+$('dd689Counters').textContent=v?.campaign_queue_id?
+'Exact owner replay entries '+v.exact_replay_count+
+' · mismatches '+v.invalid_replay_count+
+' · append-only owner audit receipts '+v.owner_audit_receipt_count+
+' · renewal drift candidates '+(v.drift_resolution_candidates||[]).length+
+' · owner acceptance candidates '+(v.audit_acceptance_candidates||[]).length:
+'No owner audit counts available.';
+const replay=$('dd689Replay');replay.replaceChildren();
+for(const x of v?.owner_action_history||[]){
+const li=document.createElement('li');li.textContent=x.replay_state+
+' · '+x.decision+' · '+x.case_id+
+' · prior owner receipt #'+x.receipt_id+
+' · underlying evidence #'+x.evidence_receipt_id;
+replay.appendChild(li);
+}
+if(!replay.childElementCount){const li=document.createElement('li');
+li.textContent='No owner escalation/signoff to replay from the bounded ledger.';replay.appendChild(li);}
+const decisions=$('dd689Decisions');decisions.replaceChildren();
+for(const x of v?.owner_audit_receipts||[]){
+const li=document.createElement('li');li.textContent=x.decision+' · '+x.case_id+
+' · durable owner audit receipt #'+x.receipt_id+
+' · previous owner receipt #'+x.reference_receipt_id;
+decisions.appendChild(li);
+}
+if(!decisions.childElementCount){const li=document.createElement('li');
+li.textContent='No recorded 689 owner audit acknowledgments; history alone is not acceptance.';decisions.appendChild(li);}
+chooseAudit689();
+}
 async function refresh(){
 const id=Number($('dd685Campaign').value);
 if(!id){state=null;$('dd685Status').textContent='HOLD · Select a campaign.';}
@@ -801,6 +869,7 @@ const d=await api(null,id||0),v=d.financial685;
 draw686(d);
 draw687(d);
 draw688(d);
+draw689(d);
 if(!id)return;
 if(!v||v.queue_id!==id)throw Error('Fresh exact financial evidence was not returned.');
 state=v;
@@ -828,7 +897,7 @@ await refresh();
 document.addEventListener('DOMContentLoaded',()=>{
 if(!$('dd685-finance'))return;
 (async()=>{try{
-const d=await api(null);draw686(d);draw687(d);draw688(d);const seen=new Set();
+const d=await api(null);draw686(d);draw687(d);draw688(d);draw689(d);const seen=new Set();
 for(const q of d.queue||[])if(q.utm_campaign&&!seen.has(q.social_post_queue_id)){
 seen.add(q.social_post_queue_id);
 $('dd685Campaign').add(new Option(q.utm_campaign+' · #'+q.social_post_queue_id,q.social_post_queue_id));
@@ -840,6 +909,48 @@ $('dd686Refresh').addEventListener('click',()=>void refresh());
 $('dd687Refresh').addEventListener('click',()=>void refresh());
 
 $('dd688Refresh').addEventListener('click',()=>void refresh());
+
+$('dd689Refresh').addEventListener('click',()=>void refresh());
+$('dd689Decision').addEventListener('change',chooseAudit689);
+$('dd689AuditForm').addEventListener('submit',async e=>{
+e.preventDefault();
+const btn=$('dd689Submit');btn.disabled=true;
+try{
+if(!state?.queue_id||!audit689?.history_complete||!audit689?.master_accepted_now)
+throw Error('Current independently verified signed Master evidence and replay-complete history required.');
+if(!$('dd689Reviewed').checked)throw Error('Explicit owner evidence review is required.');
+const selected=$('dd689Source').value,index=selected.lastIndexOf('|');
+if(index<1)throw Error('Select an exact previously recorded owner evidence receipt.');
+const note=$('dd689Note').value.trim();
+if(note.length<20||note.length>400)throw Error('Add 20–400 characters of specific owner review evidence.');
+const d=await api({action:'owner_finance_audit_689',social_post_queue_id:state.queue_id,
+decision:$('dd689Decision').value,case_id:selected.slice(0,index),
+reference_receipt_id:Number(selected.slice(index+1)),
+expected_fingerprint_sha256:state.fingerprint_sha256,
+expected_master_receipt_id:state.verified_master_receipt_id,
+owner_reviewed:true,resolution_note:note},state.queue_id);
+$('dd689Result').textContent=d.result.status+' · exact owner audit #'+
+d.result.receipt_id+' recorded. No external Master replay or profit certification.';
+$('dd689Reviewed').checked=false;$('dd689Note').value='';
+await refresh();
+}catch(error){$('dd689Result').textContent='HOLD · '+error.message;}
+finally{btn.disabled=false;}
+});
+$('dd689Export').addEventListener('click',async()=>{
+try{
+const id=Number($('dd685Campaign').value);
+if(!id||!state?.queue_id||id!==state.queue_id)throw Error('Select and refresh the exact campaign first.');
+if(!window.DDAuth?.apiFetch)throw Error('Authenticated Admin required.');
+const response=await window.DDAuth.apiFetch(endpoint+'?export=financial689&campaign_queue_id='+encodeURIComponent(id));
+if(!response.ok)throw Error('Protected owner audit export refused. HTTP '+response.status);
+const blob=await response.blob(),url=URL.createObjectURL(blob);
+const a=document.createElement('a');a.href=url;
+a.download='devilndove-finance-replay-'+id+'-689.json';
+document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1000);
+$('dd689Result').textContent='Owner audit report exported with all unresolved HOLD gates shown.';
+}catch(error){$('dd689Result').textContent='HOLD · '+error.message;}
+});
+
 $('dd688Decision').addEventListener('change',chooseCases688);
 $('dd688OwnerReview').addEventListener('submit',async e=>{
 e.preventDefault();

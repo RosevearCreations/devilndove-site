@@ -143,6 +143,37 @@
 <p id="dd688Result" role="status" aria-live="polite">No Build 688 owner review submitted.</p>
 <p class="small">The report includes truthful HOLD flags and historical audit markers. It is an administrative record, not a certified financial statement. No background renewal, polling, posting, or owner signoff occurs.</p>
 </section>
+<section class="card" id="dd689-finance" aria-labelledby="dd689-title">
+<p class="eyebrow">Build 689 · Financial evidence replay</p>
+<h2 id="dd689-title">Escalation replay, Master renewal drift resolution &amp; owner audit acceptance</h2>
+<p>Reinspect exact prior owner escalation and closure signoff receipts without repeating external Master actions. A new owner audit decision requires matching source revision, unexpired independently reverified Master evidence, and a substantial review note. Historical signatures are not reverified by this report.</p>
+<button class="btn secondary" type="button" id="dd689Refresh">Refresh evidence replay</button>
+<button class="btn secondary" type="button" id="dd689Export">Export protected audit (JSON)</button>
+<p id="dd689Status" role="status" aria-live="polite">HOLD · Select and refresh a campaign.</p>
+<p id="dd689Renewal" class="small">Master renewal drift review not loaded.</p>
+<p id="dd689Counters" class="small">Owner replay and acceptance evidence unavailable.</p>
+<h3>Exact historical owner action replay</h3>
+<ol id="dd689Replay" class="clean" aria-label="Replay-checked owner financial decisions"><li>No bounded owner audit ledger loaded.</li></ol>
+<h3>Owner acceptance continuity</h3>
+<ol id="dd689Decisions" class="clean" aria-label="Durably recorded owner audit continuity"><li>No current owner audit decisions loaded.</li></ol>
+<form id="dd689AuditForm">
+<h3>Record reviewed owner continuity</h3>
+<label>Audit action
+<select class="input" id="dd689Decision" required>
+<option value="replay_escalation">Record replay review of an escalated case</option>
+<option value="resolve_renewal_drift">Acknowledge renewal drift resolved by independently signed evidence</option>
+<option value="accept_owner_audit">Accept an independently evidenced prior owner closure</option>
+</select></label>
+<label>Exact previous owner action receipt
+<select class="input" id="dd689Source" required><option value="">Select current matched evidence</option></select></label>
+<label>Owner observation (20–400 characters)
+<textarea class="input" id="dd689Note" rows="3" minlength="20" maxlength="400" required></textarea></label>
+<label><input id="dd689Reviewed" type="checkbox" required> We have inspected the exact case, source fingerprint, Master receipt and protected replay ledger. This records an owner audit only.</label>
+<button class="btn secondary" id="dd689Submit" type="submit">Record owner audit continuity</button>
+</form>
+<p id="dd689Result" role="status" aria-live="polite">No Build 689 owner audit action recorded.</p>
+<p class="small">All actions are explicit, authenticated and append-only. A successful owner review never activates a provider, certifies profit or changes continuous connection state.</p>
+</section>
 <section class="card" id="dd684-finance" aria-labelledby="dd684-title">
 <p class="eyebrow">Build 684 · Independent financial runtime verification</p>
 <h2 id="dd684-title">Signer enrollment, verified Master acceptance &amp; financial closure continuity</h2>
