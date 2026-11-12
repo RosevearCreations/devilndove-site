@@ -1067,6 +1067,8 @@ jobs:
         run: node scripts/build689_financial_replay_renewal_audit_continuity_contract.mjs
       - name: Build 690 financial replay exception investigation, renewal continuity and owner closure reconciliation regression
         run: node scripts/build690_financial_replay_exception_renewal_closure_contract.mjs
+      - name: Build 691 replay exception aging, historical Master renewal gaps and owner closure continuity regression
+        run: node scripts/build691_financial_aging_gap_owner_closure_contract.mjs
       - name: JavaScript syntax
         run: |
           node --check functions/_middleware.js
