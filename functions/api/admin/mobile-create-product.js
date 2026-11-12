@@ -601,6 +601,7 @@ export async function onRequestPost(context) {
       for(const row of photos)photoProof.push(await inspect(row,'photo'));
       for(const row of videos)videoProof.push(await inspect(row,'video'));
       const result=camera700SummarizeReadback(photoProof,videoProof);
+      if(photos.length>=25||videos.length>=25)result.status='HOLD_BOUNDED_MEDIA_HISTORY_LIMIT';
       return json({ok:true,product_id:id,product_number_label:formatProductNumberLabel(product.product_number||id),
         capture_reference_verified:true,original_owner_verified:true,
         r2_head_checked:true,inspected_at:new Date().toISOString(),
@@ -1974,7 +1975,7 @@ export async function onRequestPost(context) {
 }
 export function camera700SummarizeReadback(photoRows,videoRows){
  const items=[...photoRows,...videoRows],unverified=items.filter(x=>x.confirmed!==true);
- return{status:items.length&&!unverified.length?'MEDIA_R2_D1_READBACK_CONFIRMED':
+ return{status:photoRows.length&&items.length&&!unverified.length?'MEDIA_R2_D1_READBACK_CONFIRMED':
  'HOLD_MEDIA_INCOMPLETE_OR_UNVERIFIED',photo_count:photoRows.length,
  video_count:videoRows.length,confirmed_count:items.length-unverified.length,
  unverified_count:unverified.length,media:items,device_accepted:false,
