@@ -1083,6 +1083,8 @@ jobs:
         run: node scripts/build697_independent_reconciliation_aging_resolution_master_renewal_contract.mjs
       - name: Build 698 original source repair proof intake, owner financial recovery, Master drift, mobile Shop and camera-first Product regression
         run: node scripts/build698_financial_source_repair_mobile_shop_camera_contract.mjs
+      - name: Build 699 original camera retry proof, first Product viewport assessment and independent source repair document signature regression
+        run: node scripts/build699_camera_media_shop_source_witness_contract.mjs
       - name: JavaScript syntax
         run: |
           node --check functions/_middleware.js

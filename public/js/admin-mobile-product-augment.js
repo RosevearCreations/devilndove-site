@@ -350,8 +350,11 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 
-// Build 698 — opt-in camera-first standalone New Product draft. Uses the existing
-// authenticated D1 product creation and R2 image/video endpoints. Never publishes.
+// Build 698 continuity: uploaded videos stay in internal review only, not auto-publication.
+// Build 699 — interrupted mobile camera draft save and R2 media recovery.
+// The server assigns DD numbers; localStorage contains only a random capture
+// reference and original Product ID, never media, credentials or source bytes.
+// Retry is explicit and same-source; no automatic network loops or publishing.
 document.addEventListener('DOMContentLoaded',()=>{
   const panel=document.getElementById('dd698-camera-start');
   if(!panel)return;
@@ -360,35 +363,81 @@ document.addEventListener('DOMContentLoaded',()=>{
     library=$('dd698PhotoLibrary'),video=$('dd698CameraVideo'),
     preview=$('dd698CameraPreview'),status=$('dd698CameraStatus'),
     save=$('dd698CameraSave'),clear=$('dd698CameraClear'),
-    link=$('dd698CameraSavedLink');
-  const photos=[];
-  let saving=false;
-  const key=f=>[f.name,f.size,f.lastModified].join('|');
-  const validPhoto=f=>f&&/^image\/(jpeg|png|webp|gif|avif|heic|heif)$/i.test(f.type||'')&&
-    Number(f.size)>0&&Number(f.size)<=10*1024*1024;
-  const videoKind=f=>{
-    const ext=String(f?.name||'').split('.').pop().toLowerCase();
-    const map={mp4:'video/mp4',mov:'video/quicktime',webm:'video/webm'};
-    return map[ext]&&(!f.type||f.type===map[ext])?map[ext]:null;
+    link=$('dd698CameraSavedLink'),resume=$('dd699Resume'),
+    fresh=$('dd699New'),progress=$('dd699Progress');
+  const STORE='dd_camera699_active_draft',photos=[];
+  const validToken=x=>/^camera699-[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/.test(String(x||''));
+  let active=null,saving=false;
+  try{
+    const stored=JSON.parse(localStorage.getItem(STORE)||'null');
+    if(stored&&validToken(stored.token)&&Number.isSafeInteger(stored.product_id)&&stored.product_id>=0)
+      active={token:stored.token,product_id:stored.product_id,label:String(stored.label||''),
+        product_name:String(stored.product_name||'')};
+  }catch{}
+  const uniqueKey=file=>[file.name,file.size,file.lastModified].join('|');
+  const isPhoto=file=>file&&/^image\/(jpeg|png|webp|gif|avif|heic|heif)$/i.test(file.type||'')&&
+    Number(file.size)>0&&Number(file.size)<=10*1024*1024;
+  const videoKind=file=>{
+    const ext=String(file?.name||'').split('.').pop().toLowerCase();
+    const kinds={mp4:'video/mp4',mov:'video/quicktime',webm:'video/webm'};
+    return kinds[ext]&&(!file.type||file.type===kinds[ext])?kinds[ext]:null;
   };
-  const sizeLabel=f=>(f.size/1048576).toFixed(1)+' MB';
-  const setMessage=(s,bad=false)=>{status.textContent=s;status.style.color=bad?'#b00020':'';};
+  const labelBytes=file=>(file.size/1048576).toFixed(1)+' MB';
+  const setMessage=(message,warning=false)=>{
+    status.textContent=message;status.style.color=warning?'#b00020':'';
+  };
+  function persist(){
+    try{
+      if(active)localStorage.setItem(STORE,JSON.stringify(active));
+      else localStorage.removeItem(STORE);
+    }catch{}
+  }
+  function showLinks(product){
+    if(!product)return;
+    const pid=Number(product.product_id||0);
+    if(!Number.isSafeInteger(pid)||pid<1)return;
+    const productLabel=String(product.label||('DD'+pid));
+    const edit=document.createElement('a');
+    edit.className='btn secondary';
+    edit.href='/admin/product-editor/?product_id='+encodeURIComponent(pid);
+    edit.textContent='Edit '+productLabel+' in Product Editor';
+    const drafts=document.createElement('a');
+    drafts.className='btn secondary';drafts.href='/admin/mobile-product/';
+    drafts.textContent='All saved drafts';
+    link.replaceChildren(edit,document.createTextNode(' '),drafts);
+  }
   function render(){
-    const vids=Array.from(video.files||[]),items=photos.map(f=>f.name+' ('+sizeLabel(f)+')');
-    if(vids[0])items.push('Video: '+vids[0].name+' ('+sizeLabel(vids[0])+')');
+    const movie=video.files?.[0]||null;
+    const selected=[...photos.map(f=>'Photo '+f.name+' ('+labelBytes(f)+')')];
+    if(movie)selected.push('Video '+movie.name+' ('+labelBytes(movie)+')');
     preview.replaceChildren();
-    const p=document.createElement('p');p.className='small';
-    p.textContent=items.length?items.length+' selected media: '+items.join(' · '):
-      'Choose a photo or video to start. No photos or video are saved until Save is pressed.';
-    preview.appendChild(p);
+    const message=document.createElement('p');
+    message.className='small';message.textContent=selected.length?
+      selected.join(' · '):'No media selected. Re-select files after a browser reload; files are not kept in localStorage.';
+    preview.appendChild(message);
     save.disabled=saving;
+    clear.disabled=saving;
+    if(fresh)fresh.disabled=saving;
+    if(resume){
+      resume.hidden=!active;
+      resume.textContent=active?
+        'Original camera draft '+(active.label||'#'+(active.product_id||'?'))+
+        ' · '+(active.product_id?'continue uploads':'recover save receipt'):
+        '';
+    }
+    if(progress)progress.textContent=active?
+      'Stable capture reference saved locally. '+(active.product_id?
+      'Product #'+active.product_id+' already created; retries attach to it.':
+      'Save result unconfirmed; retry checks for existing draft before creating a new one.')+
+      ' Pending selected photos: '+photos.length+(movie?' · 1 video':''):
+      'New Product: save will allocate one DD number, then attach media.';
   }
   function addPhotos(files){
-    for(const file of Array.from(files||[])){
-      if(!validPhoto(file)){setMessage('Use supported photos of 10 MB or less (JPEG, PNG, WebP, GIF, AVIF or HEIC).',true);continue;}
-      if(photos.some(x=>key(x)===key(file)))continue;
-      if(photos.length>=7){setMessage('This quick draft accepts seven images. Save another batch separately.',true);break;}
-      photos.push(file);
+    for(const f of Array.from(files||[])){
+      if(!isPhoto(f)){setMessage('Choose photos of 10 MB or less (JPG/PNG/WebP/GIF/AVIF/HEIC).',true);continue;}
+      if(photos.some(x=>uniqueKey(x)===uniqueKey(f)))continue;
+      if(photos.length>=7){setMessage('Maximum seven images per capture batch.',true);break;}
+      photos.push(f);
     }
     render();
   }
@@ -397,89 +446,152 @@ document.addEventListener('DOMContentLoaded',()=>{
   video.addEventListener('change',()=>{
     const f=video.files?.[0];
     if(f&&(!videoKind(f)||!f.size||f.size>25*1024*1024)){
-      video.value='';setMessage('Video must be MP4, MOV or WebM and 25 MB or smaller.',true);
+      video.value='';setMessage('Video must be MP4, MOV or WebM, maximum 25 MB.',true);
     }
     render();
   });
   clear.addEventListener('click',()=>{
     if(saving)return;
-    photos.length=0;camera.value='';library.value='';video.value='';render();
-    setMessage('Unsaved media selection cleared. Existing saved drafts were not changed.');
+    photos.length=0;video.value='';camera.value='';library.value='';
+    render();setMessage('Unsaved media selection cleared. Existing draft preserved.');
   });
-  async function parseResponse(response,error){
-    let data=null;try{data=await response.json();}catch{}
-    if(!response.ok||!data?.ok)throw new Error(data?.error||error||'Save failed.');
+  fresh?.addEventListener('click',()=>{
+    if(saving)return;
+    photos.length=0;video.value='';camera.value='';library.value='';
+    active=null;persist();link.replaceChildren();name.value='';
+    setMessage('New capture selected. Previous drafts remain saved and can be found in Drafts.');
+    render();
+  });
+  resume?.addEventListener('click',()=>{
+    if(saving||!active)return;
+    setMessage('Original draft '+(active.label||active.product_id||'capture')+
+      ' selected. Re-select any missing media and use Save/Retry. Nothing is published.');
+    showLinks(active);
+  });
+  async function responseJson(response,message){
+    let data=null;
+    try{data=await response.json();}catch{}
+    if(!response.ok||data?.ok!==true)throw Error(data?.error||message||'Original media receipt unavailable.');
     return data;
+  }
+  function ensureCapture(){
+    if(!active){
+      if(!crypto?.randomUUID)throw Error('Secure camera capture token unavailable; requires HTTPS.');
+      active={token:'camera699-'+crypto.randomUUID(),product_id:0,label:'',product_name:name.value.trim()};
+      persist();
+    }
+    if(!validToken(active.token))throw Error('Invalid local capture identity. No write attempted.');
+    return active;
+  }
+  async function createOrRecover(){
+    ensureCapture();
+    if(active.product_id)return active;
+    const f=new FormData();
+    f.set('capture_entry_mode','camera');f.set('inventory_quantity','1');
+    f.set('price_cents','0');f.set('name',active.product_name||'');
+    f.set('capture_reference',active.token);
+    const data=await responseJson(await window.DDAuth.apiFetch('/api/admin/mobile-create-product',
+      {method:'POST',body:f}),'Unconfirmed original draft save. Retry the SAME capture reference.');
+    const id=Number(data.product?.product_id||0);
+    if(!Number.isSafeInteger(id)||id<1)
+      throw Error('No confirmed original Product ID. Retry SAME capture reference; do not create another.');
+    active.product_id=id;active.label=String(data.product_number_label||('DD'+data.product?.product_number||id));
+    active.product_name=String(data.product?.name||active.product_name||('Temporary '+active.label));
+    persist();showLinks(active);render();
+    return active;
+  }
+  async function uploadPhotos(){
+    let done=0,missing=0;
+    // One file per request: each original photo has a deterministic SHA-256
+    // R2 path and a guarded D1 catalog attachment. Unknown outcomes are safe
+    // to retry with the SAME draft and original bytes.
+    for(let i=0;i<photos.length;){
+      const file=photos[i],f=new FormData();
+      f.set('action','camera699_upload_only');
+      f.set('product_id',String(active.product_id));
+      f.set('capture_reference',active.token);
+      f.append('images',file,file.name);
+      try{
+        const data=await responseJson(await window.DDAuth.apiFetch('/api/admin/mobile-create-product',
+          {method:'POST',body:f}),'Original photo upload result unconfirmed.');
+        const receipt=data.uploaded_images?.[0];
+        if(!data.same_original_draft||!receipt?.ok||!Number(receipt.product_image_id))
+          throw Error(receipt?.error||'Original R2 / Product image attachment not confirmed.');
+        done++;photos.splice(i,1);
+        setMessage('Camera draft '+active.label+': '+done+' photo(s) confirmed; '+photos.length+' awaiting upload.');
+      }catch(error){
+        missing++;i++;
+        setMessage('Draft '+active.label+' preserved. Photo '+file.name+
+          ' unconfirmed: '+error.message+' Reuse Save/Retry with same file and draft.',true);
+      }
+    }
+    return{done,missing};
+  }
+  async function uploadVideo(){
+    const movie=video.files?.[0];
+    if(!movie)return{done:0,missing:0};
+    const kind=videoKind(movie);
+    if(!kind||!movie.size||movie.size>25*1024*1024)
+      throw Error('Video invalid. MP4, WebM or MOV under 25 MB required.');
+    const f=new FormData();
+    f.set('product_id',String(active.product_id));
+    f.set('capture_reference',active.token);
+    f.set('file',movie,movie.name);
+    f.set('video_title','Original camera video — internal review required');
+    try{
+      const data=await responseJson(await window.DDAuth.apiFetch('/api/admin/product-video-attachments',
+        {method:'POST',body:f}),'Video registration unconfirmed.');
+      if(!Number.isSafeInteger(Number(data.product_video_id))||Number(data.product_video_id)<1||
+        data.publication_status!=='internal_review')
+        throw Error('Video original review receipt missing or not marked private review.');
+      video.value='';
+      return{done:1,missing:0};
+    }catch(error){
+      setMessage('Draft '+active.label+' preserved. Video outcome uncertain: '+error.message+
+        ' Check Product video attachments before retrying. Same original video and draft can be retried manually; do not create another Product.',true);
+      return{done:0,missing:1};
+    }
   }
   save.addEventListener('click',async()=>{
     if(saving)return;
-    const movie=video.files?.[0]||null,display=name.value.trim();
-    if(!photos.length&&!movie&&!display){
-      setMessage('Take a photo, record a video, or enter a quick name first.',true);return;
+    const movie=video.files?.[0]||null;
+    if(!active&&!photos.length&&!movie&&!name.value.trim()){
+      setMessage('Take a photo, record a video or enter a quick name first.',true);return;
     }
     if(!window.DDAuth?.isLoggedIn?.()||!window.DDAuth.apiFetch){
-      setMessage('Sign in as an Admin before saving a camera-first product.',true);return;
+      setMessage('Admin login required before saving an original camera draft.',true);return;
     }
-    if(movie&&(!videoKind(movie)||movie.size>25*1024*1024)){
-      setMessage('Video must be MP4, MOV or WebM and 25 MB or smaller.',true);return;
-    }
-    saving=true;save.disabled=true;link.replaceChildren();
-    const f=new FormData();f.set('capture_entry_mode','camera');f.set('inventory_quantity','1');
-    f.set('price_cents','0');f.set('name',display);
-    f.set('capture_reference','Camera-first capture '+new Date().toISOString());
-    for(const image of photos)f.append('images',image,image.name);
-    let created=null;
+    saving=true;render();
     try{
-      setMessage('Saving the draft and selected photos to existing Cloudflare storage…');
-      const response=await window.DDAuth.apiFetch('/api/admin/mobile-create-product',{method:'POST',body:f});
-      const data=await parseResponse(response,'Could not save camera-first draft.');
-      const product=data.product||{},productId=Number(product.product_id||0);
-      if(!Number.isSafeInteger(productId)||productId<1)
-        throw Error('Product write outcome unknown. Check drafts before retrying; do not create a duplicate.');
-      created=productId;
-      const label=data.product_number_label||('DD'+String(product.product_number||productId));
-      const savedName=String(product.name||display||('Temporary '+label));
-      const uploaded=Array.isArray(data.uploaded_images)?data.uploaded_images:[];
-      const successes=uploaded.filter(x=>x.ok===true).length;
-      photos.length=0;camera.value='';library.value='';render();
-      const a=document.createElement('a');
-      a.className='btn secondary';a.href='/admin/product-editor/?product_id='+encodeURIComponent(productId);
-      a.textContent='Edit '+label+' in full Product Editor';
-      const b=document.createElement('a');
-      b.className='btn secondary';b.href='/admin/mobile-product/';
-      b.textContent='Open saved draft list';
-      link.replaceChildren(a,document.createTextNode(' '),b);
-      const notes=[label+' saved as '+savedName+' (draft / not published).'];
-      if(uploaded.length!==successes||successes!==Number(data.uploaded_images?.length||0)||
-        successes===0&&Number(f.getAll('images').length)>0){
-        notes.push('Some photos may not have reached R2. Check attachments before uploading again.');
-      }else if(successes) notes.push(successes+' photo(s) uploaded.');
-      if(movie){
-        setMessage(notes.join(' ')+' Attaching video for internal review…');
-        const movieForm=new FormData();
-        movieForm.set('product_id',String(productId));
-        movieForm.set('file',movie,movie.name);
-        movieForm.set('video_title','Unreviewed camera-first product video');
-        try{
-          const movieResponse=await window.DDAuth.apiFetch('/api/admin/product-video-attachments',{method:'POST',body:movieForm});
-          const result=await parseResponse(movieResponse,'Video attachment not confirmed.');
-          if(!Number.isSafeInteger(Number(result.product_video_id))||Number(result.product_video_id)<1)
-            throw Error('Video attachment receipt missing.');
-          notes.push('Video attached for internal review only.');
-          video.value='';
-        }catch(error){
-          notes.push('Video outcome unconfirmed: '+error.message+
-            ' Check Product video attachments before retrying to avoid duplicates.');
-        }
-      }
-      setMessage(notes.join(' '),notes.some(x=>/unconfirmed|Some photos|could not/i.test(x)));
-      name.value='';render();
+      setMessage('Saving or recovering one original camera draft…');
+      await createOrRecover();
+      setMessage('Original camera draft '+active.label+' saved; checking selected R2 media one file at a time…');
+      const pictures=await uploadPhotos();
+      const clip=await uploadVideo();
+      const missing=pictures.missing+clip.missing;
+      const label=active.label,originalId=active.product_id;
       $('mobileRefreshDraftsButton')?.click();
       $('mobileTodayRefreshButton')?.click();
+      if(missing){
+        persist();
+        setMessage('Draft '+label+' saved as '+(active.product_name||'Temporary '+label)+' (#'+originalId+'). '+
+          pictures.done+' photos and '+clip.done+' video confirmed. '+
+          missing+' media item(s) unconfirmed; reselect/retry only missing items on this SAME draft.',true);
+      }else{
+        setMessage('Draft '+label+' saved as '+(active.product_name||'Temporary '+label)+' (#'+originalId+'). '+
+          pictures.done+' photos and '+clip.done+
+          ' video confirmed; all new media complete. Never published automatically.');
+        active=null;persist();name.value='';
+      }
     }catch(error){
-      setMessage((created?'Draft #'+created+' saved but later step failed: ':'')+
-        (error?.message||'Unable to save. Check existing drafts before retrying.'),true);
+      persist();
+      setMessage('Original camera save not fully confirmed: '+error.message+
+        ' Keep the capture identity and retry this SAME draft, not a second Product.',true);
     }finally{saving=false;render();}
   });
+  if(active){
+    setMessage('Previous camera capture found. Select missing files again and use Save/Retry. The original DD draft will be reused.');
+    showLinks(active);
+  }
   render();
 });
