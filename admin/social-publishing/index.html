@@ -304,6 +304,54 @@
 <p id="dd693Result" role="status" aria-live="polite">No Build 693 owner receipt recorded.</p>
 <p class="small">All actions require authenticated owner review and durable readback. No automatic replay, repair, financial certification, receiver activation or claim of continuously CONNECTED infrastructure is made.</p>
 </section>
+<section class="card" id="dd697-finance" aria-labelledby="dd697-title">
+<p class="eyebrow">Build 697 · Independently reconciled source evidence, escalation resolution review and Master attestation continuity</p>
+<h2 id="dd697-title">Independent Correction Reconciliation, Financial Escalation Resolution Review &amp; Master Attestation Renewal Continuity</h2>
+<p>Reconcile an exact original Build 696 signed custodian attestation with a <strong>different independent Ed25519 reconciler</strong>. Two valid signatures authenticate the evidence chain; they cannot repair the original financial source mismatch. Follow-up reviews acknowledge the original owner escalation; renewal checks current signed Master continuity without forging a new external Master signature.</p>
+<button class="btn secondary" type="button" id="dd697Refresh">Refresh protected Build 697 evidence</button>
+<button class="btn secondary" type="button" id="dd697Export">Export protected bounded evidence JSON</button>
+<p id="dd697Status" role="status" aria-live="polite">HOLD · Select and refresh exact source campaign.</p>
+<p class="small" id="dd697Stats">Reconciler and independent Master proof not loaded.</p>
+<h3>Original correction reconciliation (source repair remains HOLD)</h3>
+<ol class="clean" id="dd697Corrections"><li>Requires separate custodian and reconciler identities.</li></ol>
+<h3>Financial owner escalation resolution follow-up</h3>
+<ol class="clean" id="dd697Aging"><li>Requires previously recorded original Build 696 escalation.</li></ol>
+<h3>Master attestation renewal continuity</h3>
+<ol class="clean" id="dd697Master"><li>Requires fresh independently accepted Master and prior continuity.</li></ol>
+<form id="dd697Form">
+<h3>Append original evidence-bound owner review</h3>
+<label>Protected decision<select class="input" id="dd697Decision" required>
+<option value="reconcile_correction_evidence">Verify second independent signed reconciliation of original custodian evidence (source repair HOLD)</option>
+<option value="review_escalation_resolution">Record owner financial escalation resolution follow-up review (not external incident closure)</option>
+<option value="renew_master_attestation">Review current independently signed Master attestation continuity renewal</option>
+</select></label>
+<label>Exact original receipt/case evidence
+<select class="input" id="dd697Source" required><option value="">Choose original bounded evidence</option></select></label>
+<label>Original owner follow-up disposition (aging review only)
+<select class="input" id="dd697Disposition">
+<option value="follow_up_required">External follow-up required</option>
+<option value="owner_evidence_reviewed">Original evidence reviewed, remediation not proven</option>
+</select></label>
+<p class="small">Use a separate reconciler, not the original Build 696 source custodian. Share only the canonical claim with the external signer. Never paste a private signing key.</p>
+<label>Independent reconciler ID (signature only)
+<input class="input" id="dd697Signer" maxlength="120" autocomplete="off" spellcheck="false"></label>
+<label>Fresh independent challenge nonce (16–100 characters)
+<input class="input" id="dd697Nonce" maxlength="100" autocomplete="off" spellcheck="false"></label>
+<label>Independent signed UTC issue time
+<input class="input" id="dd697Issued" maxlength="40" autocomplete="off" spellcheck="false" placeholder="2026-11-12T19:00:00.000Z"></label>
+<button class="btn secondary" type="button" id="dd697Prepare">Prepare exact second-party claim for external signing</button>
+<label>Exact canonical independent reconciliation claim
+<textarea class="input" id="dd697Claim" readonly rows="5" spellcheck="false"></textarea></label>
+<label>Independent reconciler Ed25519 signature (base64 or base64url)
+<textarea class="input" id="dd697Signature" maxlength="120" rows="2" spellcheck="false"></textarea></label>
+<label>Original owner review note, 20–400 characters
+<textarea class="input" id="dd697Note" minlength="20" maxlength="400" rows="3" required></textarea></label>
+<label><input type="checkbox" id="dd697Reviewed" required> We reviewed exact original source, signer custody and Master receipts and understand source repair, automated closure, audited financial certification and continuous connection remain unverified.</label>
+<button class="btn secondary" id="dd697Submit" type="submit">Append protected original owner receipt</button>
+</form>
+<p id="dd697Result" role="status" aria-live="polite">No Build 697 owner action recorded.</p>
+<p class="small">No source writes, automatic incident closure, private keys, D1 migration, background polling, provider replay or new external Master attestation is asserted. All unverified original financial discrepancies remain HOLD.</p>
+</section>
 <section class="card" id="dd696-finance" aria-labelledby="dd696-title">
 <p class="eyebrow">Build 696 · Independent correction, aging escalation &amp; Master continuity</p>
 <h2 id="dd696-title">Independent Source Correction Verification, Financial Aging Escalation Follow-Up &amp; Master Closure Continuity</h2>
