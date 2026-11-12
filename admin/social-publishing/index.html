@@ -63,6 +63,25 @@
 </section>
 
 
+<section class="card" id="dd685-finance" aria-labelledby="dd685-title">
+<p class="eyebrow">Build 685 · Financial receipt freshness &amp; exception recovery</p>
+<h2 id="dd685-title">Current Master receipt, supervised revalidation &amp; owner exceptions</h2>
+<p>Receipt age and source-fingerprint checks are read-only. Expired or mismatched proof becomes HOLD. Only an explicit owner request can ask the independent Master receiver for a new signed acceptance. A resolved case requires a newer verified receipt; no action here certifies profits or asserts a continuously connected Master.</p>
+<label>Campaign<select id="dd685Campaign" class="input"><option value="">Choose financial campaign</option></select></label>
+<button id="dd685Refresh" type="button" class="btn secondary">Check stored receipt freshness</button>
+<p id="dd685Status" role="status" aria-live="polite">Choose a campaign to inspect exact signed receipt age. HOLD until independently verified.</p>
+<p id="dd685Clock" class="small" role="status">No valid Master acceptance expiry available.</p>
+<button id="dd685Revalidate" type="button" class="btn primary">Owner-supervised signed Master recheck</button>
+<form id="dd685Recovery"><h3>Owner exception audit &amp; recovery</h3>
+<label>Decision<select id="dd685Decision" class="input" required><option value="open">Open verified issue</option><option value="close">Close after newer signed Master proof</option></select></label>
+<label>Exception / incident<select id="dd685Case" class="input"><option value="">Use current issue when opening</option></select></label>
+<label>Owner evidence note<textarea id="dd685Note" class="input" rows="3" minlength="20" maxlength="400" required></textarea></label>
+<label><input id="dd685Reviewed" type="checkbox" required> Owner examined the source fingerprint, receipt expiry and independent Master evidence.</label>
+<button class="btn primary" type="submit">Record owner exception decision</button>
+</form>
+<p id="dd685History" class="small" aria-live="polite">No exception history loaded.</p>
+<p id="dd685Result" role="status" aria-live="polite">No changes made. All financial acceptance, telemetry and profit-certification gates remain independent.</p>
+</section>
 <section class="card" id="dd684-finance" aria-labelledby="dd684-title">
 <p class="eyebrow">Build 684 · Independent financial runtime verification</p>
 <h2 id="dd684-title">Signer enrollment, verified Master acceptance &amp; financial closure continuity</h2>
