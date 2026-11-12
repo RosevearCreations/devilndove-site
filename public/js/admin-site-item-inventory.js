@@ -775,8 +775,8 @@ function clearInventoryWorkspaceFields(){
 // prior Amazon URL or catalog search cannot accidentally seed the next item.
 resetInventoryForm();
 seedSearchText='';
-setInputValue('siteInventorySeedSearch','');
-setInputValue('siteInventoryAmazonImportUrl','');
+setInputValue('siteInventorySeedSearch', '');
+setInputValue('siteInventoryAmazonImportUrl', '');
 setInputValue('siteInventoryAmazonImportType','supply');
 setAmazonLinkPreviewStatus('');
 setMessage('Inventory entry fields cleared. Ready for a new item.');
@@ -1013,7 +1013,7 @@ document.getElementById('siteInventoryNextPage')?.addEventListener('click',()=>{
 document.getElementById('siteInventoryGoToPage')?.addEventListener('click',goToInventoryPage);
 document.getElementById('siteInventoryPageJump')?.addEventListener('keydown',(event)=>{ if (event.key==='Enter'){ event.preventDefault();goToInventoryPage();} });
 document.getElementById('siteInventoryResetButton')?.addEventListener('click',resetInventoryForm);
-document.getElementById('siteInventoryClearFieldsButton')?.addEventListener('click',clearInventoryWorkspaceFields);
+document.getElementById('siteInventoryClearFieldsButton')?.addEventListener('click', clearInventoryWorkspaceFields);
 document.getElementById('siteInventoryBulkCostForm')?.addEventListener('submit',onBulkCostApply);
 document.getElementById('siteInventoryBulkPreviewButton')?.addEventListener('click',onBulkCostPreview);
 document.getElementById('siteInventoryBulkScope')?.addEventListener('change',updateBulkCostScopeHelpers);
