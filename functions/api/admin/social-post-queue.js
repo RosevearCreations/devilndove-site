@@ -3,36 +3,36 @@
 // This is review-first. It prepares platform-ready captions and records manual/API posting status,
 // but does not auto-post until official OAuth/API keys are configured and approved for each platform.
 
-import { auditAdminAction, captureRuntimeIncident, getAdminUserFromRequest, getDb, jsonResponse, normalizeText } from '../_lib/adminAudit.js';
+import{ auditAdminAction,captureRuntimeIncident,getAdminUserFromRequest,getDb,jsonResponse,normalizeText } from '../_lib/adminAudit.js';
 
 
-const finance678 = (() => {
+const finance678=(()=>{
 // Build 678 — independent, signed marketing-expense attestation and owner-gated ROI.
-const rows = r => Array.isArray(r?.results) ? r.results : [];
-const parse = s => { try { return JSON.parse(s || '{}'); } catch { return {}; } };
-const clean = (v,n=120) => String(v ?? '').trim().slice(0,n);
-const positiveId = v => Number.isSafeInteger(Number(v)) && Number(v)>0 ? Number(v) : 0;
-const bytes = b64 => Uint8Array.from(atob(String(b64||'').replace(/-/g,'+').replace(/_/g,'/')),c=>c.charCodeAt(0));
-const money = v => Number.isSafeInteger(Number(v)) && Number(v)>0 ? Number(v) : 0;
-const canonical = v => JSON.stringify({
-v:1, campaign:v.campaign, queue_id:v.queue_id, receipt_reference:v.receipt_reference,
-vendor:v.vendor, amount_cents:v.amount_cents, currency:'CAD',
-original_document_sha256:v.original_document_sha256, checked_at:v.checked_at
+const rows=r=> Array.isArray(r?.results) ? r.results :[];
+const parse=s=>{ try{ return JSON.parse(s || '{}');} catch{ return{};} };
+const clean=(v,n=120)=> String(v ?? '').trim().slice(0,n);
+const positiveId=v=> Number.isSafeInteger(Number(v)) && Number(v)>0 ? Number(v) :0;
+const bytes=b64=> Uint8Array.from(atob(String(b64||'').replace(/-/g,'+').replace(/_/g,'/')),c=>c.charCodeAt(0));
+const money=v=> Number.isSafeInteger(Number(v)) && Number(v)>0 ? Number(v) :0;
+const canonical=v=> JSON.stringify({
+v:1,campaign:v.campaign,queue_id:v.queue_id,receipt_reference:v.receipt_reference,
+vendor:v.vendor,amount_cents:v.amount_cents,currency:'CAD',
+original_document_sha256:v.original_document_sha256,checked_at:v.checked_at
 });
-function campaignReturn678(revenueCents,costCents) {
+function campaignReturn678(revenueCents,costCents){
 if (!Number.isSafeInteger(revenueCents)||!Number.isSafeInteger(costCents)||costCents<=0||revenueCents<0) return null;
-return {attributed_sales_cents:revenueCents, verified_ad_cost_cents:costCents,
+return{attributed_sales_cents:revenueCents,verified_ad_cost_cents:costCents,
 marketing_contribution_cents:revenueCents-costCents,
 marketing_roi_percent:Math.round(((revenueCents-costCents)/costCents)*10000)/100,
 basis:'gross_order_receipts_before_product_costs_shipping_taxes_and_overheads'};
 }
-async function verifiedOriginalCost(db,id,ref) {
+async function verifiedOriginalCost(db,id,ref){
 return db.prepare(`SELECT a.social_post_attempt_id,a.social_post_queue_id,a.external_post_id,a.response_json,q.utm_campaign
     FROM social_post_attempts a JOIN social_post_queue q ON q.social_post_queue_id=a.social_post_queue_id
     WHERE a.social_post_queue_id=? AND a.external_post_id=? AND a.platform_key='campaign_cost'
     AND a.attempt_status='campaign_cost_recorded' LIMIT 1`).bind(id,ref).first();
 }
-async function expenseAttestation678(db,env,admin,payload,record) {
+async function expenseAttestation678(db,env,admin,payload,record){
 const id=positiveId(payload.social_post_queue_id),ref=clean(payload.receipt_reference,100),
 vendor=clean(payload.vendor,100),sha=clean(payload.original_document_sha256,64).toLowerCase(),
 checked=clean(payload.checked_at,40),sig=clean(payload.verifier_signature,500),
@@ -48,10 +48,10 @@ if (!cost||!money(details.cost_cents)||details.currency!=='CAD')throw Error('Mat
 const claim={campaign:cost.utm_campaign,queue_id:id,receipt_reference:ref,vendor,amount_cents:details.cost_cents,
 original_document_sha256:sha,checked_at:new Date(date).toISOString()};
 let genuine=false;
-try {
+try{
 const publicKey=await crypto.subtle.importKey('raw',bytes(key),{name:'Ed25519'},false,['verify']);
 genuine=await crypto.subtle.verify({name:'Ed25519'},publicKey,bytes(sig),new TextEncoder().encode(canonical(claim)));
-} catch { genuine=false; }
+} catch{ genuine=false;}
 if(!genuine)throw Error('Independent verifier signature failed. HOLD; owner attestation cannot substitute.');
 const dup=await db.prepare(`SELECT social_post_attempt_id FROM social_post_attempts
     WHERE platform_key='campaign_cost_verifier' AND attempt_status='independent_expense_verified'
@@ -65,7 +65,7 @@ const saved=await db.prepare(`SELECT social_post_attempt_id FROM social_post_att
     platform_key='campaign_cost_verifier' AND attempt_status='independent_expense_verified'
     AND external_post_id=? AND social_post_queue_id=? LIMIT 1`).bind(ref,id).first();
 if(!saved)throw Error('Independent verification could not be durably recorded. HOLD.');
-return {status:'independent_expense_verified',receipt_reference:ref,roi_certified:false,publication_performed:false};
+return{status:'independent_expense_verified',receipt_reference:ref,roi_certified:false,publication_performed:false};
 }
 async function reconciledCampaign(db,id){
 const post=await db.prepare('SELECT utm_campaign FROM social_post_queue WHERE social_post_queue_id=?').bind(id).first();
@@ -116,9 +116,9 @@ const metrics=campaignReturn678(revenueCents,costCents);
 if(!metrics)blockers.push('invalid_or_missing_verified_cost');
 const accepted=attempts.some(a=>a.attempt_status==='campaign_roi_owner_accepted'&&
 parse(a.response_json).fingerprint===JSON.stringify({costCents,revenueCents,receipts:seenCost.size,orders:seenOrder.size}));
-return {campaign:post.utm_campaign,queue_id:id,metrics,receipt_count:seenCost.size,verified_receipt_count:signatures.length,
+return{campaign:post.utm_campaign,queue_id:id,metrics,receipt_count:seenCost.size,verified_receipt_count:signatures.length,
 paid_order_count:seenOrder.size,blockers:[...new Set(blockers)],
-signoff: !blockers.length && accepted ? 'OWNER_ACCEPTED_MARKETING_RETURN' : 'HOLD',
+signoff:!blockers.length && accepted ? 'OWNER_ACCEPTED_MARKETING_RETURN':'HOLD',
 profitability_status:'HOLD_PRODUCT_COSTS_TAXES_AND_OVERHEADS',roi_certified:false};
 }
 async function ownerSignoff678(db,admin,payload,record){
@@ -132,7 +132,7 @@ receipts:view.receipt_count,orders:view.paid_order_count});
 const ref='owner_roi:'+view.campaign+':'+fingerprint;
 const duplicate=await db.prepare(`SELECT social_post_attempt_id FROM social_post_attempts
     WHERE platform_key='campaign_roi' AND attempt_status='campaign_roi_owner_accepted' AND external_post_id=? LIMIT 1`).bind(ref).first();
-if(duplicate) return {status:'already_owner_accepted',...view,publication_performed:false};
+if(duplicate) return{status:'already_owner_accepted',...view,publication_performed:false};
 await record(db,admin,id,'campaign_roi','campaign_roi_owner_accepted',{
 external_post_id:ref,response:{fingerprint,metrics:view.metrics,campaign:view.campaign,
 owner_user_id:admin.user_id,profitability_certified:false},
@@ -141,21 +141,21 @@ const saved=await db.prepare(`SELECT social_post_attempt_id FROM social_post_att
     platform_key='campaign_roi' AND attempt_status='campaign_roi_owner_accepted'
     AND external_post_id=? LIMIT 1`).bind(ref).first();
 if(!saved)throw Error('Owner signoff could not be durably recorded. HOLD.');
-return {status:'owner_accepted_marketing_return',...view,publication_performed:false};
+return{status:'owner_accepted_marketing_return',...view,publication_performed:false};
 }
 async function financialSummary678(db,id){
-if(!positiveId(id))return {status:'HOLD_SELECT_CAMPAIGN',roi_certified:false};
+if(!positiveId(id))return{status:'HOLD_SELECT_CAMPAIGN',roi_certified:false};
 return reconciledCampaign(db,Number(id));
 }
 
-return {campaignReturn678,expenseAttestation678,ownerSignoff678,financialSummary678};
+return{campaignReturn678,expenseAttestation678,ownerSignoff678,financialSummary678};
 })();
-const {campaignReturn678,expenseAttestation678,ownerSignoff678,financialSummary678} = finance678;
+const{campaignReturn678,expenseAttestation678,ownerSignoff678,financialSummary678}=finance678;
 
-const finance679 = (() => {
+const finance679=(()=>{
 // Build 679: verified per-order cost allocations, tax-excluded net contribution and read-only Master evidence.
 const list=r=>Array.isArray(r?.results)?r.results:[];
-const unpack=s=>{try{return JSON.parse(s||'{}')}catch{return {}}};
+const unpack=s=>{try{return JSON.parse(s||'{}')}catch{return{}}};
 const str=(s,n=120)=>String(s??'').trim().slice(0,n);
 const num=n=>Number.isSafeInteger(Number(n))?Number(n):NaN;
 const validId=n=>Number.isSafeInteger(num(n))&&num(n)>0;
@@ -168,7 +168,7 @@ function netContribution679({total_cents,tax_cents,verified_ad_cost_cents,verifi
 const values=[total_cents,tax_cents,verified_ad_cost_cents,verified_operating_cost_cents].map(num);
 if(values.some(x=>!Number.isSafeInteger(x)||x<0)||values[1]>values[0])return null;
 const revenue=values[0]-values[1],net=revenue-values[2]-values[3];
-return {tax_excluded_receipts_cents:revenue,verified_ad_cost_cents:values[2],
+return{tax_excluded_receipts_cents:revenue,verified_ad_cost_cents:values[2],
 verified_operating_cost_cents:values[3],net_contribution_cents:net,
 net_margin_percent:revenue>0?Math.round(net/revenue*10000)/100:null,
 status:'VERIFIED_SOURCE_BASIS_NOT_AUDITED_FINANCIAL_STATEMENT'};
@@ -182,7 +182,7 @@ const rows=list(await db.prepare(`SELECT a.social_post_attempt_id,a.social_post_
     WHERE q.utm_campaign=? AND a.attempt_status IN
     ('campaign_revenue_bound','campaign_cost_recorded','independent_expense_verified',
      'verified_order_cost_679','net_campaign_owner_accepted_679')`).bind(queue.utm_campaign).all());
-return {name:queue.utm_campaign,rows};
+return{name:queue.utm_campaign,rows};
 }
 async function settledOrder(db,id){
 const order=await db.prepare('SELECT order_id,total_cents,tax_cents,currency,payment_status FROM orders WHERE order_id=?').bind(id).first();
@@ -219,7 +219,7 @@ await settledOrder(db,id);
 const claim={order_id:id,campaign:source.name,axis,reference,issuer,
 amount_cents:cents,source_sha256:digest,observed_at:new Date(date).toISOString()};
 let genuine=false;
-try {const key=await crypto.subtle.importKey('raw',u8(publicKey),{name:'Ed25519'},false,['verify']);
+try{const key=await crypto.subtle.importKey('raw',u8(publicKey),{name:'Ed25519'},false,['verify']);
 genuine=await crypto.subtle.verify('Ed25519',key,u8(signature),new TextEncoder().encode(identity(claim)));
 }catch{}
 if(!genuine)throw Error('Independent signed cost evidence failed verification. HOLD.');
@@ -235,11 +235,11 @@ const written=await db.prepare(`SELECT social_post_attempt_id FROM social_post_a
     platform_key='order_cost_679' AND attempt_status='verified_order_cost_679'
     AND external_post_id=? LIMIT 1`).bind(reference).first();
 if(!written)throw Error('Verified cost evidence not durably saved. HOLD.');
-return {status:'verified_order_cost_recorded',axis,order_id:id,publication_performed:false};
+return{status:'verified_order_cost_recorded',axis,order_id:id,publication_performed:false};
 }
 async function campaignNet679(db,queueId){
-if(!validId(queueId))return {status:'HOLD_SELECT_CAMPAIGN',certified:false,master_handoff:'HOLD'};
-const {name,rows}=await campaignRows(db,Number(queueId));
+if(!validId(queueId))return{status:'HOLD_SELECT_CAMPAIGN',certified:false,master_handoff:'HOLD'};
+const{name,rows}=await campaignRows(db,Number(queueId));
 const orders=rows.filter(r=>r.attempt_status==='campaign_revenue_bound');
 const costs=rows.filter(r=>r.attempt_status==='campaign_cost_recorded');
 const attest=rows.filter(r=>r.attempt_status==='independent_expense_verified');
@@ -285,7 +285,7 @@ signed_cost_references:[...seenAllocations].sort(),verified_ad_receipts:[...seen
 gross,taxCents,adSpend,operations});
 const ownerAccepted=rows.some(x=>x.attempt_status==='net_campaign_owner_accepted_679'&&
 unpack(x.response_json).fingerprint===fingerprint);
-return {status:blockers.length?'HOLD_SOURCE_EVIDENCE':ownerAccepted?'OWNER_SIGNED_SOURCE_NET_CONTRIBUTION':'READY_OWNER_REVIEW',
+return{status:blockers.length?'HOLD_SOURCE_EVIDENCE':ownerAccepted?'OWNER_SIGNED_SOURCE_NET_CONTRIBUTION':'READY_OWNER_REVIEW',
 campaign:name,queue_id:Number(queueId),currency:'CAD',financial,blockers:[...new Set(blockers)],
 orders_seen:seenOrders.size,expense_receipts_seen:seenReceipts.size,product_cost_receipts_seen:seenAllocations.size,
 fingerprint,owner_accepted:!blockers.length&&ownerAccepted,
@@ -301,7 +301,7 @@ const digest=Array.from(sha,b=>b.toString(16).padStart(2,'0')).join('');
 const ref='net679:'+digest;
 const prior=await db.prepare(`SELECT social_post_attempt_id FROM social_post_attempts WHERE
     attempt_status='net_campaign_owner_accepted_679' AND external_post_id=? LIMIT 1`).bind(ref).first();
-if(prior)return {status:'already_owner_accepted',master_handoff:v.master_handoff,publication_performed:false};
+if(prior)return{status:'already_owner_accepted',master_handoff:v.master_handoff,publication_performed:false};
 await record(db,admin,Number(payload.social_post_queue_id),'campaign_net_679','net_campaign_owner_accepted_679',{
 external_post_id:ref,response:{fingerprint:v.fingerprint,campaign:v.campaign,financial:v.financial,
 signer_user_id:admin.user_id,master_handoff:v.master_handoff,independently_certified:false},
@@ -309,383 +309,383 @@ notes:'Explicit owner approval of source-net contribution; independent audit and
 const saved=await db.prepare(`SELECT social_post_attempt_id FROM social_post_attempts
     WHERE attempt_status='net_campaign_owner_accepted_679' AND external_post_id=? LIMIT 1`).bind(ref).first();
 if(!saved)throw Error('Owner acceptance could not be persisted; HOLD.');
-return {status:'owner_signed_source_net_contribution',master_handoff:v.master_handoff,publication_performed:false};
+return{status:'owner_signed_source_net_contribution',master_handoff:v.master_handoff,publication_performed:false};
 }
 
-return {netContribution679,verifyCost679,campaignNet679,ownerNetSignoff679};
+return{netContribution679,verifyCost679,campaignNet679,ownerNetSignoff679};
 })();
-const {netContribution679,verifyCost679,campaignNet679,ownerNetSignoff679} = finance679;
+const{netContribution679,verifyCost679,campaignNet679,ownerNetSignoff679}=finance679;
 
-export { campaignReturn678, netContribution679 };
-const PLATFORM_DEFINITIONS = [
+export{ campaignReturn678,netContribution679 };
+const PLATFORM_DEFINITIONS=[
 {
-platform_key: 'facebook',
-display_name: 'Facebook Page',
-connection_status: 'manual_ready',
-api_ready: 0,
-requires_oauth: 1,
-required_scopes: 'pages_manage_posts,pages_read_engagement,pages_show_list',
-notes: 'Manual-ready now. API posting later requires a Meta app, Page access token, permissions, and review where applicable.'
+platform_key:'facebook',
+display_name:'Facebook Page',
+connection_status:'manual_ready',
+api_ready:0,
+requires_oauth:1,
+required_scopes:'pages_manage_posts,pages_read_engagement,pages_show_list',
+notes:'Manual-ready now. API posting later requires a Meta app, Page access token, permissions, and review where applicable.'
 },
 {
-platform_key: 'instagram',
-display_name: 'Instagram Business/Creator',
-connection_status: 'manual_ready',
-api_ready: 0,
-requires_oauth: 1,
-required_scopes: 'instagram_business_content_publish,pages_show_list',
-notes: 'Manual-ready now. API publishing later requires an Instagram professional account connected to Meta and the Content Publishing API flow.'
+platform_key:'instagram',
+display_name:'Instagram Business/Creator',
+connection_status:'manual_ready',
+api_ready:0,
+requires_oauth:1,
+required_scopes:'instagram_business_content_publish,pages_show_list',
+notes:'Manual-ready now. API publishing later requires an Instagram professional account connected to Meta and the Content Publishing API flow.'
 },
 {
-platform_key: 'tiktok',
-display_name: 'TikTok',
-connection_status: 'manual_ready',
-api_ready: 0,
-requires_oauth: 1,
-required_scopes: 'video.upload,video.publish',
-notes: 'Manual-ready now. API posting later requires TikTok developer app approval, creator info query, and verified media URL/domain rules.'
+platform_key:'tiktok',
+display_name:'TikTok',
+connection_status:'manual_ready',
+api_ready:0,
+requires_oauth:1,
+required_scopes:'video.upload,video.publish',
+notes:'Manual-ready now. API posting later requires TikTok developer app approval, creator info query, and verified media URL/domain rules.'
 },
 {
-platform_key: 'x',
-display_name: 'X',
-connection_status: 'manual_ready',
-api_ready: 0,
-requires_oauth: 1,
-required_scopes: 'tweet.write,users.read,offline.access',
-notes: 'Manual-ready now. API posting later requires X API access and OAuth tokens; posting links may have platform costs/limits.'
+platform_key:'x',
+display_name:'X',
+connection_status:'manual_ready',
+api_ready:0,
+requires_oauth:1,
+required_scopes:'tweet.write,users.read,offline.access',
+notes:'Manual-ready now. API posting later requires X API access and OAuth tokens; posting links may have platform costs/limits.'
 },
 {
-platform_key: 'youtube',
-display_name: 'YouTube Shorts/Community',
-connection_status: 'manual_ready',
-api_ready: 0,
-requires_oauth: 1,
-required_scopes: 'youtube.upload,youtube.force-ssl',
-notes: 'Manual-ready now. API upload/posting later requires Google OAuth/app configuration.'
+platform_key:'youtube',
+display_name:'YouTube Shorts/Community',
+connection_status:'manual_ready',
+api_ready:0,
+requires_oauth:1,
+required_scopes:'youtube.upload,youtube.force-ssl',
+notes:'Manual-ready now. API upload/posting later requires Google OAuth/app configuration.'
 },
 {
-platform_key: 'pinterest',
-display_name: 'Pinterest',
-connection_status: 'manual_ready',
-api_ready: 0,
-requires_oauth: 1,
-required_scopes: 'pins:write,boards:read',
-notes: 'Manual-ready now. Useful for finished products and workshop inspiration boards once OAuth is configured.'
+platform_key:'pinterest',
+display_name:'Pinterest',
+connection_status:'manual_ready',
+api_ready:0,
+requires_oauth:1,
+required_scopes:'pins:write,boards:read',
+notes:'Manual-ready now. Useful for finished products and workshop inspiration boards once OAuth is configured.'
 }
 ];
 
-const CAPTION_TEMPLATES = [
+const CAPTION_TEMPLATES=[
 {
-template_key: 'making_story',
-display_name: 'Making story / in progress',
-content_pillar: 'behind_the_scenes',
-default_platforms_json: JSON.stringify(['facebook', 'instagram', 'tiktok', 'x']),
-default_hashtags: '#DevilnDove #HandmadeOntario #WorkshopMade #SmallBusinessCanada',
-body_template: '{title}\n\n{summary}\n\n{cta}\n\n{link}\n\n{hashtags}',
-call_to_action: 'Follow along as we turn shop experiments into one-of-a-kind pieces.',
-notes: 'Use while a crafting job or workshop experiment is in progress.'
+template_key:'making_story',
+display_name:'Making story / in progress',
+content_pillar:'behind_the_scenes',
+default_platforms_json:JSON.stringify(['facebook','instagram','tiktok','x']),
+default_hashtags:'#DevilnDove #HandmadeOntario #WorkshopMade #SmallBusinessCanada',
+body_template:'{title}\n\n{summary}\n\n{cta}\n\n{link}\n\n{hashtags}',
+call_to_action:'Follow along as we turn shop experiments into one-of-a-kind pieces.',
+notes:'Use while a crafting job or workshop experiment is in progress.'
 },
 {
-template_key: 'finished_product',
-display_name: 'Finished product / shop-ready',
-content_pillar: 'finished_goods',
-default_platforms_json: JSON.stringify(['facebook', 'instagram', 'pinterest', 'x']),
-default_hashtags: '#DevilnDove #HandmadeGifts #OntarioMaker #ShopSmallCanada',
-body_template: '{title}\n\n{summary}\n\n{cta}\n\n{link}\n\n{hashtags}',
-call_to_action: 'See the finished piece, details, and availability here:',
-notes: 'Use for product launches, gallery items, vintage finds, and ready-to-sell pieces.'
+template_key:'finished_product',
+display_name:'Finished product / shop-ready',
+content_pillar:'finished_goods',
+default_platforms_json:JSON.stringify(['facebook','instagram','pinterest','x']),
+default_hashtags:'#DevilnDove #HandmadeGifts #OntarioMaker #ShopSmallCanada',
+body_template:'{title}\n\n{summary}\n\n{cta}\n\n{link}\n\n{hashtags}',
+call_to_action:'See the finished piece, details, and availability here:',
+notes:'Use for product launches, gallery items, vintage finds, and ready-to-sell pieces.'
 },
 {
-template_key: 'shop_oops',
-display_name: 'Funny shop moment / oops',
-content_pillar: 'human_story',
-default_platforms_json: JSON.stringify(['facebook', 'instagram', 'tiktok', 'x']),
-default_hashtags: '#DevilnDove #MakerLife #WorkshopOops #CreativeProcess',
-body_template: '{title}\n\n{summary}\n\n{cta}\n\n{hashtags}',
-call_to_action: 'We are calling this one “learning with character.”',
-notes: 'Use for light, human, therapy-workshop moments that should not sound too polished.'
+template_key:'shop_oops',
+display_name:'Funny shop moment / oops',
+content_pillar:'human_story',
+default_platforms_json:JSON.stringify(['facebook','instagram','tiktok','x']),
+default_hashtags:'#DevilnDove #MakerLife #WorkshopOops #CreativeProcess',
+body_template:'{title}\n\n{summary}\n\n{cta}\n\n{hashtags}',
+call_to_action:'We are calling this one “learning with character.”',
+notes:'Use for light, human, therapy-workshop moments that should not sound too polished.'
 },
 {
-template_key: 'local_market',
-display_name: 'Local Ontario update / event',
-content_pillar: 'local_presence',
-default_platforms_json: JSON.stringify(['facebook', 'instagram', 'x']),
-default_hashtags: '#DevilnDove #SouthernOntario #TillsonburgOntario #OntarioSmallBusiness',
-body_template: '{title}\n\n{summary}\n\n{cta}\n\n{link}\n\n{hashtags}',
-call_to_action: 'Local friends can message us with questions or pickup ideas.',
-notes: 'Use when relevance to Southern Ontario/Tillsonburg/local shoppers matters.'
+template_key:'local_market',
+display_name:'Local Ontario update / event',
+content_pillar:'local_presence',
+default_platforms_json:JSON.stringify(['facebook','instagram','x']),
+default_hashtags:'#DevilnDove #SouthernOntario #TillsonburgOntario #OntarioSmallBusiness',
+body_template:'{title}\n\n{summary}\n\n{cta}\n\n{link}\n\n{hashtags}',
+call_to_action:'Local friends can message us with questions or pickup ideas.',
+notes:'Use when relevance to Southern Ontario/Tillsonburg/local shoppers matters.'
 },
 {
-template_key: 'laser_engraving',
-display_name: 'Laser engraving / personalized gift',
-content_pillar: 'custom_work',
-default_platforms_json: JSON.stringify(['facebook', 'instagram', 'pinterest', 'x']),
-default_hashtags: '#DevilnDove #LaserEngravingOntario #CustomGiftsOntario #WorkshopMade',
-body_template: '{title}\n\n{summary}\n\n{cta}\n\n{link}\n\n{hashtags}',
-call_to_action: 'Ask us about making something similar with your own wording or idea.',
-notes: 'Use for engraving jobs, custom gift ideas, and personalized workshop updates.'
+template_key:'laser_engraving',
+display_name:'Laser engraving / personalized gift',
+content_pillar:'custom_work',
+default_platforms_json:JSON.stringify(['facebook','instagram','pinterest','x']),
+default_hashtags:'#DevilnDove #LaserEngravingOntario #CustomGiftsOntario #WorkshopMade',
+body_template:'{title}\n\n{summary}\n\n{cta}\n\n{link}\n\n{hashtags}',
+call_to_action:'Ask us about making something similar with your own wording or idea.',
+notes:'Use for engraving jobs, custom gift ideas, and personalized workshop updates.'
 },
 {
-template_key: 'vintage_find',
-display_name: 'Vintage find / collected item',
-content_pillar: 'vintage_collectibles',
-default_platforms_json: JSON.stringify(['facebook', 'instagram', 'pinterest', 'x']),
-default_hashtags: '#DevilnDove #VintageFindsOntario #CollectiblesCanada #ShopSmallCanada',
-body_template: '{title}\n\n{summary}\n\n{cta}\n\n{link}\n\n{hashtags}',
-call_to_action: 'Condition, story, and availability details are listed here:',
-notes: 'Use for sourced vintage/collectible/antiquity items.'
+template_key:'vintage_find',
+display_name:'Vintage find / collected item',
+content_pillar:'vintage_collectibles',
+default_platforms_json:JSON.stringify(['facebook','instagram','pinterest','x']),
+default_hashtags:'#DevilnDove #VintageFindsOntario #CollectiblesCanada #ShopSmallCanada',
+body_template:'{title}\n\n{summary}\n\n{cta}\n\n{link}\n\n{hashtags}',
+call_to_action:'Condition, story, and availability details are listed here:',
+notes:'Use for sourced vintage/collectible/antiquity items.'
 }
 ];
 
-function rows(result) { return Array.isArray(result?.results) ? result.results : []; }
-function safeJson(value, fallback) { try { return JSON.parse(value || ''); } catch { return fallback; } }
-function slugKey(value) { return normalizeText(value).toLowerCase().replace(/[^a-z0-9]+/g, '_').replace(/^_+|_+$/g, ''); }
-function trimTo(value, limit) {
-const clean = normalizeText(value);
-if (clean.length <= limit) return clean;
+function rows(result){ return Array.isArray(result?.results) ? result.results :[];}
+function safeJson(value,fallback){ try{ return JSON.parse(value || '');} catch{ return fallback;} }
+function slugKey(value){ return normalizeText(value).toLowerCase().replace(/[^a-z0-9]+/g,'_').replace(/^_+|_+$/g,'');}
+function trimTo(value,limit){
+const clean=normalizeText(value);
+if (clean.length <=limit) return clean;
 return `${clean.slice(0, Math.max(0, limit - 1)).trim()}…`;
 }
-function splitList(value) {
-if (Array.isArray(value)) return value.map((item) => normalizeText(item)).filter(Boolean);
-return String(value || '').split(/\r?\n|,|\|/).map((item) => normalizeText(item)).filter(Boolean);
+function splitList(value){
+if (Array.isArray(value)) return value.map((item)=> normalizeText(item)).filter(Boolean);
+return String(value || '').split(/\r?\n|,|\|/).map((item)=> normalizeText(item)).filter(Boolean);
 }
-function normalizePlatforms(value) {
-const allowed = new Set(PLATFORM_DEFINITIONS.map((row) => row.platform_key));
-const incoming = splitList(value).map((item) => slugKey(item)).map((item) => item === 'twitter' ? 'x' : item);
-const unique = [...new Set(incoming.filter((item) => allowed.has(item)))];
-return unique.length ? unique : ['facebook', 'instagram'];
+function normalizePlatforms(value){
+const allowed=new Set(PLATFORM_DEFINITIONS.map((row)=> row.platform_key));
+const incoming=splitList(value).map((item)=> slugKey(item)).map((item)=> item==='twitter'? 'x':item);
+const unique=[...new Set(incoming.filter((item)=> allowed.has(item)))];
+return unique.length ? unique :['facebook','instagram'];
 }
-function normalizeHashtags(value) {
-const tags = splitList(value)
-.map((tag) => tag.replace(/^#+/, '').replace(/[^a-zA-Z0-9_]/g, ''))
+function normalizeHashtags(value){
+const tags=splitList(value)
+.map((tag)=> tag.replace(/^#+/,'').replace(/[^a-zA-Z0-9_]/g,''))
 .filter(Boolean)
-.slice(0, 20);
-return [...new Set(tags)].map((tag) => `#${tag}`).join(' ');
+.slice(0,20);
+return [...new Set(tags)].map((tag)=> `#${tag}`).join(' ');
 }
-function buildQueueKey(seed) {
-const raw = normalizeText(seed) || `${Date.now()}-${crypto.randomUUID()}`;
-let hash = 0;
-for (let index = 0; index < raw.length; index += 1) {
-hash = ((hash << 5) - hash) + raw.charCodeAt(index);
-hash |= 0;
+function buildQueueKey(seed){
+const raw=normalizeText(seed) || `${Date.now()}-${crypto.randomUUID()}`;
+let hash=0;
+for (let index=0;index < raw.length;index +=1){
+hash=((hash << 5) - hash) + raw.charCodeAt(index);
+hash |=0;
 }
 return `social_${Math.abs(hash)}_${Date.now().toString(36)}`;
 }
-function safeUrl(value) {
-const clean = normalizeText(value);
+function safeUrl(value){
+const clean=normalizeText(value);
 if (!clean) return '';
-try { return new URL(clean).toString(); } catch { return clean; }
+try{ return new URL(clean).toString();} catch{ return clean;}
 }
-function buildCaption({ title, summary, hashtags, linkUrl }) {
-const parts = [];
+function buildCaption({ title,summary,hashtags,linkUrl }){
+const parts=[];
 if (title) parts.push(title);
 if (summary) parts.push(summary);
 if (linkUrl) parts.push(`More: ${linkUrl}`);
 if (hashtags) parts.push(hashtags);
-return trimTo(parts.filter(Boolean).join('\n\n'), 2200);
+return trimTo(parts.filter(Boolean).join('\n\n'),2200);
 }
 
-function envText(env, ...names) {
-for (const name of names) {
-const value = normalizeText(env?.[name]);
+function envText(env,...names){
+for (const name of names){
+const value=normalizeText(env?.[name]);
 if (value) return value;
 }
 return '';
 }
-function getPlatformReadiness(env = {}) {
-const facebookReady = !!(envText(env, 'FACEBOOK_PAGE_ID', 'META_PAGE_ID') && envText(env, 'FACEBOOK_PAGE_ACCESS_TOKEN', 'META_PAGE_ACCESS_TOKEN'));
-const instagramReady = !!(envText(env, 'INSTAGRAM_USER_ID', 'IG_USER_ID', 'INSTAGRAM_BUSINESS_ACCOUNT_ID') && envText(env, 'INSTAGRAM_ACCESS_TOKEN', 'META_PAGE_ACCESS_TOKEN', 'FACEBOOK_PAGE_ACCESS_TOKEN'));
-const xReady = !!envText(env, 'X_USER_ACCESS_TOKEN', 'TWITTER_USER_ACCESS_TOKEN');
-const pinterestReady = !!(envText(env, 'PINTEREST_ACCESS_TOKEN') && envText(env, 'PINTEREST_BOARD_ID'));
-const tiktokReady = !!envText(env, 'TIKTOK_ACCESS_TOKEN');
-const youtubeReady = !!envText(env, 'YOUTUBE_ACCESS_TOKEN');
-return {
-facebook: {
-platform_key: 'facebook', api_ready: facebookReady ? 1 : 0, publish_mode: facebookReady ? 'api_ready' : 'manual_ready',
-missing_env: facebookReady ? [] : ['FACEBOOK_PAGE_ID', 'FACEBOOK_PAGE_ACCESS_TOKEN'],
-notes: facebookReady ? 'API publishing can be attempted through the Facebook Page feed/photos endpoints.' : 'Manual/copy-paste ready. Add Page ID and Page access token as Cloudflare environment variables to attempt API publishing.'
+function getPlatformReadiness(env={}){
+const facebookReady=!!(envText(env,'FACEBOOK_PAGE_ID','META_PAGE_ID') && envText(env,'FACEBOOK_PAGE_ACCESS_TOKEN','META_PAGE_ACCESS_TOKEN'));
+const instagramReady=!!(envText(env,'INSTAGRAM_USER_ID','IG_USER_ID','INSTAGRAM_BUSINESS_ACCOUNT_ID') && envText(env,'INSTAGRAM_ACCESS_TOKEN','META_PAGE_ACCESS_TOKEN','FACEBOOK_PAGE_ACCESS_TOKEN'));
+const xReady=!!envText(env,'X_USER_ACCESS_TOKEN','TWITTER_USER_ACCESS_TOKEN');
+const pinterestReady=!!(envText(env,'PINTEREST_ACCESS_TOKEN') && envText(env,'PINTEREST_BOARD_ID'));
+const tiktokReady=!!envText(env,'TIKTOK_ACCESS_TOKEN');
+const youtubeReady=!!envText(env,'YOUTUBE_ACCESS_TOKEN');
+return{
+facebook:{
+platform_key:'facebook',api_ready:facebookReady ? 1 :0,publish_mode:facebookReady ? 'api_ready':'manual_ready',
+missing_env:facebookReady ? [] :['FACEBOOK_PAGE_ID','FACEBOOK_PAGE_ACCESS_TOKEN'],
+notes:facebookReady ? 'API publishing can be attempted through the Facebook Page feed/photos endpoints.':'Manual/copy-paste ready. Add Page ID and Page access token as Cloudflare environment variables to attempt API publishing.'
 },
-instagram: {
-platform_key: 'instagram', api_ready: instagramReady ? 1 : 0, publish_mode: instagramReady ? 'api_ready' : 'manual_ready',
-missing_env: instagramReady ? [] : ['INSTAGRAM_USER_ID', 'INSTAGRAM_ACCESS_TOKEN or FACEBOOK_PAGE_ACCESS_TOKEN'],
-notes: instagramReady ? 'API image publishing can be attempted through the Instagram Content Publishing media/container flow.' : 'Manual/copy-paste ready. Instagram API publishing also requires a professional Instagram account connected through Meta.'
+instagram:{
+platform_key:'instagram',api_ready:instagramReady ? 1 :0,publish_mode:instagramReady ? 'api_ready':'manual_ready',
+missing_env:instagramReady ? [] :['INSTAGRAM_USER_ID','INSTAGRAM_ACCESS_TOKEN or FACEBOOK_PAGE_ACCESS_TOKEN'],
+notes:instagramReady ? 'API image publishing can be attempted through the Instagram Content Publishing media/container flow.':'Manual/copy-paste ready. Instagram API publishing also requires a professional Instagram account connected through Meta.'
 },
-x: {
-platform_key: 'x', api_ready: xReady ? 1 : 0, publish_mode: xReady ? 'api_ready' : 'manual_ready',
-missing_env: xReady ? [] : ['X_USER_ACCESS_TOKEN'],
-notes: xReady ? 'API text/link publishing can be attempted through POST /2/tweets.' : 'Manual/copy-paste ready. Add an OAuth user access token with write permission to attempt API publishing.'
+x:{
+platform_key:'x',api_ready:xReady ? 1 :0,publish_mode:xReady ? 'api_ready':'manual_ready',
+missing_env:xReady ? [] :['X_USER_ACCESS_TOKEN'],
+notes:xReady ? 'API text/link publishing can be attempted through POST /2/tweets.':'Manual/copy-paste ready. Add an OAuth user access token with write permission to attempt API publishing.'
 },
-pinterest: {
-platform_key: 'pinterest', api_ready: pinterestReady ? 1 : 0, publish_mode: pinterestReady ? 'api_ready' : 'manual_ready',
-missing_env: pinterestReady ? [] : ['PINTEREST_ACCESS_TOKEN', 'PINTEREST_BOARD_ID'],
-notes: pinterestReady ? 'API image pin publishing can be attempted for public image URLs.' : 'Manual/copy-paste ready. Add access token and board ID for API pin publishing.'
+pinterest:{
+platform_key:'pinterest',api_ready:pinterestReady ? 1 :0,publish_mode:pinterestReady ? 'api_ready':'manual_ready',
+missing_env:pinterestReady ? [] :['PINTEREST_ACCESS_TOKEN','PINTEREST_BOARD_ID'],
+notes:pinterestReady ? 'API image pin publishing can be attempted for public image URLs.':'Manual/copy-paste ready. Add access token and board ID for API pin publishing.'
 },
-tiktok: {
-platform_key: 'tiktok', api_ready: 0, publish_mode: tiktokReady ? 'credentials_detected_manual_review' : 'manual_ready',
-missing_env: tiktokReady ? [] : ['TIKTOK_ACCESS_TOKEN'],
-notes: 'Kept manual/review-first in this build. TikTok direct publishing needs the platform upload/publish flow and app approval before we should automate it.'
+tiktok:{
+platform_key:'tiktok',api_ready:0,publish_mode:tiktokReady ? 'credentials_detected_manual_review':'manual_ready',
+missing_env:tiktokReady ? [] :['TIKTOK_ACCESS_TOKEN'],
+notes:'Kept manual/review-first in this build. TikTok direct publishing needs the platform upload/publish flow and app approval before we should automate it.'
 },
-youtube: {
-platform_key: 'youtube', api_ready: 0, publish_mode: youtubeReady ? 'credentials_detected_manual_review' : 'manual_ready',
-missing_env: youtubeReady ? [] : ['YOUTUBE_ACCESS_TOKEN'],
-notes: 'Kept manual/review-first in this build. YouTube upload/community posting needs Google OAuth upload handling before we should automate it.'
+youtube:{
+platform_key:'youtube',api_ready:0,publish_mode:youtubeReady ? 'credentials_detected_manual_review':'manual_ready',
+missing_env:youtubeReady ? [] :['YOUTUBE_ACCESS_TOKEN'],
+notes:'Kept manual/review-first in this build. YouTube upload/community posting needs Google OAuth upload handling before we should automate it.'
 }
 };
 }
-async function tableColumnSet(db, tableName) {
-try {
-const result = await db.prepare(`PRAGMA table_info(${tableName})`).all();
-return new Set(rows(result).map((row) => String(row.name || '').toLowerCase()).filter(Boolean));
-} catch {
+async function tableColumnSet(db,tableName){
+try{
+const result=await db.prepare(`PRAGMA table_info(${tableName})`).all();
+return new Set(rows(result).map((row)=> String(row.name || '').toLowerCase()).filter(Boolean));
+} catch{
 return new Set();
 }
 }
-async function ensureColumn(db, tableName, columnName, sql) {
-const columns = await tableColumnSet(db, tableName);
-if (!columns.has(String(columnName || '').toLowerCase())) {
-await db.prepare(`ALTER TABLE ${tableName} ADD COLUMN ${sql}`).run().catch(() => null);
+async function ensureColumn(db,tableName,columnName,sql){
+const columns=await tableColumnSet(db,tableName);
+if (!columns.has(String(columnName || '').toLowerCase())){
+await db.prepare(`ALTER TABLE ${tableName} ADD COLUMN ${sql}`).run().catch(()=> null);
 }
 }
-async function tableExists(db, tableName) {
-try {
-const row = await db.prepare(`SELECT name FROM sqlite_master WHERE type='table' AND name=? LIMIT 1`).bind(tableName).first();
+async function tableExists(db,tableName){
+try{
+const row=await db.prepare(`SELECT name FROM sqlite_master WHERE type='table' AND name=? LIMIT 1`).bind(tableName).first();
 return !!row?.name;
-} catch { return false; }
+} catch{ return false;}
 }
-async function ensureUtmAnalyticsColumns(db) {
-for (const tableName of ['site_visitor_sessions', 'site_page_views', 'custom_requests']) {
-if (!(await tableExists(db, tableName))) continue;
-await ensureColumn(db, tableName, 'utm_source', 'utm_source TEXT');
-await ensureColumn(db, tableName, 'utm_medium', 'utm_medium TEXT');
-await ensureColumn(db, tableName, 'utm_campaign', 'utm_campaign TEXT');
-await ensureColumn(db, tableName, 'utm_content', 'utm_content TEXT');
-await ensureColumn(db, tableName, 'utm_term', 'utm_term TEXT');
+async function ensureUtmAnalyticsColumns(db){
+for (const tableName of ['site_visitor_sessions','site_page_views','custom_requests']){
+if (!(await tableExists(db,tableName))) continue;
+await ensureColumn(db,tableName,'utm_source','utm_source TEXT');
+await ensureColumn(db,tableName,'utm_medium','utm_medium TEXT');
+await ensureColumn(db,tableName,'utm_campaign','utm_campaign TEXT');
+await ensureColumn(db,tableName,'utm_content','utm_content TEXT');
+await ensureColumn(db,tableName,'utm_term','utm_term TEXT');
 }
 }
-function safeResponseJson(text) {
-try { return JSON.parse(text || '{}'); } catch { return { raw: text || '' }; }
+function safeResponseJson(text){
+try{ return JSON.parse(text || '{}');} catch{ return{ raw:text || ''};}
 }
-async function fetchJson(url, options = {}) {
-const response = await fetch(url, options);
-const text = await response.text().catch(() => '');
-return { response, body: safeResponseJson(text), text };
+async function fetchJson(url,options={}){
+const response=await fetch(url,options);
+const text=await response.text().catch(()=> '');
+return{ response,body:safeResponseJson(text),text };
 }
-function absolutePostUrl(row, platform) {
-const utmUrl = safeUrl(row?.utm_url || '');
+function absolutePostUrl(row,platform){
+const utmUrl=safeUrl(row?.utm_url || '');
 if (utmUrl) return utmUrl;
-const url = safeUrl(row?.link_url || '');
+const url=safeUrl(row?.link_url || '');
 if (url) return url;
-const key = normalizeText(row?.social_post_key || '');
-return key ? `https://devilndove.com/?social=${encodeURIComponent(key)}&platform=${encodeURIComponent(platform)}` : '';
+const key=normalizeText(row?.social_post_key || '');
+return key ? `https://devilndove.com/?social=${encodeURIComponent(key)}&platform=${encodeURIComponent(platform)}`:'';
 }
-function platformCaption(row, platform) {
-const overrides = safeJson(row?.platform_caption_overrides_json, {});
-const override = normalizeText(overrides?.[platform] || overrides?.[String(platform || '').toLowerCase()] || '');
-const caption = override || normalizeText(row?.caption || buildCaption({
-title: row?.title || '',
-summary: row?.summary || '',
-hashtags: row?.hashtags || '',
-linkUrl: absolutePostUrl(row, platform)
+function platformCaption(row,platform){
+const overrides=safeJson(row?.platform_caption_overrides_json,{});
+const override=normalizeText(overrides?.[platform] || overrides?.[String(platform || '').toLowerCase()] || '');
+const caption=override || normalizeText(row?.caption || buildCaption({
+title:row?.title || '',
+summary:row?.summary || '',
+hashtags:row?.hashtags || '',
+linkUrl:absolutePostUrl(row,platform)
 }));
-const link = absolutePostUrl(row, platform);
-if (platform === 'x') return trimTo([caption, link && !caption.includes(link) ? link : ''].filter(Boolean).join('\n'), 280);
-if (platform === 'pinterest') return trimTo(caption, 500);
-return trimTo(caption, 2200);
+const link=absolutePostUrl(row,platform);
+if (platform==='x') return trimTo([caption,link && !caption.includes(link) ? link :''].filter(Boolean).join('\n'),280);
+if (platform==='pinterest') return trimTo(caption,500);
+return trimTo(caption,2200);
 }
-function stableHash(value) {
-const raw = normalizeText(value);
-let hash = 0;
-for (let index = 0; index < raw.length; index += 1) {
-hash = ((hash << 5) - hash) + raw.charCodeAt(index);
-hash |= 0;
+function stableHash(value){
+const raw=normalizeText(value);
+let hash=0;
+for (let index=0;index < raw.length;index +=1){
+hash=((hash << 5) - hash) + raw.charCodeAt(index);
+hash |=0;
 }
 return Math.abs(hash).toString(36);
 }
 
-async function templateByKey(db, key) {
-const clean = slugKey(key || '');
+async function templateByKey(db,key){
+const clean=slugKey(key || '');
 if (!clean) return null;
-const stored = await db.prepare(`SELECT * FROM social_caption_templates WHERE template_key = ? AND COALESCE(is_active,1)=1 LIMIT 1`).bind(clean).first().catch(() => null);
-return stored || CAPTION_TEMPLATES.find((template) => template.template_key === clean) || null;
+const stored=await db.prepare(`SELECT * FROM social_caption_templates WHERE template_key = ? AND COALESCE(is_active,1)=1 LIMIT 1`).bind(clean).first().catch(()=> null);
+return stored || CAPTION_TEMPLATES.find((template)=> template.template_key===clean) || null;
 }
-function fillCaptionTemplate(template, values = {}) {
+function fillCaptionTemplate(template,values={}){
 if (!template) return '';
-const map = {
-title: normalizeText(values.title || ''),
-summary: normalizeText(values.summary || ''),
-cta: normalizeText(values.call_to_action || template.call_to_action || ''),
-link: safeUrl(values.link_url || values.utm_url || ''),
-hashtags: normalizeText(values.hashtags || template.default_hashtags || '')
+const map={
+title:normalizeText(values.title || ''),
+summary:normalizeText(values.summary || ''),
+cta:normalizeText(values.call_to_action || template.call_to_action || ''),
+link:safeUrl(values.link_url || values.utm_url || ''),
+hashtags:normalizeText(values.hashtags || template.default_hashtags || '')
 };
 return trimTo(String(template.body_template || '')
-.replace(/\{title\}/g, map.title)
-.replace(/\{summary\}/g, map.summary)
-.replace(/\{cta\}/g, map.cta)
-.replace(/\{link\}/g, map.link)
-.replace(/\{hashtags\}/g, map.hashtags)
-.replace(/\n{3,}/g, '\n\n')
-.trim(), 2200);
+.replace(/\{title\}/g,map.title)
+.replace(/\{summary\}/g,map.summary)
+.replace(/\{cta\}/g,map.cta)
+.replace(/\{link\}/g,map.link)
+.replace(/\{hashtags\}/g,map.hashtags)
+.replace(/\n{3,}/g,'\n\n')
+.trim(),2200);
 }
-function buildUtmUrl(linkUrl, payload = {}, platforms = []) {
-const clean = safeUrl(linkUrl || '');
+function buildUtmUrl(linkUrl,payload={},platforms=[]){
+const clean=safeUrl(linkUrl || '');
 if (!clean) return '';
-try {
-const url = new URL(clean, 'https://devilndove.com');
-const source = normalizeText(payload.utm_source || 'devilndove_social');
-const medium = normalizeText(payload.utm_medium || 'social');
-const campaign = slugKey(payload.utm_campaign || payload.caption_template_key || payload.source_type || 'workshop_update');
-const content = normalizePlatforms(platforms || payload.target_platforms || payload.platforms || []).join('-') || 'social';
-if (source && !url.searchParams.has('utm_source')) url.searchParams.set('utm_source', source);
-if (medium && !url.searchParams.has('utm_medium')) url.searchParams.set('utm_medium', medium);
-if (campaign && !url.searchParams.has('utm_campaign')) url.searchParams.set('utm_campaign', campaign);
-if (content && !url.searchParams.has('utm_content')) url.searchParams.set('utm_content', content);
+try{
+const url=new URL(clean,'https://devilndove.com');
+const source=normalizeText(payload.utm_source || 'devilndove_social');
+const medium=normalizeText(payload.utm_medium || 'social');
+const campaign=slugKey(payload.utm_campaign || payload.caption_template_key || payload.source_type || 'workshop_update');
+const content=normalizePlatforms(platforms || payload.target_platforms || payload.platforms || []).join('-') || 'social';
+if (source && !url.searchParams.has('utm_source')) url.searchParams.set('utm_source',source);
+if (medium && !url.searchParams.has('utm_medium')) url.searchParams.set('utm_medium',medium);
+if (campaign && !url.searchParams.has('utm_campaign')) url.searchParams.set('utm_campaign',campaign);
+if (content && !url.searchParams.has('utm_content')) url.searchParams.set('utm_content',content);
 return url.toString();
-} catch {
+} catch{
 return clean;
 }
 }
 
-function normalizeCaptionOverrides(payload = {}, platforms = []) {
-const source = typeof payload.platform_captions === 'object' && payload.platform_captions ? payload.platform_captions : {};
-const aliases = { facebook: 'facebook_caption', instagram: 'instagram_caption', tiktok: 'tiktok_caption', x: 'x_caption', youtube: 'youtube_caption', pinterest: 'pinterest_caption' };
-const result = {};
-for (const platform of platforms) {
-const value = normalizeText(source[platform] || payload[aliases[platform]] || '');
+function normalizeCaptionOverrides(payload={},platforms=[]){
+const source=typeof payload.platform_captions==='object'&& payload.platform_captions ? payload.platform_captions :{};
+const aliases={ facebook:'facebook_caption',instagram:'instagram_caption',tiktok:'tiktok_caption',x:'x_caption',youtube:'youtube_caption',pinterest:'pinterest_caption'};
+const result={};
+for (const platform of platforms){
+const value=normalizeText(source[platform] || payload[aliases[platform]] || '');
 if (!value) continue;
-const limit = platform === 'x' ? 280 : platform === 'pinterest' ? 500 : 2200;
-result[platform] = trimTo(value, limit);
+const limit=platform==='x'? 280 :platform==='pinterest'? 500 :2200;
+result[platform]=trimTo(value,limit);
 }
 return result;
 }
-function buildDuplicateSignature({ title, caption, imageUrls, platforms, linkUrl }) {
+function buildDuplicateSignature({ title,caption,imageUrls,platforms,linkUrl }){
 return stableHash(JSON.stringify({
-title: normalizeText(title).toLowerCase(),
-caption: normalizeText(caption).toLowerCase(),
-image_urls: [...new Set((imageUrls || []).map(safeUrl).filter(Boolean))].sort(),
-platforms: [...new Set((platforms || []).map(slugKey).filter(Boolean))].sort(),
-link_url: safeUrl(linkUrl || '')
+title:normalizeText(title).toLowerCase(),
+caption:normalizeText(caption).toLowerCase(),
+image_urls:[...new Set((imageUrls || []).map(safeUrl).filter(Boolean))].sort(),
+platforms:[...new Set((platforms || []).map(slugKey).filter(Boolean))].sort(),
+link_url:safeUrl(linkUrl || '')
 }));
 }
-function parseScheduledAt(value) {
-const clean = normalizeText(value);
+function parseScheduledAt(value){
+const clean=normalizeText(value);
 if (!clean) return '';
-const parsed = new Date(clean);
+const parsed=new Date(clean);
 if (Number.isNaN(parsed.getTime())) return clean;
-return parsed.toISOString().replace(/\.\d{3}Z$/, 'Z');
+return parsed.toISOString().replace(/\.\d{3}Z$/,'Z');
 }
-function isScheduledInFuture(value) {
-const clean = normalizeText(value);
+function isScheduledInFuture(value){
+const clean=normalizeText(value);
 if (!clean) return false;
-const parsed = new Date(clean);
+const parsed=new Date(clean);
 return Number.isFinite(parsed.getTime()) && parsed.getTime() > Date.now() + 60_000;
 }
-function buildMediaWarnings({ platforms = [], imageUrls = [], videoUrl = '', caption = '' }) {
-const warnings = [];
-const imageCount = imageUrls.length;
-const needsImage = platforms.some((platform) => ['instagram', 'pinterest', 'tiktok'].includes(platform));
+function buildMediaWarnings({ platforms=[],imageUrls=[],videoUrl='',caption=''}){
+const warnings=[];
+const imageCount=imageUrls.length;
+const needsImage=platforms.some((platform)=> ['instagram','pinterest','tiktok'].includes(platform));
 if (needsImage && !imageCount) warnings.push('Instagram, Pinterest, and TikTok-style posts should have at least one public image URL before publishing.');
 if (imageCount > 10) warnings.push('More than 10 images were supplied; only the first 10 are retained for the queue.');
-for (const url of imageUrls) {
+for (const url of imageUrls){
 if (!/^https:\/\//i.test(url)) warnings.push(`Image URL is not HTTPS/public: ${url}`);
 if (/localhost|127\.0\.0\.1|file:/i.test(url)) warnings.push(`Image URL looks private/local and will not work for social platforms: ${url}`);
 }
@@ -693,32 +693,32 @@ if (platforms.includes('x') && normalizeText(caption).length > 280) warnings.pus
 if (videoUrl && !/^https:\/\//i.test(videoUrl)) warnings.push('Video URL is not HTTPS/public; video-first platforms may reject it.');
 return [...new Set(warnings)];
 }
-function platformPayload(row, platform, env = {}) {
-const images = safeJson(row.image_urls_json, []).map(safeUrl).filter(Boolean);
-const caption = platformCaption(row, platform);
-const link = absolutePostUrl(row, platform);
-const readiness = getPlatformReadiness(env)[platform] || { api_ready: 0, missing_env: [] };
-const base = { platform, api_ready: !!readiness.api_ready, missing_env: readiness.missing_env || [], caption, link_url: link || '', image_count: images.length, first_image_url: images[0] || '' };
-if (platform === 'facebook') return { ...base, method: 'POST', endpoint_template: 'https://graph.facebook.com/v25.0/{FACEBOOK_PAGE_ID}/feed or /photos', body_preview: { message: caption, link: link || undefined, url: images[0] || undefined } };
-if (platform === 'instagram') return { ...base, method: 'POST', endpoint_template: 'https://graph.facebook.com/v25.0/{INSTAGRAM_USER_ID}/media then /media_publish', body_preview: { image_url: images[0] || '', caption } };
-if (platform === 'x') return { ...base, method: 'POST', endpoint_template: 'https://api.x.com/2/tweets', body_preview: { text: caption } };
-if (platform === 'pinterest') return { ...base, method: 'POST', endpoint_template: 'https://api.pinterest.com/v5/pins', body_preview: { board_id: '{PINTEREST_BOARD_ID}', title: trimTo(row.title || 'Devil n Dove workshop update', 100), description: caption, link: link || undefined, media_source: images[0] ? { source_type: 'image_url', url: images[0] } : undefined } };
-return { ...base, method: 'manual', endpoint_template: 'manual/copy-paste for now', body_preview: { caption, media: images, video_url: row.video_url || '' } };
+function platformPayload(row,platform,env={}){
+const images=safeJson(row.image_urls_json,[]).map(safeUrl).filter(Boolean);
+const caption=platformCaption(row,platform);
+const link=absolutePostUrl(row,platform);
+const readiness=getPlatformReadiness(env)[platform] ||{ api_ready:0,missing_env:[] };
+const base={ platform,api_ready:!!readiness.api_ready,missing_env:readiness.missing_env || [],caption,link_url:link || '',image_count:images.length,first_image_url:images[0] || ''};
+if (platform==='facebook') return{ ...base,method:'POST',endpoint_template:'https://graph.facebook.com/v25.0/{FACEBOOK_PAGE_ID}/feed or /photos',body_preview:{ message:caption,link:link || undefined,url:images[0] || undefined } };
+if (platform==='instagram') return{ ...base,method:'POST',endpoint_template:'https://graph.facebook.com/v25.0/{INSTAGRAM_USER_ID}/media then /media_publish',body_preview:{ image_url:images[0] || '',caption } };
+if (platform==='x') return{ ...base,method:'POST',endpoint_template:'https://api.x.com/2/tweets',body_preview:{ text:caption } };
+if (platform==='pinterest') return{ ...base,method:'POST',endpoint_template:'https://api.pinterest.com/v5/pins',body_preview:{ board_id:'{PINTEREST_BOARD_ID}',title:trimTo(row.title || 'Devil n Dove workshop update',100),description:caption,link:link || undefined,media_source:images[0] ?{ source_type:'image_url',url:images[0] } :undefined } };
+return{ ...base,method:'manual',endpoint_template:'manual/copy-paste for now',body_preview:{ caption,media:images,video_url:row.video_url || ''} };
 }
-function buildDryRunPayload(row, selectedPlatforms, env = {}) {
-const platforms = normalizePlatforms(selectedPlatforms || safeJson(row.target_platforms_json, []));
-const images = safeJson(row.image_urls_json, []).map(safeUrl).filter(Boolean);
-const warnings = buildMediaWarnings({ platforms, imageUrls: images, videoUrl: row.video_url || '', caption: row.caption || '' });
-return {
-social_post_queue_id: Number(row.social_post_queue_id || 0),
-scheduled_at: row.scheduled_at || null,
-blocked_until_schedule: isScheduledInFuture(row.scheduled_at),
-do_not_repost: Number(row.do_not_repost || 0) === 1,
-media_quality_warnings: warnings,
-platform_payloads: platforms.map((platform) => platformPayload(row, platform, env))
+function buildDryRunPayload(row,selectedPlatforms,env={}){
+const platforms=normalizePlatforms(selectedPlatforms || safeJson(row.target_platforms_json,[]));
+const images=safeJson(row.image_urls_json,[]).map(safeUrl).filter(Boolean);
+const warnings=buildMediaWarnings({ platforms,imageUrls:images,videoUrl:row.video_url || '',caption:row.caption || ''});
+return{
+social_post_queue_id:Number(row.social_post_queue_id || 0),
+scheduled_at:row.scheduled_at || null,
+blocked_until_schedule:isScheduledInFuture(row.scheduled_at),
+do_not_repost:Number(row.do_not_repost || 0)===1,
+media_quality_warnings:warnings,
+platform_payloads:platforms.map((platform)=> platformPayload(row,platform,env))
 };
 }
-async function ensureSchema(db) {
+async function ensureSchema(db){
 await db.prepare(`CREATE TABLE IF NOT EXISTS social_platform_connections (
     social_platform_connection_id INTEGER PRIMARY KEY AUTOINCREMENT,
     platform_key TEXT NOT NULL UNIQUE,
@@ -781,8 +781,8 @@ await db.prepare(`CREATE TABLE IF NOT EXISTS social_caption_templates (
     created_at TEXT DEFAULT CURRENT_TIMESTAMP,
     updated_at TEXT DEFAULT CURRENT_TIMESTAMP
   )`).run();
-await db.prepare(`CREATE INDEX IF NOT EXISTS idx_social_caption_templates_active ON social_caption_templates(is_active, content_pillar)`).run().catch(() => null);
-for (const template of CAPTION_TEMPLATES) {
+await db.prepare(`CREATE INDEX IF NOT EXISTS idx_social_caption_templates_active ON social_caption_templates(is_active, content_pillar)`).run().catch(()=> null);
+for (const template of CAPTION_TEMPLATES){
 await db.prepare(`INSERT INTO social_caption_templates (
       template_key, display_name, content_pillar, default_platforms_json, default_hashtags,
       body_template, call_to_action, is_active, notes, updated_at
@@ -796,39 +796,39 @@ template.default_hashtags,
 template.body_template,
 template.call_to_action,
 template.notes
-).run().catch(() => null);
+).run().catch(()=> null);
 }
-await db.prepare(`CREATE INDEX IF NOT EXISTS idx_social_post_queue_status ON social_post_queue(post_status, approval_status, scheduled_at)`).run().catch(() => null);
-await db.prepare(`CREATE INDEX IF NOT EXISTS idx_social_post_queue_source ON social_post_queue(source_type, source_id)`).run().catch(() => null);
-await db.prepare(`CREATE INDEX IF NOT EXISTS idx_social_post_attempts_queue ON social_post_attempts(social_post_queue_id, platform_key)`).run().catch(() => null);
-await ensureColumn(db, 'social_post_queue', 'last_publish_attempt_at', 'last_publish_attempt_at TEXT');
-await ensureColumn(db, 'social_post_queue', 'api_publish_mode', "api_publish_mode TEXT DEFAULT 'review_first'");
-await ensureColumn(db, 'social_post_attempts', 'request_mode', 'request_mode TEXT');
-await ensureColumn(db, 'social_post_attempts', 'http_status', 'http_status INTEGER');
-await ensureColumn(db, 'social_post_attempts', 'platform_response_id', 'platform_response_id TEXT');
-await ensureColumn(db, 'social_post_attempts', 'published_url', 'published_url TEXT');
-await ensureColumn(db, 'social_post_queue', 'platform_caption_overrides_json', "platform_caption_overrides_json TEXT DEFAULT '{}'");
-await ensureColumn(db, 'social_post_queue', 'media_quality_warnings_json', "media_quality_warnings_json TEXT DEFAULT '[]'");
-await ensureColumn(db, 'social_post_queue', 'duplicate_signature', 'duplicate_signature TEXT');
-await ensureColumn(db, 'social_post_queue', 'do_not_repost', 'do_not_repost INTEGER DEFAULT 0');
-await ensureColumn(db, 'social_post_queue', 'schedule_timezone', 'schedule_timezone TEXT');
-await ensureColumn(db, 'social_post_queue', 'dry_run_payload_json', "dry_run_payload_json TEXT DEFAULT '{}'");
-await ensureColumn(db, 'social_post_queue', 'last_dry_run_at', 'last_dry_run_at TEXT');
-await ensureColumn(db, 'social_post_queue', 'caption_template_key', 'caption_template_key TEXT');
-await ensureColumn(db, 'social_post_queue', 'content_pillar', 'content_pillar TEXT');
-await ensureColumn(db, 'social_post_queue', 'call_to_action', 'call_to_action TEXT');
-await ensureColumn(db, 'social_post_queue', 'utm_source', 'utm_source TEXT');
-await ensureColumn(db, 'social_post_queue', 'utm_medium', 'utm_medium TEXT');
-await ensureColumn(db, 'social_post_queue', 'utm_campaign', 'utm_campaign TEXT');
-await ensureColumn(db, 'social_post_queue', 'utm_url', 'utm_url TEXT');
-await ensureColumn(db, 'social_post_queue', 'privacy_status', "privacy_status TEXT DEFAULT 'needs_review'");
-await ensureColumn(db, 'social_post_queue', 'privacy_notes', 'privacy_notes TEXT');
-await ensureColumn(db, 'social_post_queue', 'media_consent_required', 'media_consent_required INTEGER DEFAULT 1');
-await ensureColumn(db, 'social_post_queue', 'customer_media_present', 'customer_media_present INTEGER DEFAULT 0');
-await ensureColumn(db, 'social_post_queue', 'approved_for_public_post', 'approved_for_public_post INTEGER DEFAULT 0');
-await db.prepare(`CREATE INDEX IF NOT EXISTS idx_social_post_queue_duplicate ON social_post_queue(duplicate_signature, do_not_repost)`).run().catch(() => null);
+await db.prepare(`CREATE INDEX IF NOT EXISTS idx_social_post_queue_status ON social_post_queue(post_status, approval_status, scheduled_at)`).run().catch(()=> null);
+await db.prepare(`CREATE INDEX IF NOT EXISTS idx_social_post_queue_source ON social_post_queue(source_type, source_id)`).run().catch(()=> null);
+await db.prepare(`CREATE INDEX IF NOT EXISTS idx_social_post_attempts_queue ON social_post_attempts(social_post_queue_id, platform_key)`).run().catch(()=> null);
+await ensureColumn(db,'social_post_queue','last_publish_attempt_at','last_publish_attempt_at TEXT');
+await ensureColumn(db,'social_post_queue','api_publish_mode',"api_publish_mode TEXT DEFAULT 'review_first'");
+await ensureColumn(db,'social_post_attempts','request_mode','request_mode TEXT');
+await ensureColumn(db,'social_post_attempts','http_status','http_status INTEGER');
+await ensureColumn(db,'social_post_attempts','platform_response_id','platform_response_id TEXT');
+await ensureColumn(db,'social_post_attempts','published_url','published_url TEXT');
+await ensureColumn(db,'social_post_queue','platform_caption_overrides_json',"platform_caption_overrides_json TEXT DEFAULT '{}'");
+await ensureColumn(db,'social_post_queue','media_quality_warnings_json',"media_quality_warnings_json TEXT DEFAULT '[]'");
+await ensureColumn(db,'social_post_queue','duplicate_signature','duplicate_signature TEXT');
+await ensureColumn(db,'social_post_queue','do_not_repost','do_not_repost INTEGER DEFAULT 0');
+await ensureColumn(db,'social_post_queue','schedule_timezone','schedule_timezone TEXT');
+await ensureColumn(db,'social_post_queue','dry_run_payload_json',"dry_run_payload_json TEXT DEFAULT '{}'");
+await ensureColumn(db,'social_post_queue','last_dry_run_at','last_dry_run_at TEXT');
+await ensureColumn(db,'social_post_queue','caption_template_key','caption_template_key TEXT');
+await ensureColumn(db,'social_post_queue','content_pillar','content_pillar TEXT');
+await ensureColumn(db,'social_post_queue','call_to_action','call_to_action TEXT');
+await ensureColumn(db,'social_post_queue','utm_source','utm_source TEXT');
+await ensureColumn(db,'social_post_queue','utm_medium','utm_medium TEXT');
+await ensureColumn(db,'social_post_queue','utm_campaign','utm_campaign TEXT');
+await ensureColumn(db,'social_post_queue','utm_url','utm_url TEXT');
+await ensureColumn(db,'social_post_queue','privacy_status',"privacy_status TEXT DEFAULT 'needs_review'");
+await ensureColumn(db,'social_post_queue','privacy_notes','privacy_notes TEXT');
+await ensureColumn(db,'social_post_queue','media_consent_required','media_consent_required INTEGER DEFAULT 1');
+await ensureColumn(db,'social_post_queue','customer_media_present','customer_media_present INTEGER DEFAULT 0');
+await ensureColumn(db,'social_post_queue','approved_for_public_post','approved_for_public_post INTEGER DEFAULT 0');
+await db.prepare(`CREATE INDEX IF NOT EXISTS idx_social_post_queue_duplicate ON social_post_queue(duplicate_signature, do_not_repost)`).run().catch(()=> null);
 
-for (const platform of PLATFORM_DEFINITIONS) {
+for (const platform of PLATFORM_DEFINITIONS){
 await db.prepare(`INSERT INTO social_platform_connections (
       platform_key, display_name, connection_status, api_ready, requires_oauth, required_scopes, notes, updated_at
     ) VALUES (?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP)
@@ -844,12 +844,12 @@ platform.api_ready,
 platform.requires_oauth,
 platform.required_scopes,
 platform.notes
-).run().catch(() => null);
+).run().catch(()=> null);
 }
 }
-async function summarize(db, env = {}) {
+async function summarize(db,env={}){
 // Build 197: dashboard reads do not run a large DDL/seed pass. The deployment migration owns schema changes.
-const summary = await db.prepare(`SELECT
+const summary=await db.prepare(`SELECT
     COUNT(*) AS total,
     SUM(CASE WHEN post_status IN ('draft','ready') THEN 1 ELSE 0 END) AS open_count,
     SUM(CASE WHEN approval_status='needs_review' THEN 1 ELSE 0 END) AS needs_review_count,
@@ -857,12 +857,12 @@ const summary = await db.prepare(`SELECT
     SUM(CASE WHEN COALESCE(scheduled_at,'') <> '' AND datetime(scheduled_at) > datetime('now') AND post_status IN ('draft','ready') THEN 1 ELSE 0 END) AS scheduled_count,
     SUM(CASE WHEN COALESCE(scheduled_at,'') <> '' AND datetime(scheduled_at) <= datetime('now') AND post_status='ready' AND approval_status='approved' THEN 1 ELSE 0 END) AS due_count,
     SUM(CASE WHEN COALESCE(do_not_repost,0)=1 AND post_status IN ('draft','ready') THEN 1 ELSE 0 END) AS duplicate_warning_count
-    FROM social_post_queue`).first().catch(() => ({ total: 0, open_count: 0, needs_review_count: 0, posted_count: 0, scheduled_count: 0, due_count: 0, duplicate_warning_count: 0 }));
-const queue = rows(await db.prepare(`SELECT * FROM social_post_queue ORDER BY datetime(updated_at) DESC, social_post_queue_id DESC LIMIT 50`).all().catch(() => ({ results: [] })));
-const platforms = rows(await db.prepare(`SELECT * FROM social_platform_connections ORDER BY platform_key`).all().catch(() => ({ results: [] })));
-const attempts = rows(await db.prepare(`SELECT a.*, q.social_post_key FROM social_post_attempts a INNER JOIN social_post_queue q ON q.social_post_queue_id = a.social_post_queue_id ORDER BY datetime(a.attempted_at) DESC LIMIT 30`).all().catch(() => ({ results: [] })));
-const templates = rows(await db.prepare(`SELECT * FROM social_caption_templates WHERE COALESCE(is_active,1)=1 ORDER BY content_pillar, display_name`).all().catch(() => ({ results: [] })));
-const calendar = rows(await db.prepare(`SELECT
+    FROM social_post_queue`).first().catch(()=> ({ total:0,open_count:0,needs_review_count:0,posted_count:0,scheduled_count:0,due_count:0,duplicate_warning_count:0 }));
+const queue=rows(await db.prepare(`SELECT * FROM social_post_queue ORDER BY datetime(updated_at) DESC, social_post_queue_id DESC LIMIT 50`).all().catch(()=> ({ results:[] })));
+const platforms=rows(await db.prepare(`SELECT * FROM social_platform_connections ORDER BY platform_key`).all().catch(()=> ({ results:[] })));
+const attempts=rows(await db.prepare(`SELECT a.*, q.social_post_key FROM social_post_attempts a INNER JOIN social_post_queue q ON q.social_post_queue_id = a.social_post_queue_id ORDER BY datetime(a.attempted_at) DESC LIMIT 30`).all().catch(()=> ({ results:[] })));
+const templates=rows(await db.prepare(`SELECT * FROM social_caption_templates WHERE COALESCE(is_active,1)=1 ORDER BY content_pillar, display_name`).all().catch(()=> ({ results:[] })));
+const calendar=rows(await db.prepare(`SELECT
       substr(COALESCE(scheduled_at, created_at), 1, 10) AS calendar_date,
       COUNT(*) AS total,
       SUM(CASE WHEN post_status='ready' AND approval_status='approved' THEN 1 ELSE 0 END) AS ready_count,
@@ -874,28 +874,28 @@ const calendar = rows(await db.prepare(`SELECT
       AND COALESCE(post_status,'draft') <> 'archived'
     GROUP BY calendar_date
     ORDER BY calendar_date ASC
-    LIMIT 60`).all().catch(() => ({ results: [] })));
+    LIMIT 60`).all().catch(()=> ({ results:[] })));
 await ensureUtmAnalyticsColumns(db);
-const hasPageViews = await tableExists(db, 'site_page_views');
-const hasSessions = await tableExists(db, 'site_visitor_sessions');
-const hasCustomRequests = await tableExists(db, 'custom_requests');
-const utm_rollups = rows(await db.prepare(`${hasPageViews || hasSessions || hasCustomRequests ? `WITH
+const hasPageViews=await tableExists(db,'site_page_views');
+const hasSessions=await tableExists(db,'site_visitor_sessions');
+const hasCustomRequests=await tableExists(db,'custom_requests');
+const utm_rollups=rows(await db.prepare(`${hasPageViews || hasSessions || hasCustomRequests ? `WITH
 q AS (
 SELECT COALESCE(NULLIF(utm_source,''),'unknown') AS utm_source,
 COALESCE(NULLIF(utm_medium,''),'social') AS utm_medium,
 COALESCE(NULLIF(utm_campaign,''),'uncategorized') AS utm_campaign,
 COUNT(*) AS total_posts,
-SUM(CASE WHEN post_status='posted' THEN 1 ELSE 0 END) AS posted_count,
+SUM(CASE WHEN post_status='posted'THEN 1 ELSE 0 END) AS posted_count,
 SUM(CASE WHEN post_status IN ('draft','ready') THEN 1 ELSE 0 END) AS open_count,
-SUM(CASE WHEN approval_status='approved' THEN 1 ELSE 0 END) AS approved_count
+SUM(CASE WHEN approval_status='approved'THEN 1 ELSE 0 END) AS approved_count
 FROM social_post_queue
 WHERE COALESCE(post_status,'draft') <> 'archived'
-GROUP BY utm_source, utm_medium, utm_campaign
+GROUP BY utm_source,utm_medium,utm_campaign
 ),
-v AS (${hasPageViews ? `SELECT COALESCE(NULLIF(utm_source,''),'unknown') AS utm_source, COALESCE(NULLIF(utm_medium,''),'social') AS utm_medium, COALESCE(NULLIF(utm_campaign,''),'uncategorized') AS utm_campaign, COUNT(*) AS page_views, COUNT(DISTINCT site_visitor_session_id) AS visitor_sessions, SUM(CASE WHEN path LIKE '/checkout%' THEN 1 ELSE 0 END) AS checkout_views FROM site_page_views WHERE COALESCE(utm_campaign,'') <> '' GROUP BY utm_source, utm_medium, utm_campaign` : `SELECT 'none' AS utm_source, 'none' AS utm_medium, 'none' AS utm_campaign, 0 AS page_views, 0 AS visitor_sessions, 0 AS checkout_views WHERE 0`}),
-s AS (${hasSessions ? `SELECT COALESCE(NULLIF(utm_source,''),'unknown') AS utm_source, COALESCE(NULLIF(utm_medium,''),'social') AS utm_medium, COALESCE(NULLIF(utm_campaign,''),'uncategorized') AS utm_campaign, COUNT(*) AS session_count, SUM(CASE WHEN is_checkout_started=1 THEN 1 ELSE 0 END) AS checkout_starts, SUM(CASE WHEN is_abandoned_cart=1 THEN 1 ELSE 0 END) AS abandoned_carts FROM site_visitor_sessions WHERE COALESCE(utm_campaign,'') <> '' GROUP BY utm_source, utm_medium, utm_campaign` : `SELECT 'none' AS utm_source, 'none' AS utm_medium, 'none' AS utm_campaign, 0 AS session_count, 0 AS checkout_starts, 0 AS abandoned_carts WHERE 0`}),
-cr AS (${hasCustomRequests ? `SELECT COALESCE(NULLIF(utm_source,''),'unknown') AS utm_source, COALESCE(NULLIF(utm_medium,''),'social') AS utm_medium, COALESCE(NULLIF(utm_campaign,''),'uncategorized') AS utm_campaign, COUNT(*) AS custom_request_count FROM custom_requests WHERE COALESCE(utm_campaign,'') <> '' GROUP BY utm_source, utm_medium, utm_campaign` : `SELECT 'none' AS utm_source, 'none' AS utm_medium, 'none' AS utm_campaign, 0 AS custom_request_count WHERE 0`})
-SELECT q.*, COALESCE(v.page_views,0) AS page_views, COALESCE(v.visitor_sessions,0) AS visitor_sessions, COALESCE(v.checkout_views,0) AS checkout_views, COALESCE(s.session_count,0) AS session_count, COALESCE(s.checkout_starts,0) AS checkout_starts, COALESCE(s.abandoned_carts,0) AS abandoned_carts, COALESCE(cr.custom_request_count,0) AS custom_request_count
+v AS (${hasPageViews ? `SELECT COALESCE(NULLIF(utm_source,''),'unknown') AS utm_source, COALESCE(NULLIF(utm_medium,''),'social') AS utm_medium, COALESCE(NULLIF(utm_campaign,''),'uncategorized') AS utm_campaign, COUNT(*) AS page_views, COUNT(DISTINCT site_visitor_session_id) AS visitor_sessions, SUM(CASE WHEN path LIKE '/checkout%' THEN 1 ELSE 0 END) AS checkout_views FROM site_page_views WHERE COALESCE(utm_campaign,'') <> '' GROUP BY utm_source, utm_medium, utm_campaign`:`SELECT 'none' AS utm_source, 'none' AS utm_medium, 'none' AS utm_campaign, 0 AS page_views, 0 AS visitor_sessions, 0 AS checkout_views WHERE 0`}),
+s AS (${hasSessions ? `SELECT COALESCE(NULLIF(utm_source,''),'unknown') AS utm_source, COALESCE(NULLIF(utm_medium,''),'social') AS utm_medium, COALESCE(NULLIF(utm_campaign,''),'uncategorized') AS utm_campaign, COUNT(*) AS session_count, SUM(CASE WHEN is_checkout_started=1 THEN 1 ELSE 0 END) AS checkout_starts, SUM(CASE WHEN is_abandoned_cart=1 THEN 1 ELSE 0 END) AS abandoned_carts FROM site_visitor_sessions WHERE COALESCE(utm_campaign,'') <> '' GROUP BY utm_source, utm_medium, utm_campaign`:`SELECT 'none' AS utm_source, 'none' AS utm_medium, 'none' AS utm_campaign, 0 AS session_count, 0 AS checkout_starts, 0 AS abandoned_carts WHERE 0`}),
+cr AS (${hasCustomRequests ? `SELECT COALESCE(NULLIF(utm_source,''),'unknown') AS utm_source, COALESCE(NULLIF(utm_medium,''),'social') AS utm_medium, COALESCE(NULLIF(utm_campaign,''),'uncategorized') AS utm_campaign, COUNT(*) AS custom_request_count FROM custom_requests WHERE COALESCE(utm_campaign,'') <> '' GROUP BY utm_source, utm_medium, utm_campaign`:`SELECT 'none' AS utm_source, 'none' AS utm_medium, 'none' AS utm_campaign, 0 AS custom_request_count WHERE 0`})
+SELECT q.*,COALESCE(v.page_views,0) AS page_views,COALESCE(v.visitor_sessions,0) AS visitor_sessions,COALESCE(v.checkout_views,0) AS checkout_views,COALESCE(s.session_count,0) AS session_count,COALESCE(s.checkout_starts,0) AS checkout_starts,COALESCE(s.abandoned_carts,0) AS abandoned_carts,COALESCE(cr.custom_request_count,0) AS custom_request_count
 FROM q
 LEFT JOIN v ON v.utm_source=q.utm_source AND v.utm_medium=q.utm_medium AND v.utm_campaign=q.utm_campaign
 LEFT JOIN s ON s.utm_source=q.utm_source AND s.utm_medium=q.utm_medium AND s.utm_campaign=q.utm_campaign
@@ -904,68 +904,68 @@ COALESCE(NULLIF(utm_source,''),'unknown') AS utm_source,
 COALESCE(NULLIF(utm_medium,''),'social') AS utm_medium,
 COALESCE(NULLIF(utm_campaign,''),'uncategorized') AS utm_campaign,
 COUNT(*) AS total_posts,
-SUM(CASE WHEN post_status='posted' THEN 1 ELSE 0 END) AS posted_count,
+SUM(CASE WHEN post_status='posted'THEN 1 ELSE 0 END) AS posted_count,
 SUM(CASE WHEN post_status IN ('draft','ready') THEN 1 ELSE 0 END) AS open_count,
-SUM(CASE WHEN approval_status='approved' THEN 1 ELSE 0 END) AS approved_count,
-0 AS page_views, 0 AS visitor_sessions, 0 AS checkout_views, 0 AS session_count, 0 AS checkout_starts, 0 AS abandoned_carts, 0 AS custom_request_count
+SUM(CASE WHEN approval_status='approved'THEN 1 ELSE 0 END) AS approved_count,
+0 AS page_views,0 AS visitor_sessions,0 AS checkout_views,0 AS session_count,0 AS checkout_starts,0 AS abandoned_carts,0 AS custom_request_count
 FROM social_post_queue
 WHERE COALESCE(post_status,'draft') <> 'archived'
-GROUP BY utm_source, utm_medium, utm_campaign`}
+GROUP BY utm_source,utm_medium,utm_campaign`}
     ORDER BY total_posts DESC, posted_count DESC, page_views DESC, custom_request_count DESC, utm_campaign ASC
-    LIMIT 40`).all().catch(() => ({ results: [] })));
-const platform_readiness = getPlatformReadiness(env);
-const platformRows = platforms.map((platform) => ({
+    LIMIT 40`).all().catch(()=> ({ results:[] })));
+const platform_readiness=getPlatformReadiness(env);
+const platformRows=platforms.map((platform)=> ({
 ...platform,
-...(platform_readiness[platform.platform_key] || {}),
-stored_api_ready: platform.api_ready
+...(platform_readiness[platform.platform_key] ||{}),
+stored_api_ready:platform.api_ready
 }));
-return { summary, queue, platforms: platformRows, attempts, templates, calendar, utm_rollups, platform_readiness };
+return{ summary,queue,platforms:platformRows,attempts,templates,calendar,utm_rollups,platform_readiness };
 }
-function normalizeQueueRow(row = {}) {
-return {
+function normalizeQueueRow(row={}){
+return{
 ...row,
-target_platforms: safeJson(row.target_platforms_json, []),
-image_urls: safeJson(row.image_urls_json, []),
-platform_caption_overrides: safeJson(row.platform_caption_overrides_json, {}),
-media_quality_warnings: safeJson(row.media_quality_warnings_json, []),
-dry_run_payload: safeJson(row.dry_run_payload_json, {})
+target_platforms:safeJson(row.target_platforms_json,[]),
+image_urls:safeJson(row.image_urls_json,[]),
+platform_caption_overrides:safeJson(row.platform_caption_overrides_json,{}),
+media_quality_warnings:safeJson(row.media_quality_warnings_json,[]),
+dry_run_payload:safeJson(row.dry_run_payload_json,{})
 };
 }
-async function createQueuedPost(db, adminUser, payload = {}) {
-const title = trimTo(payload.title || payload.job_title || payload.process_title || 'Workshop update', 140);
-const summary = trimTo(payload.summary || payload.description || '', 1200);
-const templateKey = slugKey(payload.caption_template_key || payload.template_key || '');
-const template = await templateByKey(db, templateKey);
-const templatePlatforms = template ? safeJson(template.default_platforms_json, []) : [];
-const hashtags = normalizeHashtags(payload.hashtags || template?.default_hashtags || 'DevilnDove,HandmadeOntario,WorkshopMade,SmallBusinessCanada');
-const imageUrls = splitList(payload.image_urls || payload.image_url || payload.images).map(safeUrl).filter(Boolean).slice(0, 10);
-const videoUrl = safeUrl(payload.video_url || '');
-const linkUrl = safeUrl(payload.link_url || payload.product_url || '');
-const platforms = normalizePlatforms(payload.target_platforms || payload.platforms || templatePlatforms);
-const sourceType = slugKey(payload.source_type || 'job_update') || 'job_update';
-const sourceId = normalizeText(payload.source_id || payload.job_id || '');
-const contentPillar = slugKey(payload.content_pillar || template?.content_pillar || sourceType || 'workshop_update');
-const callToAction = normalizeText(payload.call_to_action || template?.call_to_action || 'Follow along with the Devil n Dove workshop.');
-const utmSource = normalizeText(payload.utm_source || 'devilndove_social');
-const utmMedium = normalizeText(payload.utm_medium || 'social');
-const utmCampaign = slugKey(payload.utm_campaign || templateKey || contentPillar || sourceType || 'workshop_update');
-const utmUrl = buildUtmUrl(linkUrl, { ...payload, utm_source: utmSource, utm_medium: utmMedium, utm_campaign: utmCampaign, caption_template_key: templateKey, source_type: sourceType }, platforms);
-const templatedCaption = template ? fillCaptionTemplate(template, { title, summary, call_to_action: callToAction, link_url: utmUrl || linkUrl, hashtags }) : '';
-const caption = trimTo(payload.caption || templatedCaption || buildCaption({ title, summary, hashtags, linkUrl: utmUrl || linkUrl }), 2200);
-const platformCaptionOverrides = normalizeCaptionOverrides(payload, platforms);
-const notes = normalizeText(payload.notes || '');
-const scheduledAt = parseScheduledAt(payload.scheduled_at || '');
-const scheduleTimezone = normalizeText(payload.schedule_timezone || payload.timezone || 'America/Toronto');
-const status = ['draft', 'ready'].includes(slugKey(payload.post_status)) ? slugKey(payload.post_status) : 'draft';
-const approval = status === 'ready' ? 'approved' : 'needs_review';
-const mediaWarnings = buildMediaWarnings({ platforms, imageUrls, videoUrl, caption });
-const duplicateSignature = buildDuplicateSignature({ title, caption, imageUrls, platforms, linkUrl });
-const existingDuplicate = await db.prepare(`SELECT social_post_queue_id, title, post_status FROM social_post_queue WHERE duplicate_signature = ? AND COALESCE(post_status,'draft') <> 'archived' ORDER BY datetime(created_at) DESC LIMIT 1`).bind(duplicateSignature).first().catch(() => null);
-const doNotRepost = existingDuplicate ? 1 : 0;
-const socialPostKey = buildQueueKey(`${sourceType}|${sourceId}|${title}|${summary}`);
-const mergedNotes = [notes, existingDuplicate ? `Possible duplicate of social queue #${existingDuplicate.social_post_queue_id}; review before reposting.` : ''].filter(Boolean).join(' | ');
+async function createQueuedPost(db,adminUser,payload={}){
+const title=trimTo(payload.title || payload.job_title || payload.process_title || 'Workshop update',140);
+const summary=trimTo(payload.summary || payload.description || '',1200);
+const templateKey=slugKey(payload.caption_template_key || payload.template_key || '');
+const template=await templateByKey(db,templateKey);
+const templatePlatforms=template ? safeJson(template.default_platforms_json,[]) :[];
+const hashtags=normalizeHashtags(payload.hashtags || template?.default_hashtags || 'DevilnDove,HandmadeOntario,WorkshopMade,SmallBusinessCanada');
+const imageUrls=splitList(payload.image_urls || payload.image_url || payload.images).map(safeUrl).filter(Boolean).slice(0,10);
+const videoUrl=safeUrl(payload.video_url || '');
+const linkUrl=safeUrl(payload.link_url || payload.product_url || '');
+const platforms=normalizePlatforms(payload.target_platforms || payload.platforms || templatePlatforms);
+const sourceType=slugKey(payload.source_type || 'job_update') || 'job_update';
+const sourceId=normalizeText(payload.source_id || payload.job_id || '');
+const contentPillar=slugKey(payload.content_pillar || template?.content_pillar || sourceType || 'workshop_update');
+const callToAction=normalizeText(payload.call_to_action || template?.call_to_action || 'Follow along with the Devil n Dove workshop.');
+const utmSource=normalizeText(payload.utm_source || 'devilndove_social');
+const utmMedium=normalizeText(payload.utm_medium || 'social');
+const utmCampaign=slugKey(payload.utm_campaign || templateKey || contentPillar || sourceType || 'workshop_update');
+const utmUrl=buildUtmUrl(linkUrl,{ ...payload,utm_source:utmSource,utm_medium:utmMedium,utm_campaign:utmCampaign,caption_template_key:templateKey,source_type:sourceType },platforms);
+const templatedCaption=template ? fillCaptionTemplate(template,{ title,summary,call_to_action:callToAction,link_url:utmUrl || linkUrl,hashtags }) :'';
+const caption=trimTo(payload.caption || templatedCaption || buildCaption({ title,summary,hashtags,linkUrl:utmUrl || linkUrl }),2200);
+const platformCaptionOverrides=normalizeCaptionOverrides(payload,platforms);
+const notes=normalizeText(payload.notes || '');
+const scheduledAt=parseScheduledAt(payload.scheduled_at || '');
+const scheduleTimezone=normalizeText(payload.schedule_timezone || payload.timezone || 'America/Toronto');
+const status=['draft','ready'].includes(slugKey(payload.post_status)) ? slugKey(payload.post_status) :'draft';
+const approval=status==='ready'? 'approved':'needs_review';
+const mediaWarnings=buildMediaWarnings({ platforms,imageUrls,videoUrl,caption });
+const duplicateSignature=buildDuplicateSignature({ title,caption,imageUrls,platforms,linkUrl });
+const existingDuplicate=await db.prepare(`SELECT social_post_queue_id, title, post_status FROM social_post_queue WHERE duplicate_signature = ? AND COALESCE(post_status,'draft') <> 'archived' ORDER BY datetime(created_at) DESC LIMIT 1`).bind(duplicateSignature).first().catch(()=> null);
+const doNotRepost=existingDuplicate ? 1 :0;
+const socialPostKey=buildQueueKey(`${sourceType}|${sourceId}|${title}|${summary}`);
+const mergedNotes=[notes,existingDuplicate ? `Possible duplicate of social queue #${existingDuplicate.social_post_queue_id}; review before reposting.`:''].filter(Boolean).join(' | ');
 
-const insert = await db.prepare(`INSERT INTO social_post_queue (
+const insert=await db.prepare(`INSERT INTO social_post_queue (
     social_post_key, source_type, source_id, title, summary, caption, hashtags,
     target_platforms_json, image_urls_json, video_url, link_url, approval_status,
     post_status, scheduled_at, created_by_user_id, updated_by_user_id, notes,
@@ -1003,49 +1003,49 @@ utmMedium || null,
 utmCampaign || null,
 utmUrl || null
 ).run();
-const socialPostQueueId = Number(insert?.meta?.last_row_id || 0);
+const socialPostQueueId=Number(insert?.meta?.last_row_id || 0);
 
-for (const platform of platforms) {
+for (const platform of platforms){
 await db.prepare(`INSERT INTO social_post_attempts (
       social_post_queue_id, platform_key, attempt_status, attempted_by_user_id, notes, attempted_at
     ) VALUES (?, ?, 'manual_ready', ?, ?, CURRENT_TIMESTAMP)`).bind(
 socialPostQueueId,
 platform,
 adminUser.user_id,
-doNotRepost ? 'Prepared but flagged as possible duplicate; review before publishing.' : 'Prepared for manual publishing/copy-paste.'
-).run().catch(() => null);
+doNotRepost ? 'Prepared but flagged as possible duplicate; review before publishing.':'Prepared for manual publishing/copy-paste.'
+).run().catch(()=> null);
 }
 
-return { social_post_queue_id: socialPostQueueId, social_post_key: socialPostKey, duplicate_warning: !!existingDuplicate, media_warnings: mediaWarnings };
+return{ social_post_queue_id:socialPostQueueId,social_post_key:socialPostKey,duplicate_warning:!!existingDuplicate,media_warnings:mediaWarnings };
 }
-async function updateStatus(db, adminUser, payload = {}) {
-const id = Number(payload.social_post_queue_id || 0);
+async function updateStatus(db,adminUser,payload={}){
+const id=Number(payload.social_post_queue_id || 0);
 if (!id) throw new Error('A social_post_queue_id is required.');
-const postStatus = slugKey(payload.post_status || '');
-const approvalStatus = slugKey(payload.approval_status || '');
-const allowedPost = new Set(['draft', 'ready', 'posted', 'failed', 'archived']);
-const allowedApproval = new Set(['needs_review', 'approved', 'rejected']);
-const fields = [];
-const bindings = [];
-if (allowedPost.has(postStatus)) { fields.push('post_status = ?'); bindings.push(postStatus); }
-if (allowedApproval.has(approvalStatus)) { fields.push('approval_status = ?'); bindings.push(approvalStatus); }
-if (payload.notes !== undefined) { fields.push('notes = ?'); bindings.push(normalizeText(payload.notes) || null); }
-if (payload.scheduled_at !== undefined) { fields.push('scheduled_at = ?'); bindings.push(parseScheduledAt(payload.scheduled_at) || null); }
-if (payload.schedule_timezone !== undefined) { fields.push('schedule_timezone = ?'); bindings.push(normalizeText(payload.schedule_timezone) || null); }
-if (payload.do_not_repost !== undefined) { fields.push('do_not_repost = ?'); bindings.push(Number(payload.do_not_repost) ? 1 : 0); }
-if (postStatus === 'posted') { fields.push('published_at = COALESCE(published_at, CURRENT_TIMESTAMP)'); }
+const postStatus=slugKey(payload.post_status || '');
+const approvalStatus=slugKey(payload.approval_status || '');
+const allowedPost=new Set(['draft','ready','posted','failed','archived']);
+const allowedApproval=new Set(['needs_review','approved','rejected']);
+const fields=[];
+const bindings=[];
+if (allowedPost.has(postStatus)){ fields.push('post_status = ?');bindings.push(postStatus);}
+if (allowedApproval.has(approvalStatus)){ fields.push('approval_status = ?');bindings.push(approvalStatus);}
+if (payload.notes !==undefined){ fields.push('notes = ?');bindings.push(normalizeText(payload.notes) || null);}
+if (payload.scheduled_at !==undefined){ fields.push('scheduled_at = ?');bindings.push(parseScheduledAt(payload.scheduled_at) || null);}
+if (payload.schedule_timezone !==undefined){ fields.push('schedule_timezone = ?');bindings.push(normalizeText(payload.schedule_timezone) || null);}
+if (payload.do_not_repost !==undefined){ fields.push('do_not_repost = ?');bindings.push(Number(payload.do_not_repost) ? 1 :0);}
+if (postStatus==='posted'){ fields.push('published_at = COALESCE(published_at, CURRENT_TIMESTAMP)');}
 if (!fields.length) throw new Error('No valid status change was provided.');
-fields.push('updated_by_user_id = ?'); bindings.push(adminUser.user_id);
+fields.push('updated_by_user_id = ?');bindings.push(adminUser.user_id);
 fields.push('updated_at = CURRENT_TIMESTAMP');
 bindings.push(id);
 await db.prepare(`UPDATE social_post_queue SET ${fields.join(', ')} WHERE social_post_queue_id = ?`).bind(...bindings).run();
 }
-async function recordManualPost(db, adminUser, payload = {}) {
-const id = Number(payload.social_post_queue_id || 0);
-const platform = slugKey(payload.platform_key || payload.platform || '');
+async function recordManualPost(db,adminUser,payload={}){
+const id=Number(payload.social_post_queue_id || 0);
+const platform=slugKey(payload.platform_key || payload.platform || '');
 if (!id || !platform) throw new Error('social_post_queue_id and platform_key are required.');
-const externalUrl = safeUrl(payload.external_post_url || '');
-const externalId = normalizeText(payload.external_post_id || '');
+const externalUrl=safeUrl(payload.external_post_url || '');
+const externalId=normalizeText(payload.external_post_id || '');
 await db.prepare(`INSERT INTO social_post_attempts (
     social_post_queue_id, platform_key, attempt_status, external_post_url, external_post_id,
     response_json, attempted_by_user_id, attempted_at, notes
@@ -1054,102 +1054,102 @@ id,
 platform,
 externalUrl || null,
 externalId || null,
-JSON.stringify({ mode: 'manual_record', recorded_at: new Date().toISOString() }),
+JSON.stringify({ mode:'manual_record',recorded_at:new Date().toISOString() }),
 adminUser.user_id,
 normalizeText(payload.notes || 'Manual post recorded.')
 ).run();
-await db.prepare(`UPDATE social_post_queue SET post_status='posted', approval_status='approved', published_at=COALESCE(published_at,CURRENT_TIMESTAMP), updated_by_user_id=?, updated_at=CURRENT_TIMESTAMP WHERE social_post_queue_id=?`).bind(adminUser.user_id, id).run();
+await db.prepare(`UPDATE social_post_queue SET post_status='posted', approval_status='approved', published_at=COALESCE(published_at,CURRENT_TIMESTAMP), updated_by_user_id=?, updated_at=CURRENT_TIMESTAMP WHERE social_post_queue_id=?`).bind(adminUser.user_id,id).run();
 }
-async function generateFromRecentMedia(db, adminUser) {
-const mediaRows = rows(await db.prepare(`SELECT public_url, original_filename, variant_role, annotation_notes, created_at FROM media_assets WHERE COALESCE(public_url,'') <> '' ORDER BY datetime(created_at) DESC LIMIT 6`).all().catch(() => ({ results: [] })));
+async function generateFromRecentMedia(db,adminUser){
+const mediaRows=rows(await db.prepare(`SELECT public_url, original_filename, variant_role, annotation_notes, created_at FROM media_assets WHERE COALESCE(public_url,'') <> '' ORDER BY datetime(created_at) DESC LIMIT 6`).all().catch(()=> ({ results:[] })));
 if (!mediaRows.length) throw new Error('No recent media assets with public URLs were found. Upload job/process images first.');
-const imageUrls = mediaRows.map((row) => row.public_url).filter(Boolean);
-return createQueuedPost(db, adminUser, {
-source_type: 'recent_media',
-title: 'Fresh from the Devil n Dove workshop',
-summary: 'A quick behind-the-scenes look at what we are making, testing, repairing, or learning in the shop today.',
-image_urls: imageUrls,
-hashtags: 'DevilnDove,WorkshopMade,HandmadeOntario,SmallBusinessCanada,BehindTheScenes',
-target_platforms: ['facebook', 'instagram', 'tiktok', 'x'],
-notes: `Generated from ${imageUrls.length} recent media asset(s). Review and edit before posting.`
+const imageUrls=mediaRows.map((row)=> row.public_url).filter(Boolean);
+return createQueuedPost(db,adminUser,{
+source_type:'recent_media',
+title:'Fresh from the Devil n Dove workshop',
+summary:'A quick behind-the-scenes look at what we are making, testing, repairing, or learning in the shop today.',
+image_urls:imageUrls,
+hashtags:'DevilnDove,WorkshopMade,HandmadeOntario,SmallBusinessCanada,BehindTheScenes',
+target_platforms:['facebook','instagram','tiktok','x'],
+notes:`Generated from ${imageUrls.length} recent media asset(s). Review and edit before posting.`
 });
 }
 
-async function publishToFacebook(env, row, images) {
-const pageId = envText(env, 'FACEBOOK_PAGE_ID', 'META_PAGE_ID');
-const token = envText(env, 'FACEBOOK_PAGE_ACCESS_TOKEN', 'META_PAGE_ACCESS_TOKEN');
+async function publishToFacebook(env,row,images){
+const pageId=envText(env,'FACEBOOK_PAGE_ID','META_PAGE_ID');
+const token=envText(env,'FACEBOOK_PAGE_ACCESS_TOKEN','META_PAGE_ACCESS_TOKEN');
 if (!pageId || !token) throw new Error('Facebook API credentials are missing. Add FACEBOOK_PAGE_ID and FACEBOOK_PAGE_ACCESS_TOKEN.');
-const caption = platformCaption(row, 'facebook');
-const version = envText(env, 'META_GRAPH_API_VERSION') || 'v25.0';
-const url = images[0]
+const caption=platformCaption(row,'facebook');
+const version=envText(env,'META_GRAPH_API_VERSION') || 'v25.0';
+const url=images[0]
 ? `https://graph.facebook.com/${version}/${encodeURIComponent(pageId)}/photos`
-: `https://graph.facebook.com/${version}/${encodeURIComponent(pageId)}/feed`;
-const body = new URLSearchParams();
-body.set('access_token', token);
-if (images[0]) {
-body.set('url', images[0]);
-body.set('caption', caption);
-} else {
-body.set('message', caption);
+:`https://graph.facebook.com/${version}/${encodeURIComponent(pageId)}/feed`;
+const body=new URLSearchParams();
+body.set('access_token',token);
+if (images[0]){
+body.set('url',images[0]);
+body.set('caption',caption);
+} else{
+body.set('message',caption);
 }
-const { response, body: responseBody, text } = await fetchJson(url, { method: 'POST', body });
+const{ response,body:responseBody,text }=await fetchJson(url,{ method:'POST',body });
 if (!response.ok) throw new Error(`Facebook publish failed (${response.status}): ${responseBody?.error?.message || text || 'unknown error'}`);
-return { id: responseBody.post_id || responseBody.id || '', url: responseBody.post_id ? `https://www.facebook.com/${responseBody.post_id}` : '', response: responseBody, http_status: response.status };
+return{ id:responseBody.post_id || responseBody.id || '',url:responseBody.post_id ? `https://www.facebook.com/${responseBody.post_id}`:'',response:responseBody,http_status:response.status };
 }
-async function publishToInstagram(env, row, images) {
-const igUserId = envText(env, 'INSTAGRAM_USER_ID', 'IG_USER_ID', 'INSTAGRAM_BUSINESS_ACCOUNT_ID');
-const token = envText(env, 'INSTAGRAM_ACCESS_TOKEN', 'META_PAGE_ACCESS_TOKEN', 'FACEBOOK_PAGE_ACCESS_TOKEN');
+async function publishToInstagram(env,row,images){
+const igUserId=envText(env,'INSTAGRAM_USER_ID','IG_USER_ID','INSTAGRAM_BUSINESS_ACCOUNT_ID');
+const token=envText(env,'INSTAGRAM_ACCESS_TOKEN','META_PAGE_ACCESS_TOKEN','FACEBOOK_PAGE_ACCESS_TOKEN');
 if (!igUserId || !token) throw new Error('Instagram API credentials are missing. Add INSTAGRAM_USER_ID and INSTAGRAM_ACCESS_TOKEN or FACEBOOK_PAGE_ACCESS_TOKEN.');
 if (!images[0]) throw new Error('Instagram publishing needs at least one public image URL.');
-const version = envText(env, 'META_GRAPH_API_VERSION') || 'v25.0';
-const createBody = new URLSearchParams();
-createBody.set('access_token', token);
-createBody.set('image_url', images[0]);
-createBody.set('caption', platformCaption(row, 'instagram'));
-const createResult = await fetchJson(`https://graph.facebook.com/${version}/${encodeURIComponent(igUserId)}/media`, { method: 'POST', body: createBody });
+const version=envText(env,'META_GRAPH_API_VERSION') || 'v25.0';
+const createBody=new URLSearchParams();
+createBody.set('access_token',token);
+createBody.set('image_url',images[0]);
+createBody.set('caption',platformCaption(row,'instagram'));
+const createResult=await fetchJson(`https://graph.facebook.com/${version}/${encodeURIComponent(igUserId)}/media`,{ method:'POST',body:createBody });
 if (!createResult.response.ok || !createResult.body?.id) throw new Error(`Instagram media container failed (${createResult.response.status}): ${createResult.body?.error?.message || createResult.text || 'unknown error'}`);
-const publishBody = new URLSearchParams();
-publishBody.set('access_token', token);
-publishBody.set('creation_id', createResult.body.id);
-const publishResult = await fetchJson(`https://graph.facebook.com/${version}/${encodeURIComponent(igUserId)}/media_publish`, { method: 'POST', body: publishBody });
+const publishBody=new URLSearchParams();
+publishBody.set('access_token',token);
+publishBody.set('creation_id',createResult.body.id);
+const publishResult=await fetchJson(`https://graph.facebook.com/${version}/${encodeURIComponent(igUserId)}/media_publish`,{ method:'POST',body:publishBody });
 if (!publishResult.response.ok) throw new Error(`Instagram publish failed (${publishResult.response.status}): ${publishResult.body?.error?.message || publishResult.text || 'unknown error'}`);
-return { id: publishResult.body?.id || createResult.body.id || '', url: '', response: { create: createResult.body, publish: publishResult.body }, http_status: publishResult.response.status };
+return{ id:publishResult.body?.id || createResult.body.id || '',url:'',response:{ create:createResult.body,publish:publishResult.body },http_status:publishResult.response.status };
 }
-async function publishToX(env, row) {
-const token = envText(env, 'X_USER_ACCESS_TOKEN', 'TWITTER_USER_ACCESS_TOKEN');
+async function publishToX(env,row){
+const token=envText(env,'X_USER_ACCESS_TOKEN','TWITTER_USER_ACCESS_TOKEN');
 if (!token) throw new Error('X API token is missing. Add X_USER_ACCESS_TOKEN with post/write permission.');
-const text = platformCaption(row, 'x');
+const text=platformCaption(row,'x');
 if (!text) throw new Error('X post text is empty. Add a caption before publishing.');
-const { response, body, text: raw } = await fetchJson('https://api.x.com/2/tweets', {
-method: 'POST',
-headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
-body: JSON.stringify({ text })
+const{ response,body,text:raw }=await fetchJson('https://api.x.com/2/tweets',{
+method:'POST',
+headers:{ Authorization:`Bearer ${token}`,'Content-Type':'application/json'},
+body:JSON.stringify({ text })
 });
 if (!response.ok) throw new Error(`X publish failed (${response.status}): ${body?.detail || body?.title || body?.errors?.[0]?.message || raw || 'unknown error'}`);
-const id = body?.data?.id || '';
-return { id, url: id ? `https://x.com/i/web/status/${id}` : '', response: body, http_status: response.status };
+const id=body?.data?.id || '';
+return{ id,url:id ? `https://x.com/i/web/status/${id}`:'',response:body,http_status:response.status };
 }
-async function publishToPinterest(env, row, images) {
-const token = envText(env, 'PINTEREST_ACCESS_TOKEN');
-const boardId = envText(env, 'PINTEREST_BOARD_ID');
+async function publishToPinterest(env,row,images){
+const token=envText(env,'PINTEREST_ACCESS_TOKEN');
+const boardId=envText(env,'PINTEREST_BOARD_ID');
 if (!token || !boardId) throw new Error('Pinterest API credentials are missing. Add PINTEREST_ACCESS_TOKEN and PINTEREST_BOARD_ID.');
 if (!images[0]) throw new Error('Pinterest publishing needs at least one public image URL.');
-const payload = {
-board_id: boardId,
-title: trimTo(row.title || 'Devil n Dove workshop update', 100),
-description: platformCaption(row, 'pinterest'),
-link: absolutePostUrl(row, 'pinterest') || undefined,
-media_source: { source_type: 'image_url', url: images[0] }
+const payload={
+board_id:boardId,
+title:trimTo(row.title || 'Devil n Dove workshop update',100),
+description:platformCaption(row,'pinterest'),
+link:absolutePostUrl(row,'pinterest') || undefined,
+media_source:{ source_type:'image_url',url:images[0] }
 };
-const { response, body, text } = await fetchJson('https://api.pinterest.com/v5/pins', {
-method: 'POST',
-headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
-body: JSON.stringify(payload)
+const{ response,body,text }=await fetchJson('https://api.pinterest.com/v5/pins',{
+method:'POST',
+headers:{ Authorization:`Bearer ${token}`,'Content-Type':'application/json'},
+body:JSON.stringify(payload)
 });
 if (!response.ok) throw new Error(`Pinterest publish failed (${response.status}): ${body?.message || text || 'unknown error'}`);
-return { id: body?.id || '', url: body?.link || '', response: body, http_status: response.status };
+return{ id:body?.id || '',url:body?.link || '',response:body,http_status:response.status };
 }
-async function recordApiAttempt(db, adminUser, id, platform, status, details = {}) {
+async function recordApiAttempt(db,adminUser,id,platform,status,details={}){
 await db.prepare(`INSERT INTO social_post_attempts (
     social_post_queue_id, platform_key, attempt_status, external_post_url, external_post_id,
     platform_response_id, published_url, request_mode, http_status, response_json,
@@ -1163,10 +1163,10 @@ details.external_post_id || details.id || null,
 details.platform_response_id || details.id || null,
 details.published_url || details.url || null,
 details.http_status || null,
-JSON.stringify(details.response || details.error || details || {}),
+JSON.stringify(details.response || details.error || details ||{}),
 adminUser.user_id,
 details.notes || null
-).run().catch(async () => {
+).run().catch(async ()=>{
 await db.prepare(`INSERT INTO social_post_attempts (
       social_post_queue_id, platform_key, attempt_status, external_post_url, external_post_id,
       response_json, attempted_by_user_id, attempted_at, notes
@@ -1176,27 +1176,27 @@ platform,
 status,
 details.external_post_url || details.url || null,
 details.external_post_id || details.id || null,
-JSON.stringify(details.response || details.error || details || {}),
+JSON.stringify(details.response || details.error || details ||{}),
 adminUser.user_id,
 details.notes || null
-).run().catch(() => null);
+).run().catch(()=> null);
 });
 }
 
 
-async function saveCaptionTemplate(db, payload = {}) {
-const templateKey = slugKey(payload.template_key || payload.caption_template_key || payload.display_name || '');
-const displayName = trimTo(payload.display_name || templateKey.replace(/_/g, ' '), 120);
-const bodyTemplate = trimTo(payload.body_template || '', 2200);
+async function saveCaptionTemplate(db,payload={}){
+const templateKey=slugKey(payload.template_key || payload.caption_template_key || payload.display_name || '');
+const displayName=trimTo(payload.display_name || templateKey.replace(/_/g,' '),120);
+const bodyTemplate=trimTo(payload.body_template || '',2200);
 if (!templateKey) throw new Error('Template key is required.');
 if (!displayName) throw new Error('Template display name is required.');
 if (!bodyTemplate) throw new Error('Template body is required.');
-const platforms = normalizePlatforms(payload.default_platforms || payload.platforms || payload.default_platforms_json || ['facebook', 'instagram']);
-const hashtags = normalizeHashtags(payload.default_hashtags || payload.hashtags || 'DevilnDove,HandmadeOntario,WorkshopMade');
-const contentPillar = slugKey(payload.content_pillar || 'workshop_update');
-const callToAction = trimTo(payload.call_to_action || '', 280);
-const notes = trimTo(payload.notes || '', 1200);
-const isActive = payload.is_active === false || String(payload.is_active || '').toLowerCase() === '0' ? 0 : 1;
+const platforms=normalizePlatforms(payload.default_platforms || payload.platforms || payload.default_platforms_json || ['facebook','instagram']);
+const hashtags=normalizeHashtags(payload.default_hashtags || payload.hashtags || 'DevilnDove,HandmadeOntario,WorkshopMade');
+const contentPillar=slugKey(payload.content_pillar || 'workshop_update');
+const callToAction=trimTo(payload.call_to_action || '',280);
+const notes=trimTo(payload.notes || '',1200);
+const isActive=payload.is_active===false || String(payload.is_active || '').toLowerCase()==='0'? 0 :1;
 
 await db.prepare(`INSERT INTO social_caption_templates (
     template_key, display_name, content_pillar, default_platforms_json, default_hashtags,
@@ -1212,187 +1212,187 @@ await db.prepare(`INSERT INTO social_caption_templates (
     is_active = excluded.is_active,
     notes = excluded.notes,
     updated_at = CURRENT_TIMESTAMP`).bind(
-templateKey, displayName, contentPillar, JSON.stringify(platforms), hashtags,
-bodyTemplate, callToAction || null, isActive, notes || null
+templateKey,displayName,contentPillar,JSON.stringify(platforms),hashtags,
+bodyTemplate,callToAction || null,isActive,notes || null
 ).run();
 
-return { template_key: templateKey, display_name: displayName, is_active: isActive };
+return{ template_key:templateKey,display_name:displayName,is_active:isActive };
 }
 
-async function archiveCaptionTemplate(db, payload = {}) {
-const templateKey = slugKey(payload.template_key || payload.caption_template_key || '');
+async function archiveCaptionTemplate(db,payload={}){
+const templateKey=slugKey(payload.template_key || payload.caption_template_key || '');
 if (!templateKey) throw new Error('Template key is required.');
 await db.prepare(`UPDATE social_caption_templates SET is_active=0, updated_at=CURRENT_TIMESTAMP WHERE template_key = ?`).bind(templateKey).run();
-return { template_key: templateKey, archived: true };
+return{ template_key:templateKey,archived:true };
 }
 
-async function previewCaptionTemplate(db, payload = {}) {
-const template = await templateByKey(db, payload.caption_template_key || payload.template_key || '');
+async function previewCaptionTemplate(db,payload={}){
+const template=await templateByKey(db,payload.caption_template_key || payload.template_key || '');
 if (!template) throw new Error('Choose a valid caption template.');
-const platforms = normalizePlatforms(payload.target_platforms || payload.platforms || safeJson(template.default_platforms_json, []));
-const hashtags = normalizeHashtags(payload.hashtags || template.default_hashtags || 'DevilnDove,HandmadeOntario,WorkshopMade,SmallBusinessCanada');
-const linkUrl = safeUrl(payload.link_url || payload.product_url || '');
-const utmUrl = buildUtmUrl(linkUrl, { ...payload, caption_template_key: template.template_key }, platforms);
-const caption = fillCaptionTemplate(template, {
-title: payload.title || 'Fresh from the Devil n Dove workshop',
-summary: payload.summary || 'A quick behind-the-scenes update from our making table.',
-call_to_action: payload.call_to_action || template.call_to_action,
-link_url: utmUrl || linkUrl,
+const platforms=normalizePlatforms(payload.target_platforms || payload.platforms || safeJson(template.default_platforms_json,[]));
+const hashtags=normalizeHashtags(payload.hashtags || template.default_hashtags || 'DevilnDove,HandmadeOntario,WorkshopMade,SmallBusinessCanada');
+const linkUrl=safeUrl(payload.link_url || payload.product_url || '');
+const utmUrl=buildUtmUrl(linkUrl,{ ...payload,caption_template_key:template.template_key },platforms);
+const caption=fillCaptionTemplate(template,{
+title:payload.title || 'Fresh from the Devil n Dove workshop',
+summary:payload.summary || 'A quick behind-the-scenes update from our making table.',
+call_to_action:payload.call_to_action || template.call_to_action,
+link_url:utmUrl || linkUrl,
 hashtags
 });
-return { template_key: template.template_key, display_name: template.display_name, platforms, hashtags, utm_url: utmUrl, caption };
+return{ template_key:template.template_key,display_name:template.display_name,platforms,hashtags,utm_url:utmUrl,caption };
 }
 
-async function dryRunQueuedPost(context, db, adminUser, payload = {}) {
-const id = Number(payload.social_post_queue_id || 0);
+async function dryRunQueuedPost(context,db,adminUser,payload={}){
+const id=Number(payload.social_post_queue_id || 0);
 if (!id) throw new Error('A social_post_queue_id is required.');
-const row = await db.prepare(`SELECT * FROM social_post_queue WHERE social_post_queue_id = ? LIMIT 1`).bind(id).first();
+const row=await db.prepare(`SELECT * FROM social_post_queue WHERE social_post_queue_id = ? LIMIT 1`).bind(id).first();
 if (!row) throw new Error('Queued social post not found.');
-const selected = normalizePlatforms(payload.platform_keys || payload.platforms || safeJson(row.target_platforms_json, []));
-const dryRun = buildDryRunPayload(row, selected, context.env);
+const selected=normalizePlatforms(payload.platform_keys || payload.platforms || safeJson(row.target_platforms_json,[]));
+const dryRun=buildDryRunPayload(row,selected,context.env);
 await db.prepare(`UPDATE social_post_queue SET dry_run_payload_json=?, last_dry_run_at=CURRENT_TIMESTAMP, updated_by_user_id=?, updated_at=CURRENT_TIMESTAMP WHERE social_post_queue_id=?`).bind(
 JSON.stringify(dryRun),
 adminUser.user_id,
 id
-).run().catch(() => null);
-for (const item of dryRun.platform_payloads || []) {
-await recordApiAttempt(db, adminUser, id, item.platform, 'dry_run_preview', { platform: item.platform, response: item, notes: 'Dry-run payload preview only; nothing was posted.' });
+).run().catch(()=> null);
+for (const item of dryRun.platform_payloads || []){
+await recordApiAttempt(db,adminUser,id,item.platform,'dry_run_preview',{ platform:item.platform,response:item,notes:'Dry-run payload preview only; nothing was posted.'});
 }
 return dryRun;
 }
-async function publishQueuedPost(context, db, adminUser, payload = {}) {
-const id = Number(payload.social_post_queue_id || 0);
+async function publishQueuedPost(context,db,adminUser,payload={}){
+const id=Number(payload.social_post_queue_id || 0);
 if (!id) throw new Error('A social_post_queue_id is required.');
-const row = await db.prepare(`SELECT * FROM social_post_queue WHERE social_post_queue_id = ? LIMIT 1`).bind(id).first();
+const row=await db.prepare(`SELECT * FROM social_post_queue WHERE social_post_queue_id = ? LIMIT 1`).bind(id).first();
 if (!row) throw new Error('Queued social post not found.');
-const queuedPlatforms = safeJson(row.target_platforms_json, []);
-const selected = normalizePlatforms(payload.platform_keys || payload.platforms || queuedPlatforms);
-const images = safeJson(row.image_urls_json, []).map(safeUrl).filter(Boolean);
-const readiness = getPlatformReadiness(context.env);
-const results = [];
+const queuedPlatforms=safeJson(row.target_platforms_json,[]);
+const selected=normalizePlatforms(payload.platform_keys || payload.platforms || queuedPlatforms);
+const images=safeJson(row.image_urls_json,[]).map(safeUrl).filter(Boolean);
+const readiness=getPlatformReadiness(context.env);
+const results=[];
 // Build 673: a successful provider acknowledgement belongs to its channel.
 // Force and partial-channel retries cannot publish that channel a second time.
-const priorSuccess = rows(await db.prepare(`SELECT DISTINCT platform_key FROM social_post_attempts
+const priorSuccess=rows(await db.prepare(`SELECT DISTINCT platform_key FROM social_post_attempts
     WHERE social_post_queue_id=? AND attempt_status IN ('api_posted','receipt_verified','posted_manual')`).bind(id).all().catch(()=>({results:[]})));
-const alreadyPublished = new Set(priorSuccess.map(item=>item.platform_key));
+const alreadyPublished=new Set(priorSuccess.map(item=>item.platform_key));
 
 // Build 672: a tagged CAIP original is not a public derivative. Never let
 // force=true bypass the per-URL, per-project owner approval for this source.
-if (row.source_type === 'caip_project') {
-const approved = images.length > 0 && await Promise.all(images.map(async (url) => {
-const receipt = await db.prepare(`SELECT consent_record_id FROM media_consent_records
+if (row.source_type==='caip_project'){
+const approved=images.length > 0 && await Promise.all(images.map(async (url)=>{
+const receipt=await db.prepare(`SELECT consent_record_id FROM media_consent_records
         WHERE source_type='caip_project' AND source_id=? AND media_url=?
           AND consent_status='approved' AND public_use_allowed=1 AND social_use_allowed=1
           AND (expires_at IS NULL OR datetime(expires_at)>CURRENT_TIMESTAMP)
         ORDER BY consent_record_id DESC LIMIT 1`).bind(String(row.source_id||''),url).first().catch(()=>null);
 return !!receipt;
 })).then(flags=>flags.every(Boolean));
-if (!approved) return {social_post_queue_id:id,attempted_platforms:selected,
+if (!approved) return{social_post_queue_id:id,attempted_platforms:selected,
 results:selected.map(platform=>({platform,status:'blocked_caip_derivative_approval',notes:'Exact public derivative and owner consent receipt required; force cannot override.'}))};
 }
 
-await db.prepare(`UPDATE social_post_queue SET last_publish_attempt_at=CURRENT_TIMESTAMP, updated_by_user_id=?, updated_at=CURRENT_TIMESTAMP WHERE social_post_queue_id=?`).bind(adminUser.user_id, id).run().catch(() => null);
+await db.prepare(`UPDATE social_post_queue SET last_publish_attempt_at=CURRENT_TIMESTAMP, updated_by_user_id=?, updated_at=CURRENT_TIMESTAMP WHERE social_post_queue_id=?`).bind(adminUser.user_id,id).run().catch(()=> null);
 
-const privacyStatus = slugKey(row.privacy_status || 'needs_review');
-const privacyApproved = Number(row.approved_for_public_post || 0) === 1 || ['approved', 'no_private_media'].includes(privacyStatus);
-if (!privacyApproved && (row.source_type === 'caip_project' || payload.force !== true)) {
-for (const platform of selected) {
-const blocked = { platform, status: 'blocked_privacy_review', privacy_status: privacyStatus, notes: 'Review Social Media Privacy Guard before API publishing this post.' };
-await recordApiAttempt(db, adminUser, id, platform, 'blocked_privacy_review', blocked);
+const privacyStatus=slugKey(row.privacy_status || 'needs_review');
+const privacyApproved=Number(row.approved_for_public_post || 0)===1 || ['approved','no_private_media'].includes(privacyStatus);
+if (!privacyApproved && (row.source_type==='caip_project'|| payload.force !==true)){
+for (const platform of selected){
+const blocked={ platform,status:'blocked_privacy_review',privacy_status:privacyStatus,notes:'Review Social Media Privacy Guard before API publishing this post.'};
+await recordApiAttempt(db,adminUser,id,platform,'blocked_privacy_review',blocked);
 results.push(blocked);
 }
-return { social_post_queue_id: id, attempted_platforms: selected, results };
+return{ social_post_queue_id:id,attempted_platforms:selected,results };
 }
 
-if (Number(row.do_not_repost || 0) === 1 && payload.force !== true) {
-for (const platform of selected) {
-const blocked = { platform, status: 'blocked_duplicate_suspected', notes: 'Possible duplicate/repost detected. Clear the duplicate warning or force publish only after review.' };
-await recordApiAttempt(db, adminUser, id, platform, 'blocked_duplicate_suspected', blocked);
+if (Number(row.do_not_repost || 0)===1 && payload.force !==true){
+for (const platform of selected){
+const blocked={ platform,status:'blocked_duplicate_suspected',notes:'Possible duplicate/repost detected. Clear the duplicate warning or force publish only after review.'};
+await recordApiAttempt(db,adminUser,id,platform,'blocked_duplicate_suspected',blocked);
 results.push(blocked);
 }
-return { social_post_queue_id: id, attempted_platforms: selected, results };
+return{ social_post_queue_id:id,attempted_platforms:selected,results };
 }
 
-if (isScheduledInFuture(row.scheduled_at) && payload.force !== true) {
-for (const platform of selected) {
-const blocked = { platform, status: 'blocked_scheduled', scheduled_at: row.scheduled_at, notes: 'This post is scheduled for the future. Use dry run/preview now or wait until it is due.' };
-await recordApiAttempt(db, adminUser, id, platform, 'blocked_scheduled', blocked);
+if (isScheduledInFuture(row.scheduled_at) && payload.force !==true){
+for (const platform of selected){
+const blocked={ platform,status:'blocked_scheduled',scheduled_at:row.scheduled_at,notes:'This post is scheduled for the future. Use dry run/preview now or wait until it is due.'};
+await recordApiAttempt(db,adminUser,id,platform,'blocked_scheduled',blocked);
 results.push(blocked);
 }
-return { social_post_queue_id: id, attempted_platforms: selected, results };
+return{ social_post_queue_id:id,attempted_platforms:selected,results };
 }
 
-const verified672 = row.source_type === 'caip_project' ? await verifyAccounts672(context.env) : [];
-for (const platform of selected) {
-if (alreadyPublished.has(platform)) {
+const verified672=row.source_type==='caip_project'? await verifyAccounts672(context.env) :[];
+for (const platform of selected){
+if (alreadyPublished.has(platform)){
 results.push({platform,status:'already_published',notes:'An earlier provider receipt exists; duplicate publishing is blocked.'});
 continue;
 }
-if (row.approval_status !== 'approved' && (row.source_type === 'caip_project' || payload.force !== true)) {
-const blocked = { platform, status: 'blocked_needs_approval', notes: 'Approve/ready the queue item before API publishing.' };
-await recordApiAttempt(db, adminUser, id, platform, 'blocked_needs_approval', blocked);
+if (row.approval_status !=='approved'&& (row.source_type==='caip_project'|| payload.force !==true)){
+const blocked={ platform,status:'blocked_needs_approval',notes:'Approve/ready the queue item before API publishing.'};
+await recordApiAttempt(db,adminUser,id,platform,'blocked_needs_approval',blocked);
 results.push(blocked);
 continue;
 }
-if (['tiktok', 'youtube'].includes(platform)) {
-const manual = { platform, status: 'manual_pending', notes: readiness[platform]?.notes || 'This platform remains manual/review-first in this build.' };
-await recordApiAttempt(db, adminUser, id, platform, 'manual_pending', manual);
+if (['tiktok','youtube'].includes(platform)){
+const manual={ platform,status:'manual_pending',notes:readiness[platform]?.notes || 'This platform remains manual/review-first in this build.'};
+await recordApiAttempt(db,adminUser,id,platform,'manual_pending',manual);
 results.push(manual);
 continue;
 }
-if (row.source_type === 'caip_project' && !verified672.some(account=>account.platform===platform && account.verified)) {
+if (row.source_type==='caip_project'&& !verified672.some(account=>account.platform===platform && account.verified)){
 const held={platform,status:'blocked_account_unverified',notes:'Destination identity must be verified with its provider before owner-supervised CAIP publishing.'};
 await recordApiAttempt(db,adminUser,id,platform,'blocked_account_unverified',held);
 results.push(held);
 continue;
 }
-if (!readiness[platform]?.api_ready) {
-const missing = { platform, status: 'credentials_missing', notes: readiness[platform]?.notes || 'Missing platform credentials.', missing_env: readiness[platform]?.missing_env || [] };
-await recordApiAttempt(db, adminUser, id, platform, 'credentials_missing', missing);
+if (!readiness[platform]?.api_ready){
+const missing={ platform,status:'credentials_missing',notes:readiness[platform]?.notes || 'Missing platform credentials.',missing_env:readiness[platform]?.missing_env || [] };
+await recordApiAttempt(db,adminUser,id,platform,'credentials_missing',missing);
 results.push(missing);
 continue;
 }
-try {
+try{
 let published;
-if (platform === 'facebook') published = await publishToFacebook(context.env, row, images);
-else if (platform === 'instagram') published = await publishToInstagram(context.env, row, images);
-else if (platform === 'x') published = await publishToX(context.env, row, images);
-else if (platform === 'pinterest') published = await publishToPinterest(context.env, row, images);
+if (platform==='facebook') published=await publishToFacebook(context.env,row,images);
+else if (platform==='instagram') published=await publishToInstagram(context.env,row,images);
+else if (platform==='x') published=await publishToX(context.env,row,images);
+else if (platform==='pinterest') published=await publishToPinterest(context.env,row,images);
 else throw new Error(`API publishing is not implemented for ${platform}.`);
-await recordApiAttempt(db, adminUser, id, platform, 'api_posted', {
+await recordApiAttempt(db,adminUser,id,platform,'api_posted',{
 platform,
-id: published.id,
-url: published.url,
-external_post_id: published.id,
-external_post_url: published.url,
-published_url: published.url,
-http_status: published.http_status,
-response: published.response,
-notes: 'Published through configured platform API.'
+id:published.id,
+url:published.url,
+external_post_id:published.id,
+external_post_url:published.url,
+published_url:published.url,
+http_status:published.http_status,
+response:published.response,
+notes:'Published through configured platform API.'
 });
-results.push({ platform, status: 'api_posted', external_post_id: published.id, external_post_url: published.url, http_status: published.http_status });
-} catch (error) {
-const failure = { platform, status: 'api_failed', error: error?.message || String(error || 'Publish failed.') };
-await recordApiAttempt(db, adminUser, id, platform, 'api_failed', failure);
+results.push({ platform,status:'api_posted',external_post_id:published.id,external_post_url:published.url,http_status:published.http_status });
+} catch (error){
+const failure={ platform,status:'api_failed',error:error?.message || String(error || 'Publish failed.') };
+await recordApiAttempt(db,adminUser,id,platform,'api_failed',failure);
 results.push(failure);
 }
 }
-if(results.length && results.every(item=>item.status==='already_published')) {
-return {social_post_queue_id:id,attempted_platforms:selected,results,publication_performed:false};
+if(results.length && results.every(item=>item.status==='already_published')){
+return{social_post_queue_id:id,attempted_platforms:selected,results,publication_performed:false};
 }
-const postedCount = results.filter((row) => ['api_posted','already_published'].includes(row.status)).length;
-const failedCount = results.filter((row) => row.status === 'api_failed').length;
-const terminal = postedCount && !failedCount && results.every((row) => ['api_posted', 'already_published', 'manual_pending'].includes(row.status)) ? 'posted' : postedCount ? 'ready' : failedCount ? 'failed' : 'ready';
+const postedCount=results.filter((row)=> ['api_posted','already_published'].includes(row.status)).length;
+const failedCount=results.filter((row)=> row.status==='api_failed').length;
+const terminal=postedCount && !failedCount && results.every((row)=> ['api_posted','already_published','manual_pending'].includes(row.status)) ? 'posted':postedCount ? 'ready':failedCount ? 'failed':'ready';
 await db.prepare(`UPDATE social_post_queue
     SET post_status = ?, published_at = CASE WHEN ?='posted' THEN COALESCE(published_at,CURRENT_TIMESTAMP) ELSE published_at END,
         updated_by_user_id = ?, updated_at = CURRENT_TIMESTAMP
-    WHERE social_post_queue_id = ?`).bind(terminal, terminal, adminUser.user_id, id).run().catch(() => null);
-return { social_post_queue_id: id, attempted_platforms: selected, results };
+    WHERE social_post_queue_id = ?`).bind(terminal,terminal,adminUser.user_id,id).run().catch(()=> null);
+return{ social_post_queue_id:id,attempted_platforms:selected,results };
 }
 
 // Build 673: receipts are provider acknowledgements until a separate read-only
 // provider lookup independently confirms the same published ID.
-async function receipts673(db) {
+async function receipts673(db){
 const records=rows(await db.prepare(`SELECT a.social_post_attempt_id,a.social_post_queue_id,a.platform_key,
     a.attempt_status,a.external_post_id,a.external_post_url,a.attempted_at,a.notes,q.title
     FROM social_post_attempts a JOIN social_post_queue q ON q.social_post_queue_id=a.social_post_queue_id
@@ -1401,7 +1401,7 @@ const records=rows(await db.prepare(`SELECT a.social_post_attempt_id,a.social_po
 const latest=new Map();
 for(const item of records){const key=item.social_post_queue_id+':'+item.platform_key;if(!latest.has(key))latest.set(key,item);}
 const channels=[...latest.values()];
-return {channels,totals:{
+return{channels,totals:{
 provider_acknowledged:channels.filter(x=>x.attempt_status==='api_posted').length,
 independently_verified:channels.filter(x=>x.attempt_status==='receipt_verified').length,
 failed:channels.filter(x=>x.attempt_status==='api_failed').length,
@@ -1420,39 +1420,39 @@ if(!row||['posted','archived'].includes(row.post_status))throw Error('Posted or 
 await db.prepare(`UPDATE social_post_queue SET utm_campaign=?,scheduled_at=?,schedule_timezone=?,
     post_status='draft',approval_status='needs_review',updated_by_user_id=?,updated_at=CURRENT_TIMESTAMP
     WHERE social_post_queue_id=?`).bind(campaign,date,trimTo(payload.schedule_timezone||'UTC',64),adminUser.user_id,id).run();
-return {social_post_queue_id:id,campaign_name:campaign,scheduled_at:date,approval_reset:true,publication_performed:false};
+return{social_post_queue_id:id,campaign_name:campaign,scheduled_at:date,approval_reset:true,publication_performed:false};
 }
 // Build 675: provider metrics are accepted only from a fresh, authenticated
 // read-only lookup of a previously acknowledged publication ID.
 async function verifyEngagement675(context,db,adminUser,payload){
 const queueId=Number(payload.social_post_queue_id),platform=slugKey(payload.platform_key||'');
 if(!Number.isSafeInteger(queueId)||queueId<1||!['facebook','x'].includes(platform))
-return {verified:false,status:'provider_metrics_unsupported',publication_performed:false};
+return{verified:false,status:'provider_metrics_unsupported',publication_performed:false};
 const receipt=await db.prepare(`SELECT external_post_id FROM social_post_attempts WHERE social_post_queue_id=?
     AND platform_key=? AND attempt_status IN ('api_posted','receipt_verified') AND COALESCE(external_post_id,'')<>''
     ORDER BY social_post_attempt_id DESC LIMIT 1`).bind(queueId,platform).first();
-if(!receipt)return {verified:false,status:'publication_receipt_missing',publication_performed:false};
+if(!receipt)return{verified:false,status:'publication_receipt_missing',publication_performed:false};
 const id=String(receipt.external_post_id),env=context.env,meta=platform==='x'
 ?{url:`https://api.x.com/2/tweets/${encodeURIComponent(id)}?tweet.fields=public_metrics`,token:envText(env,'X_USER_ACCESS_TOKEN','TWITTER_USER_ACCESS_TOKEN')}
 :{url:`https://graph.facebook.com/${envText(env,'META_GRAPH_API_VERSION')||'v22.0'}/${encodeURIComponent(id)}?fields=id,reactions.limit(0).summary(true),comments.limit(0).summary(true)`,token:envText(env,'FACEBOOK_PAGE_ACCESS_TOKEN','META_PAGE_ACCESS_TOKEN')};
-if(!meta.token)return {verified:false,status:'provider_credentials_missing',publication_performed:false};
+if(!meta.token)return{verified:false,status:'provider_credentials_missing',publication_performed:false};
 try{
 const res=await fetch(meta.url,{headers:{Authorization:`Bearer ${meta.token}`},signal:AbortSignal.timeout(6000)});
 const json=await res.json().catch(()=>({})),item=json.data||json;
-if(!res.ok||String(item.id||'')!==id)return {verified:false,status:'provider_metrics_hold',publication_performed:false};
+if(!res.ok||String(item.id||'')!==id)return{verified:false,status:'provider_metrics_hold',publication_performed:false};
 const values=platform==='x'?{likes:item.public_metrics?.like_count,replies:item.public_metrics?.reply_count,
 shares:item.public_metrics?.retweet_count,quotes:item.public_metrics?.quote_count}
 :{likes:item.reactions?.summary?.total_count,replies:item.comments?.summary?.total_count};
 const metrics={};for(const [key,value] of Object.entries(values))
 if(Number.isSafeInteger(value)&&value>=0)metrics[key]=value;
-if(!Object.keys(metrics).length)return {verified:false,status:'provider_metrics_missing',publication_performed:false};
+if(!Object.keys(metrics).length)return{verified:false,status:'provider_metrics_missing',publication_performed:false};
 const observedAt=new Date().toISOString();
 await recordApiAttempt(db,adminUser,queueId,platform,'engagement_verified',{
 external_post_id:id,response:{provider_id:id,metrics,observed_at:observedAt,provenance:'read_only_provider_api'},
 notes:'Verified source-scoped engagement snapshot; not sales or ROI.'
 });
-return {verified:true,status:'engagement_verified',platform,metrics,observed_at:observedAt,publication_performed:false};
-}catch{return {verified:false,status:'provider_metrics_unavailable',publication_performed:false};}
+return{verified:true,status:'engagement_verified',platform,metrics,observed_at:observedAt,publication_performed:false};
+}catch{return{verified:false,status:'provider_metrics_unavailable',publication_performed:false};}
 }
 async function engagement675(db){
 const data=rows(await db.prepare(`SELECT a.social_post_queue_id,a.platform_key,a.external_post_id,a.response_json,a.attempted_at,
@@ -1463,7 +1463,7 @@ for(const item of data){const key=item.social_post_queue_id+':'+item.platform_ke
 const evidence=safeJson(item.response_json,{});if(evidence.provenance!=='read_only_provider_api')continue;
 snapshots.push({social_post_queue_id:item.social_post_queue_id,platform:item.platform_key,campaign:item.utm_campaign,
 provider_id:item.external_post_id,metrics:evidence.metrics,observed_at:evidence.observed_at});}
-return {snapshots,roi_status:'UNAVAILABLE_NO_VERIFIED_ATTRIBUTED_REVENUE_AND_SPEND',financial_claims:false};
+return{snapshots,roi_status:'UNAVAILABLE_NO_VERIFIED_ATTRIBUTED_REVENUE_AND_SPEND',financial_claims:false};
 }
 // Build 676: order settlement and campaign attribution are separate evidence
 // axes. The current order schema has no authoritative UTM/session foreign key.
@@ -1483,7 +1483,7 @@ await recordApiAttempt(db,adminUser,id,'campaign_cost','campaign_cost_recorded',
 external_post_id:ref,response:{campaign:post.utm_campaign,cost_cents:cents,currency:'CAD',receipt_reference:ref,
 provenance:'owner_attested_expense_receipt',roi_certified:false},
 notes:'Owner-recorded expense evidence, not independent vendor verification.'});
-return {status:'cost_evidence_recorded',roi_certified:false,publication_performed:false};
+return{status:'cost_evidence_recorded',roi_certified:false,publication_performed:false};
 }
 if(kind==='revenue'){
 const orderId=Number(payload.order_id);
@@ -1513,7 +1513,7 @@ settled_cents:Number(payment.settled_cents),currency:'CAD',settlement_verified:t
 attribution_verified:true,site_visitor_session_id:Number(bound.site_visitor_session_id),
 provenance:'server_observed_checkout_campaign',roi_certified:false},
 notes:'Paid order and first-party campaign session matched; expense verification still required for certified ROI.'});
-return {status:'paid_order_bound_to_campaign',roi_certified:false,publication_performed:false};
+return{status:'paid_order_bound_to_campaign',roi_certified:false,publication_performed:false};
 }
 throw Error('Choose cost or revenue evidence.');
 }
@@ -1522,11 +1522,11 @@ const result=rows(await db.prepare(`SELECT a.attempt_status,a.external_post_id,a
     q.utm_campaign FROM social_post_attempts a JOIN social_post_queue q ON q.social_post_queue_id=a.social_post_queue_id
     WHERE a.attempt_status IN ('campaign_cost_recorded','campaign_revenue_candidate_hold','campaign_revenue_bound')
     ORDER BY a.social_post_attempt_id DESC LIMIT 150`).all().catch(()=>({results:[]})));
-const items=result.map(row=>{const detail=safeJson(row.response_json,{});return {kind:row.attempt_status,
+const items=result.map(row=>{const detail=safeJson(row.response_json,{});return{kind:row.attempt_status,
 campaign:row.utm_campaign,reference:row.external_post_id,amount_cents:row.attempt_status==='campaign_cost_recorded'?
 detail.cost_cents:detail.settled_cents,observed_at:row.attempted_at,
 attribution_verified:row.attempt_status==='campaign_revenue_bound',roi_certified:false};});
-return {items,certification:items.some(i=>i.attribution_verified)?'HOLD_VENDOR_COST_VERIFICATION':'HOLD_CHECKOUT_SESSION_AND_PAID_ORDER_PROOF',currency:'CAD',
+return{items,certification:items.some(i=>i.attribution_verified)?'HOLD_VENDOR_COST_VERIFICATION':'HOLD_CHECKOUT_SESSION_AND_PAID_ORDER_PROOF',currency:'CAD',
 cost_evidence:'OWNER_ATTESTED_NOT_VENDOR_VERIFIED',roi_percent:null,roi_certified:false};
 }
 async function verifyPublication673(context,db,adminUser,payload){
@@ -1539,25 +1539,25 @@ if(!receipt)throw Error('No provider-acknowledged receipt exists. HOLD.');
 const idOnProvider=String(receipt.external_post_id);
 const env=context.env;
 const provider=platform==='facebook'
-? {url:`https://graph.facebook.com/${envText(env,'META_GRAPH_API_VERSION')||'v22.0'}/${encodeURIComponent(idOnProvider)}?fields=id,permalink_url`,token:envText(env,'FACEBOOK_PAGE_ACCESS_TOKEN','META_PAGE_ACCESS_TOKEN')}
-: platform==='instagram'
-? {url:`https://graph.facebook.com/${envText(env,'META_GRAPH_API_VERSION')||'v22.0'}/${encodeURIComponent(idOnProvider)}?fields=id,permalink`,token:envText(env,'INSTAGRAM_ACCESS_TOKEN','META_PAGE_ACCESS_TOKEN','FACEBOOK_PAGE_ACCESS_TOKEN')}
-: platform==='pinterest'
-? {url:`https://api.pinterest.com/v5/pins/${encodeURIComponent(idOnProvider)}`,token:envText(env,'PINTEREST_ACCESS_TOKEN')}
-: {url:`https://api.x.com/2/tweets/${encodeURIComponent(idOnProvider)}`,token:envText(env,'X_USER_ACCESS_TOKEN','TWITTER_USER_ACCESS_TOKEN')};
-if(!provider.token)return {verified:false,status:'provider_credentials_missing',publication_performed:false};
+?{url:`https://graph.facebook.com/${envText(env,'META_GRAPH_API_VERSION')||'v22.0'}/${encodeURIComponent(idOnProvider)}?fields=id,permalink_url`,token:envText(env,'FACEBOOK_PAGE_ACCESS_TOKEN','META_PAGE_ACCESS_TOKEN')}
+:platform==='instagram'
+?{url:`https://graph.facebook.com/${envText(env,'META_GRAPH_API_VERSION')||'v22.0'}/${encodeURIComponent(idOnProvider)}?fields=id,permalink`,token:envText(env,'INSTAGRAM_ACCESS_TOKEN','META_PAGE_ACCESS_TOKEN','FACEBOOK_PAGE_ACCESS_TOKEN')}
+:platform==='pinterest'
+?{url:`https://api.pinterest.com/v5/pins/${encodeURIComponent(idOnProvider)}`,token:envText(env,'PINTEREST_ACCESS_TOKEN')}
+:{url:`https://api.x.com/2/tweets/${encodeURIComponent(idOnProvider)}`,token:envText(env,'X_USER_ACCESS_TOKEN','TWITTER_USER_ACCESS_TOKEN')};
+if(!provider.token)return{verified:false,status:'provider_credentials_missing',publication_performed:false};
 try{
 const res=await fetch(provider.url,{headers:{Authorization:`Bearer ${provider.token}`},signal:AbortSignal.timeout(6000)});
 const body=await res.json().catch(()=>({}));
 const returned=String((body.data||body).id||'');
-if(!res.ok||returned!==idOnProvider)return {verified:false,status:'provider_lookup_hold',publication_performed:false};
+if(!res.ok||returned!==idOnProvider)return{verified:false,status:'provider_lookup_hold',publication_performed:false};
 await recordApiAttempt(db,adminUser,id,platform,'receipt_verified',{
 external_post_id:idOnProvider,external_post_url:receipt.external_post_url,
 notes:'Independent read-only provider ID lookup matched prior acknowledgement.',
 response:{verified_at:new Date().toISOString(),provider_id:idOnProvider,http_status:res.status}
 });
-return {verified:true,status:'receipt_verified',platform,provider_id:idOnProvider,publication_performed:false};
-}catch{return {verified:false,status:'provider_lookup_unavailable',publication_performed:false};}
+return{verified:true,status:'receipt_verified',platform,provider_id:idOnProvider,publication_performed:false};
+}catch{return{verified:false,status:'provider_lookup_unavailable',publication_performed:false};}
 }
 async function retryFailed673(context,db,adminUser,payload){
 const id=Number(payload.social_post_queue_id),platform=slugKey(payload.platform_key||'');
@@ -1577,7 +1577,7 @@ return publishQueuedPost(context,db,adminUser,{social_post_queue_id:id,platform_
 }
 
 // Read-only account identity check. A configured token alone is not a verified account.
-async function verifyAccounts672(env) {
+async function verifyAccounts672(env){
 const checks=[
 ['facebook',envText(env,'FACEBOOK_PAGE_ID','META_PAGE_ID'),envText(env,'FACEBOOK_PAGE_ACCESS_TOKEN','META_PAGE_ACCESS_TOKEN'),id=>`https://graph.facebook.com/${envText(env,'META_GRAPH_API_VERSION')||'v22.0'}/${encodeURIComponent(id)}?fields=id,name`],
 ['instagram',envText(env,'INSTAGRAM_USER_ID','IG_USER_ID','INSTAGRAM_BUSINESS_ACCOUNT_ID'),envText(env,'INSTAGRAM_ACCESS_TOKEN','META_PAGE_ACCESS_TOKEN','FACEBOOK_PAGE_ACCESS_TOKEN'),id=>`https://graph.facebook.com/${envText(env,'META_GRAPH_API_VERSION')||'v22.0'}/${encodeURIComponent(id)}?fields=id,username`],
@@ -1585,16 +1585,16 @@ const checks=[
 ['x','me',envText(env,'X_USER_ACCESS_TOKEN','TWITTER_USER_ACCESS_TOKEN'),()=> 'https://api.x.com/2/users/me']
 ];
 return Promise.all(checks.map(async ([platform,id,token,url])=>{
-if (!id||!token)return {platform,verified:false,status:'credentials_missing'};
-try {const response=await fetch(url(id),{headers:{Authorization:`Bearer ${token}`},signal:AbortSignal.timeout(6000)});
+if (!id||!token)return{platform,verified:false,status:'credentials_missing'};
+try{const response=await fetch(url(id),{headers:{Authorization:`Bearer ${token}`},signal:AbortSignal.timeout(6000)});
 const body=await response.json().catch(()=>({}));const user=body.data||body;
 const identity=String(user.id||'');const verified=response.ok&&!!identity&&(platform==='pinterest'||platform==='x'||identity===String(id));
-return {platform,verified,status:verified?'account_verified':'account_unverified',account_id:verified?identity:null,account_name:verified?String(user.name||user.username||user.business_name||'').slice(0,100):null};
-}catch{return {platform,verified:false,status:'verification_unavailable'};}
+return{platform,verified,status:verified?'account_verified':'account_unverified',account_id:verified?identity:null,account_name:verified?String(user.name||user.username||user.business_name||'').slice(0,100):null};
+}catch{return{platform,verified:false,status:'verification_unavailable'};}
 })).then(rows=>[...rows,{platform:'tiktok',verified:false,status:'manual_only'},{platform:'youtube',verified:false,status:'manual_only'}]);
 }
 
-async function approveCaipDerivative672(db,adminUser,payload) {
+async function approveCaipDerivative672(db,adminUser,payload){
 const queueId=Number(payload.social_post_queue_id),assetId=Number(payload.creative_asset_id);
 const url=String(payload.public_url||'').trim();
 if (!Number.isSafeInteger(queueId)||queueId<1||!Number.isSafeInteger(assetId)||assetId<1||!/^https:\/\//i.test(url))throw Error('Choose a real queue, CAIP asset and HTTPS public derivative URL.');
@@ -1612,14 +1612,14 @@ await db.prepare(`INSERT INTO media_consent_records(consent_key,subject_label,so
     VALUES(?,?,'caip_project',?,?,'approved','all_public',1,1,?, ?,CURRENT_TIMESTAMP)
     ON CONFLICT(consent_key) DO UPDATE SET media_url=excluded.media_url,consent_status='approved',public_use_allowed=1,social_use_allowed=1,reviewed_by_user_id=excluded.reviewed_by_user_id,updated_at=CURRENT_TIMESTAMP`).bind(`caip672:${queueId}:${assetId}`,`CAIP asset ${assetId}`,String(post.source_id),url,'Owner reviewed exact public derivative; source rights and consent checked.',adminUser.user_id).run();
 await db.prepare(`UPDATE social_post_queue SET image_urls_json=?,approval_status='needs_review',post_status='draft',updated_by_user_id=?,updated_at=CURRENT_TIMESTAMP WHERE social_post_queue_id=?`).bind(JSON.stringify([url]),adminUser.user_id,queueId).run();
-return {social_post_queue_id:queueId,creative_asset_id:assetId,public_derivative_approved:true,publication_performed:false};
+return{social_post_queue_id:queueId,creative_asset_id:assetId,public_derivative_approved:true,publication_performed:false};
 }
 
 
 // Build 680: evidence age, independently signed Master receipt and owner exceptions (read-only by default).
 async function finance680(db,env,id){
 const source=await campaignNet679(db,id);
-if(!source?.campaign)return {status:'HOLD_SELECT_CAMPAIGN',ack:'HOLD',exceptions:[]};
+if(!source?.campaign)return{status:'HOLD_SELECT_CAMPAIGN',ack:'HOLD',exceptions:[]};
 const all=rows(await db.prepare(`SELECT a.attempt_status,a.external_post_id,a.response_json,a.attempted_at
     FROM social_post_attempts a JOIN social_post_queue q ON q.social_post_queue_id=a.social_post_queue_id
     WHERE q.utm_campaign=? AND a.platform_key IN ('campaign_cost_verifier','order_cost_679','master_ack_680','profit_exception_680')
@@ -1637,12 +1637,12 @@ const open=[...byRef.values()].filter(x=>x.attempt_status==='profit_exception_op
 reference:x.external_post_id,notes:safeJson(x.response_json,{}).reason||'Owner follow-up required',
 created_at:x.attempted_at}));
 const blockers=[...(source.blockers||[])];
-  if(all.length===500)blockers.push('evidence_scan_limit_reached');
+if(all.length===500)blockers.push('evidence_scan_limit_reached');
 if(!evidence.length)blockers.push('no_independent_cost_evidence');
 if(stale.length)blockers.push('stale_or_future_dated_cost_evidence');
 if(!ackValid)blockers.push('no_current_matching_independent_master_ack');
 if(open.length)blockers.push('open_owner_profitability_exception');
-return {campaign:source.campaign,source_status:source.status,ack:ackValid?'SIGNED_RECEIPT_MATCH_ONLY':'HOLD',
+return{campaign:source.campaign,source_status:source.status,ack:ackValid?'SIGNED_RECEIPT_MATCH_ONLY':'HOLD',
 connection:'HOLD_INDEPENDENT_RUNTIME_TRANSPORT_AND_MASTER_ADMISSION',
 evidence_count:evidence.length,stale_count:stale.length,
 exceptions:open,blockers:[...new Set(blockers)],as_of:new Date(now).toISOString(),
@@ -1675,7 +1675,7 @@ notes:'Independent signature verified; Master runtime transport/connection remai
 const saved=await db.prepare(`SELECT social_post_attempt_id FROM social_post_attempts
     WHERE platform_key='master_ack_680' AND external_post_id=? LIMIT 1`).bind(nonce).first();
 if(!saved)throw Error('Master ACK not durably stored. HOLD.');
-return {status:'signed_master_ack_recorded',connection:'HOLD',publication_performed:false};
+return{status:'signed_master_ack_recorded',connection:'HOLD',publication_performed:false};
 }
 async function exception680(db,user,p){
 const id=Number(p.social_post_queue_id),source=await campaignNet679(db,id);
@@ -1699,535 +1699,535 @@ const saved=await db.prepare(`SELECT social_post_attempt_id FROM social_post_att
 WHERE platform_key='profit_exception_680' AND external_post_id=? AND social_post_queue_id=? AND attempt_status=?
 ORDER BY social_post_attempt_id DESC LIMIT 1`).bind(ref,id,status).first();
 if(!saved)throw Error('Owner exception evidence was not durably saved. HOLD.');
-return {status,exception_reference:ref,profitability_certified:false,publication_performed:false};
+return{status,exception_reference:ref,profitability_certified:false,publication_performed:false};
 }
 
 
 const parseUtc681=x=>{const v=String(x??'');return Date.parse(/^\d{4}-\d\d-\d\d \d\d:\d\d:\d\d$/.test(v)?v.replace(' ','T')+'Z':v);};
 export function exceptionSla681(e,now=Date.now()){
- const opened=parseUtc681(e.opened_at),ack=parseUtc681(e.ack_at),closed=parseUtc681(e.resolved_at);
- return {...e,age_hours:Number.isFinite(opened)?Math.max(0,Math.floor((now-opened)/3600000)):null,
-  acknowledgement_due_at:Number.isFinite(opened)?new Date(opened+24*3600000).toISOString():null,
-  resolution_due_at:Number.isFinite(opened)?new Date(opened+72*3600000).toISOString():null,
-  sla:!Number.isFinite(opened)?'HOLD_INVALID_CLOCK':Number.isFinite(closed)?'RESOLVED':
-   now>opened+72*3600000&&!Number.isFinite(ack)?'ACK_AND_RESOLUTION_OVERDUE':
-   now>opened+72*3600000?'RESOLUTION_OVERDUE':
-   !Number.isFinite(ack)&&now>opened+24*3600000?'ACK_OVERDUE':Number.isFinite(ack)?'ACKNOWLEDGED_OPEN':'AWAITING_ACK'};
+const opened=parseUtc681(e.opened_at),ack=parseUtc681(e.ack_at),closed=parseUtc681(e.resolved_at);
+return{...e,age_hours:Number.isFinite(opened)?Math.max(0,Math.floor((now-opened)/3600000)):null,
+acknowledgement_due_at:Number.isFinite(opened)?new Date(opened+24*3600000).toISOString():null,
+resolution_due_at:Number.isFinite(opened)?new Date(opened+72*3600000).toISOString():null,
+sla:!Number.isFinite(opened)?'HOLD_INVALID_CLOCK':Number.isFinite(closed)?'RESOLVED':
+now>opened+72*3600000&&!Number.isFinite(ack)?'ACK_AND_RESOLUTION_OVERDUE':
+now>opened+72*3600000?'RESOLUTION_OVERDUE':
+!Number.isFinite(ack)&&now>opened+24*3600000?'ACK_OVERDUE':Number.isFinite(ack)?'ACKNOWLEDGED_OPEN':'AWAITING_ACK'};
 }
 
 async function finance681(db,env,id){
- const source=await campaignNet679(db,id);
- if(!source?.campaign)return {status:'HOLD_SELECT_CAMPAIGN',exceptions:[],master_receipts:[],owner_history:[]};
- const audit=rows(await db.prepare(`SELECT a.social_post_attempt_id,a.social_post_queue_id,a.platform_key,a.attempt_status,a.external_post_id,a.attempted_at,a.response_json
+const source=await campaignNet679(db,id);
+if(!source?.campaign)return{status:'HOLD_SELECT_CAMPAIGN',exceptions:[],master_receipts:[],owner_history:[]};
+const audit=rows(await db.prepare(`SELECT a.social_post_attempt_id,a.social_post_queue_id,a.platform_key,a.attempt_status,a.external_post_id,a.attempted_at,a.response_json
  FROM social_post_attempts a JOIN social_post_queue q ON q.social_post_queue_id=a.social_post_queue_id
  WHERE q.utm_campaign=? AND a.attempt_status IN
  ('profit_exception_open_680','profit_exception_resolved_680','owner_exception_acknowledged_681',
  'master_signed_ack_680','campaign_roi_owner_accepted','net_campaign_owner_accepted_679')
  ORDER BY a.social_post_attempt_id ASC LIMIT 251`).bind(source.campaign).all());
- const now=Date.now(),issues=new Map(),masters=[],history=[];
- for(const a of audit.slice(0,250)){
-  const d=safeJson(a.response_json,{}),key=a.social_post_queue_id+':'+a.external_post_id;
-  if(a.attempt_status==='profit_exception_open_680')issues.set(key,{reference:a.external_post_id,queue_id:a.social_post_queue_id,reason:d.reason||'',opened_at:a.attempted_at,ack_at:null,resolved_at:null});
-  if(a.attempt_status==='owner_exception_acknowledged_681'){
-   const e=issues.get(key);if(e&&!e.resolved_at)e.ack_at=a.attempted_at;
-   history.push({receipt_id:Number(a.social_post_attempt_id),kind:'exception_acknowledgement',recorded_at:a.attempted_at});
-  }
-  if(a.attempt_status==='profit_exception_resolved_680'){const e=issues.get(key);if(e)e.resolved_at=a.attempted_at;}
-  if(['campaign_roi_owner_accepted','net_campaign_owner_accepted_679'].includes(a.attempt_status))
-   history.push({receipt_id:Number(a.social_post_attempt_id),kind:a.attempt_status,recorded_at:a.attempted_at});
-  if(a.attempt_status==='master_signed_ack_680'){
-   const t=Date.parse(d.ack_at),same=d.fingerprint===source.fingerprint&&
-    d.source_revision===normalizeText(env?.DEVILNDOVE_SOURCE_REVISION);
-   masters.push({receipt_id:Number(a.social_post_attempt_id),recorded_at:a.attempted_at,master_revision:d.master_revision||null,
-    source_revision:d.source_revision||null,
-    state:!same?'SUPERSEDED_OR_SOURCE_MISMATCH':!Number.isFinite(t)||now-t>86400000||t>now+300000?'EXPIRED_OR_INVALID_TIME':'SIGNED_AT_INTAKE_RECEIPT_ONLY'});
-  }
- }
- const exceptions=[...issues.values()].map(e=>exceptionSla681(e,now));
- return {campaign:source.campaign,status:audit.length>250?'HOLD_INCOMPLETE_AUDIT':'READ_ONLY',as_of:new Date(now).toISOString(),
-  exception_sla:{acknowledge_hours:24,resolve_hours:72,policy:'PROVISIONAL_OWNER_REVIEW_TARGETS'},
-  exceptions,master_receipts:masters.slice(-25).reverse(),owner_history:history.slice(-25).reverse(),
-  scan_complete:audit.length<=250,connection:'HOLD_INDEPENDENT_RUNTIME_TRANSPORT_AND_MASTER_ADMISSION',
-  master_accepted:false,profitability_certified:false};
+const now=Date.now(),issues=new Map(),masters=[],history=[];
+for(const a of audit.slice(0,250)){
+const d=safeJson(a.response_json,{}),key=a.social_post_queue_id+':'+a.external_post_id;
+if(a.attempt_status==='profit_exception_open_680')issues.set(key,{reference:a.external_post_id,queue_id:a.social_post_queue_id,reason:d.reason||'',opened_at:a.attempted_at,ack_at:null,resolved_at:null});
+if(a.attempt_status==='owner_exception_acknowledged_681'){
+const e=issues.get(key);if(e&&!e.resolved_at)e.ack_at=a.attempted_at;
+history.push({receipt_id:Number(a.social_post_attempt_id),kind:'exception_acknowledgement',recorded_at:a.attempted_at});
+}
+if(a.attempt_status==='profit_exception_resolved_680'){const e=issues.get(key);if(e)e.resolved_at=a.attempted_at;}
+if(['campaign_roi_owner_accepted','net_campaign_owner_accepted_679'].includes(a.attempt_status))
+history.push({receipt_id:Number(a.social_post_attempt_id),kind:a.attempt_status,recorded_at:a.attempted_at});
+if(a.attempt_status==='master_signed_ack_680'){
+const t=Date.parse(d.ack_at),same=d.fingerprint===source.fingerprint&&
+d.source_revision===normalizeText(env?.DEVILNDOVE_SOURCE_REVISION);
+masters.push({receipt_id:Number(a.social_post_attempt_id),recorded_at:a.attempted_at,master_revision:d.master_revision||null,
+source_revision:d.source_revision||null,
+state:!same?'SUPERSEDED_OR_SOURCE_MISMATCH':!Number.isFinite(t)||now-t>86400000||t>now+300000?'EXPIRED_OR_INVALID_TIME':'SIGNED_AT_INTAKE_RECEIPT_ONLY'});
+}
+}
+const exceptions=[...issues.values()].map(e=>exceptionSla681(e,now));
+return{campaign:source.campaign,status:audit.length>250?'HOLD_INCOMPLETE_AUDIT':'READ_ONLY',as_of:new Date(now).toISOString(),
+exception_sla:{acknowledge_hours:24,resolve_hours:72,policy:'PROVISIONAL_OWNER_REVIEW_TARGETS'},
+exceptions,master_receipts:masters.slice(-25).reverse(),owner_history:history.slice(-25).reverse(),
+scan_complete:audit.length<=250,connection:'HOLD_INDEPENDENT_RUNTIME_TRANSPORT_AND_MASTER_ADMISSION',
+master_accepted:false,profitability_certified:false};
 }
 async function ownerExceptionAck681(db,user,p){
- const id=Number(p.social_post_queue_id),ref=normalizeText(p.exception_reference);
- if(!Number.isSafeInteger(id)||id<1||!/^[-a-zA-Z0-9_]{6,80}$/.test(ref)||p.owner_reviewed!==true)
-  throw Error('Select a real campaign exception and explicitly confirm owner review.');
- const source=await campaignNet679(db,id);
- if(!source?.campaign)throw Error('Campaign not found. HOLD.');
- const last=await db.prepare(`SELECT attempt_status FROM social_post_attempts WHERE social_post_queue_id=?
+const id=Number(p.social_post_queue_id),ref=normalizeText(p.exception_reference);
+if(!Number.isSafeInteger(id)||id<1||!/^[-a-zA-Z0-9_]{6,80}$/.test(ref)||p.owner_reviewed!==true)
+throw Error('Select a real campaign exception and explicitly confirm owner review.');
+const source=await campaignNet679(db,id);
+if(!source?.campaign)throw Error('Campaign not found. HOLD.');
+const last=await db.prepare(`SELECT attempt_status FROM social_post_attempts WHERE social_post_queue_id=?
  AND platform_key='profit_exception_680' AND external_post_id=?
  ORDER BY social_post_attempt_id DESC LIMIT 1`).bind(id,ref).first();
- if(last?.attempt_status!=='profit_exception_open_680')throw Error('Only an open exception may be acknowledged.');
- const earlier=await finance681(db,{},id);
- if(!earlier.scan_complete)throw Error('Audit window incomplete; owner review HOLD.');
- const match=earlier.exceptions?.find(e=>e.queue_id===id&&e.reference===ref&&!e.resolved_at);
- if(!match||match.ack_at)throw Error('Exception acknowledgement already recorded or no open episode.');
- const prior=await db.prepare(`SELECT COALESCE(MAX(social_post_attempt_id),0) AS last_id
+if(last?.attempt_status!=='profit_exception_open_680')throw Error('Only an open exception may be acknowledged.');
+const earlier=await finance681(db,{},id);
+if(!earlier.scan_complete)throw Error('Audit window incomplete; owner review HOLD.');
+const match=earlier.exceptions?.find(e=>e.queue_id===id&&e.reference===ref&&!e.resolved_at);
+if(!match||match.ack_at)throw Error('Exception acknowledgement already recorded or no open episode.');
+const prior=await db.prepare(`SELECT COALESCE(MAX(social_post_attempt_id),0) AS last_id
  FROM social_post_attempts WHERE social_post_queue_id=? AND platform_key='profit_exception_review_681'
  AND external_post_id=?`).bind(id,ref).first();
- await recordApiAttempt(db,user,id,'profit_exception_review_681','owner_exception_acknowledged_681',{
-  external_post_id:ref,response:{campaign:source.campaign,owner_user_id:user.user_id,decision:'acknowledged_for_review',
-  profitability_certified:false},notes:'Owner acknowledgement only, not resolution or Master acceptance.'});
- const saved=await db.prepare(`SELECT social_post_attempt_id FROM social_post_attempts
+await recordApiAttempt(db,user,id,'profit_exception_review_681','owner_exception_acknowledged_681',{
+external_post_id:ref,response:{campaign:source.campaign,owner_user_id:user.user_id,decision:'acknowledged_for_review',
+profitability_certified:false},notes:'Owner acknowledgement only, not resolution or Master acceptance.'});
+const saved=await db.prepare(`SELECT social_post_attempt_id FROM social_post_attempts
  WHERE social_post_queue_id=? AND platform_key='profit_exception_review_681'
  AND external_post_id=? AND attempt_status='owner_exception_acknowledged_681'
  AND social_post_attempt_id>? ORDER BY social_post_attempt_id DESC LIMIT 1`).bind(id,ref,Number(prior?.last_id||0)).first();
- if(!saved)throw Error('Owner acceptance history was not durably saved. HOLD.');
- return {status:'owner_exception_acknowledged_681',connection:'HOLD',publication_performed:false};
+if(!saved)throw Error('Owner acceptance history was not durably saved. HOLD.');
+return{status:'owner_exception_acknowledged_681',connection:'HOLD',publication_performed:false};
 }
 
 
 
 // Build 683: signed financial provenance; Master CONNECTED remains HOLD.
 export function financialClaim683(kind,x){
- if(kind==='source')return {version:1,source:'devilndove',campaign:x.campaign,queue_id:x.queue_id,
- source_revision:x.source_revision,fingerprint_sha256:x.fingerprint_sha256,signer_id:x.signer_id,nonce:x.nonce,issued_at:x.issued_at};
- if(kind==='master')return {version:1,source:'devilndove',campaign:x.campaign,queue_id:x.queue_id,
- source_revision:x.source_revision,fingerprint_sha256:x.fingerprint_sha256,
- source_signer_receipt_id:x.source_signer_receipt_id,source_signer_nonce:x.source_signer_nonce,
- master_revision:x.master_revision,nonce:x.nonce,issued_at:x.issued_at};
- throw Error('Unsupported financial claim');
+if(kind==='source')return{version:1,source:'devilndove',campaign:x.campaign,queue_id:x.queue_id,
+source_revision:x.source_revision,fingerprint_sha256:x.fingerprint_sha256,signer_id:x.signer_id,nonce:x.nonce,issued_at:x.issued_at};
+if(kind==='master')return{version:1,source:'devilndove',campaign:x.campaign,queue_id:x.queue_id,
+source_revision:x.source_revision,fingerprint_sha256:x.fingerprint_sha256,
+source_signer_receipt_id:x.source_signer_receipt_id,source_signer_nonce:x.source_signer_nonce,
+master_revision:x.master_revision,nonce:x.nonce,issued_at:x.issued_at};
+throw Error('Unsupported financial claim');
 }
 const fresh683=(t,age=86400000)=>typeof t==='string'&&/^\d{4}-\d\d-\d\dT\d\d:\d\d:\d\d(?:\.\d{3})?Z$/.test(t)&&
- Number.isFinite(Date.parse(t))&&Date.now()-Date.parse(t)<=age&&Date.now()-Date.parse(t)>=-300000;
+Number.isFinite(Date.parse(t))&&Date.now()-Date.parse(t)<=age&&Date.now()-Date.parse(t)>=-300000;
 const nonce683=v=>typeof v==='string'&&/^[A-Za-z0-9_-]{16,100}$/.test(v);
 async function signed683(key,claim,signature){
- if(!key||!signature||typeof key!=='string'||typeof signature!=='string')return false;
- try{
- const decode=s=>Uint8Array.from(atob(s.replace(/-/g,'+').replace(/_/g,'/')),c=>c.charCodeAt(0));
- const pk=decode(key),sig=decode(signature);
- if(pk.length!==32||sig.length!==64)return false;
- const verifier=await crypto.subtle.importKey('raw',pk,{name:'Ed25519'},false,['verify']);
- return await crypto.subtle.verify('Ed25519',verifier,sig,new TextEncoder().encode(JSON.stringify(claim)));
- }catch{return false}
+if(!key||!signature||typeof key!=='string'||typeof signature!=='string')return false;
+try{
+const decode=s=>Uint8Array.from(atob(s.replace(/-/g,'+').replace(/_/g,'/')),c=>c.charCodeAt(0));
+const pk=decode(key),sig=decode(signature);
+if(pk.length!==32||sig.length!==64)return false;
+const verifier=await crypto.subtle.importKey('raw',pk,{name:'Ed25519'},false,['verify']);
+return await crypto.subtle.verify('Ed25519',verifier,sig,new TextEncoder().encode(JSON.stringify(claim)));
+}catch{return false}
 }
 async function financial683(db,env,id){
- const n=Number(id);
- if(!Number.isSafeInteger(n)||n<1)return {status:'HOLD_SELECT_CAMPAIGN',signer:{status:'HOLD'},master:{status:'HOLD'},master_correlated:false};
- const baseline=await finance682(db,env,n),rev=normalizeText(env?.DEVILNDOVE_SOURCE_REVISION);
- const data=rows(await db.prepare("SELECT social_post_attempt_id,platform_key,external_post_id,response_json,attempted_at FROM social_post_attempts WHERE social_post_queue_id=? AND platform_key IN ('finance_signer_683','finance_master_683','finance_closure_683') ORDER BY social_post_attempt_id DESC LIMIT 121").bind(n).all());
- const complete=baseline.complete&&data.length<=120;
- const source=data.find(r=>r.platform_key==='finance_signer_683'),proof=safeJson(source?.response_json,{}),claim=proof.claim||{};
- const sourceOK=!!complete&&!!rev&&claim.source_revision===rev&&claim.campaign===baseline.campaign&&claim.queue_id===n&&
- claim.fingerprint_sha256===baseline.fingerprint_sha256&&claim.signer_id===normalizeText(env?.FINANCIAL_EVIDENCE_SIGNER_ID_683)&&
- nonce683(claim.nonce)&&fresh683(claim.issued_at)&&
- await signed683(normalizeText(env?.FINANCIAL_EVIDENCE_SIGNER_PUBLIC_KEY_683),financialClaim683('source',claim),proof.signature);
- const master=data.find(r=>r.platform_key==='finance_master_683'),mp=safeJson(master?.response_json,{}),mc=mp.claim||{};
- const masterOK=!!sourceOK&&mc.campaign===baseline.campaign&&mc.queue_id===n&&mc.source_revision===rev&&
- mc.fingerprint_sha256===baseline.fingerprint_sha256&&mc.source_signer_receipt_id===Number(source.social_post_attempt_id)&&
- mc.source_signer_nonce===claim.nonce&&!!mc.master_revision&&nonce683(mc.nonce)&&fresh683(mc.issued_at)&&
- await signed683(normalizeText(env?.AI_DATA_MASTER_ACK_PUBLIC_KEY),financialClaim683('master',mc),mp.signature);
- return {status:!complete?'HOLD_INCOMPLETE_AUDIT':masterOK?'SOURCE_MASTER_SIGNED_RECEIPTS_CORRELATED':'HOLD_INDEPENDENT_SIGNED_PROOF',
- complete,queue_id:n,campaign:baseline.campaign,source_revision:rev||null,fingerprint_sha256:baseline.fingerprint_sha256,
- signer:{status:sourceOK?'INDEPENDENT_SIGNER_ADMITTED':'HOLD',signer_id:normalizeText(env?.FINANCIAL_EVIDENCE_SIGNER_ID_683)||null,
- receipt_id:sourceOK?Number(source.social_post_attempt_id):null,nonce:sourceOK?claim.nonce:null},
- master:{status:masterOK?'SIGNED_MASTER_RECEIPT_CORRELATED':'HOLD',receipt_id:masterOK?Number(master.social_post_attempt_id):null,
- master_revision:masterOK?mc.master_revision:null},master_correlated:!!masterOK,
- closed_cases:data.filter(r=>r.platform_key==='finance_closure_683').slice(0,25).map(r=>{
- const d=safeJson(r.response_json,{});return {case_code:r.external_post_id,receipt_id:r.social_post_attempt_id,
- current_source:d.fingerprint_sha256===baseline.fingerprint_sha256,
- current_master:!!masterOK&&d.master_receipt_id===Number(master.social_post_attempt_id),recorded_at:r.attempted_at};}),
- master_connection:'HOLD_INDEPENDENT_RUNTIME_TRANSPORT_AND_MASTER_ADMISSION',
- master_accepted:false,profitability_certified:false,publication_performed:false};
+const n=Number(id);
+if(!Number.isSafeInteger(n)||n<1)return{status:'HOLD_SELECT_CAMPAIGN',signer:{status:'HOLD'},master:{status:'HOLD'},master_correlated:false};
+const baseline=await finance682(db,env,n),rev=normalizeText(env?.DEVILNDOVE_SOURCE_REVISION);
+const data=rows(await db.prepare("SELECT social_post_attempt_id,platform_key,external_post_id,response_json,attempted_at FROM social_post_attempts WHERE social_post_queue_id=? AND platform_key IN ('finance_signer_683','finance_master_683','finance_closure_683') ORDER BY social_post_attempt_id DESC LIMIT 121").bind(n).all());
+const complete=baseline.complete&&data.length<=120;
+const source=data.find(r=>r.platform_key==='finance_signer_683'),proof=safeJson(source?.response_json,{}),claim=proof.claim||{};
+const sourceOK=!!complete&&!!rev&&claim.source_revision===rev&&claim.campaign===baseline.campaign&&claim.queue_id===n&&
+claim.fingerprint_sha256===baseline.fingerprint_sha256&&claim.signer_id===normalizeText(env?.FINANCIAL_EVIDENCE_SIGNER_ID_683)&&
+nonce683(claim.nonce)&&fresh683(claim.issued_at)&&
+await signed683(normalizeText(env?.FINANCIAL_EVIDENCE_SIGNER_PUBLIC_KEY_683),financialClaim683('source',claim),proof.signature);
+const master=data.find(r=>r.platform_key==='finance_master_683'),mp=safeJson(master?.response_json,{}),mc=mp.claim||{};
+const masterOK=!!sourceOK&&mc.campaign===baseline.campaign&&mc.queue_id===n&&mc.source_revision===rev&&
+mc.fingerprint_sha256===baseline.fingerprint_sha256&&mc.source_signer_receipt_id===Number(source.social_post_attempt_id)&&
+mc.source_signer_nonce===claim.nonce&&!!mc.master_revision&&nonce683(mc.nonce)&&fresh683(mc.issued_at)&&
+await signed683(normalizeText(env?.AI_DATA_MASTER_ACK_PUBLIC_KEY),financialClaim683('master',mc),mp.signature);
+return{status:!complete?'HOLD_INCOMPLETE_AUDIT':masterOK?'SOURCE_MASTER_SIGNED_RECEIPTS_CORRELATED':'HOLD_INDEPENDENT_SIGNED_PROOF',
+complete,queue_id:n,campaign:baseline.campaign,source_revision:rev||null,fingerprint_sha256:baseline.fingerprint_sha256,
+signer:{status:sourceOK?'INDEPENDENT_SIGNER_ADMITTED':'HOLD',signer_id:normalizeText(env?.FINANCIAL_EVIDENCE_SIGNER_ID_683)||null,
+receipt_id:sourceOK?Number(source.social_post_attempt_id):null,nonce:sourceOK?claim.nonce:null},
+master:{status:masterOK?'SIGNED_MASTER_RECEIPT_CORRELATED':'HOLD',receipt_id:masterOK?Number(master.social_post_attempt_id):null,
+master_revision:masterOK?mc.master_revision:null},master_correlated:!!masterOK,
+closed_cases:data.filter(r=>r.platform_key==='finance_closure_683').slice(0,25).map(r=>{
+const d=safeJson(r.response_json,{});return{case_code:r.external_post_id,receipt_id:r.social_post_attempt_id,
+current_source:d.fingerprint_sha256===baseline.fingerprint_sha256,
+current_master:!!masterOK&&d.master_receipt_id===Number(master.social_post_attempt_id),recorded_at:r.attempted_at};}),
+master_connection:'HOLD_INDEPENDENT_RUNTIME_TRANSPORT_AND_MASTER_ADMISSION',
+master_accepted:false,profitability_certified:false,publication_performed:false};
 }
 async function admission683(db,env,user,p){
- const id=Number(p.social_post_queue_id),v=await finance682(db,env,id),
- revision=normalizeText(env?.DEVILNDOVE_SOURCE_REVISION),signer=normalizeText(env?.FINANCIAL_EVIDENCE_SIGNER_ID_683);
- if(p.owner_reviewed!==true||!v.complete||!v.source_owner_accepted||!v.financial||!revision||!signer||
- v.cases.some(c=>!c.code.startsWith('MASTER_')))throw Error('Independent signer admission requires complete fresh owner-reviewed source finances. HOLD.');
- const nonce=normalizeText(p.nonce),issued_at=normalizeText(p.issued_at),signature=normalizeText(p.signature);
- if(!nonce683(nonce)||!fresh683(issued_at,300000))throw Error('Fresh unique source nonce and UTC timestamp required.');
- const claim=financialClaim683('source',{campaign:v.campaign,queue_id:id,source_revision:revision,
- fingerprint_sha256:v.fingerprint_sha256,signer_id:signer,nonce,issued_at});
- if(!await signed683(normalizeText(env?.FINANCIAL_EVIDENCE_SIGNER_PUBLIC_KEY_683),claim,signature))
- throw Error('Independently enrolled signer did not verify the exact financial source. HOLD.');
- const duplicate=await db.prepare("SELECT social_post_attempt_id FROM social_post_attempts WHERE platform_key='finance_signer_683' AND external_post_id=? LIMIT 1").bind(nonce).first();
- if(duplicate)throw Error('Source signer nonce replay rejected.');
- await recordApiAttempt(db,user,id,'finance_signer_683','independent_financial_signer_admitted_683',{
- external_post_id:nonce,response:{claim,signature,verified_at:new Date().toISOString()},
- notes:'External Ed25519 verified; no private key, connected status or financial certification.'});
- const saved=rows(await db.prepare("SELECT social_post_attempt_id FROM social_post_attempts WHERE platform_key='finance_signer_683' AND external_post_id=? LIMIT 2").bind(nonce).all());
- if(saved.length!==1)throw Error('Unique durable signer evidence could not be confirmed. HOLD.');
- return {status:'independent_financial_signer_admitted_683',receipt_id:saved[0].social_post_attempt_id,
- master_accepted:false,publication_performed:false};
+const id=Number(p.social_post_queue_id),v=await finance682(db,env,id),
+revision=normalizeText(env?.DEVILNDOVE_SOURCE_REVISION),signer=normalizeText(env?.FINANCIAL_EVIDENCE_SIGNER_ID_683);
+if(p.owner_reviewed!==true||!v.complete||!v.source_owner_accepted||!v.financial||!revision||!signer||
+v.cases.some(c=>!c.code.startsWith('MASTER_')))throw Error('Independent signer admission requires complete fresh owner-reviewed source finances. HOLD.');
+const nonce=normalizeText(p.nonce),issued_at=normalizeText(p.issued_at),signature=normalizeText(p.signature);
+if(!nonce683(nonce)||!fresh683(issued_at,300000))throw Error('Fresh unique source nonce and UTC timestamp required.');
+const claim=financialClaim683('source',{campaign:v.campaign,queue_id:id,source_revision:revision,
+fingerprint_sha256:v.fingerprint_sha256,signer_id:signer,nonce,issued_at});
+if(!await signed683(normalizeText(env?.FINANCIAL_EVIDENCE_SIGNER_PUBLIC_KEY_683),claim,signature))
+throw Error('Independently enrolled signer did not verify the exact financial source. HOLD.');
+const duplicate=await db.prepare("SELECT social_post_attempt_id FROM social_post_attempts WHERE platform_key='finance_signer_683' AND external_post_id=? LIMIT 1").bind(nonce).first();
+if(duplicate)throw Error('Source signer nonce replay rejected.');
+await recordApiAttempt(db,user,id,'finance_signer_683','independent_financial_signer_admitted_683',{
+external_post_id:nonce,response:{claim,signature,verified_at:new Date().toISOString()},
+notes:'External Ed25519 verified; no private key, connected status or financial certification.'});
+const saved=rows(await db.prepare("SELECT social_post_attempt_id FROM social_post_attempts WHERE platform_key='finance_signer_683' AND external_post_id=? LIMIT 2").bind(nonce).all());
+if(saved.length!==1)throw Error('Unique durable signer evidence could not be confirmed. HOLD.');
+return{status:'independent_financial_signer_admitted_683',receipt_id:saved[0].social_post_attempt_id,
+master_accepted:false,publication_performed:false};
 }
 async function masterCorrelation683(db,env,user,p){
- const id=Number(p.social_post_queue_id),v=await financial683(db,env,id);
- if(p.owner_reviewed!==true||!v.complete||v.signer?.status!=='INDEPENDENT_SIGNER_ADMITTED')
- throw Error('Current independent financial signer evidence must be admitted first. HOLD.');
- const nonce=normalizeText(p.nonce),issued_at=normalizeText(p.issued_at),
- master_revision=normalizeText(p.master_revision),signature=normalizeText(p.signature);
- if(!nonce683(nonce)||!fresh683(issued_at,300000)||!master_revision||master_revision.length>120)
- throw Error('Fresh Master nonce, revision and UTC timestamp required.');
- const claim=financialClaim683('master',{campaign:v.campaign,queue_id:id,source_revision:v.source_revision,
- fingerprint_sha256:v.fingerprint_sha256,source_signer_receipt_id:v.signer.receipt_id,
- source_signer_nonce:v.signer.nonce,master_revision,nonce,issued_at});
- if(!await signed683(normalizeText(env?.AI_DATA_MASTER_ACK_PUBLIC_KEY),claim,signature))
- throw Error('External Master did not sign the exact independent source receipt. HOLD.');
- const duplicate=await db.prepare("SELECT social_post_attempt_id FROM social_post_attempts WHERE platform_key='finance_master_683' AND external_post_id=? LIMIT 1").bind(nonce).first();
- if(duplicate)throw Error('Master receipt nonce replay rejected.');
- await recordApiAttempt(db,user,id,'finance_master_683','master_financial_receipt_correlated_683',{
- external_post_id:nonce,response:{claim,signature,verified_at:new Date().toISOString()},
- notes:'Independent signed Master receipt matched source signer; runtime CONNECTED still unverified.'});
- const saved=rows(await db.prepare("SELECT social_post_attempt_id FROM social_post_attempts WHERE platform_key='finance_master_683' AND external_post_id=? LIMIT 2").bind(nonce).all());
- if(saved.length!==1)throw Error('Unique durable Master correlation could not be confirmed. HOLD.');
- return {status:'master_financial_receipt_correlated_683',receipt_id:saved[0].social_post_attempt_id,
- connection:'HOLD',master_accepted:false,publication_performed:false};
+const id=Number(p.social_post_queue_id),v=await financial683(db,env,id);
+if(p.owner_reviewed!==true||!v.complete||v.signer?.status!=='INDEPENDENT_SIGNER_ADMITTED')
+throw Error('Current independent financial signer evidence must be admitted first. HOLD.');
+const nonce=normalizeText(p.nonce),issued_at=normalizeText(p.issued_at),
+master_revision=normalizeText(p.master_revision),signature=normalizeText(p.signature);
+if(!nonce683(nonce)||!fresh683(issued_at,300000)||!master_revision||master_revision.length>120)
+throw Error('Fresh Master nonce, revision and UTC timestamp required.');
+const claim=financialClaim683('master',{campaign:v.campaign,queue_id:id,source_revision:v.source_revision,
+fingerprint_sha256:v.fingerprint_sha256,source_signer_receipt_id:v.signer.receipt_id,
+source_signer_nonce:v.signer.nonce,master_revision,nonce,issued_at});
+if(!await signed683(normalizeText(env?.AI_DATA_MASTER_ACK_PUBLIC_KEY),claim,signature))
+throw Error('External Master did not sign the exact independent source receipt. HOLD.');
+const duplicate=await db.prepare("SELECT social_post_attempt_id FROM social_post_attempts WHERE platform_key='finance_master_683' AND external_post_id=? LIMIT 1").bind(nonce).first();
+if(duplicate)throw Error('Master receipt nonce replay rejected.');
+await recordApiAttempt(db,user,id,'finance_master_683','master_financial_receipt_correlated_683',{
+external_post_id:nonce,response:{claim,signature,verified_at:new Date().toISOString()},
+notes:'Independent signed Master receipt matched source signer; runtime CONNECTED still unverified.'});
+const saved=rows(await db.prepare("SELECT social_post_attempt_id FROM social_post_attempts WHERE platform_key='finance_master_683' AND external_post_id=? LIMIT 2").bind(nonce).all());
+if(saved.length!==1)throw Error('Unique durable Master correlation could not be confirmed. HOLD.');
+return{status:'master_financial_receipt_correlated_683',receipt_id:saved[0].social_post_attempt_id,
+connection:'HOLD',master_accepted:false,publication_performed:false};
 }
 async function ownerClosure683(db,env,user,p){
- const id=Number(p.social_post_queue_id),case_code=normalizeText(p.case_code),
- note=normalizeText(p.resolution_note),v=await financial683(db,env,id),baseline=await finance682(db,env,id);
- if(p.owner_reviewed!==true||!/^[-A-Z0-9_]{6,100}$/.test(case_code)||note.length<20||note.length>400||
- !v.complete||!v.master_correlated||p.expected_fingerprint_sha256!==v.fingerprint_sha256)
- throw Error('Exact source fingerprint, signed independent Master receipt and owner evidence review required. HOLD.');
- if(baseline.cases.some(c=>!c.code.startsWith('MASTER_'))||
- baseline.cases.some(c=>c.code===case_code&&!c.code.startsWith('MASTER_')))
- throw Error('Source discrepancy still active; independent closure HOLD.');
- const prior=await db.prepare("SELECT social_post_attempt_id FROM social_post_attempts WHERE social_post_queue_id=? AND platform_key='finance_discrepancy_682' AND external_post_id=? AND attempt_status IN ('owner_escalated_682','owner_reviewed_682') ORDER BY social_post_attempt_id DESC LIMIT 1").bind(id,case_code).first();
- if(!prior)throw Error('A prior owner-reviewed discrepancy is required before closure.');
- const last=await db.prepare("SELECT response_json FROM social_post_attempts WHERE social_post_queue_id=? AND platform_key='finance_closure_683' AND external_post_id=? ORDER BY social_post_attempt_id DESC LIMIT 1").bind(id,case_code).first();
- const old=safeJson(last?.response_json,{});
- if(old.fingerprint_sha256===v.fingerprint_sha256&&old.master_receipt_id===v.master.receipt_id)
- throw Error('Duplicate closure for exact source and Master receipts refused.');
- await recordApiAttempt(db,user,id,'finance_closure_683','owner_discrepancy_evidence_closed_683',{
- external_post_id:case_code,response:{fingerprint_sha256:v.fingerprint_sha256,
- source_signer_receipt_id:v.signer.receipt_id,master_receipt_id:v.master.receipt_id,
- original_review_receipt_id:prior.social_post_attempt_id,owner_user_id:user.user_id,resolution_note:note,
- master_accepted:false,profitability_certified:false},
- notes:'Owner case evidence closed; runtime Master CONNECTED and accounting certification remain HOLD.'});
- const saved=await db.prepare("SELECT social_post_attempt_id FROM social_post_attempts WHERE social_post_queue_id=? AND platform_key='finance_closure_683' AND external_post_id=? ORDER BY social_post_attempt_id DESC LIMIT 1").bind(id,case_code).first();
- if(!saved)throw Error('Durable owner discrepancy closure record missing. HOLD.');
- return {status:'owner_discrepancy_evidence_closed_683',receipt_id:saved.social_post_attempt_id,
- master_accepted:false,connection:'HOLD',publication_performed:false};
+const id=Number(p.social_post_queue_id),case_code=normalizeText(p.case_code),
+note=normalizeText(p.resolution_note),v=await financial683(db,env,id),baseline=await finance682(db,env,id);
+if(p.owner_reviewed!==true||!/^[-A-Z0-9_]{6,100}$/.test(case_code)||note.length<20||note.length>400||
+!v.complete||!v.master_correlated||p.expected_fingerprint_sha256!==v.fingerprint_sha256)
+throw Error('Exact source fingerprint, signed independent Master receipt and owner evidence review required. HOLD.');
+if(baseline.cases.some(c=>!c.code.startsWith('MASTER_'))||
+baseline.cases.some(c=>c.code===case_code&&!c.code.startsWith('MASTER_')))
+throw Error('Source discrepancy still active; independent closure HOLD.');
+const prior=await db.prepare("SELECT social_post_attempt_id FROM social_post_attempts WHERE social_post_queue_id=? AND platform_key='finance_discrepancy_682' AND external_post_id=? AND attempt_status IN ('owner_escalated_682','owner_reviewed_682') ORDER BY social_post_attempt_id DESC LIMIT 1").bind(id,case_code).first();
+if(!prior)throw Error('A prior owner-reviewed discrepancy is required before closure.');
+const last=await db.prepare("SELECT response_json FROM social_post_attempts WHERE social_post_queue_id=? AND platform_key='finance_closure_683' AND external_post_id=? ORDER BY social_post_attempt_id DESC LIMIT 1").bind(id,case_code).first();
+const old=safeJson(last?.response_json,{});
+if(old.fingerprint_sha256===v.fingerprint_sha256&&old.master_receipt_id===v.master.receipt_id)
+throw Error('Duplicate closure for exact source and Master receipts refused.');
+await recordApiAttempt(db,user,id,'finance_closure_683','owner_discrepancy_evidence_closed_683',{
+external_post_id:case_code,response:{fingerprint_sha256:v.fingerprint_sha256,
+source_signer_receipt_id:v.signer.receipt_id,master_receipt_id:v.master.receipt_id,
+original_review_receipt_id:prior.social_post_attempt_id,owner_user_id:user.user_id,resolution_note:note,
+master_accepted:false,profitability_certified:false},
+notes:'Owner case evidence closed; runtime Master CONNECTED and accounting certification remain HOLD.'});
+const saved=await db.prepare("SELECT social_post_attempt_id FROM social_post_attempts WHERE social_post_queue_id=? AND platform_key='finance_closure_683' AND external_post_id=? ORDER BY social_post_attempt_id DESC LIMIT 1").bind(id,case_code).first();
+if(!saved)throw Error('Durable owner discrepancy closure record missing. HOLD.');
+return{status:'owner_discrepancy_evidence_closed_683',receipt_id:saved.social_post_attempt_id,
+master_accepted:false,connection:'HOLD',publication_performed:false};
 }
 
 
 // Build 684: only externally controlled signing keys and a pinned, authenticated receiver are trusted.
 export function claim684(kind,c){
- if(kind==='enrollment')return {v:1,purpose:'devilndove_finance_signer_runtime_684',source:'devilndove',
- queue_id:c.queue_id,campaign:c.campaign,source_revision:c.source_revision,fingerprint_sha256:c.fingerprint_sha256,
- source_signer_receipt_id:c.source_signer_receipt_id,signer_id:c.signer_id,nonce:c.nonce,issued_at:c.issued_at};
- if(kind==='acceptance')return {v:1,purpose:'ai_data_finance_master_acceptance_684',source:'devilndove',
- queue_id:c.queue_id,campaign:c.campaign,source_revision:c.source_revision,fingerprint_sha256:c.fingerprint_sha256,
- source_signer_receipt_id:c.source_signer_receipt_id,enrollment_receipt_id:c.enrollment_receipt_id,
- master_signed_receipt_id:c.master_signed_receipt_id,master_revision:c.master_revision,
- receiver_receipt_id:c.receiver_receipt_id,request_nonce:c.request_nonce,decision:'accepted',issued_at:c.issued_at};
- throw Error('Unknown financial evidence claim');
+if(kind==='enrollment')return{v:1,purpose:'devilndove_finance_signer_runtime_684',source:'devilndove',
+queue_id:c.queue_id,campaign:c.campaign,source_revision:c.source_revision,fingerprint_sha256:c.fingerprint_sha256,
+source_signer_receipt_id:c.source_signer_receipt_id,signer_id:c.signer_id,nonce:c.nonce,issued_at:c.issued_at};
+if(kind==='acceptance')return{v:1,purpose:'ai_data_finance_master_acceptance_684',source:'devilndove',
+queue_id:c.queue_id,campaign:c.campaign,source_revision:c.source_revision,fingerprint_sha256:c.fingerprint_sha256,
+source_signer_receipt_id:c.source_signer_receipt_id,enrollment_receipt_id:c.enrollment_receipt_id,
+master_signed_receipt_id:c.master_signed_receipt_id,master_revision:c.master_revision,
+receiver_receipt_id:c.receiver_receipt_id,request_nonce:c.request_nonce,decision:'accepted',issued_at:c.issued_at};
+throw Error('Unknown financial evidence claim');
 }
 export const nonce684=x=>typeof x==='string'&&/^[A-Za-z0-9_-]{16,100}$/.test(x);
 export const fresh684=(x,max=300000,now=Date.now())=>typeof x==='string'&&
- /^\d{4}-\d\d-\d\dT\d\d:\d\d:\d\d(?:\.\d{3})?Z$/.test(x)&&Number.isFinite(Date.parse(x))&&
- now-Date.parse(x)>=-300000&&now-Date.parse(x)<=max;
+/^\d{4}-\d\d-\d\dT\d\d:\d\d:\d\d(?:\.\d{3})?Z$/.test(x)&&Number.isFinite(Date.parse(x))&&
+now-Date.parse(x)>=-300000&&now-Date.parse(x)<=max;
 const decode684=s=>Uint8Array.from(atob(s.replace(/-/g,'+').replace(/_/g,'/')),c=>c.charCodeAt(0));
 export async function verify684(key,claim,signature){
- if(typeof key!=='string'||typeof signature!=='string'||!key||!signature)return false;
- try{
- const pub=decode684(key),sig=decode684(signature);if(pub.length!==32||sig.length!==64)return false;
- const k=await crypto.subtle.importKey('raw',pub,'Ed25519',false,['verify']);
- return !!await crypto.subtle.verify('Ed25519',k,sig,new TextEncoder().encode(JSON.stringify(claim)));
- }catch{return false;}
+if(typeof key!=='string'||typeof signature!=='string'||!key||!signature)return false;
+try{
+const pub=decode684(key),sig=decode684(signature);if(pub.length!==32||sig.length!==64)return false;
+const k=await crypto.subtle.importKey('raw',pub,'Ed25519',false,['verify']);
+return !!await crypto.subtle.verify('Ed25519',k,sig,new TextEncoder().encode(JSON.stringify(claim)));
+}catch{return false;}
 }
 export function same684(a,b){return a?.queue_id===b?.queue_id&&a?.campaign===b?.campaign&&
- a?.source_revision===b?.source_revision&&a?.fingerprint_sha256===b?.fingerprint_sha256&&
- a?.source_signer_receipt_id===b?.source_signer_receipt_id;}
+a?.source_revision===b?.source_revision&&a?.fingerprint_sha256===b?.fingerprint_sha256&&
+a?.source_signer_receipt_id===b?.source_signer_receipt_id;}
 export function endpoint684(env){
- const urlText=env?.FINANCIAL_MASTER_ACCEPTANCE_URL_684,origin=env?.FINANCIAL_MASTER_ACCEPTANCE_ORIGIN_684,
- token=env?.FINANCIAL_MASTER_ACCEPTANCE_TOKEN_684;
- if(typeof urlText!=='string'||typeof origin!=='string'||typeof token!=='string'||
- !/^[A-Za-z0-9_.~+/-]{24,4096}$/.test(token))return null;
- try{const url=new URL(urlText),pin=new URL(origin);
- if(url.protocol!=='https:'||pin.protocol!=='https:'||url.origin!==pin.origin||
- pin.pathname!=='/'||pin.search||pin.hash||url.username||url.password||url.hash||
- !/^\/[A-Za-z0-9_./-]{1,240}$/.test(url.pathname))return null;
- return {url:url.href,token};}catch{return null;}
+const urlText=env?.FINANCIAL_MASTER_ACCEPTANCE_URL_684,origin=env?.FINANCIAL_MASTER_ACCEPTANCE_ORIGIN_684,
+token=env?.FINANCIAL_MASTER_ACCEPTANCE_TOKEN_684;
+if(typeof urlText!=='string'||typeof origin!=='string'||typeof token!=='string'||
+!/^[A-Za-z0-9_.~+/-]{24,4096}$/.test(token))return null;
+try{const url=new URL(urlText),pin=new URL(origin);
+if(url.protocol!=='https:'||pin.protocol!=='https:'||url.origin!==pin.origin||
+pin.pathname!=='/'||pin.search||pin.hash||url.username||url.password||url.hash||
+!/^\/[A-Za-z0-9_./-]{1,240}$/.test(url.pathname))return null;
+return{url:url.href,token};}catch{return null;}
 }
 export async function lookup684(env,identity,fetchImpl=fetch){
- const server=endpoint684(env);if(!server)throw Error('Pinned authenticated Master receiver not enrolled. HOLD.');
- const request_nonce=crypto.randomUUID()+'-'+crypto.randomUUID();
- const response=await fetchImpl(server.url,{method:'GET',redirect:'error',cache:'no-store',headers:{
- 'Authorization':'Bearer '+server.token,'Accept':'application/json','X-Finance-Queue-Id':String(identity.queue_id),
- 'X-Finance-Fingerprint':identity.fingerprint_sha256,
- 'X-Finance-Source-Receipt':String(identity.source_signer_receipt_id),
- 'X-Finance-Master-Receipt':String(identity.master_signed_receipt_id),
- 'X-Finance-Request-Nonce':request_nonce}});
- if(!response?.ok||response.status!==200||!(response.headers?.get('content-type')||'').toLowerCase().includes('application/json'))
- throw Error('Independent Master receiver did not return authenticated JSON acceptance. HOLD.');
- if(Number(response.headers.get('content-length')||0)>16384)throw Error('Master receipt evidence too large. HOLD.');
- const raw=await response.text();if(raw.length>16384)throw Error('Master receipt exceeded evidence limit. HOLD.');
- let evidence;try{evidence=JSON.parse(raw)}catch{throw Error('Malformed independent Master receipt. HOLD.')}
- const c=evidence?.claim;
- if(!c||c.request_nonce!==request_nonce||c.decision!=='accepted'||!same684(c,identity)||
- c.enrollment_receipt_id!==identity.enrollment_receipt_id||
- c.master_signed_receipt_id!==identity.master_signed_receipt_id||
- c.master_revision!==identity.master_revision||typeof c.receiver_receipt_id!=='string'||
- !/^[A-Za-z0-9_.:-]{10,120}$/.test(c.receiver_receipt_id)||!fresh684(c.issued_at)||
- !await verify684(env.AI_DATA_MASTER_ACK_PUBLIC_KEY,claim684('acceptance',c),evidence.signature))
- throw Error('Independent Master acceptance signature, nonce, receipt or freshness mismatch. HOLD.');
- return {claim:claim684('acceptance',c),signature:evidence.signature,checked_at:new Date().toISOString()};
+const server=endpoint684(env);if(!server)throw Error('Pinned authenticated Master receiver not enrolled. HOLD.');
+const request_nonce=crypto.randomUUID()+'-'+crypto.randomUUID();
+const response=await fetchImpl(server.url,{method:'GET',redirect:'error',cache:'no-store',headers:{
+'Authorization':'Bearer '+server.token,'Accept':'application/json','X-Finance-Queue-Id':String(identity.queue_id),
+'X-Finance-Fingerprint':identity.fingerprint_sha256,
+'X-Finance-Source-Receipt':String(identity.source_signer_receipt_id),
+'X-Finance-Master-Receipt':String(identity.master_signed_receipt_id),
+'X-Finance-Request-Nonce':request_nonce}});
+if(!response?.ok||response.status!==200||!(response.headers?.get('content-type')||'').toLowerCase().includes('application/json'))
+throw Error('Independent Master receiver did not return authenticated JSON acceptance. HOLD.');
+if(Number(response.headers.get('content-length')||0)>16384)throw Error('Master receipt evidence too large. HOLD.');
+const raw=await response.text();if(raw.length>16384)throw Error('Master receipt exceeded evidence limit. HOLD.');
+let evidence;try{evidence=JSON.parse(raw)}catch{throw Error('Malformed independent Master receipt. HOLD.')}
+const c=evidence?.claim;
+if(!c||c.request_nonce!==request_nonce||c.decision!=='accepted'||!same684(c,identity)||
+c.enrollment_receipt_id!==identity.enrollment_receipt_id||
+c.master_signed_receipt_id!==identity.master_signed_receipt_id||
+c.master_revision!==identity.master_revision||typeof c.receiver_receipt_id!=='string'||
+!/^[A-Za-z0-9_.:-]{10,120}$/.test(c.receiver_receipt_id)||!fresh684(c.issued_at)||
+!await verify684(env.AI_DATA_MASTER_ACK_PUBLIC_KEY,claim684('acceptance',c),evidence.signature))
+throw Error('Independent Master acceptance signature, nonce, receipt or freshness mismatch. HOLD.');
+return{claim:claim684('acceptance',c),signature:evidence.signature,checked_at:new Date().toISOString()};
 }
 
 // Build 684: append-only D1 receipts; no browser-supplied CONNECTED or Master acceptance claim.
 async function append684(db,user,id,platform,status,nonce,data){
- const result=await db.prepare("INSERT INTO social_post_attempts (social_post_queue_id,platform_key,attempt_status,external_post_id,response_json,attempted_by_user_id,notes) SELECT ?,?,?,?,?,?,? WHERE NOT EXISTS (SELECT 1 FROM social_post_attempts WHERE platform_key=? AND external_post_id=?)")
- .bind(id,platform,status,nonce,JSON.stringify(data),user.user_id,'Exact external signed financial evidence; independent runtime telemetry separate.',platform,nonce).run();
- if(!result?.success||Number(result?.meta?.changes)!==1)throw Error('Duplicate, uncommitted or replayed signed receipt. HOLD.');
- const found=rows(await db.prepare("SELECT social_post_attempt_id FROM social_post_attempts WHERE platform_key=? AND external_post_id=? LIMIT 2").bind(platform,nonce).all());
- if(found.length!==1)throw Error('Durable unique financial receipt not confirmed. HOLD.');
- return Number(found[0].social_post_attempt_id);
+const result=await db.prepare("INSERT INTO social_post_attempts (social_post_queue_id,platform_key,attempt_status,external_post_id,response_json,attempted_by_user_id,notes) SELECT ?,?,?,?,?,?,? WHERE NOT EXISTS (SELECT 1 FROM social_post_attempts WHERE platform_key=? AND external_post_id=?)")
+.bind(id,platform,status,nonce,JSON.stringify(data),user.user_id,'Exact external signed financial evidence; independent runtime telemetry separate.',platform,nonce).run();
+if(!result?.success||Number(result?.meta?.changes)!==1)throw Error('Duplicate, uncommitted or replayed signed receipt. HOLD.');
+const found=rows(await db.prepare("SELECT social_post_attempt_id FROM social_post_attempts WHERE platform_key=? AND external_post_id=? LIMIT 2").bind(platform,nonce).all());
+if(found.length!==1)throw Error('Durable unique financial receipt not confirmed. HOLD.');
+return Number(found[0].social_post_attempt_id);
 }
 const pin684=v=>({queue_id:v.queue_id,campaign:v.campaign,source_revision:v.source_revision,
- fingerprint_sha256:v.fingerprint_sha256,source_signer_receipt_id:v.signer?.receipt_id});
+fingerprint_sha256:v.fingerprint_sha256,source_signer_receipt_id:v.signer?.receipt_id});
 async function financial684(db,env,id){
- const n=Number(id);if(!Number.isSafeInteger(n)||n<1)return {status:'HOLD_SELECT_CAMPAIGN',signer_enrolled:false,master_accepted:false,connection:'HOLD'};
- const source=await financial683(db,env,n),base=await finance682(db,env,n);
- const data=rows(await db.prepare("SELECT social_post_attempt_id,platform_key,external_post_id,response_json,attempted_at FROM social_post_attempts WHERE social_post_queue_id=? AND platform_key IN ('finance_enrollment_684','finance_acceptance_684','finance_continuity_684') ORDER BY social_post_attempt_id DESC LIMIT 121").bind(n).all());
- const complete=source.complete&&base.complete&&data.length<=120;
- const er=data.find(x=>x.platform_key==='finance_enrollment_684'),e=safeJson(er?.response_json,{}),ec=e.claim||{};
- const pinned=pin684(source),enrolled=!!complete&&base.source_owner_accepted&&!base.cases.some(c=>!c.code.startsWith('MASTER_'))&&source.signer?.status==='INDEPENDENT_SIGNER_ADMITTED'&&
- same684(ec,pinned)&&ec.signer_id===normalizeText(env?.FINANCIAL_EVIDENCE_SIGNER_ID_683)&&
- nonce684(ec.nonce)&&fresh684(ec.issued_at,30*86400000)&&
- await verify684(normalizeText(env?.FINANCIAL_EVIDENCE_SIGNER_PUBLIC_KEY_683),claim684('enrollment',ec),e.signature);
- const ar=data.find(x=>x.platform_key==='finance_acceptance_684'),a=safeJson(ar?.response_json,{}),ac=a.claim||{};
- const accepted=!!enrolled&&source.master_correlated&&same684(ac,pinned)&&
- ac.enrollment_receipt_id===Number(er.social_post_attempt_id)&&
- ac.master_signed_receipt_id===source.master.receipt_id&&
- ac.master_revision===source.master.master_revision&&ac.decision==='accepted'&&
- nonce684(ac.request_nonce)&&fresh684(ac.issued_at,1200000)&&fresh684(a.checked_at,1200000)&&
- typeof ac.receiver_receipt_id==='string'&&/^[A-Za-z0-9_.:-]{10,120}$/.test(ac.receiver_receipt_id)&&
- await verify684(normalizeText(env?.AI_DATA_MASTER_ACK_PUBLIC_KEY),claim684('acceptance',ac),a.signature);
- const closures=data.filter(x=>x.platform_key==='finance_continuity_684').slice(0,25).map(x=>{
-  const c=safeJson(x.response_json,{});
-  return {case_code:c.case_code,receipt_id:x.social_post_attempt_id,recorded_at:x.attempted_at,
-   current:!!accepted&&c.fingerprint_sha256===source.fingerprint_sha256&&
-   c.source_signer_receipt_id===source.signer.receipt_id&&
-   c.enrollment_receipt_id===Number(er?.social_post_attempt_id)&&
-   c.master_signed_receipt_id===source.master.receipt_id&&
-   c.master_acceptance_receipt_id===Number(ar?.social_post_attempt_id)};
- });
- return {status:!complete?'HOLD_AUDIT_INCOMPLETE':accepted?'INDEPENDENT_MASTER_ACCEPTANCE_VERIFIED':'HOLD_MASTER_RUNTIME_ACCEPTANCE',
-  campaign:source.campaign,queue_id:n,source_revision:source.source_revision,
-  fingerprint_sha256:source.fingerprint_sha256,source_signer_receipt_id:source.signer?.receipt_id||null,
-  signer_id:source.signer?.signer_id||null,signer_nonce:source.signer?.nonce||null,
-  master_signed_receipt_id:source.master?.receipt_id||null,master_revision:source.master?.master_revision||null,
-  signer_enrolled:!!enrolled,enrollment_receipt_id:enrolled?Number(er.social_post_attempt_id):null,
-  master_accepted:!!accepted,master_acceptance_receipt_id:accepted?Number(ar.social_post_attempt_id):null,
-  receiver_receipt_id:accepted?ac.receiver_receipt_id:null,
-  receiver_configured:!!endpoint684(env),source_owner_accepted:!!base.source_owner_accepted,
-  source_blockers:base.cases.filter(c=>!c.code.startsWith('MASTER_')).map(c=>c.code),
-  closed_cases:closures,connection:'HOLD_INDEPENDENT_CONTINUOUS_RUNTIME_TELEMETRY',
-  profitability_certified:false,publication_performed:false};
+const n=Number(id);if(!Number.isSafeInteger(n)||n<1)return{status:'HOLD_SELECT_CAMPAIGN',signer_enrolled:false,master_accepted:false,connection:'HOLD'};
+const source=await financial683(db,env,n),base=await finance682(db,env,n);
+const data=rows(await db.prepare("SELECT social_post_attempt_id,platform_key,external_post_id,response_json,attempted_at FROM social_post_attempts WHERE social_post_queue_id=? AND platform_key IN ('finance_enrollment_684','finance_acceptance_684','finance_continuity_684') ORDER BY social_post_attempt_id DESC LIMIT 121").bind(n).all());
+const complete=source.complete&&base.complete&&data.length<=120;
+const er=data.find(x=>x.platform_key==='finance_enrollment_684'),e=safeJson(er?.response_json,{}),ec=e.claim||{};
+const pinned=pin684(source),enrolled=!!complete&&base.source_owner_accepted&&!base.cases.some(c=>!c.code.startsWith('MASTER_'))&&source.signer?.status==='INDEPENDENT_SIGNER_ADMITTED'&&
+same684(ec,pinned)&&ec.signer_id===normalizeText(env?.FINANCIAL_EVIDENCE_SIGNER_ID_683)&&
+nonce684(ec.nonce)&&fresh684(ec.issued_at,30*86400000)&&
+await verify684(normalizeText(env?.FINANCIAL_EVIDENCE_SIGNER_PUBLIC_KEY_683),claim684('enrollment',ec),e.signature);
+const ar=data.find(x=>x.platform_key==='finance_acceptance_684'),a=safeJson(ar?.response_json,{}),ac=a.claim||{};
+const accepted=!!enrolled&&source.master_correlated&&same684(ac,pinned)&&
+ac.enrollment_receipt_id===Number(er.social_post_attempt_id)&&
+ac.master_signed_receipt_id===source.master.receipt_id&&
+ac.master_revision===source.master.master_revision&&ac.decision==='accepted'&&
+nonce684(ac.request_nonce)&&fresh684(ac.issued_at,1200000)&&fresh684(a.checked_at,1200000)&&
+typeof ac.receiver_receipt_id==='string'&&/^[A-Za-z0-9_.:-]{10,120}$/.test(ac.receiver_receipt_id)&&
+await verify684(normalizeText(env?.AI_DATA_MASTER_ACK_PUBLIC_KEY),claim684('acceptance',ac),a.signature);
+const closures=data.filter(x=>x.platform_key==='finance_continuity_684').slice(0,25).map(x=>{
+const c=safeJson(x.response_json,{});
+return{case_code:c.case_code,receipt_id:x.social_post_attempt_id,recorded_at:x.attempted_at,
+current:!!accepted&&c.fingerprint_sha256===source.fingerprint_sha256&&
+c.source_signer_receipt_id===source.signer.receipt_id&&
+c.enrollment_receipt_id===Number(er?.social_post_attempt_id)&&
+c.master_signed_receipt_id===source.master.receipt_id&&
+c.master_acceptance_receipt_id===Number(ar?.social_post_attempt_id)};
+});
+return{status:!complete?'HOLD_AUDIT_INCOMPLETE':accepted?'INDEPENDENT_MASTER_ACCEPTANCE_VERIFIED':'HOLD_MASTER_RUNTIME_ACCEPTANCE',
+campaign:source.campaign,queue_id:n,source_revision:source.source_revision,
+fingerprint_sha256:source.fingerprint_sha256,source_signer_receipt_id:source.signer?.receipt_id||null,
+signer_id:source.signer?.signer_id||null,signer_nonce:source.signer?.nonce||null,
+master_signed_receipt_id:source.master?.receipt_id||null,master_revision:source.master?.master_revision||null,
+signer_enrolled:!!enrolled,enrollment_receipt_id:enrolled?Number(er.social_post_attempt_id):null,
+master_accepted:!!accepted,master_acceptance_receipt_id:accepted?Number(ar.social_post_attempt_id):null,
+receiver_receipt_id:accepted?ac.receiver_receipt_id:null,
+receiver_configured:!!endpoint684(env),source_owner_accepted:!!base.source_owner_accepted,
+source_blockers:base.cases.filter(c=>!c.code.startsWith('MASTER_')).map(c=>c.code),
+closed_cases:closures,connection:'HOLD_INDEPENDENT_CONTINUOUS_RUNTIME_TELEMETRY',
+profitability_certified:false,publication_performed:false};
 }
 async function enroll684(db,env,user,p){
- const id=Number(p.social_post_queue_id),v=await financial684(db,env,id),nonce=normalizeText(p.nonce),
- issued_at=normalizeText(p.issued_at),signature=normalizeText(p.signature);
- if(p.owner_reviewed!==true||!v.source_owner_accepted||v.source_blockers?.length||
- !v.source_signer_receipt_id||!v.signer_id||!v.source_revision||!nonce684(nonce)||!fresh684(issued_at))
- throw Error('Owner-accepted exact source, independent existing signer, nonce and current time required. HOLD.');
- if(p.expected_fingerprint_sha256!==v.fingerprint_sha256)throw Error('Source fingerprint changed. Refresh before signer enrollment.');
- const claim=claim684('enrollment',{...pin684({queue_id:id,campaign:v.campaign,source_revision:v.source_revision,
- fingerprint_sha256:v.fingerprint_sha256,signer:{receipt_id:v.source_signer_receipt_id}}),signer_id:v.signer_id,nonce,issued_at});
- if(!await verify684(normalizeText(env?.FINANCIAL_EVIDENCE_SIGNER_PUBLIC_KEY_683),claim,signature))
- throw Error('Original independent financial signer did not sign exact runtime enrollment. HOLD.');
- const receipt_id=await append684(db,user,id,'finance_enrollment_684','independent_signer_runtime_enrolled_684',nonce,{claim,signature,checked_at:new Date().toISOString()});
- return {status:'independent_signer_runtime_enrolled_684',receipt_id,master_accepted:false,publication_performed:false};
+const id=Number(p.social_post_queue_id),v=await financial684(db,env,id),nonce=normalizeText(p.nonce),
+issued_at=normalizeText(p.issued_at),signature=normalizeText(p.signature);
+if(p.owner_reviewed!==true||!v.source_owner_accepted||v.source_blockers?.length||
+!v.source_signer_receipt_id||!v.signer_id||!v.source_revision||!nonce684(nonce)||!fresh684(issued_at))
+throw Error('Owner-accepted exact source, independent existing signer, nonce and current time required. HOLD.');
+if(p.expected_fingerprint_sha256!==v.fingerprint_sha256)throw Error('Source fingerprint changed. Refresh before signer enrollment.');
+const claim=claim684('enrollment',{...pin684({queue_id:id,campaign:v.campaign,source_revision:v.source_revision,
+fingerprint_sha256:v.fingerprint_sha256,signer:{receipt_id:v.source_signer_receipt_id}}),signer_id:v.signer_id,nonce,issued_at});
+if(!await verify684(normalizeText(env?.FINANCIAL_EVIDENCE_SIGNER_PUBLIC_KEY_683),claim,signature))
+throw Error('Original independent financial signer did not sign exact runtime enrollment. HOLD.');
+const receipt_id=await append684(db,user,id,'finance_enrollment_684','independent_signer_runtime_enrolled_684',nonce,{claim,signature,checked_at:new Date().toISOString()});
+return{status:'independent_signer_runtime_enrolled_684',receipt_id,master_accepted:false,publication_performed:false};
 }
 async function accept684(db,env,user,p){
- const id=Number(p.social_post_queue_id),v=await financial684(db,env,id);
- if(p.owner_reviewed!==true||!v.signer_enrolled||!v.master_signed_receipt_id||
- v.source_blockers?.length||p.expected_fingerprint_sha256!==v.fingerprint_sha256)
- throw Error('Fresh independent signer, exact signed Master receipt and owner review required. HOLD.');
- const evidence=await lookup684(env,{queue_id:id,campaign:v.campaign,source_revision:v.source_revision,
- fingerprint_sha256:v.fingerprint_sha256,source_signer_receipt_id:v.source_signer_receipt_id,
- enrollment_receipt_id:v.enrollment_receipt_id,master_signed_receipt_id:v.master_signed_receipt_id,
- master_revision:v.master_revision});
- const receipt_id=await append684(db,user,id,'finance_acceptance_684','independent_master_runtime_accepted_684',
- evidence.claim.request_nonce,evidence);
- return {status:'independent_master_runtime_accepted_684',receipt_id,master_accepted:true,
- connection:'HOLD_INDEPENDENT_CONTINUOUS_RUNTIME_TELEMETRY',publication_performed:false};
+const id=Number(p.social_post_queue_id),v=await financial684(db,env,id);
+if(p.owner_reviewed!==true||!v.signer_enrolled||!v.master_signed_receipt_id||
+v.source_blockers?.length||p.expected_fingerprint_sha256!==v.fingerprint_sha256)
+throw Error('Fresh independent signer, exact signed Master receipt and owner review required. HOLD.');
+const evidence=await lookup684(env,{queue_id:id,campaign:v.campaign,source_revision:v.source_revision,
+fingerprint_sha256:v.fingerprint_sha256,source_signer_receipt_id:v.source_signer_receipt_id,
+enrollment_receipt_id:v.enrollment_receipt_id,master_signed_receipt_id:v.master_signed_receipt_id,
+master_revision:v.master_revision});
+const receipt_id=await append684(db,user,id,'finance_acceptance_684','independent_master_runtime_accepted_684',
+evidence.claim.request_nonce,evidence);
+return{status:'independent_master_runtime_accepted_684',receipt_id,master_accepted:true,
+connection:'HOLD_INDEPENDENT_CONTINUOUS_RUNTIME_TELEMETRY',publication_performed:false};
 }
 async function continuity684(db,env,user,p){
- const id=Number(p.social_post_queue_id),v=await financial684(db,env,id),base=await finance682(db,env,id),
- code=normalizeText(p.case_code),note=normalizeText(p.resolution_note);
- if(p.owner_reviewed!==true||!v.master_accepted||!v.signer_enrolled||!v.source_owner_accepted||
- v.source_blockers?.length||p.expected_fingerprint_sha256!==v.fingerprint_sha256||
- !['MASTER_RECEIPT_NOT_CURRENT','MASTER_INDEPENDENT_ADMISSION_UNVERIFIED'].includes(code)||
- note.length<20||note.length>400||!base.cases.some(c=>c.code===code))
- throw Error('Current independent Master acceptance and exactly reviewed discrepancy required for owner closure. HOLD.');
- const old=base.reviews.find(x=>x.case_code===code&&x.current_evidence);
- if(!old)throw Error('Original fingerprint-pinned owner discrepancy review missing. HOLD.');
- const earlier=v.closed_cases.find(x=>x.case_code===code&&x.current);
- if(earlier)throw Error('Current discrepancy already closed; replay refused.');
- const nonce='case-'+crypto.randomUUID()+'-'+crypto.randomUUID();
- const receipt_id=await append684(db,user,id,'finance_continuity_684','owner_finance_continuity_closed_684',nonce,{
-  case_code:code,fingerprint_sha256:v.fingerprint_sha256,source_signer_receipt_id:v.source_signer_receipt_id,
-  enrollment_receipt_id:v.enrollment_receipt_id,master_signed_receipt_id:v.master_signed_receipt_id,
-  master_acceptance_receipt_id:v.master_acceptance_receipt_id,
-  prior_owner_review_receipt_id:old.receipt_id,owner_user_id:user.user_id,resolution_note:note,
-  master_accepted:true,profitability_certified:false});
- return {status:'owner_finance_continuity_closed_684',receipt_id,master_accepted:true,
- connection:'HOLD_INDEPENDENT_CONTINUOUS_RUNTIME_TELEMETRY',publication_performed:false};
+const id=Number(p.social_post_queue_id),v=await financial684(db,env,id),base=await finance682(db,env,id),
+code=normalizeText(p.case_code),note=normalizeText(p.resolution_note);
+if(p.owner_reviewed!==true||!v.master_accepted||!v.signer_enrolled||!v.source_owner_accepted||
+v.source_blockers?.length||p.expected_fingerprint_sha256!==v.fingerprint_sha256||
+!['MASTER_RECEIPT_NOT_CURRENT','MASTER_INDEPENDENT_ADMISSION_UNVERIFIED'].includes(code)||
+note.length<20||note.length>400||!base.cases.some(c=>c.code===code))
+throw Error('Current independent Master acceptance and exactly reviewed discrepancy required for owner closure. HOLD.');
+const old=base.reviews.find(x=>x.case_code===code&&x.current_evidence);
+if(!old)throw Error('Original fingerprint-pinned owner discrepancy review missing. HOLD.');
+const earlier=v.closed_cases.find(x=>x.case_code===code&&x.current);
+if(earlier)throw Error('Current discrepancy already closed; replay refused.');
+const nonce='case-'+crypto.randomUUID()+'-'+crypto.randomUUID();
+const receipt_id=await append684(db,user,id,'finance_continuity_684','owner_finance_continuity_closed_684',nonce,{
+case_code:code,fingerprint_sha256:v.fingerprint_sha256,source_signer_receipt_id:v.source_signer_receipt_id,
+enrollment_receipt_id:v.enrollment_receipt_id,master_signed_receipt_id:v.master_signed_receipt_id,
+master_acceptance_receipt_id:v.master_acceptance_receipt_id,
+prior_owner_review_receipt_id:old.receipt_id,owner_user_id:user.user_id,resolution_note:note,
+master_accepted:true,profitability_certified:false});
+return{status:'owner_finance_continuity_closed_684',receipt_id,master_accepted:true,
+connection:'HOLD_INDEPENDENT_CONTINUOUS_RUNTIME_TELEMETRY',publication_performed:false};
 }
 
 // Build 682 — source-only financial export and owner discrepancy audit.
 async function finance682(db,env,id){
- const n=Number(id);
- if(!Number.isSafeInteger(n)||n<1)return {status:'HOLD_SELECT_CAMPAIGN',cases:[],reviews:[],master_accepted:false};
- const source=await campaignNet679(db,n),f680=await finance680(db,env,n),f681=await finance681(db,env,n);
- if(!source?.campaign)throw Error('Campaign evidence not found.');
- const hash=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(source.fingerprint||''));
- const pin=Array.from(new Uint8Array(hash),b=>b.toString(16).padStart(2,'0')).join('');
- const flags=[];
- if(source.blockers?.length)flags.push('SOURCE_FINANCIAL_EVIDENCE_INCOMPLETE');
- if(!source.owner_accepted)flags.push('SOURCE_OWNER_SIGNOFF_PENDING');
- if(f680.stale_count)flags.push('SOURCE_VERIFIER_EVIDENCE_STALE');
- if(f681.exceptions?.some(e=>!e.resolved_at))flags.push('OWNER_EXCEPTION_OPEN');
- if(!f681.scan_complete)flags.push('SOURCE_AUDIT_WINDOW_INCOMPLETE');
- if(!(f681.master_receipts||[]).some(e=>e.state==='SIGNED_AT_INTAKE_RECEIPT_ONLY'))
-  flags.push('MASTER_RECEIPT_NOT_CURRENT');
- flags.push('MASTER_INDEPENDENT_ADMISSION_UNVERIFIED');
- const found=rows(await db.prepare(`SELECT social_post_attempt_id,attempt_status,external_post_id,attempted_at,response_json
+const n=Number(id);
+if(!Number.isSafeInteger(n)||n<1)return{status:'HOLD_SELECT_CAMPAIGN',cases:[],reviews:[],master_accepted:false};
+const source=await campaignNet679(db,n),f680=await finance680(db,env,n),f681=await finance681(db,env,n);
+if(!source?.campaign)throw Error('Campaign evidence not found.');
+const hash=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(source.fingerprint||''));
+const pin=Array.from(new Uint8Array(hash),b=>b.toString(16).padStart(2,'0')).join('');
+const flags=[];
+if(source.blockers?.length)flags.push('SOURCE_FINANCIAL_EVIDENCE_INCOMPLETE');
+if(!source.owner_accepted)flags.push('SOURCE_OWNER_SIGNOFF_PENDING');
+if(f680.stale_count)flags.push('SOURCE_VERIFIER_EVIDENCE_STALE');
+if(f681.exceptions?.some(e=>!e.resolved_at))flags.push('OWNER_EXCEPTION_OPEN');
+if(!f681.scan_complete)flags.push('SOURCE_AUDIT_WINDOW_INCOMPLETE');
+if(!(f681.master_receipts||[]).some(e=>e.state==='SIGNED_AT_INTAKE_RECEIPT_ONLY'))
+flags.push('MASTER_RECEIPT_NOT_CURRENT');
+flags.push('MASTER_INDEPENDENT_ADMISSION_UNVERIFIED');
+const found=rows(await db.prepare(`SELECT social_post_attempt_id,attempt_status,external_post_id,attempted_at,response_json
  FROM social_post_attempts WHERE social_post_queue_id=? AND platform_key='finance_discrepancy_682'
  ORDER BY social_post_attempt_id DESC LIMIT 101`).bind(n).all());
- const recent=found.slice(0,100).map(e=>{const d=safeJson(e.response_json,{});
- return {receipt_id:e.social_post_attempt_id,case_code:e.external_post_id,
-  disposition:e.attempt_status==='owner_escalated_682'?'ESCALATED':'OWNER_REVIEWED',
-  recorded_at:e.attempted_at,current_evidence:d.fingerprint_sha256===pin};});
- if(found.length>100)flags.push('DISCREPANCY_AUDIT_WINDOW_INCOMPLETE');
- const cases=[...new Set(flags)].map(code=>({code,state:code==='MASTER_INDEPENDENT_ADMISSION_UNVERIFIED'?
- 'HOLD_EXTERNAL_MASTER_PROOF':'HOLD_SOURCE_OR_OWNER_REVIEW',
- last_review:recent.find(x=>x.case_code===code&&x.current_evidence)||null}));
- return {format:'devilndove-finance-evidence-682',version:1,campaign:source.campaign,
-  as_of:new Date().toISOString(),currency:'CAD',source_revision:normalizeText(env?.DEVILNDOVE_SOURCE_REVISION)||null,
-  fingerprint_sha256:pin,source_status:source.status,source_owner_accepted:!!source.owner_accepted,
-  financial:source.blockers?.length?null:source.financial||null,
-  counts:{paid_orders:source.orders_seen||0,verified_expenses:source.expense_receipts_seen||0,
-   verified_cost_allocations:source.product_cost_receipts_seen||0},
-  cases,reviews:recent,master_receipts:f681.master_receipts||[],owner_history:f681.owner_history||[],
-  master_accepted:false,profitability_certified:false,
-  master_connection:'HOLD_INDEPENDENT_RUNTIME_TRANSPORT_AND_MASTER_ADMISSION',
-  status:flags.length?'HOLD_DISCREPANCIES':'SOURCE_EVIDENCE_REVIEW_ONLY',
-  complete:f681.scan_complete&&found.length<=100};
+const recent=found.slice(0,100).map(e=>{const d=safeJson(e.response_json,{});
+return{receipt_id:e.social_post_attempt_id,case_code:e.external_post_id,
+disposition:e.attempt_status==='owner_escalated_682'?'ESCALATED':'OWNER_REVIEWED',
+recorded_at:e.attempted_at,current_evidence:d.fingerprint_sha256===pin};});
+if(found.length>100)flags.push('DISCREPANCY_AUDIT_WINDOW_INCOMPLETE');
+const cases=[...new Set(flags)].map(code=>({code,state:code==='MASTER_INDEPENDENT_ADMISSION_UNVERIFIED'?
+'HOLD_EXTERNAL_MASTER_PROOF':'HOLD_SOURCE_OR_OWNER_REVIEW',
+last_review:recent.find(x=>x.case_code===code&&x.current_evidence)||null}));
+return{format:'devilndove-finance-evidence-682',version:1,campaign:source.campaign,
+as_of:new Date().toISOString(),currency:'CAD',source_revision:normalizeText(env?.DEVILNDOVE_SOURCE_REVISION)||null,
+fingerprint_sha256:pin,source_status:source.status,source_owner_accepted:!!source.owner_accepted,
+financial:source.blockers?.length?null:source.financial||null,
+counts:{paid_orders:source.orders_seen||0,verified_expenses:source.expense_receipts_seen||0,
+verified_cost_allocations:source.product_cost_receipts_seen||0},
+cases,reviews:recent,master_receipts:f681.master_receipts||[],owner_history:f681.owner_history||[],
+master_accepted:false,profitability_certified:false,
+master_connection:'HOLD_INDEPENDENT_RUNTIME_TRANSPORT_AND_MASTER_ADMISSION',
+status:flags.length?'HOLD_DISCREPANCIES':'SOURCE_EVIDENCE_REVIEW_ONLY',
+complete:f681.scan_complete&&found.length<=100};
 }
 async function ownerDiscrepancy682(db,env,user,p){
- const id=Number(p.social_post_queue_id),code=normalizeText(p.case_code),
-  note=normalizeText(p.review_note),decision=normalizeText(p.disposition),
-  expected=normalizeText(p.expected_fingerprint_sha256);
- if(!Number.isSafeInteger(id)||id<1||p.owner_reviewed!==true||
-  !['acknowledge','escalate'].includes(decision)||note.length<15||note.length>400)
-  throw Error('Explicit owner review and a 15–400 character decision are required.');
- const view=await finance682(db,env,id);
- if(!view.complete)throw Error('Audit window incomplete: owner decision HOLD.');
- if(expected!==view.fingerprint_sha256||!view.cases.some(c=>c.code===code))
-  throw Error('Discrepancy or source fingerprint changed. Refresh before review.');
- const prior=await db.prepare(`SELECT COALESCE(MAX(social_post_attempt_id),0) last_id FROM social_post_attempts
+const id=Number(p.social_post_queue_id),code=normalizeText(p.case_code),
+note=normalizeText(p.review_note),decision=normalizeText(p.disposition),
+expected=normalizeText(p.expected_fingerprint_sha256);
+if(!Number.isSafeInteger(id)||id<1||p.owner_reviewed!==true||
+!['acknowledge','escalate'].includes(decision)||note.length<15||note.length>400)
+throw Error('Explicit owner review and a 15–400 character decision are required.');
+const view=await finance682(db,env,id);
+if(!view.complete)throw Error('Audit window incomplete: owner decision HOLD.');
+if(expected!==view.fingerprint_sha256||!view.cases.some(c=>c.code===code))
+throw Error('Discrepancy or source fingerprint changed. Refresh before review.');
+const prior=await db.prepare(`SELECT COALESCE(MAX(social_post_attempt_id),0) last_id FROM social_post_attempts
  WHERE social_post_queue_id=? AND platform_key='finance_discrepancy_682'`).bind(id).first();
- const status=decision==='escalate'?'owner_escalated_682':'owner_reviewed_682';
- await recordApiAttempt(db,user,id,'finance_discrepancy_682',status,{
-  external_post_id:code,response:{fingerprint_sha256:expected,decision,owner_user_id:user.user_id,
-   review_note:note,master_accepted:false,profitability_certified:false},
-  notes:'Source-only owner review. Independent Master acceptance and financial certification remain HOLD.'});
- const saved=await db.prepare(`SELECT social_post_attempt_id FROM social_post_attempts
+const status=decision==='escalate'?'owner_escalated_682':'owner_reviewed_682';
+await recordApiAttempt(db,user,id,'finance_discrepancy_682',status,{
+external_post_id:code,response:{fingerprint_sha256:expected,decision,owner_user_id:user.user_id,
+review_note:note,master_accepted:false,profitability_certified:false},
+notes:'Source-only owner review. Independent Master acceptance and financial certification remain HOLD.'});
+const saved=await db.prepare(`SELECT social_post_attempt_id FROM social_post_attempts
  WHERE social_post_queue_id=? AND platform_key='finance_discrepancy_682' AND external_post_id=?
  AND attempt_status=? AND social_post_attempt_id>? LIMIT 1`).bind(id,code,status,Number(prior?.last_id||0)).first();
- if(!saved)throw Error('Owner audit decision was not durably saved. HOLD.');
- return {status,receipt_id:saved.social_post_attempt_id,master_accepted:false,publication_performed:false};
+if(!saved)throw Error('Owner audit decision was not durably saved. HOLD.');
+return{status,receipt_id:saved.social_post_attempt_id,master_accepted:false,publication_performed:false};
 }
 
-export async function onRequestGet(context) {
-const adminUser = await getAdminUserFromRequest(context.request, context.env);
-if (!adminUser) return jsonResponse({ ok: false, error: 'Admin access required.' }, 401);
-const db = getDb(context.env);
-if (!db) return jsonResponse({ ok: false, error: 'Database binding is not configured.' }, 500);
-try {
+export async function onRequestGet(context){
+const adminUser=await getAdminUserFromRequest(context.request,context.env);
+if (!adminUser) return jsonResponse({ ok:false,error:'Admin access required.'},401);
+const db=getDb(context.env);
+if (!db) return jsonResponse({ ok:false,error:'Database binding is not configured.'},500);
+try{
 const params=new URL(context.request.url).searchParams;
 if(params.get('export')==='financial682'){
- const evidence=await finance682(db,context.env,params.get('campaign_queue_id'));
- if(!evidence.campaign||!evidence.complete)return jsonResponse({ok:false,error:'Complete campaign evidence required for protected export.'},409,{'Cache-Control':'no-store'});
- return new Response(JSON.stringify(evidence,null,2),{status:200,headers:{
- 'Content-Type':'application/json; charset=utf-8','Content-Disposition':'attachment; filename="devilndove-financial-evidence-'+Number(params.get('campaign_queue_id'))+'.json"',
- 'Cache-Control':'private, no-store','X-Content-Type-Options':'nosniff'}});
+const evidence=await finance682(db,context.env,params.get('campaign_queue_id'));
+if(!evidence.campaign||!evidence.complete)return jsonResponse({ok:false,error:'Complete campaign evidence required for protected export.'},409,{'Cache-Control':'no-store'});
+return new Response(JSON.stringify(evidence,null,2),{status:200,headers:{
+'Content-Type':'application/json; charset=utf-8','Content-Disposition':'attachment; filename="devilndove-financial-evidence-'+Number(params.get('campaign_queue_id'))+'.json"',
+'Cache-Control':'private, no-store','X-Content-Type-Options':'nosniff'}});
 }
-const data = await summarize(db, context.env);
-return jsonResponse({ ok: true, ...data, receipts673:await receipts673(db),engagement675:await engagement675(db),financial676:await financial676(db), financial678:await financialSummary678(db,context.request.headers.get('x-campaign-queue-id')||new URL(context.request.url).searchParams.get('campaign_queue_id')), financial679:await campaignNet679(db,new URL(context.request.url).searchParams.get('campaign_queue_id')), financial680:await finance680(db,context.env,new URL(context.request.url).searchParams.get('campaign_queue_id')), financial681:await finance681(db,context.env,new URL(context.request.url).searchParams.get('campaign_queue_id')), financial682:await finance682(db,context.env,new URL(context.request.url).searchParams.get('campaign_queue_id')), financial683:await financial683(db,context.env,new URL(context.request.url).searchParams.get('campaign_queue_id')), financial684:await financial684(db,context.env,new URL(context.request.url).searchParams.get('campaign_queue_id')), queue: data.queue.map(normalizeQueueRow), mode: 'review_first_api_when_configured' }, 200, { 'Cache-Control': 'no-store' });
-} catch (error) {
-await captureRuntimeIncident(context.env, context.request, {
-incident_scope: 'admin_social',
-incident_code: 'social_queue_get_failed',
-severity: 'error',
-message: error?.message || 'Social queue failed to load.',
-details: { error: String(error?.stack || error?.message || error) },
-related_user_id: adminUser.user_id
+const data=await summarize(db,context.env);
+return jsonResponse({ ok:true,...data,receipts673:await receipts673(db),engagement675:await engagement675(db),financial676:await financial676(db),financial678:await financialSummary678(db,context.request.headers.get('x-campaign-queue-id')||new URL(context.request.url).searchParams.get('campaign_queue_id')),financial679:await campaignNet679(db,new URL(context.request.url).searchParams.get('campaign_queue_id')),financial680:await finance680(db,context.env,new URL(context.request.url).searchParams.get('campaign_queue_id')),financial681:await finance681(db,context.env,new URL(context.request.url).searchParams.get('campaign_queue_id')),financial682:await finance682(db,context.env,new URL(context.request.url).searchParams.get('campaign_queue_id')),financial683:await financial683(db,context.env,new URL(context.request.url).searchParams.get('campaign_queue_id')),financial684:await financial684(db,context.env,new URL(context.request.url).searchParams.get('campaign_queue_id')),queue:data.queue.map(normalizeQueueRow),mode:'review_first_api_when_configured'},200,{ 'Cache-Control':'no-store'});
+} catch (error){
+await captureRuntimeIncident(context.env,context.request,{
+incident_scope:'admin_social',
+incident_code:'social_queue_get_failed',
+severity:'error',
+message:error?.message || 'Social queue failed to load.',
+details:{ error:String(error?.stack || error?.message || error) },
+related_user_id:adminUser.user_id
 });
-return jsonResponse({ ok: true, degraded: true, backend_warning: error?.message || 'Social queue is temporarily unavailable. Refresh after the database migration completes.', summary: { total: 0, open_count: 0, needs_review_count: 0, posted_count: 0, scheduled_count: 0, due_count: 0, duplicate_warning_count: 0 }, queue: [], platforms: [], attempts: [], templates: [], calendar: [], utm_rollups: [], mode: 'review_first_api_when_configured' }, 200, { 'Cache-Control': 'no-store' });
+return jsonResponse({ ok:true,degraded:true,backend_warning:error?.message || 'Social queue is temporarily unavailable. Refresh after the database migration completes.',summary:{ total:0,open_count:0,needs_review_count:0,posted_count:0,scheduled_count:0,due_count:0,duplicate_warning_count:0 },queue:[],platforms:[],attempts:[],templates:[],calendar:[],utm_rollups:[],mode:'review_first_api_when_configured'},200,{ 'Cache-Control':'no-store'});
 }
 }
 
-export async function onRequestPost(context) {
-const adminUser = await getAdminUserFromRequest(context.request, context.env);
-if (!adminUser) return jsonResponse({ ok: false, error: 'Admin access required.' }, 401);
-const db = getDb(context.env);
-if (!db) return jsonResponse({ ok: false, error: 'Database binding is not configured.' }, 500);
+export async function onRequestPost(context){
+const adminUser=await getAdminUserFromRequest(context.request,context.env);
+if (!adminUser) return jsonResponse({ ok:false,error:'Admin access required.'},401);
+const db=getDb(context.env);
+if (!db) return jsonResponse({ ok:false,error:'Database binding is not configured.'},500);
 
-let payload = {};
-try { payload = await context.request.json(); } catch { payload = {}; }
-const action = slugKey(payload.action || 'create');
+let payload={};
+try{ payload=await context.request.json();} catch{ payload={};}
+const action=slugKey(payload.action || 'create');
 
-try {
+try{
 await ensureSchema(db);
-let result = {};
-if (action === 'create') result = await createQueuedPost(db, adminUser, payload);
-else if (action === 'update_status') await updateStatus(db, adminUser, payload);
-else if (action === 'record_manual_post') await recordManualPost(db, adminUser, payload);
-else if (action === 'generate_from_recent_media') result = await generateFromRecentMedia(db, adminUser);
-else if (action === 'preview_caption_template') result = await previewCaptionTemplate(db, payload);
-else if (action === 'save_caption_template') result = await saveCaptionTemplate(db, payload);
-else if (action === 'archive_caption_template') result = await archiveCaptionTemplate(db, payload);
-else if (action === 'dry_run_platforms') result = await dryRunQueuedPost(context, db, adminUser, payload);
-else if (action === 'publish_platforms') result = await publishQueuedPost(context, db, adminUser, payload);
-else if (action === 'verify_accounts_672') result = {accounts:await verifyAccounts672(context.env),verified_at:new Date().toISOString(),publication_performed:false};
-else if (action === 'approve_caip_derivative_672') result = await approveCaipDerivative672(db,adminUser,payload);
-else if (action === 'verify_publication_673') result = await verifyPublication673(context,db,adminUser,payload);
-else if (action === 'retry_failed_673') result = await retryFailed673(context,db,adminUser,payload);
-else if (action === 'campaign_schedule_674') result = await scheduleCampaign674(db,adminUser,payload);
-else if (action === 'verify_engagement_675') result = await verifyEngagement675(context,db,adminUser,payload);
-else if (action === 'financial_evidence_676') result = await recordFinancialEvidence676(db,adminUser,payload);
-else if (action === 'verify_product_cost_679') result = await verifyCost679(db,context.env,adminUser,payload,recordApiAttempt);
-else if (action === 'owner_net_signoff_679') result = await ownerNetSignoff679(db,adminUser,payload,recordApiAttempt);
-else if (action === 'master_ack_680') result = await masterAck680(db,context.env,adminUser,payload);
-else if (action === 'owner_profit_exception_680') result = await exception680(db,adminUser,payload);
-    else if (action === 'owner_exception_ack_681') result = await ownerExceptionAck681(db,adminUser,payload);
-else if (action === 'owner_discrepancy_review_682') result = await ownerDiscrepancy682(db,context.env,adminUser,payload);
-else if (action === 'admit_financial_signer_683') result = await admission683(db,context.env,adminUser,payload);
-else if (action === 'correlate_financial_master_683') result = await masterCorrelation683(db,context.env,adminUser,payload);
-else if (action === 'close_financial_discrepancy_683') result = await ownerClosure683(db,context.env,adminUser,payload);
-else if (action === 'enroll_finance_signer_684') result = await enroll684(db,context.env,adminUser,payload);
-else if (action === 'verify_finance_master_684') result = await accept684(db,context.env,adminUser,payload);
-else if (action === 'close_finance_continuity_684') result = await continuity684(db,context.env,adminUser,payload);
-else if (action === 'expense_attestation_678') result = await expenseAttestation678(db,context.env,adminUser,payload,recordApiAttempt);
-else if (action === 'owner_marketing_signoff_678') result = await ownerSignoff678(db,adminUser,payload,recordApiAttempt);
+let result={};
+if (action==='create') result=await createQueuedPost(db,adminUser,payload);
+else if (action==='update_status') await updateStatus(db,adminUser,payload);
+else if (action==='record_manual_post') await recordManualPost(db,adminUser,payload);
+else if (action==='generate_from_recent_media') result=await generateFromRecentMedia(db,adminUser);
+else if (action==='preview_caption_template') result=await previewCaptionTemplate(db,payload);
+else if (action==='save_caption_template') result=await saveCaptionTemplate(db,payload);
+else if (action==='archive_caption_template') result=await archiveCaptionTemplate(db,payload);
+else if (action==='dry_run_platforms') result=await dryRunQueuedPost(context,db,adminUser,payload);
+else if (action==='publish_platforms') result=await publishQueuedPost(context,db,adminUser,payload);
+else if (action==='verify_accounts_672') result={accounts:await verifyAccounts672(context.env),verified_at:new Date().toISOString(),publication_performed:false};
+else if (action==='approve_caip_derivative_672') result=await approveCaipDerivative672(db,adminUser,payload);
+else if (action==='verify_publication_673') result=await verifyPublication673(context,db,adminUser,payload);
+else if (action==='retry_failed_673') result=await retryFailed673(context,db,adminUser,payload);
+else if (action==='campaign_schedule_674') result=await scheduleCampaign674(db,adminUser,payload);
+else if (action==='verify_engagement_675') result=await verifyEngagement675(context,db,adminUser,payload);
+else if (action==='financial_evidence_676') result=await recordFinancialEvidence676(db,adminUser,payload);
+else if (action==='verify_product_cost_679') result=await verifyCost679(db,context.env,adminUser,payload,recordApiAttempt);
+else if (action==='owner_net_signoff_679') result=await ownerNetSignoff679(db,adminUser,payload,recordApiAttempt);
+else if (action==='master_ack_680') result=await masterAck680(db,context.env,adminUser,payload);
+else if (action==='owner_profit_exception_680') result=await exception680(db,adminUser,payload);
+else if (action==='owner_exception_ack_681') result=await ownerExceptionAck681(db,adminUser,payload);
+else if (action==='owner_discrepancy_review_682') result=await ownerDiscrepancy682(db,context.env,adminUser,payload);
+else if (action==='admit_financial_signer_683') result=await admission683(db,context.env,adminUser,payload);
+else if (action==='correlate_financial_master_683') result=await masterCorrelation683(db,context.env,adminUser,payload);
+else if (action==='close_financial_discrepancy_683') result=await ownerClosure683(db,context.env,adminUser,payload);
+else if (action==='enroll_finance_signer_684') result=await enroll684(db,context.env,adminUser,payload);
+else if (action==='verify_finance_master_684') result=await accept684(db,context.env,adminUser,payload);
+else if (action==='close_finance_continuity_684') result=await continuity684(db,context.env,adminUser,payload);
+else if (action==='expense_attestation_678') result=await expenseAttestation678(db,context.env,adminUser,payload,recordApiAttempt);
+else if (action==='owner_marketing_signoff_678') result=await ownerSignoff678(db,adminUser,payload,recordApiAttempt);
 else throw new Error(`Unsupported social queue action: ${action}`);
 
-await auditAdminAction(context.env, context.request, adminUser, {
-action_type: `social_queue_${action}`,
-target_type: 'social_post_queue',
-target_id: result.social_post_queue_id || payload.social_post_queue_id || null,
-target_key: result.social_post_key || null,
-details: { action, platforms: payload.target_platforms || payload.platforms || null }
+await auditAdminAction(context.env,context.request,adminUser,{
+action_type:`social_queue_${action}`,
+target_type:'social_post_queue',
+target_id:result.social_post_queue_id || payload.social_post_queue_id || null,
+target_key:result.social_post_key || null,
+details:{ action,platforms:payload.target_platforms || payload.platforms || null }
 });
 
-const data = await summarize(db, context.env);
-return jsonResponse({ ok: true, message: 'Social queue updated.', result, ...data, queue: data.queue.map(normalizeQueueRow), mode: 'review_first_api_when_configured' }, 200, { 'Cache-Control': 'no-store' });
-} catch (error) {
-await captureRuntimeIncident(context.env, context.request, {
-incident_scope: 'admin_social',
-incident_code: 'social_queue_post_failed',
-severity: 'error',
-message: error?.message || 'Social queue update failed.',
-details: { action, error: String(error?.stack || error?.message || error) },
-related_user_id: adminUser.user_id
+const data=await summarize(db,context.env);
+return jsonResponse({ ok:true,message:'Social queue updated.',result,...data,queue:data.queue.map(normalizeQueueRow),mode:'review_first_api_when_configured'},200,{ 'Cache-Control':'no-store'});
+} catch (error){
+await captureRuntimeIncident(context.env,context.request,{
+incident_scope:'admin_social',
+incident_code:'social_queue_post_failed',
+severity:'error',
+message:error?.message || 'Social queue update failed.',
+details:{ action,error:String(error?.stack || error?.message || error) },
+related_user_id:adminUser.user_id
 });
-return jsonResponse({ ok: false, error: error?.message || 'Social queue update failed.' }, 500);
+return jsonResponse({ ok:false,error:error?.message || 'Social queue update failed.'},500);
 }
 }
