@@ -1779,6 +1779,130 @@ async function ownerExceptionAck681(db,user,p){
 }
 
 
+
+// Build 683: signed financial provenance; Master CONNECTED remains HOLD.
+export function financialClaim683(kind,x){
+ if(kind==='source')return {version:1,source:'devilndove',campaign:x.campaign,queue_id:x.queue_id,
+ source_revision:x.source_revision,fingerprint_sha256:x.fingerprint_sha256,signer_id:x.signer_id,nonce:x.nonce,issued_at:x.issued_at};
+ if(kind==='master')return {version:1,source:'devilndove',campaign:x.campaign,queue_id:x.queue_id,
+ source_revision:x.source_revision,fingerprint_sha256:x.fingerprint_sha256,
+ source_signer_receipt_id:x.source_signer_receipt_id,source_signer_nonce:x.source_signer_nonce,
+ master_revision:x.master_revision,nonce:x.nonce,issued_at:x.issued_at};
+ throw Error('Unsupported financial claim');
+}
+const fresh683=(t,age=86400000)=>typeof t==='string'&&/^\d{4}-\d\d-\d\dT\d\d:\d\d:\d\d(?:\.\d{3})?Z$/.test(t)&&
+ Number.isFinite(Date.parse(t))&&Date.now()-Date.parse(t)<=age&&Date.now()-Date.parse(t)>=-300000;
+const nonce683=v=>typeof v==='string'&&/^[A-Za-z0-9_-]{16,100}$/.test(v);
+async function signed683(key,claim,signature){
+ if(!key||!signature||typeof key!=='string'||typeof signature!=='string')return false;
+ try{
+ const decode=s=>Uint8Array.from(atob(s.replace(/-/g,'+').replace(/_/g,'/')),c=>c.charCodeAt(0));
+ const pk=decode(key),sig=decode(signature);
+ if(pk.length!==32||sig.length!==64)return false;
+ const verifier=await crypto.subtle.importKey('raw',pk,{name:'Ed25519'},false,['verify']);
+ return await crypto.subtle.verify('Ed25519',verifier,sig,new TextEncoder().encode(JSON.stringify(claim)));
+ }catch{return false}
+}
+async function financial683(db,env,id){
+ const n=Number(id);
+ if(!Number.isSafeInteger(n)||n<1)return {status:'HOLD_SELECT_CAMPAIGN',signer:{status:'HOLD'},master:{status:'HOLD'},master_correlated:false};
+ const baseline=await finance682(db,env,n),rev=normalizeText(env?.DEVILNDOVE_SOURCE_REVISION);
+ const data=rows(await db.prepare("SELECT social_post_attempt_id,platform_key,external_post_id,response_json,attempted_at FROM social_post_attempts WHERE social_post_queue_id=? AND platform_key IN ('finance_signer_683','finance_master_683','finance_closure_683') ORDER BY social_post_attempt_id DESC LIMIT 121").bind(n).all());
+ const complete=baseline.complete&&data.length<=120;
+ const source=data.find(r=>r.platform_key==='finance_signer_683'),proof=safeJson(source?.response_json,{}),claim=proof.claim||{};
+ const sourceOK=!!complete&&!!rev&&claim.source_revision===rev&&claim.campaign===baseline.campaign&&claim.queue_id===n&&
+ claim.fingerprint_sha256===baseline.fingerprint_sha256&&claim.signer_id===normalizeText(env?.FINANCIAL_EVIDENCE_SIGNER_ID_683)&&
+ nonce683(claim.nonce)&&fresh683(claim.issued_at)&&
+ await signed683(normalizeText(env?.FINANCIAL_EVIDENCE_SIGNER_PUBLIC_KEY_683),financialClaim683('source',claim),proof.signature);
+ const master=data.find(r=>r.platform_key==='finance_master_683'),mp=safeJson(master?.response_json,{}),mc=mp.claim||{};
+ const masterOK=!!sourceOK&&mc.campaign===baseline.campaign&&mc.queue_id===n&&mc.source_revision===rev&&
+ mc.fingerprint_sha256===baseline.fingerprint_sha256&&mc.source_signer_receipt_id===Number(source.social_post_attempt_id)&&
+ mc.source_signer_nonce===claim.nonce&&!!mc.master_revision&&nonce683(mc.nonce)&&fresh683(mc.issued_at)&&
+ await signed683(normalizeText(env?.AI_DATA_MASTER_ACK_PUBLIC_KEY),financialClaim683('master',mc),mp.signature);
+ return {status:!complete?'HOLD_INCOMPLETE_AUDIT':masterOK?'SOURCE_MASTER_SIGNED_RECEIPTS_CORRELATED':'HOLD_INDEPENDENT_SIGNED_PROOF',
+ complete,queue_id:n,campaign:baseline.campaign,source_revision:rev||null,fingerprint_sha256:baseline.fingerprint_sha256,
+ signer:{status:sourceOK?'INDEPENDENT_SIGNER_ADMITTED':'HOLD',signer_id:normalizeText(env?.FINANCIAL_EVIDENCE_SIGNER_ID_683)||null,
+ receipt_id:sourceOK?Number(source.social_post_attempt_id):null,nonce:sourceOK?claim.nonce:null},
+ master:{status:masterOK?'SIGNED_MASTER_RECEIPT_CORRELATED':'HOLD',receipt_id:masterOK?Number(master.social_post_attempt_id):null,
+ master_revision:masterOK?mc.master_revision:null},master_correlated:!!masterOK,
+ closed_cases:data.filter(r=>r.platform_key==='finance_closure_683').slice(0,25).map(r=>{
+ const d=safeJson(r.response_json,{});return {case_code:r.external_post_id,receipt_id:r.social_post_attempt_id,
+ current_source:d.fingerprint_sha256===baseline.fingerprint_sha256,
+ current_master:!!masterOK&&d.master_receipt_id===Number(master.social_post_attempt_id),recorded_at:r.attempted_at};}),
+ master_connection:'HOLD_INDEPENDENT_RUNTIME_TRANSPORT_AND_MASTER_ADMISSION',
+ master_accepted:false,profitability_certified:false,publication_performed:false};
+}
+async function admission683(db,env,user,p){
+ const id=Number(p.social_post_queue_id),v=await finance682(db,env,id),
+ revision=normalizeText(env?.DEVILNDOVE_SOURCE_REVISION),signer=normalizeText(env?.FINANCIAL_EVIDENCE_SIGNER_ID_683);
+ if(p.owner_reviewed!==true||!v.complete||!v.source_owner_accepted||!v.financial||!revision||!signer||
+ v.cases.some(c=>!c.code.startsWith('MASTER_')))throw Error('Independent signer admission requires complete fresh owner-reviewed source finances. HOLD.');
+ const nonce=normalizeText(p.nonce),issued_at=normalizeText(p.issued_at),signature=normalizeText(p.signature);
+ if(!nonce683(nonce)||!fresh683(issued_at,300000))throw Error('Fresh unique source nonce and UTC timestamp required.');
+ const claim=financialClaim683('source',{campaign:v.campaign,queue_id:id,source_revision:revision,
+ fingerprint_sha256:v.fingerprint_sha256,signer_id:signer,nonce,issued_at});
+ if(!await signed683(normalizeText(env?.FINANCIAL_EVIDENCE_SIGNER_PUBLIC_KEY_683),claim,signature))
+ throw Error('Independently enrolled signer did not verify the exact financial source. HOLD.');
+ const duplicate=await db.prepare("SELECT social_post_attempt_id FROM social_post_attempts WHERE platform_key='finance_signer_683' AND external_post_id=? LIMIT 1").bind(nonce).first();
+ if(duplicate)throw Error('Source signer nonce replay rejected.');
+ await recordApiAttempt(db,user,id,'finance_signer_683','independent_financial_signer_admitted_683',{
+ external_post_id:nonce,response:{claim,signature,verified_at:new Date().toISOString()},
+ notes:'External Ed25519 verified; no private key, connected status or financial certification.'});
+ const saved=rows(await db.prepare("SELECT social_post_attempt_id FROM social_post_attempts WHERE platform_key='finance_signer_683' AND external_post_id=? LIMIT 2").bind(nonce).all());
+ if(saved.length!==1)throw Error('Unique durable signer evidence could not be confirmed. HOLD.');
+ return {status:'independent_financial_signer_admitted_683',receipt_id:saved[0].social_post_attempt_id,
+ master_accepted:false,publication_performed:false};
+}
+async function masterCorrelation683(db,env,user,p){
+ const id=Number(p.social_post_queue_id),v=await financial683(db,env,id);
+ if(p.owner_reviewed!==true||!v.complete||v.signer?.status!=='INDEPENDENT_SIGNER_ADMITTED')
+ throw Error('Current independent financial signer evidence must be admitted first. HOLD.');
+ const nonce=normalizeText(p.nonce),issued_at=normalizeText(p.issued_at),
+ master_revision=normalizeText(p.master_revision),signature=normalizeText(p.signature);
+ if(!nonce683(nonce)||!fresh683(issued_at,300000)||!master_revision||master_revision.length>120)
+ throw Error('Fresh Master nonce, revision and UTC timestamp required.');
+ const claim=financialClaim683('master',{campaign:v.campaign,queue_id:id,source_revision:v.source_revision,
+ fingerprint_sha256:v.fingerprint_sha256,source_signer_receipt_id:v.signer.receipt_id,
+ source_signer_nonce:v.signer.nonce,master_revision,nonce,issued_at});
+ if(!await signed683(normalizeText(env?.AI_DATA_MASTER_ACK_PUBLIC_KEY),claim,signature))
+ throw Error('External Master did not sign the exact independent source receipt. HOLD.');
+ const duplicate=await db.prepare("SELECT social_post_attempt_id FROM social_post_attempts WHERE platform_key='finance_master_683' AND external_post_id=? LIMIT 1").bind(nonce).first();
+ if(duplicate)throw Error('Master receipt nonce replay rejected.');
+ await recordApiAttempt(db,user,id,'finance_master_683','master_financial_receipt_correlated_683',{
+ external_post_id:nonce,response:{claim,signature,verified_at:new Date().toISOString()},
+ notes:'Independent signed Master receipt matched source signer; runtime CONNECTED still unverified.'});
+ const saved=rows(await db.prepare("SELECT social_post_attempt_id FROM social_post_attempts WHERE platform_key='finance_master_683' AND external_post_id=? LIMIT 2").bind(nonce).all());
+ if(saved.length!==1)throw Error('Unique durable Master correlation could not be confirmed. HOLD.');
+ return {status:'master_financial_receipt_correlated_683',receipt_id:saved[0].social_post_attempt_id,
+ connection:'HOLD',master_accepted:false,publication_performed:false};
+}
+async function ownerClosure683(db,env,user,p){
+ const id=Number(p.social_post_queue_id),case_code=normalizeText(p.case_code),
+ note=normalizeText(p.resolution_note),v=await financial683(db,env,id),baseline=await finance682(db,env,id);
+ if(p.owner_reviewed!==true||!/^[-A-Z0-9_]{6,100}$/.test(case_code)||note.length<20||note.length>400||
+ !v.complete||!v.master_correlated||p.expected_fingerprint_sha256!==v.fingerprint_sha256)
+ throw Error('Exact source fingerprint, signed independent Master receipt and owner evidence review required. HOLD.');
+ if(baseline.cases.some(c=>!c.code.startsWith('MASTER_'))||
+ baseline.cases.some(c=>c.code===case_code&&!c.code.startsWith('MASTER_')))
+ throw Error('Source discrepancy still active; independent closure HOLD.');
+ const prior=await db.prepare("SELECT social_post_attempt_id FROM social_post_attempts WHERE social_post_queue_id=? AND platform_key='finance_discrepancy_682' AND external_post_id=? AND attempt_status IN ('owner_escalated_682','owner_reviewed_682') ORDER BY social_post_attempt_id DESC LIMIT 1").bind(id,case_code).first();
+ if(!prior)throw Error('A prior owner-reviewed discrepancy is required before closure.');
+ const last=await db.prepare("SELECT response_json FROM social_post_attempts WHERE social_post_queue_id=? AND platform_key='finance_closure_683' AND external_post_id=? ORDER BY social_post_attempt_id DESC LIMIT 1").bind(id,case_code).first();
+ const old=safeJson(last?.response_json,{});
+ if(old.fingerprint_sha256===v.fingerprint_sha256&&old.master_receipt_id===v.master.receipt_id)
+ throw Error('Duplicate closure for exact source and Master receipts refused.');
+ await recordApiAttempt(db,user,id,'finance_closure_683','owner_discrepancy_evidence_closed_683',{
+ external_post_id:case_code,response:{fingerprint_sha256:v.fingerprint_sha256,
+ source_signer_receipt_id:v.signer.receipt_id,master_receipt_id:v.master.receipt_id,
+ original_review_receipt_id:prior.social_post_attempt_id,owner_user_id:user.user_id,resolution_note:note,
+ master_accepted:false,profitability_certified:false},
+ notes:'Owner case evidence closed; runtime Master CONNECTED and accounting certification remain HOLD.'});
+ const saved=await db.prepare("SELECT social_post_attempt_id FROM social_post_attempts WHERE social_post_queue_id=? AND platform_key='finance_closure_683' AND external_post_id=? ORDER BY social_post_attempt_id DESC LIMIT 1").bind(id,case_code).first();
+ if(!saved)throw Error('Durable owner discrepancy closure record missing. HOLD.');
+ return {status:'owner_discrepancy_evidence_closed_683',receipt_id:saved.social_post_attempt_id,
+ master_accepted:false,connection:'HOLD',publication_performed:false};
+}
+
 // Build 682 — source-only financial export and owner discrepancy audit.
 async function finance682(db,env,id){
  const n=Number(id);
@@ -1859,7 +1983,7 @@ if(params.get('export')==='financial682'){
  'Cache-Control':'private, no-store','X-Content-Type-Options':'nosniff'}});
 }
 const data = await summarize(db, context.env);
-return jsonResponse({ ok: true, ...data, receipts673:await receipts673(db),engagement675:await engagement675(db),financial676:await financial676(db), financial678:await financialSummary678(db,context.request.headers.get('x-campaign-queue-id')||new URL(context.request.url).searchParams.get('campaign_queue_id')), financial679:await campaignNet679(db,new URL(context.request.url).searchParams.get('campaign_queue_id')), financial680:await finance680(db,context.env,new URL(context.request.url).searchParams.get('campaign_queue_id')), financial681:await finance681(db,context.env,new URL(context.request.url).searchParams.get('campaign_queue_id')), financial682:await finance682(db,context.env,new URL(context.request.url).searchParams.get('campaign_queue_id')), queue: data.queue.map(normalizeQueueRow), mode: 'review_first_api_when_configured' }, 200, { 'Cache-Control': 'no-store' });
+return jsonResponse({ ok: true, ...data, receipts673:await receipts673(db),engagement675:await engagement675(db),financial676:await financial676(db), financial678:await financialSummary678(db,context.request.headers.get('x-campaign-queue-id')||new URL(context.request.url).searchParams.get('campaign_queue_id')), financial679:await campaignNet679(db,new URL(context.request.url).searchParams.get('campaign_queue_id')), financial680:await finance680(db,context.env,new URL(context.request.url).searchParams.get('campaign_queue_id')), financial681:await finance681(db,context.env,new URL(context.request.url).searchParams.get('campaign_queue_id')), financial682:await finance682(db,context.env,new URL(context.request.url).searchParams.get('campaign_queue_id')), financial683:await financial683(db,context.env,new URL(context.request.url).searchParams.get('campaign_queue_id')), queue: data.queue.map(normalizeQueueRow), mode: 'review_first_api_when_configured' }, 200, { 'Cache-Control': 'no-store' });
 } catch (error) {
 await captureRuntimeIncident(context.env, context.request, {
 incident_scope: 'admin_social',
@@ -1908,6 +2032,9 @@ else if (action === 'master_ack_680') result = await masterAck680(db,context.env
 else if (action === 'owner_profit_exception_680') result = await exception680(db,adminUser,payload);
     else if (action === 'owner_exception_ack_681') result = await ownerExceptionAck681(db,adminUser,payload);
 else if (action === 'owner_discrepancy_review_682') result = await ownerDiscrepancy682(db,context.env,adminUser,payload);
+else if (action === 'admit_financial_signer_683') result = await admission683(db,context.env,adminUser,payload);
+else if (action === 'correlate_financial_master_683') result = await masterCorrelation683(db,context.env,adminUser,payload);
+else if (action === 'close_financial_discrepancy_683') result = await ownerClosure683(db,context.env,adminUser,payload);
 else if (action === 'expense_attestation_678') result = await expenseAttestation678(db,context.env,adminUser,payload,recordApiAttempt);
 else if (action === 'owner_marketing_signoff_678') result = await ownerSignoff678(db,adminUser,payload,recordApiAttempt);
 else throw new Error(`Unsupported social queue action: ${action}`);
