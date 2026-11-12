@@ -292,7 +292,7 @@ approvedCount +=1;
 });
 // Never present generic process/scale/material/care art as actual product evidence.
 // Product-specific proof is only visible when a listing provides the real image.
-root.style.display=approvedCount ? '':'none';
+root.style.display = approvedCount ? '' : 'none';
 }
 
 function renderProcessLinks(product,resourceLinks){
