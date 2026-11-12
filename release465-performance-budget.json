@@ -16,7 +16,7 @@
     "max_js_bytes": 600000,
     "max_css_bytes": 500000,
     "max_html_bytes": 500000,
-    "max_runtime_source_bytes": 18770000,
+    "max_runtime_source_bytes": 18802000,
     "max_runtime_source_files": 1854,
     "max_inline_data_uri_bytes": 650000
   },
@@ -33,6 +33,19 @@
     "production_mutation": false
   },
   "budget_reviews": [
+    {
+      "build": 693,
+      "date": "2026-11-12",
+      "scope": "Bounded owner SLA follow-up aging with explicit repeat review, source-pinned historical Master provenance exception HOLD/revalidation and append-only owner audit acceptance history and protected JSON export",
+      "prior_limit_bytes": 18770000,
+      "new_limit_bytes": 18802000,
+      "delta_bytes": 32000,
+      "delta_percent": 0.1705,
+      "runtime_file_limit_unchanged": 1854,
+      "review_reason": "Reviewed narrow 32,000-byte (<0.171%) expansion accommodates Build 693 bounded existing Admin API/UI projections, fail-closed source-bound evidence and owner audit controls without any D1 schema migration, newly added runtime files, external Master replay, background polling, automatic owner signoff or financial certification. Source-count, individual file, critical app quality, System Gate, Cloudflare deployment and live integrity checks remain authoritative.",
+      "owner_financial_approval": "NOT_INFERRED",
+      "production_runtime_master_acceptance": "EVIDENCE_GATED_HOLD"
+    },
     {
       "build": 692,
       "date": "2026-11-12",
