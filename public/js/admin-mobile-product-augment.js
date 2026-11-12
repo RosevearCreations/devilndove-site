@@ -548,7 +548,7 @@ document.addEventListener('DOMContentLoaded',()=>{
       return{done:1,missing:0};
     }catch(error){
       setMessage('Draft '+active.label+' preserved. Video outcome uncertain: '+error.message+
-        ' Same original video and draft can be retried manually; do not create another Product.',true);
+        ' Check Product video attachments before retrying. Same original video and draft can be retried manually; do not create another Product.',true);
       return{done:0,missing:1};
     }
   }
@@ -574,11 +574,11 @@ document.addEventListener('DOMContentLoaded',()=>{
       $('mobileTodayRefreshButton')?.click();
       if(missing){
         persist();
-        setMessage('Draft '+label+' (#'+originalId+') saved. '+
+        setMessage('Draft '+label+' saved as '+(active.product_name||'Temporary '+label)+' (#'+originalId+'). '+
           pictures.done+' photos and '+clip.done+' video confirmed. '+
           missing+' media item(s) unconfirmed; reselect/retry only missing items on this SAME draft.',true);
       }else{
-        setMessage('Draft '+label+' (#'+originalId+') saved. '+
+        setMessage('Draft '+label+' saved as '+(active.product_name||'Temporary '+label)+' (#'+originalId+'). '+
           pictures.done+' photos and '+clip.done+
           ' video confirmed; all new media complete. Never published automatically.');
         active=null;persist();name.value='';
