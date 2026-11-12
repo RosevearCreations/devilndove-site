@@ -1,5 +1,5 @@
 
-// Build 683: private signer/receipt operator workflow; never signs, publishes or connects itself.
+// Build 683: private signer/Master intake UI.
 (()=>{'use strict';const $=id=>document.getElementById(id);let latest=null;
 async function api(payload,id){
  if(!window.DDAuth?.apiFetch)throw Error('Authenticated Admin session required.');
