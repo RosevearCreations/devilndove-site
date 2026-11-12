@@ -36,7 +36,8 @@ const signature=Buffer.from(await crypto.subtle.sign('Ed25519',keys[0].privateKe
 new TextEncoder().encode(JSON.stringify(claim)))).toString('base64url');
 const payload={...claim,signature,
 independent_source_signature_verified:true,original_financial_certified:false,
-continuous_connection_verified:false,owner_user_id:4,owner_reviewed:true};
+continuous_connection_verified:false,owner_user_id:4,owner_reviewed:true,
+resolution_note:'Independent original source readback checked; bookkeeping source remains HOLD.'};
 const row=(diff={},at='2026-11-12 19:59:00')=>({
 social_post_attempt_id:850,attempt_status:'independent_live_source_snapshot_readback_700',
 attempted_at:at,response_json:JSON.stringify({...payload,...diff})});
@@ -66,6 +67,7 @@ row({observed_at:'2026-11-12T19:00:00.000Z'}),
 row({original_financial_certified:true}),
 row({continuous_connection_verified:true}),
 row({independent_source_signature_verified:false}),
+row({resolution_note:'short'}),row({owner_reviewed:false}),
 row({},'2026-11-12 19:50:00')
 ]){
 const x=await assessFinance700(current,prior,[item],signer,now);
