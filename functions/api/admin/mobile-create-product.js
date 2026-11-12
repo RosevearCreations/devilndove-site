@@ -21,6 +21,21 @@ function slugify(value) {
     .replace(/^-+|-+$/g, "");
 }
 
+
+// Build 699: one stable camera draft token is safe to replay after an unknown
+// network outcome. No client-provided product ID or draft name is authoritative.
+export function cameraCaptureToken699(v){
+ const s=String(v||'').trim();
+ return /^camera699-[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/.test(s)?s:null;
+}
+export function cameraPhotoObjectKey699(productId,sha256,extension){
+ const id=Number(productId),digest=String(sha256||'').toLowerCase(),
+ ext=String(extension||'').toLowerCase();
+ if(!Number.isSafeInteger(id)||id<1||!/^[a-f0-9]{64}$/.test(digest)||
+ !/^(jpg|jpeg|png|webp|gif|avif|heic|heif)$/.test(ext))return null;
+ return 'products/'+id+'/camera699/'+digest+'.'+ext;
+}
+
 function sanitizeFilename(filename) {
   const cleaned = String(filename || "upload")
     .replace(/[^a-zA-Z0-9._-]+/g, "-")
@@ -379,11 +394,14 @@ async function insertProductImage(db, env, productId, imageUrl, altText, sortOrd
   }
 }
 
-async function uploadImages({ db, env, files, productId, resolvedName, adminUser }) {
+async function uploadImages({ db, env, files, productId, resolvedName, adminUser, idempotentCamera699 = false }) {
   const bucket = env.PRODUCT_MEDIA_BUCKET || env.MEDIA_BUCKET || env.R2_PRODUCT_MEDIA;
   const uploaded = [];
 
-  if (!bucket || typeof bucket.put !== "function") return uploaded;
+  if (!bucket || typeof bucket.put !== "function") {
+    return files.map((file)=>({ok:false,original_filename:String(file?.name||''),
+      error:'Cloudflare R2 Product media binding unavailable. Keep selected files; do not duplicate draft.'}));
+  }
 
   const currentMaxSortResult = await db
     .prepare("SELECT COALESCE(MAX(sort_order), -1) AS max_sort FROM product_images WHERE product_id = ?")
@@ -414,12 +432,32 @@ async function uploadImages({ db, env, files, productId, resolvedName, adminUser
 
     const originalName = sanitizeFilename(file.name || `image-${index + 1}`);
     const extension = inferExtension(originalName, mimeType);
-    const objectKey = ["products", String(productId), `${Date.now()}-${index + 1}-${crypto.randomUUID()}.${extension}`].join("/");
-
     try {
       const buffer = await file.arrayBuffer();
-
-      await bucket.put(objectKey, buffer, {
+      const digest=idempotentCamera699
+        ? Array.from(new Uint8Array(await crypto.subtle.digest('SHA-256',buffer)))
+            .map(b=>b.toString(16).padStart(2,'0')).join('')
+        : null;
+      const objectKey=idempotentCamera699
+        ? cameraPhotoObjectKey699(productId,digest,extension)
+        : ["products", String(productId), `${Date.now()}-${index + 1}-${crypto.randomUUID()}.${extension}`].join("/");
+      if(!objectKey)throw Error('Unsupported camera photo type or digest.');
+      const storedImageUrl = normalizeStoredImageUrl(env, buildPublicUrl(env,objectKey) || objectKey);
+      if(idempotentCamera699){
+        const linked=await db.prepare("SELECT product_image_id FROM product_images WHERE product_id=? AND image_url=? ORDER BY product_image_id ASC LIMIT 1")
+          .bind(productId,storedImageUrl).first();
+        if(linked?.product_image_id){
+          uploaded.push({ok:true,already_attached:true,product_image_id:linked.product_image_id,
+            object_key:objectKey,public_url:storedImageUrl,
+            original_filename:originalName,file_size_bytes:Number(file.size||0),mime_type:mimeType});
+          continue;
+        }
+      }
+      const existing=idempotentCamera699 && typeof bucket.head==='function'
+        ? await bucket.head(objectKey).catch(()=>null):null;
+      if(existing && Number(existing.size)!==Number(file.size))
+        throw Error('Source photo digest exists with mismatched R2 byte size; check Product media.');
+      if(!existing)await bucket.put(objectKey, buffer, {
         httpMetadata: {
           contentType: mimeType,
           cacheControl: "public, max-age=31536000, immutable"
@@ -431,12 +469,19 @@ async function uploadImages({ db, env, files, productId, resolvedName, adminUser
         }
       });
 
-      const publicUrl = buildPublicUrl(env, objectKey);
-      const storedImageUrl = normalizeStoredImageUrl(env, publicUrl || objectKey);
       const sortOrder = nextImageSortOrder;
       nextImageSortOrder += 1;
-
-      const productImageId = await insertProductImage(db, env, productId, storedImageUrl, `${resolvedName} photo ${index + 1}`, sortOrder);
+      let productImageId = null;
+      if(idempotentCamera699){
+        // A single conditional INSERT handles double-clicks/replayed photo requests.
+        await db.prepare("INSERT INTO product_images (product_id,image_url,alt_text,sort_order,created_at) SELECT ?,?,?,?,CURRENT_TIMESTAMP WHERE NOT EXISTS (SELECT 1 FROM product_images WHERE product_id=? AND image_url=?)")
+          .bind(productId,storedImageUrl,`${resolvedName} photo ${index + 1}`,sortOrder,productId,storedImageUrl).run();
+        productImageId=Number((await db.prepare("SELECT product_image_id FROM product_images WHERE product_id=? AND image_url=? ORDER BY product_image_id ASC LIMIT 1")
+          .bind(productId,storedImageUrl).first())?.product_image_id)||null;
+        if(!productImageId)throw Error('R2 image saved but D1 catalog attachment not proven. Recheck this same photo with the same draft.');
+      }else{
+        productImageId = await insertProductImage(db, env, productId, storedImageUrl, `${resolvedName} photo ${index + 1}`, sortOrder);
+      }
 
       try {
         await db
@@ -510,6 +555,36 @@ export async function onRequestPost(context) {
       return json({ ok: false, error: "Expected multipart/form-data upload." }, 400);
     }
 
+    // Build 699: attachment-only retries do NOT rewrite the original product,
+    // SEO, inventory, owner attributes, or linked resources.
+    if (form.get('action')==='camera699_upload_only') {
+      const origin=request.headers.get('Origin');
+      if(origin&&origin!==new URL(request.url).origin)
+        return json({ok:false,error:'Same-origin camera media upload required.'},403);
+      const productId=Number(form.get('product_id')),token=cameraCaptureToken699(form.get('capture_reference'));
+      if(!Number.isSafeInteger(productId)||productId<1||!token)
+        return json({ok:false,error:'Exact saved camera draft ID and capture token required.'},400);
+      const existing=await db.prepare("SELECT product_id,product_number,name,status,capture_entry_mode,capture_reference,capture_created_by_user_id,featured_image_url FROM products WHERE product_id=? LIMIT 1")
+        .bind(productId).first();
+      if(!existing||existing.status!=='draft'||existing.capture_entry_mode!=='camera'||
+        existing.capture_reference!==token||Number(existing.capture_created_by_user_id)!==Number(adminUser.user_id))
+        return json({ok:false,error:'Saved original owner camera draft evidence not matched. HOLD.'},403);
+      const photos=form.getAll('images').filter(f=>f&&typeof f.arrayBuffer==='function');
+      if(!photos.length||photos.length>7)
+        return json({ok:false,error:'Choose between one and seven camera photos.'},400);
+      const uploaded=await uploadImages({db,env,files:photos,productId,
+        resolvedName:existing.name,adminUser,idempotentCamera699:true});
+      const first=uploaded.find(x=>x.ok&&x.public_url)?.public_url||null;
+      if(first&&!existing.featured_image_url)
+        await db.prepare("UPDATE products SET featured_image_url=?,updated_at=CURRENT_TIMESTAMP WHERE product_id=? AND (featured_image_url IS NULL OR featured_image_url='')")
+          .bind(first,productId).run();
+      return json({ok:true,product_id:productId,
+        product_number_label:formatProductNumberLabel(existing.product_number||productId),
+        uploaded_images:uploaded,confirmed_count:uploaded.filter(x=>x.ok).length,
+        unresolved_count:uploaded.filter(x=>!x.ok).length,
+        same_original_draft:true,publication_performed:false,automatic_retry:false},200);
+    }
+
     const requestedProductId = Number(form.get("product_id") || 0) || 0;
     const name = normalizeText(form.get("name"));
     const captureReference = normalizeText(form.get("capture_reference"));
@@ -537,6 +612,21 @@ export async function onRequestPost(context) {
     const resourceLinksRaw = normalizeText(form.get("resource_links_json"));
     const captureEntryModeRaw = normalizeText(form.get("capture_entry_mode")).toLowerCase();
     const captureEntryMode = ["full", "wizard", "camera"].includes(captureEntryModeRaw) ? captureEntryModeRaw : "full";
+    const cameraToken=cameraCaptureToken699(captureReference);
+    if(captureEntryMode==="camera"&&captureReference.startsWith('camera699-')&&!cameraToken)
+      return json({ok:false,error:'Invalid camera capture identity. HOLD.'},400);
+    if(captureEntryMode==="camera"&&cameraToken&&requestedProductId===0){
+      const earlier=await db.prepare("SELECT product_id,product_number,name,status,capture_reference,capture_created_by_user_id FROM products WHERE capture_reference=? AND capture_entry_mode='camera' ORDER BY product_id ASC LIMIT 1")
+        .bind(cameraToken).first();
+      if(earlier){
+        if(earlier.status!=='draft'||Number(earlier.capture_created_by_user_id)!==Number(adminUser.user_id))
+          return json({ok:false,error:'Camera capture token already belongs to another owner or a non-draft product.'},409);
+        return json({ok:true,recovered_existing_draft:true,product:earlier,
+          product_number_label:formatProductNumberLabel(earlier.product_number),
+          uploaded_images:[],publication_performed:false,
+          message:'Existing original camera draft recovered after unknown save outcome; no duplicate Product inserted.'},200);
+      }
+    }
     const creativeProjectId = Math.max(0, Number(form.get("creative_project_id") || 0) || 0);
 
     if (!Number.isInteger(priceCents) || priceCents < 0) {
