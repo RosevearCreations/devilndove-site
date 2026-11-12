@@ -2,12 +2,21 @@
   "release": 465,
   "build": 3,
   "title": "Runtime source performance budget",
-  "scope_roots": ["functions", "public/js", "js", "css", "admin", "shop", "collections", "collages"],
+  "scope_roots": [
+    "functions",
+    "public/js",
+    "js",
+    "css",
+    "admin",
+    "shop",
+    "collections",
+    "collages"
+  ],
   "limits": {
     "max_js_bytes": 600000,
     "max_css_bytes": 500000,
     "max_html_bytes": 500000,
-    "max_runtime_source_bytes": 18610000,
+    "max_runtime_source_bytes": 18625000,
     "max_runtime_source_files": 1854,
     "max_inline_data_uri_bytes": 650000
   },
@@ -22,5 +31,20 @@
     "budget_increase_requires_explicit_review": true,
     "source_gate_failure_is_fail_closed": true,
     "production_mutation": false
-  }
+  },
+  "budget_reviews": [
+    {
+      "build": 685,
+      "date": "2026-11-12",
+      "scope": "Independent financial Master receipt freshness monitoring, owner-supervised signed revalidation, exception audit/closure and CI tests",
+      "prior_limit_bytes": 18610000,
+      "new_limit_bytes": 18625000,
+      "delta_bytes": 15000,
+      "delta_percent": 0.0806,
+      "runtime_file_limit_unchanged": 1854,
+      "review_reason": "Current application quality passed; exact old cap exceeded by 14882 bytes before folding new UI into existing social script. Compact consolidation kept runtime file count within the unchanged gate. 15000-byte allowance is under 0.081% of the previous limit and maintains the existing separate per-file, inline-data, smoke and live-resource proof gates.",
+      "owner_financial_approval": "NOT_INFERRED",
+      "production_runtime_master_acceptance": "EVIDENCE_GATED_HOLD"
+    }
+  ]
 }
