@@ -169,6 +169,23 @@
  <p class="small" id="dd707MediaAuditStatus" role="status" aria-live="polite">HOLD · No current source readback.</p>
  <ol class="clean" id="dd707MediaAuditCases"><li>Refresh the same original saved camera draft.</li></ol>
 </section>
+<section class="card" id="dd708MediaRecovery" style="margin-top:12px;padding:12px" aria-labelledby="dd708MediaRecoveryTitle">
+ <p class="eyebrow">Build 708 · Independent signed-media drift exception and recovery readback</p>
+ <h3 id="dd708MediaRecoveryTitle">Record an original signed-media mismatch; verify only exact restored source</h3>
+ <p class="small">A drift case can be opened only for a server-observed D1/R2 HEAD mismatch with an existing Build 706 signed linked attachment. Reconciliation needs a later original-owner re-attestation and a fresh server readback matching the exact original key and bytes. Never automatically repair, replace, publish or clear unrecorded uploads.</p>
+ <button id="dd708MediaRefresh" class="btn secondary" type="button">Recheck signed media and recorded drift cases</button>
+ <p id="dd708MediaStatus" class="small" role="status" aria-live="polite">HOLD · No drift evidence inspected.</p>
+ <label>Current server-observed original signed-media drift
+  <select id="dd708DriftSource" class="input"><option value="">Recheck original saved camera draft</option></select></label>
+ <label><input id="dd708DriftReviewed" type="checkbox"> We reviewed the server-observed signed mismatch and original media; no device witness or automatic repair is claimed.</label>
+ <button id="dd708DriftRecord" class="btn secondary" type="button">Open source-pinned media drift exception</button>
+ <label>Previously opened signed drift with fresh original re-attestation and exact restored R2
+  <select id="dd708RecoverySource" class="input"><option value="">No source-bound recovery verified</option></select></label>
+ <label><input id="dd708RecoveryReviewed" type="checkbox"> We rechecked the original signed key, bytes, later owner re-attestation and live R2 HEAD. Unrecorded uploads remain HOLD.</label>
+ <button id="dd708RecoveryRecord" class="btn secondary" type="button">Record restored original media source readback</button>
+ <p id="dd708MediaResult" class="small" role="status" aria-live="polite">Record 25–600-character original owner notes in the device evidence notes above. No current exception or recovery admitted.</p>
+ <ol class="clean" id="dd708MediaCases"><li>No original signed media drift exception inspected.</li></ol>
+</section>
 <p class="small" id="dd700ExportStatus" role="status" aria-live="polite">Owner field acceptance is NOT recorded until a real-phone trial and independent Cloudflare media readback are both complete. This is a local evidence export, not an automatic deployment gate.</p>
 </section>
 
