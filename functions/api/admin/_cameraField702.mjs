@@ -29,12 +29,31 @@ export function canCloseMedia702(open,media,reattest,live,now=Date.now()){
  sameMedia702(reattest.media_snapshot,live?.media)&&
  Number.isFinite(observed)&&observed<=now+300000&&now-observed>=-300000&&now-observed<=86400000;
 }
+// Build 703: age from durable D1-created timestamp, not client clock.
+export function ageMedia703(open,now=Date.now()){
+ const timestamp=isoTime(open?.opened_at);
+ const valid=Number.isFinite(timestamp)&&timestamp<=now+300000&&now-timestamp>=-300000;
+ const ageMinutes=valid?Math.max(0,Math.floor((now-timestamp)/60000)):null;
+ return {receipt_id:open?.receipt_id||null,age_minutes:ageMinutes,
+   age_hours:ageMinutes===null?null:Math.floor(ageMinutes/60),
+   escalation_due:!open?.closed&&valid&&ageMinutes>=1440,
+   status:open?.closed?'CLOSED_LINKED_RECOVERY_ONLY':
+     !valid?'HOLD_INVALID_SOURCE_TIMESTAMP':
+     ageMinutes>=2880?'CRITICAL_ORIGINAL_MEDIA_EXCEPTION_AGED_48H':
+     ageMinutes>=1440?'ESCALATE_ORIGINAL_MEDIA_EXCEPTION_24H':
+     'OPEN_ORIGINAL_MEDIA_EXCEPTION_HOLD'};
+}
+export function mediaEscalationEligible703(caseInfo,aged,existing){
+ return !!caseInfo&&!caseInfo.closed&&!!aged?.escalation_due&&
+   Number.isSafeInteger(Number(caseInfo.receipt_id))&&Number(caseInfo.receipt_id)>0&&
+   !existing.some(x=>Number(x.data?.open_receipt_id)===Number(caseInfo.receipt_id));
+}
 export async function handleCamera702({db,form,adminUser,id,token,live,ready701}){
  const action=String(form.get('action')||'');
  const auditRows=await db.prepare(
  "SELECT admin_action_audit_id,action_type,created_at,details_json FROM admin_action_audit "+
  "WHERE target_type='product' AND target_id=? AND actor_user_id=? "+
- "AND action_type IN ('camera701_owner_field_receipt','camera702_owner_reattest','camera702_media_issue_open','camera702_media_issue_close') "+
+ "AND action_type IN ('camera701_owner_field_receipt','camera702_owner_reattest','camera702_media_issue_open','camera702_media_issue_close','camera703_media_aging_escalation') "+
  "ORDER BY admin_action_audit_id DESC LIMIT 81").bind(id,adminUser.user_id).all();
  const raw=Array.isArray(auditRows?.results)?auditRows.results:[];
  if(raw.length>80)return out({ok:false,error:'Unbounded original device receipt history; independent review required. HOLD.'},409);
@@ -53,15 +72,23 @@ export async function handleCamera702({db,form,adminUser,id,token,live,ready701}
    x.data?.original_701_receipt_id===originalId)
    .map(x=>({receipt_id:Number(x.admin_action_audit_id),kind:x.data.kind,
     media_kind:x.data.media_kind,attachment_id:x.data.attachment_id,
-    r2_key:x.data.r2_key,closed:closed.has(Number(x.admin_action_audit_id))}));
+    r2_key:x.data.r2_key,opened_at:x.created_at,
+    closed:closed.has(Number(x.admin_action_audit_id))}));
+ const escalationRecords=history.filter(x=>x.action_type==='camera703_media_aging_escalation'&&
+   x.data?.original_701_receipt_id===originalId);
+ const aging=cases.map(x=>({...ageMedia703(x),escalated:escalationRecords.some(e=>
+     Number(e.data?.open_receipt_id)===x.receipt_id)}));
  const state=()=>out({ok:true,status:original?'OWNER_701_SOURCE_FOUND':'HOLD_ORIGINAL_PHONE_701_REQUIRED',
   product_id:id,original_701_receipt_id:originalId,
   reattest_receipt_id:Number(latest?.admin_action_audit_id||0),
   media:live,exceptions:cases.slice(0,50),
   unresolved_count:cases.filter(x=>!x.closed).length,
+  exception_aging_703:aging.slice(0,50),
+  escalation_due_count:aging.filter(x=>x.escalation_due&&!x.escalated).length,
+  critical_aging_count:aging.filter(x=>x.status==='CRITICAL_ORIGINAL_MEDIA_EXCEPTION_AGED_48H').length,
   independently_authenticated_phone:false,
   unrecorded_upload_recovery_certified:false,publication_performed:false});
- if(action==='camera702_inspect')return state();
+ if(action==='camera702_inspect'||action==='camera703_inspect')return state();
  if(!original)return out({ok:false,error:'Original owner-reported Build 701 receipt required. HOLD.'},409);
  const note=String(form.get('owner_device_notes')||'').trim();
  const nonce=String(form.get('nonce')||'');
@@ -143,5 +170,24 @@ export async function handleCamera702({db,form,adminUser,id,token,live,ready701}
     receipt_id:receipt,open_receipt_id:openId,
     unrecorded_upload_recovery_certified:false,publication_performed:false});
  }
- return out({ok:false,error:'Unsupported Build 702 action.'},400);
+ if(action==='camera703_escalate'){
+   const openId=Number(form.get('open_receipt_id'));
+   const caseInfo=cases.find(x=>x.receipt_id===openId);
+   const aged=ageMedia703(caseInfo);
+   if(!mediaEscalationEligible703(caseInfo,aged,escalationRecords))
+     return out({ok:false,error:'Aging escalation requires an actual unresolved original receipt older than 24 hours with no prior escalation. Invalid timestamps remain HOLD.'},409);
+   const receipt=await append('camera703_media_aging_escalation',{
+     build:703,open_receipt_id:openId,media_kind:caseInfo.media_kind,
+     exception_kind:caseInfo.kind,age_minutes_at_review:aged.age_minutes,
+     source_opened_at:caseInfo.opened_at,source_r2_key:caseInfo.r2_key,
+     escalation_reason:'UNRESOLVED_ORIGINAL_PHONE_MEDIA_EXCEPTION_24H',
+     owner_followup_required:true,unrecorded_uploads_certified:false,
+     physical_phone_independently_verified:false,
+     status:'ESCALATED_UNRESOLVED_ORIGINAL_MEDIA_EXCEPTION_HOLD'
+   },'escalate');
+   return out({ok:true,status:'ESCALATED_UNRESOLVED_ORIGINAL_MEDIA_EXCEPTION_HOLD',
+     receipt_id:receipt,open_receipt_id:openId,source_age_minutes:aged.age_minutes,
+     independently_verified_upload_recovery:false,publication_performed:false});
+ }
+ return out({ok:false,error:'Unsupported Build 702/703 action.'},400);
 }

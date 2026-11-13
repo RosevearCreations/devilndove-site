@@ -1320,7 +1320,7 @@
       "reference_screen": "Unassigned / contextual module",
       "reason": "Not individually approved for a revamp; inspect actual signed-in UI and owner acceptance before changing.",
       "evidence": {
-        "byte_length": 25603,
+        "byte_length": 26945,
         "stylesheets": 1,
         "scripts": 9,
         "forms": 1,
@@ -2070,10 +2070,10 @@
       "reference_screen": "Settings & Configuration",
       "reason": "Existing social authorization and draft boundaries must remain intact; integration redesign is queued separately.",
       "evidence": {
-        "byte_length": 96833,
+        "byte_length": 101612,
         "stylesheets": 3,
         "scripts": 11,
-        "forms": 33,
+        "forms": 35,
         "has_viewport": true
       },
       "owner_visual_acceptance": "PENDING"
