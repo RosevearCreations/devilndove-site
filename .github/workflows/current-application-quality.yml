@@ -73,6 +73,14 @@ jobs:
           node --check public/js/admin-mobile-product-augment.js
           node --check public/js/admin-social-platform-preflight.js
           node scripts/build707_ninth_field_media_drift_custody_contract.mjs
+      - name: Build 709 original media recurrence, ninth aging and custody exception negative regression
+        run: |
+          node --check functions/api/admin/_cameraField702.mjs
+          node --check functions/api/admin/mobile-create-product.js
+          node --check functions/api/admin/social-post-queue.js
+          node --check public/js/admin-mobile-product-augment.js
+          node --check public/js/admin-social-platform-preflight.js
+          node scripts/build709_original_media_recurrence_ninth_aging_custody_escalation_contract.mjs
       - name: Build 708 original signed media drift recovery, ninth-reviewer continuity and custody digest negative regression
         run: |
           node --check functions/api/admin/_cameraField702.mjs
