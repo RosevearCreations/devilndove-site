@@ -17,7 +17,7 @@
     "max_css_bytes": 500000,
     "max_html_bytes": 500000,
     "max_runtime_source_bytes": 19144000,
-    "max_runtime_source_files": 1854,
+    "max_runtime_source_files": 1855,
     "max_inline_data_uri_bytes": 650000
   },
   "baseline_observed": {
@@ -33,6 +33,19 @@
     "production_mutation": false
   },
   "budget_reviews": [
+    {
+      "build": 702,
+      "date": "2026-11-12",
+      "scope": "Original same-owner physical-phone re-attestation and bounded linked-media R2 HEAD recovery exception triage, with isolated helper module. Signed sixth-party bookkeeping HOLD/manual-closure recommendation decision bound to original independently accepted source ledger and fresh Master evidence; no source mutation.",
+      "prior_limit_files": 1854,
+      "new_limit_files": 1855,
+      "delta_files": 1,
+      "runtime_bytes_limit_unchanged": 19144000,
+      "max_individual_source_caps_unchanged": true,
+      "review_reason": "Reviewed exactly one new isolated runtime module functions/api/admin/_cameraField702.mjs to separate original device and media-exception D1 audit from existing product create endpoint. Current measured runtime source count 1855 and bytes 19071361 remain within retained 19144000 byte limit. No new D1 tables, external provider, storage bucket, auto publish, source correction, financial posting, independent physical-device claim or CONNECTED. All per-file size, inline data budget, D1 firewall, six Development gates and exact-SHA Cloudflare Production proof remain enforced.",
+      "owner_phone_device_test_accepted": "NOT_INFERRED",
+      "independent_bookkeeping_closure": "SIGNED_DECISION_ONLY_ACTUAL_CLOSE_HOLD"
+    },
     {
       "build": 700,
       "date": "2026-11-12",

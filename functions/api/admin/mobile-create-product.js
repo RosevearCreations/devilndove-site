@@ -7,6 +7,7 @@
 import { captureRuntimeIncident, getAdminUserFromRequest, getDb, jsonResponse, normalizeText } from "../_lib/adminAudit.js";
 import { DEFAULT_PRODUCT_NUMBER_START, allocateNextProductNumber, ensureProductNumberSequenceAtLeast, getNextProductNumber } from "./_product-numbering.js";
 import { parseProductResourceLinksJson, persistProductResourceLinks } from "./_productResourcePersistence.js";
+import {handleCamera702} from "./_cameraField702.mjs";
 
 function json(data, status = 200) {
   return jsonResponse(data, status);
@@ -598,7 +599,8 @@ export async function onRequestPost(context) {
     // Build 700 owner-directed field proof: an explicit read-only check of
     // the ORIGINAL camera draft, its linked media, and actual R2 HEAD state.
     const adopt701=form.get('action')==='camera701_adopt_receipt';
-    if(form.get('action')==='camera700_readback'||adopt701){
+    const action702=['camera702_inspect','camera702_reattest','camera702_triage_open','camera702_triage_close'].includes(form.get('action'));
+    if(form.get('action')==='camera700_readback'||adopt701||action702){
       const origin=request.headers.get('Origin');
       if(origin&&origin!==new URL(request.url).origin)
         return json({ok:false,error:'Same-origin original device proof required.'},403);
@@ -635,6 +637,11 @@ export async function onRequestPost(context) {
       for(const row of videos)videoProof.push(await inspect(row,'video'));
       const result=camera700SummarizeReadback(photoProof,videoProof);
       if(photos.length>=25||videos.length>=25)result.status='HOLD_BOUNDED_MEDIA_HISTORY_LIMIT';
+      if(action702){
+        return await handleCamera702({db,form,adminUser,id,token,
+          live:{...result,bounded_rows:photos.length<25&&videos.length<25},
+          ready701:camera701Ready});
+      }
       if(adopt701){
         const notes=normalizeText(form.get('owner_device_notes'));
         let flags=null,clientMedia=null;
