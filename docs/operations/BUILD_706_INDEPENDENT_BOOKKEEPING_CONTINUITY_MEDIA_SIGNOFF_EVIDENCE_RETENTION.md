@@ -1,0 +1,5 @@
+# Build 706 — Independent Bookkeeping Continuity Exception Review, Original Media Recovery Owner Sign-Off & Financial Closure Evidence Retention
+
+Original baseline `main`: `bd9a3638001e8df132c5ea3c6aa206327e2712ce` (verified Cloudflare deployment + independent live integrity GREEN).
+
+Build scope: Ninth *independent* reviewer signs existing Build 705 continuity evidence and any exception without declaring real financial book closure. Original media owner signs off only linked recovery that already passed exact D1/R2 recovery reconciliation and explicit Build 702 case closure; unrecorded media stays unresolved. Durable D1 retention receipts preserve source hashes, signer proof and owner decisions with readback and no delete API. Never imply bank postings, accounting close, independently witnessed physical phone, continuous CONNECTED, repaired unrecorded media or source-of-record access unless actually attested. Existing D1/R2, no new schema migrations or provider writes. Keep production promotion gated by exact SHA tests and Cloudflare proof.
