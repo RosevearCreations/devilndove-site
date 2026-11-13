@@ -169,6 +169,19 @@
  <p class="small" id="dd707MediaAuditStatus" role="status" aria-live="polite">HOLD · No current source readback.</p>
  <ol class="clean" id="dd707MediaAuditCases"><li>Refresh the same original saved camera draft.</li></ol>
 </section>
+<section class="card" id="dd711MediaStability" style="margin-top:12px;padding:12px" aria-labelledby="dd711MediaTitle">
+ <p class="eyebrow">Build 711 · Original signed media post-resolution stability</p>
+ <h3 id="dd711MediaTitle">Recheck stability after the verified original resolution</h3>
+ <p class="small">At least 24 hours after Build 710 resolution, and only after another original owner re-attestation, compare live D1/R2 HEAD with the exact signed key and bytes. A receipt records one owner-reviewed check; it does not start continuous monitoring, certify missing uploads or verify a physical phone.</p>
+ <button class="btn secondary" id="dd711MediaRefresh" type="button">Recheck original post-resolution D1/R2</button>
+ <p id="dd711MediaStatus" class="small" role="status" aria-live="polite">HOLD · No post-resolution stability source inspected.</p>
+ <label>Original 710 signed-media resolution eligible for new recheck
+  <select class="input" id="dd711StabilitySource"><option value="">Reinspect original source and owner re-attestation</option></select></label>
+ <label><input id="dd711StabilityReviewed" type="checkbox"> We inspected the exact original 710 resolution, 709 recurrence, later owner re-attestation and actual server-side D1/R2 HEAD. Independent phone witness, unrecorded media, and automatic publication remain HOLD.</label>
+ <button class="btn secondary" id="dd711StabilityRecord" type="button">Record one signed post-resolution stability receipt</button>
+ <p id="dd711MediaResult" class="small" role="status" aria-live="polite">Existing owner evidence notes (25–600 characters) and a fresh nonce are required.</p>
+ <ol class="clean" id="dd711MediaCases"><li>No original signed 710 resolution inspected.</li></ol>
+</section>
 <section class="card" id="dd710MediaResolution" style="margin-top:12px;padding:12px" aria-labelledby="dd710ResolutionTitle">
  <p class="eyebrow">Build 710 · Original recurring signed-media source resolution evidence</p>
  <h3 id="dd710ResolutionTitle">Record the exact restored original signed-media source</h3>

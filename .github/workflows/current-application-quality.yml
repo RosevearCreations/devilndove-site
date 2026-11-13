@@ -73,6 +73,14 @@ jobs:
           node --check public/js/admin-mobile-product-augment.js
           node --check public/js/admin-social-platform-preflight.js
           node scripts/build707_ninth_field_media_drift_custody_contract.mjs
+      - name: Build 711 post-resolution media stability, custody outcome and ninth provenance renewal negative regression
+        run: |
+          node --check functions/api/admin/_cameraField702.mjs
+          node --check functions/api/admin/mobile-create-product.js
+          node --check functions/api/admin/social-post-queue.js
+          node --check public/js/admin-mobile-product-augment.js
+          node --check public/js/admin-social-platform-preflight.js
+          node scripts/build711_post_resolution_stability_custody_outcome_ninth_renewal_contract.mjs
       - name: Build 710 original media resolution, overdue custody follow-up and ninth-source provenance negative regression
         run: |
           node --check functions/api/admin/_cameraField702.mjs
