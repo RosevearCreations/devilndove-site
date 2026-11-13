@@ -1621,6 +1621,48 @@ select699();
 
 
 
+
+ let audit707=null;
+ function draw707(data){
+  if(!$('dd707-finance'))return;
+  const v=data.financial707||null;audit707=v;
+  $('dd707FinanceStatus').textContent=v?.campaign_queue_id?
+   v.status+' · original receipt history '+(v.history_complete?'VERIFIED':'HOLD')+
+   ' · financial books HOLD':
+   'HOLD · Select and refresh exact original finance campaign.';
+  $('dd707FinanceStats').textContent=v?.campaign_queue_id?
+   'Eligible original ninth reviews '+v.eligible_count+
+   ' · field accepted '+v.field_accepted_count+
+   ' · custody audited '+v.audited_custody_count+
+   ' · invalid '+v.invalid_count:
+   'Original ninth signed review and Build 706 retention SHA are required.';
+  const field=$('dd707FieldSource'),custody=$('dd707CustodySource'),
+   list=$('dd707FinanceCases');
+  field.replaceChildren(new Option('Select original ninth signed review',''));
+  custody.replaceChildren(new Option('Select original field acceptance',''));
+  list.replaceChildren();
+  for(const item of v?.items||[]){
+   const li=document.createElement('li');
+   li.textContent='Ninth signed original #'+item.review_706_receipt_id+
+    ' · retention #'+item.retention_706_receipt_id+
+    ' · owner field '+(item.field_707_verified?'VERIFIED #'+item.field_707_receipt_id:'HOLD')+
+    ' · custody '+(item.custody_707_verified?'VERIFIED #'+item.custody_707_receipt_id:'HOLD')+
+    ' · independent accounting close HOLD';
+   list.appendChild(li);
+   if(v.history_complete&&!item.field_707_verified)
+    field.add(new Option('Ninth signed #'+item.review_706_receipt_id+
+     ' / retention #'+item.retention_706_receipt_id,String(item.review_706_receipt_id)));
+   if(v.history_complete&&item.field_707_verified&&!item.custody_707_verified)
+    custody.add(new Option('Owner field #'+item.field_707_receipt_id+
+     ' / ninth signed #'+item.review_706_receipt_id,String(item.field_707_receipt_id)));
+  }
+  if(!list.childElementCount){
+   const li=document.createElement('li');
+   li.textContent='No eligible signed original ninth-reviewer source and retained manifest yet.';
+   list.appendChild(li);
+  }
+ }
+
 let audit706=null;
 function draw706(data){
  if(!$('dd706-finance'))return;
@@ -2031,7 +2073,7 @@ draw698(d);
 draw699(d);
 draw700(d);
 draw701(d);
-draw702(d);draw703(d);draw704(d);draw705(d);draw706(d);
+draw702(d);draw703(d);draw704(d);draw705(d);draw706(d);draw707(d);
 if(!id)return;
 if(!v||v.queue_id!==id)throw Error('Fresh exact financial evidence was not returned.');
 state=v;
@@ -2059,7 +2101,7 @@ await refresh();
 document.addEventListener('DOMContentLoaded',()=>{
 if(!$('dd685-finance'))return;
 (async()=>{try{
-const d=await api(null);draw686(d);draw687(d);draw688(d);draw689(d);draw690(d);draw691(d);draw692(d);draw693(d);draw694(d);draw695(d);draw696(d);draw697(d);draw698(d);draw699(d);draw700(d);draw701(d);draw702(d);draw703(d);draw704(d);draw705(d);draw706(d);const seen=new Set();
+const d=await api(null);draw686(d);draw687(d);draw688(d);draw689(d);draw690(d);draw691(d);draw692(d);draw693(d);draw694(d);draw695(d);draw696(d);draw697(d);draw698(d);draw699(d);draw700(d);draw701(d);draw702(d);draw703(d);draw704(d);draw705(d);draw706(d);draw707(d);const seen=new Set();
 for(const q of d.queue||[])if(q.utm_campaign&&!seen.has(q.social_post_queue_id)){
 seen.add(q.social_post_queue_id);
 $('dd685Campaign').add(new Option(q.utm_campaign+' · #'+q.social_post_queue_id,q.social_post_queue_id));
@@ -2091,7 +2133,73 @@ $('dd699Refresh').addEventListener('click',()=>void refresh());
 
 
 
-$('dd706FinanceRefresh').addEventListener('click',()=>void refresh());
+
+ $('dd707FinanceRefresh').addEventListener('click',()=>void refresh());
+ $('dd707FieldForm').addEventListener('submit',async event=>{
+  event.preventDefault();const button=$('dd707FieldSubmit');button.disabled=true;
+  try{
+   const id=Number($('dd707FieldSource').value),
+    source=audit707?.items?.find(x=>x.review_706_receipt_id===id&&
+     x.review_706_verified&&x.retention_706_verified&&!x.field_707_verified),
+    note=$('dd707FieldNote').value.trim();
+   if(!state?.queue_id||!audit707?.history_complete||!source||
+      !$('dd707FieldReviewed').checked||note.length<25||note.length>600)
+    throw Error('Original signed ninth review, retained SHA manifest and field-owner review required.');
+   const d=await api({action:'owner_ninth_reviewer_field_acceptance_707',
+    social_post_queue_id:state.queue_id,original_ninth_review_receipt_id:id,
+    expected_source_revision:state.source_revision,
+    expected_fingerprint_sha256:state.fingerprint_sha256,
+    expected_manifest_sha256:source.retention_manifest_sha256,
+    expected_review_packet_sha256:source.review_packet_sha256,
+    owner_original_field_reviewed:true,resolution_note:note},state.queue_id);
+   $('dd707FieldResult').textContent=d.result.status+
+     ' · receipt #'+d.result.receipt_id+
+     '. Original ninth signature verified; independent physical phone and financial close still HOLD.';
+   $('dd707FieldReviewed').checked=false;await refresh();
+  }catch(error){$('dd707FieldResult').textContent='HOLD · '+error.message;}
+  finally{button.disabled=false;}
+ });
+ $('dd707CustodyForm').addEventListener('submit',async event=>{
+  event.preventDefault();const button=$('dd707CustodySubmit');button.disabled=true;
+  try{
+   const id=Number($('dd707CustodySource').value),
+    source=audit707?.items?.find(x=>x.field_707_receipt_id===id&&
+      x.field_707_verified&&!x.custody_707_verified),
+    note=$('dd707CustodyNote').value.trim();
+   if(!state?.queue_id||!audit707?.history_complete||!source||
+     !$('dd707CustodyReviewed').checked||note.length<25||note.length>600)
+    throw Error('Verified original ninth review and field acceptance, current source and owner audit required.');
+   const d=await api({action:'owner_financial_custody_audit_707',
+    social_post_queue_id:state.queue_id,field_acceptance_receipt_id:id,
+    expected_source_revision:state.source_revision,
+    expected_fingerprint_sha256:state.fingerprint_sha256,
+    expected_manifest_sha256:source.retention_manifest_sha256,
+    owner_custody_reviewed:true,resolution_note:note},state.queue_id);
+   $('dd707CustodyResult').textContent=d.result.status+
+    ' · durable source-bound receipt #'+d.result.receipt_id+
+    ' · manifest SHA-256 '+d.result.manifest_sha256+
+    '. No accounting close or retention permanence certified.';
+   $('dd707CustodyReviewed').checked=false;await refresh();
+  }catch(error){$('dd707CustodyResult').textContent='HOLD · '+error.message;}
+  finally{button.disabled=false;}
+ });
+ $('dd707FinanceExport').addEventListener('click',async()=>{
+  try{
+   const id=Number($('dd685Campaign').value);
+   if(!id||id!==state?.queue_id||!window.DDAuth?.apiFetch)
+    throw Error('Authenticated original owner and exact selected campaign required.');
+   const response=await window.DDAuth.apiFetch(endpoint+
+     '?export=financial707&campaign_queue_id='+encodeURIComponent(id));
+   if(!response.ok)throw Error('Original protected custody export denied. HTTP '+response.status);
+   const blob=await response.blob(),url=URL.createObjectURL(blob),a=document.createElement('a');
+   a.href=url;a.download='devilndove-ninth-field-custody-'+id+'-707.json';
+   document.body.appendChild(a);a.click();a.remove();
+   setTimeout(()=>URL.revokeObjectURL(url),1000);
+   $('dd707CustodyResult').textContent='Source-bound field and custody readback exported. Financial books HOLD.';
+  }catch(error){$('dd707CustodyResult').textContent='HOLD · '+error.message;}
+ });
+
+ $('dd706FinanceRefresh').addEventListener('click',()=>void refresh());
 $('dd706ReviewPrepare').addEventListener('click',()=>{
  try{
   if(!$('dd706ReviewNonce').value.trim()){

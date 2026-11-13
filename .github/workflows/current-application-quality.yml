@@ -65,6 +65,14 @@ jobs:
           node --check public/js/admin-mobile-product-augment.js
           node --check public/js/admin-social-platform-preflight.js
           node scripts/build706_independent_bookkeeping_media_signoff_retention_contract.mjs
+      - name: Build 707 ninth reviewer field acceptance, original media signoff drift and custody audit regression
+        run: |
+          node --check functions/api/admin/_cameraField702.mjs
+          node --check functions/api/admin/mobile-create-product.js
+          node --check functions/api/admin/social-post-queue.js
+          node --check public/js/admin-mobile-product-augment.js
+          node --check public/js/admin-social-platform-preflight.js
+          node scripts/build707_ninth_field_media_drift_custody_contract.mjs
       - name: QL-336 pending child-shell and nonproduction endpoint isolation
         run: |
           node --test scripts/release467_build610_ql336_child_shell.test.mjs
