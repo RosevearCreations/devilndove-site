@@ -879,7 +879,7 @@ document.addEventListener('DOMContentLoaded',()=>{
       throw Error('Original draft changed during protected readback. HOLD.');
     show702(data);return data;
   }
-  
+
   $('dd708MediaRefresh')?.addEventListener('click',async()=>{
     try{const data=await send702('camera708_inspect');
       if(!data.ok||Number(data.product_id)!==Number(active?.product_id))
