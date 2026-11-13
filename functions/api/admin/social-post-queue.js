@@ -5008,7 +5008,7 @@ export async function assessFinance702(current,prior,reviewRows,signer={},now=Da
      (d.decision==='hold_discrepancy'||remaining===0&&current?.master_fresh===true&&
        current?.history_complete===true&&Array.isArray(current?.open_cases)&&
        current.open_cases.length===0)&&
-     row.attempt_status='independent_bookkeeping_closure_decision_702'&&
+     row.attempt_status==='independent_bookkeeping_closure_decision_702'&&
      d.original_live_source_receipt_id===match.original_live_source_receipt_id&&
      d.older_receipt_id===match.older_receipt_id&&d.newer_receipt_id===match.newer_receipt_id&&
      d.external_document_sha256===match.external_document_sha256&&
