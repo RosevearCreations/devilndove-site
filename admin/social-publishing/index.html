@@ -360,6 +360,42 @@
  <p id="dd706RetentionResult" role="status" aria-live="polite">No owner financial retention receipt; actual accounting closure HOLD.</p>
 </section>
 
+<section class="card" id="dd711-finance" aria-labelledby="dd711FinanceTitle">
+ <p class="eyebrow">Build 711 · Original custody outcome and ninth-reviewer source renewal</p>
+ <h2 id="dd711FinanceTitle">Reconcile the owner follow-up and renew the existing signed provenance chain</h2>
+ <p>Owner-controlled, on-demand reconciliation of a verified Build 710 custody follow-up and its existing independent ninth signature. Owner observations are not proof of an external reviewer response, a new independent signature or financial bookkeeping closure. The renewal SHA-256 is recomputed over original Build 706–711 ledger receipt IDs and source digest values.</p>
+ <button class="btn secondary" id="dd711FinanceRefresh" type="button">Recheck original custody outcome and ninth provenance</button>
+ <button class="btn secondary" id="dd711FinanceExport" type="button">Export protected 711 source-bound dossier</button>
+ <p id="dd711FinanceStatus" role="status" aria-live="polite">HOLD · Original Build 710 provenance not yet inspected.</p>
+ <p class="small" id="dd711FinanceStats">Read original financial history and custody sources first.</p>
+ <ol class="clean" id="dd711FinanceCases"><li>No original custody outcomes available.</li></ol>
+ <form id="dd711OutcomeForm">
+ <h3>1. Owner custody follow-up outcome</h3>
+ <label>Original verified Build 710 ninth provenance receipt
+  <select class="input" id="dd711OutcomeSource" required><option value="">Refresh original source first</option></select></label>
+ <label>Owner outcome (none is an external confirmation)
+  <select class="input" id="dd711OutcomeDisposition" required>
+   <option value="owner_original_source_review_documented">Owner source review documented, financial close still HOLD</option>
+   <option value="manual_outside_reviewer_contact_pending">Manual external reviewer follow-up pending, not confirmed</option>
+   <option value="owner_further_custody_repair_pending">Further source custody repair pending</option>
+  </select></label>
+ <label>Original owner outcome observation (25–600 characters)
+  <textarea class="input" id="dd711OutcomeNote" rows="3" minlength="25" maxlength="600" required></textarea></label>
+ <label><input id="dd711OutcomeReviewed" type="checkbox" required> We rechecked exact original ninth signature and 706/708/710 source hashes. No external confirmation, new signature or accounting close claimed.</label>
+ <button class="btn secondary" id="dd711OutcomeSubmit" type="submit">Record source-bound owner outcome</button>
+ </form>
+ <p id="dd711OutcomeResult" role="status" aria-live="polite">Original owner custody outcome not yet recorded.</p>
+ <form id="dd711RenewalForm">
+ <h3>2. Ninth-reviewer original provenance renewal</h3>
+ <label>Verified original Build 711 outcome receipt
+  <select class="input" id="dd711RenewalSource" required><option value="">Record and recheck original outcome first</option></select></label>
+ <label>Owner provenance renewal note (25–600 characters)
+  <textarea class="input" id="dd711RenewalNote" rows="3" minlength="25" maxlength="600" required></textarea></label>
+ <label><input id="dd711RenewalReviewed" type="checkbox" required> We inspected original signed ninth source, 706/708/710 SHA and 711 outcome before renewing the canonical provenance manifest. All actual financial closure stays HOLD.</label>
+ <button class="btn secondary" id="dd711RenewalSubmit" type="submit">Rehash and renew ninth-source provenance</button>
+ </form>
+ <p id="dd711RenewalResult" role="status" aria-live="polite">No original independently sourced renewal yet recorded.</p>
+</section>
 <section class="card" id="dd710-finance" aria-labelledby="dd710FinanceTitle">
  <p class="eyebrow">Build 710 · Original overdue custody follow-up and independent ninth-source provenance</p>
  <h2 id="dd710FinanceTitle">Resolve follow-up evidence without claiming an external financial close</h2>

@@ -599,7 +599,7 @@ export async function onRequestPost(context) {
     // Build 700 owner-directed field proof: an explicit read-only check of
     // the ORIGINAL camera draft, its linked media, and actual R2 HEAD state.
     const adopt701=form.get('action')==='camera701_adopt_receipt';
-    const action702=['camera702_inspect','camera702_reattest','camera702_triage_open','camera702_triage_close','camera703_inspect','camera703_escalate','camera704_inspect','camera704_followup','camera705_inspect','camera705_reconcile_linked','camera706_inspect','camera706_owner_signoff','camera707_inspect','camera708_inspect','camera708_signed_drift_open','camera708_signed_drift_revalidate','camera709_inspect','camera709_signed_recurrence_open','camera709_signed_recurrence_escalate','camera710_inspect','camera710_signed_recurrence_resolve'].includes(form.get('action'));
+    const action702=['camera702_inspect','camera702_reattest','camera702_triage_open','camera702_triage_close','camera703_inspect','camera703_escalate','camera704_inspect','camera704_followup','camera705_inspect','camera705_reconcile_linked','camera706_inspect','camera706_owner_signoff','camera707_inspect','camera708_inspect','camera708_signed_drift_open','camera708_signed_drift_revalidate','camera709_inspect','camera709_signed_recurrence_open','camera709_signed_recurrence_escalate','camera710_inspect','camera710_signed_recurrence_resolve','camera711_inspect','camera711_post_resolution_stability'].includes(form.get('action'));
     if(form.get('action')==='camera700_readback'||adopt701||action702){
       const origin=request.headers.get('Origin');
       if(origin&&origin!==new URL(request.url).origin)
