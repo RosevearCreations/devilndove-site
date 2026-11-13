@@ -705,6 +705,11 @@ document.addEventListener('DOMContentLoaded',()=>{
      if($('dd708RecoverySource'))$('dd708RecoverySource').replaceChildren(new Option('Reinspect signed source recovery',''));
      if($('dd708DriftReviewed'))$('dd708DriftReviewed').checked=false;
      if($('dd708RecoveryReviewed'))$('dd708RecoveryReviewed').checked=false;
+     if($('dd709MediaStatus'))$('dd709MediaStatus').textContent='HOLD · Reinspect original signed source.';
+     if($('dd709RecurrenceSource'))$('dd709RecurrenceSource').replaceChildren(new Option('Reinspect original media',''));
+     if($('dd709EscalationSource'))$('dd709EscalationSource').replaceChildren(new Option('Reinspect recurrence aging',''));
+     if($('dd709RecurrenceReviewed'))$('dd709RecurrenceReviewed').checked=false;
+     if($('dd709EscalationReviewed'))$('dd709EscalationReviewed').checked=false;
   }
   async function send702(action,fields={}){
     if(!window.DDAuth?.isLoggedIn?.()||!window.DDAuth.apiFetch)
@@ -717,6 +722,42 @@ document.addEventListener('DOMContentLoaded',()=>{
     for(const [k,v] of Object.entries(fields))form.set(k,String(v));
     return responseJson(await window.DDAuth.apiFetch('/api/admin/mobile-create-product',
       {method:'POST',body:form}),'Protected original device evidence unavailable.');
+  }
+  function draw709(v){
+   const status=$('dd709MediaStatus'),list=$('dd709MediaCases'),
+    recurrence=$('dd709RecurrenceSource'),escalation=$('dd709EscalationSource');
+   if(!status||!list||!recurrence||!escalation)return;
+   recurrence.replaceChildren(new Option('Choose new original D1/R2 mismatch after 708 recovery',''));
+   escalation.replaceChildren(new Option('Choose signed-media recurrence aged 24+ hours',''));
+   list.replaceChildren();
+   for(const x of v.exception_aging_703||[]){
+    if(!x.signed_drift_recovery_receipt_id_708)continue;
+    const li=document.createElement('li');
+    li.textContent='Original signed #'+x.owner_recovery_signoff_receipt_id+
+     ' / restored #'+x.signed_drift_recovery_receipt_id_708+
+     ' · '+x.signed_media_recurrence_status_709+
+     ' · current D1/R2 '+x.media_signoff_drift_707+
+     ' · recurrence #'+x.signed_media_recurrence_receipt_id_709+
+     ' · escalation #'+x.signed_media_recurrence_escalation_receipt_id_709;
+    list.appendChild(li);
+    if(x.signed_media_recurrence_ready_709)
+     recurrence.add(new Option('New independent server mismatch · restored #'+
+      x.signed_drift_recovery_receipt_id_708,
+      [x.receipt_id,x.owner_recovery_signoff_receipt_id,x.signed_drift_recovery_receipt_id_708].join('|')));
+    if(x.signed_media_recurrence_escalation_due_709)
+     escalation.add(new Option('Age '+x.signed_media_recurrence_age_hours_709+
+      'h · recurring #'+x.signed_media_recurrence_receipt_id_709,
+      [x.receipt_id,x.owner_recovery_signoff_receipt_id,
+       x.signed_drift_recovery_receipt_id_708,x.signed_media_recurrence_receipt_id_709].join('|')));
+   }
+   if(!list.childElementCount){const li=document.createElement('li');
+    li.textContent='No recovered original signed source eligible for recurrence monitoring.';
+    list.appendChild(li);}
+   status.textContent='Observed recurrence-ready '+(v.signed_media_recurrence_ready_709||0)+
+    ' · recorded '+(v.signed_media_recurrence_open_count_709||0)+
+    ' · aged and due '+(v.signed_media_recurrence_due_709||0)+
+    ' · owner escalated '+(v.signed_media_recurrence_escalated_709||0)+
+    '. Readback only; automated escalation sent FALSE.';
   }
   function draw708(v){
     const status=$('dd708MediaStatus'),list=$('dd708MediaCases'),
@@ -872,6 +913,7 @@ document.addEventListener('DOMContentLoaded',()=>{
     draw706(v);
     draw707(v);
     draw708(v);
+    draw709(v);
   }
   async function inspect702(){
     const data=await send702('camera702_inspect');
@@ -880,6 +922,52 @@ document.addEventListener('DOMContentLoaded',()=>{
     show702(data);return data;
   }
 
+  $('dd709MediaRefresh')?.addEventListener('click',async()=>{
+    try{const d=await send702('camera709_inspect');
+      if(!d.ok||Number(d.product_id)!==Number(active?.product_id))
+       throw Error('Original camera draft changed during current recurrence recheck. HOLD.');
+      show702(d);
+    }catch(e){$('dd709MediaStatus').textContent='HOLD · '+e.message;}
+  });
+  $('dd709RecurrenceRecord')?.addEventListener('click',async()=>{
+    const btn=$('dd709RecurrenceRecord');btn.disabled=true;
+    try{
+      const [id,signoff,recovered]=String($('dd709RecurrenceSource').value||'').split('|').map(Number);
+      const item=gate702?.exception_aging_703?.find(x=>x.receipt_id===id&&
+       x.owner_recovery_signoff_receipt_id===signoff&&
+       x.signed_drift_recovery_receipt_id_708===recovered&&x.signed_media_recurrence_ready_709);
+      if(!item||!$('dd709RecurrenceReviewed').checked)
+       throw Error('Choose fresh original signed D1/R2 recurrence and acknowledge original owner review.');
+      const result=await action702('camera709_signed_recurrence_open',{
+       open_receipt_id:id,original_signoff_receipt_id:signoff,
+       recovered_708_receipt_id:recovered,owner_reviewed:'true'});
+      $('dd709MediaResult').textContent=result.status+' · original recurrent drift receipt #'+result.receipt_id+
+       '. No restoration, publication, external escalation or phone witness.';
+      $('dd709RecurrenceReviewed').checked=false;
+    }catch(e){$('dd709MediaResult').textContent='HOLD · '+e.message;}
+    finally{btn.disabled=false;}
+  });
+  $('dd709EscalationRecord')?.addEventListener('click',async()=>{
+    const btn=$('dd709EscalationRecord');btn.disabled=true;
+    try{
+      const [id,signoff,recovered,recurrence]=
+       String($('dd709EscalationSource').value||'').split('|').map(Number);
+      const item=gate702?.exception_aging_703?.find(x=>x.receipt_id===id&&
+       x.owner_recovery_signoff_receipt_id===signoff&&
+       x.signed_drift_recovery_receipt_id_708===recovered&&
+       x.signed_media_recurrence_receipt_id_709===recurrence&&
+       x.signed_media_recurrence_escalation_due_709);
+      if(!item||!$('dd709EscalationReviewed').checked)
+       throw Error('Current original 24-hour recurrence plus live server mismatch and owner review required.');
+      const result=await action702('camera709_signed_recurrence_escalate',{
+       open_receipt_id:id,original_signoff_receipt_id:signoff,
+       recovered_708_receipt_id:recovered,recurrence_receipt_id:recurrence,owner_reviewed:'true'});
+      $('dd709MediaResult').textContent=result.status+' · owner follow-up receipt #'+result.receipt_id+
+       '. Automatic external notification remains OFF.';
+      $('dd709EscalationReviewed').checked=false;
+    }catch(e){$('dd709MediaResult').textContent='HOLD · '+e.message;}
+    finally{btn.disabled=false;}
+  });
   $('dd708MediaRefresh')?.addEventListener('click',async()=>{
     try{const data=await send702('camera708_inspect');
       if(!data.ok||Number(data.product_id)!==Number(active?.product_id))
