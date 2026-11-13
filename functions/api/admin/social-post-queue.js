@@ -6912,7 +6912,7 @@ export async function assessFinance708(current,base706,prior707,continuityRows=[
     x.retention_706_verified&&x.field_707_verified&&x.custody_707_verified)
    .map(x=>({...x,continuity_708_verified:false,continuity_708_receipt_id:null,
     continuity_708_recorded_at:null,custody_708_verified:false,
-    custody_708_receipt_id:null,custody_708_digest_sha256:null})),
+    custody_708_receipt_id:null,custody_708_digest_sha256:null,custody_708_recorded_at:null})),
   sourceMap=new Map(items.map(x=>[Number(x.field_707_receipt_id),x]));
  let invalid=0,prevId=Infinity,prevAt=Infinity;
  const seen=new Set(),seenNonce=new Set(),continuityReceipts=[];
@@ -6986,6 +6986,7 @@ export async function assessFinance708(current,base706,prior707,continuityRows=[
   if(hashed){custodySeen.add(Number(x.continuity_708_receipt_id));
    x.custody_708_verified=true;x.custody_708_receipt_id=id;
    x.custody_708_digest_sha256=d.renewal_manifest_sha256;
+   x.custody_708_recorded_at=row.attempted_at;
   }else invalid++;
   custodyReceipts.push({receipt_id:id,verified:hashed,
    owner_continuity_receipt_id:Number(d.owner_continuity_receipt_id),
@@ -7103,6 +7104,154 @@ async function ownerCustodyRenewal708(db,env,user,p){
   receipt_id:receiptId,renewal_manifest_sha256,bookkeeping_closed:false,financial_certified:false};
 }
 
+
+// Build 709: renewal aging and independent-*source* exception escalation.
+// "Independent" means existing independently signed ninth-reviewer evidence
+// is rechecked, NOT a fresh ninth sign-off, external complaint, or book close.
+export function renewalAge709(original,now=Date.now()){
+ const at=Date.parse(String(original?.custody_708_verified?
+   original.custody_708_recorded_at:original?.continuity_708_recorded_at||''));
+ if(!Number.isFinite(at)||at>now+300000)return {age_hours:null,
+  status:'HOLD_709_ORIGINAL_RENEWAL_TIMESTAMP_REQUIRED',escalation_due:false};
+ const age_hours=Math.max(0,Math.floor((now-at)/3600000));
+ return {age_hours,
+  status:age_hours>=72?'CRITICAL_ORIGINAL_FINANCIAL_CUSTODY_RENEWAL_AGED_72H_709':
+   age_hours>=48?'ORIGINAL_FINANCIAL_CUSTODY_RENEWAL_OVERDUE_48H_709':
+   age_hours>=24?'ORIGINAL_FINANCIAL_CUSTODY_RENEWAL_ESCALATION_DUE_24H_709':
+   'ORIGINAL_FINANCIAL_CUSTODY_RENEWAL_FRESH_UNDER_24H_709',
+  escalation_due:age_hours>=24};
+}
+export async function assessFinance709(current,base706,prior708,escalations=[],now=Date.now()){
+ const n=Number(current?.queue_id),valid=Number.isSafeInteger(n)&&n>0&&
+  current.master_fresh===true&&current.history_complete===true&&
+  Array.isArray(current.open_cases)&&current.open_cases.length===0&&
+  base706?.history_complete===true&&base706.ninth_signer_configured===true&&
+  !!base706.ninth_signer_id&&prior708?.history_complete===true,
+  log=Array.isArray(escalations)?escalations:[],
+  items=(prior708?.items||[]).filter(x=>x.continuity_708_verified)
+   .map(x=>({...x,renewal_aging_709:renewalAge709(x,now),
+    custody_exception_escalated_709:false,
+    custody_exception_escalation_receipt_id_709:null})),
+  seen=new Set(),receipts=[];
+ let invalid=0,previousId=Infinity,previousAt=Infinity;
+ for(const row of log){
+  const d=safeJson(row.response_json,{}),id=Number(row.social_post_attempt_id),
+   at=utcAttemptTime698(row.attempted_at,now),
+   source=items.find(x=>x.continuity_708_receipt_id===Number(d.original_708_continuity_receipt_id)),
+   age=renewalAge709(source,at===null?now:at);
+  const good=valid&&!!source&&row.attempt_status==='owner_financial_custody_exception_escalation_709'&&
+   Number.isSafeInteger(id)&&id>Number(source.custody_708_receipt_id||source.continuity_708_receipt_id)&&
+   id<previousId&&at!==null&&at<=previousAt&&
+   !seen.has(Number(source.continuity_708_receipt_id))&&
+   age.escalation_due===true&&d.observed_age_hours===age.age_hours&&
+   d.observed_age_status===age.status&&
+   d.original_ninth_review_receipt_id===source.review_706_receipt_id&&
+   d.original_706_retention_receipt_id===source.retention_706_receipt_id&&
+   d.original_707_field_receipt_id===source.field_707_receipt_id&&
+   d.original_707_custody_receipt_id===source.custody_707_receipt_id&&
+   d.original_708_custody_receipt_id===Number(source.custody_708_receipt_id||0)&&
+   d.original_706_manifest_sha256===source.retention_manifest_sha256&&
+   d.original_708_custody_digest_sha256===(source.custody_708_digest_sha256||null)&&
+   d.ninth_reviewer_id===base706.ninth_signer_id&&
+   d.source_revision===current.source_revision&&
+   d.fingerprint_sha256===current.fingerprint_sha256&&
+   d.independent_ninth_source_cryptographically_rechecked===true&&
+   d.owner_exception_reviewed===true&&
+   Number.isSafeInteger(Number(d.owner_user_id))&&Number(d.owner_user_id)>0&&
+   typeof d.resolution_note==='string'&&d.resolution_note.length>=25&&
+   d.resolution_note.length<=600&&
+   d.no_new_independent_signature_claimed===true&&
+   d.automatic_external_escalation_sent===false&&d.bookkeeping_closed===false&&
+   d.financial_certified===false&&d.auto_delete_scheduled===false;
+  if(good){seen.add(source.continuity_708_receipt_id);
+   source.custody_exception_escalated_709=true;
+   source.custody_exception_escalation_receipt_id_709=id;
+  }else invalid++;
+  receipts.push({receipt_id:id,verified:!!good,
+   original_708_continuity_receipt_id:Number(d.original_708_continuity_receipt_id),
+   status:good?'SOURCE_BOUND_OWNER_FINANCIAL_CUSTODY_EXCEPTION_ESCALATED_BOOKS_HOLD_709':
+    'HOLD_709_FINANCIAL_CUSTODY_ESCALATION_REPLAY_OR_SOURCE_DRIFT'});
+  previousId=id;previousAt=at===null?-Infinity:at;
+ }
+ const complete=valid&&log.length<=60&&invalid===0;
+ return {status:!complete?'HOLD_709_SOURCE_HISTORY_OR_INDEPENDENT_CUSTODY_DRIFT':
+  !items.length?'HOLD_708_NINTH_REVIEWER_RENEWAL_REQUIRED':
+  items.some(x=>x.renewal_aging_709.escalation_due&&!x.custody_exception_escalated_709)?
+   'OWNER_FINANCIAL_RENEWAL_AGING_ESCALATION_DUE_709':
+  items.some(x=>x.custody_exception_escalated_709)?
+   'OWNER_SOURCE_BOUND_CUSTODY_EXCEPTION_ESCALATED_BOOKS_HOLD_709':
+  'ON_DEMAND_RENEWAL_AGING_CURRENT_BOOKS_HOLD_709',
+  campaign_queue_id:valid?n:null,history_complete:complete,
+  items:items.slice(0,40),eligible_count:items.length,
+  escalation_due_count:items.filter(x=>x.renewal_aging_709.escalation_due&&!x.custody_exception_escalated_709).length,
+  critical_72h_count:items.filter(x=>x.renewal_aging_709.age_hours>=72).length,
+  escalated_count:items.filter(x=>x.custody_exception_escalated_709).length,
+  invalid_count:invalid,exception_escalation_receipts:receipts.slice(0,40),
+  on_demand_only:true,automated_external_escalation_sent:false,
+  independent_ninth_new_signature_generated:false,
+  financial_certified:false,bookkeeping_closed:false,
+  connection:'HOLD_INDEPENDENT_CONTINUOUS_RUNTIME_TELEMETRY'};
+}
+async function finance709(db,env,id){
+ const n=Number(id);
+ if(!Number.isSafeInteger(n)||n<1)
+  return assessFinance709({queue_id:0},{history_complete:false},{history_complete:false});
+ const current=await financial685(db,env,n),base=await finance706(db,env,n),
+  prior=await finance708(db,env,n),
+  escalation=rows(await db.prepare("SELECT social_post_attempt_id,attempt_status,response_json,attempted_at FROM social_post_attempts WHERE social_post_queue_id=? AND platform_key='finance_custody_escalation_709' ORDER BY social_post_attempt_id DESC LIMIT 61").bind(n).all());
+ return assessFinance709(current,base,prior,escalation);
+}
+async function ownerCustodyExceptionEscalation709(db,env,user,p){
+ const n=Number(p.social_post_queue_id),
+  current=await financial685(db,env,n),base=await finance706(db,env,n),
+  prior=await finance708(db,env,n),report=await finance709(db,env,n),
+  continuityId=Number(p.original_708_continuity_receipt_id),
+  item=report.items?.find(x=>x.continuity_708_receipt_id===continuityId&&
+    !x.custody_exception_escalated_709&&x.renewal_aging_709.escalation_due),
+  note=normalizeText(p.resolution_note);
+ if(!current.queue_id||!base.history_complete||!base.ninth_signer_configured||
+  !prior.history_complete||!report.history_complete||!item||
+  p.owner_exception_reviewed!==true||note.length<25||note.length>600||
+  p.expected_source_revision!==current.source_revision||
+  p.expected_fingerprint_sha256!==current.fingerprint_sha256||
+  p.expected_706_manifest_sha256!==item.retention_manifest_sha256||
+  p.expected_708_custody_digest_sha256!==(item.custody_708_digest_sha256||null))
+  throw Error('Aged 24h original independently signed ninth continuity and exact 706/708 custody source required. HOLD.');
+ const latest=await financial685(db,env,n);
+ if(latest.source_revision!==current.source_revision||
+  latest.fingerprint_sha256!==current.fingerprint_sha256||
+  latest.master_fresh!==true||latest.history_complete!==true||latest.open_cases?.length)
+  throw Error('Master or original book evidence drifted during custody exception escalation. HOLD.');
+ const age=renewalAge709(item);
+ if(!age.escalation_due)throw Error('Original source renewal is not yet 24h overdue. HOLD.');
+ const data={original_708_continuity_receipt_id:continuityId,
+  original_708_custody_receipt_id:Number(item.custody_708_receipt_id||0),
+  original_ninth_review_receipt_id:item.review_706_receipt_id,
+  original_706_retention_receipt_id:item.retention_706_receipt_id,
+  original_707_field_receipt_id:item.field_707_receipt_id,
+  original_707_custody_receipt_id:item.custody_707_receipt_id,
+  original_706_manifest_sha256:item.retention_manifest_sha256,
+  original_708_custody_digest_sha256:item.custody_708_digest_sha256||null,
+  ninth_reviewer_id:base.ninth_signer_id,
+  source_revision:current.source_revision,fingerprint_sha256:current.fingerprint_sha256,
+  observed_age_hours:age.age_hours,observed_age_status:age.status,
+  independent_ninth_source_cryptographically_rechecked:true,
+  owner_exception_reviewed:true,owner_user_id:user.user_id,resolution_note:note,
+  no_new_independent_signature_claimed:true,
+  automatic_external_escalation_sent:false,bookkeeping_closed:false,
+  financial_certified:false,auto_delete_scheduled:false};
+ const receipt=await append684(db,user,n,'finance_custody_escalation_709',
+  'owner_financial_custody_exception_escalation_709',
+  'finance709-exception-'+n+'-'+continuityId,data);
+ const readback=await finance709(db,env,n);
+ if(!readback.exception_escalation_receipts.some(x=>x.receipt_id===receipt&&x.verified))
+  throw Error('Original signed source custody escalation failed durable D1 independent readback. HOLD.');
+ return {status:'SOURCE_BOUND_OWNER_FINANCIAL_CUSTODY_EXCEPTION_ESCALATED_BOOKS_HOLD_709',
+  receipt_id:receipt,age_hours:age.age_hours,
+  automatic_external_escalation_sent:false,bookkeeping_closed:false,
+  new_independent_signature_generated:false};
+}
+
 export async function onRequestGet(context){
 const adminUser=await getAdminUserFromRequest(context.request,context.env);
 if (!adminUser) return jsonResponse({ ok:false,error:'Admin access required.'},401);
@@ -7110,6 +7259,17 @@ const db=getDb(context.env);
 if (!db) return jsonResponse({ ok:false,error:'Database binding is not configured.'},500);
 try{
 const params=new URL(context.request.url).searchParams;
+if(params.get('export')==='financial709'){
+ const n=Number(params.get('campaign_queue_id'));
+ if(!Number.isSafeInteger(n)||n<1)
+  return jsonResponse({ok:false,error:'Exact owner financial campaign required.'},400,{'Cache-Control':'no-store'});
+ const report=await finance709(db,context.env,n);
+ return new Response(JSON.stringify({report_type:'ORIGINAL_REVIEWER_RENEWAL_AGING_FINANCIAL_CUSTODY_ESCALATION_709',
+  report,bookkeeping_closed:false,external_escalation_sent:false},null,2),
+  {status:200,headers:{'Content-Type':'application/json; charset=utf-8',
+   'Content-Disposition':'attachment; filename="devilndove-financial-exception-709-'+n+'.json"',
+   'Cache-Control':'private, no-store','X-Content-Type-Options':'nosniff'}});
+}
 if(params.get('export')==='financial708'){
 const n=Number(params.get('campaign_queue_id'));
 if(!Number.isSafeInteger(n)||n<1)return jsonResponse({ok:false,error:'Exact original financial campaign required.'},400,{'Cache-Control':'no-store'});
@@ -7354,7 +7514,7 @@ return new Response(JSON.stringify(evidence,null,2),{status:200,headers:{
 'Cache-Control':'private, no-store','X-Content-Type-Options':'nosniff'}});
 }
 const data=await summarize(db,context.env);
-return jsonResponse({ ok:true,...data,receipts673:await receipts673(db),engagement675:await engagement675(db),financial676:await financial676(db),financial678:await financialSummary678(db,context.request.headers.get('x-campaign-queue-id')||new URL(context.request.url).searchParams.get('campaign_queue_id')),financial679:await campaignNet679(db,new URL(context.request.url).searchParams.get('campaign_queue_id')),financial680:await finance680(db,context.env,new URL(context.request.url).searchParams.get('campaign_queue_id')),financial681:await finance681(db,context.env,new URL(context.request.url).searchParams.get('campaign_queue_id')),financial682:await finance682(db,context.env,new URL(context.request.url).searchParams.get('campaign_queue_id')),financial683:await financial683(db,context.env,new URL(context.request.url).searchParams.get('campaign_queue_id')),financial684:await financial684(db,context.env,new URL(context.request.url).searchParams.get('campaign_queue_id')),financial685:await financial685(db,context.env,new URL(context.request.url).searchParams.get('campaign_queue_id')),financialRecoveryQueue686:await globalFinanceQueue686(db),financial687:await finance687(db,context.env,new URL(context.request.url).searchParams.get('campaign_queue_id')),financial688:await finance688(db,context.env,new URL(context.request.url).searchParams.get('campaign_queue_id')),financial689:await finance689(db,context.env,new URL(context.request.url).searchParams.get('campaign_queue_id')),financial690:await finance690(db,context.env,new URL(context.request.url).searchParams.get('campaign_queue_id')),financial691:await finance691(db,context.env,new URL(context.request.url).searchParams.get('campaign_queue_id')),financial692:await finance692(db,context.env,new URL(context.request.url).searchParams.get('campaign_queue_id')),financial693:await finance693(db,context.env,new URL(context.request.url).searchParams.get('campaign_queue_id')),financial694:await finance694(db,context.env,new URL(context.request.url).searchParams.get('campaign_queue_id')),financial695:await finance695(db,context.env,new URL(context.request.url).searchParams.get('campaign_queue_id')),financial696:await finance696(db,context.env,new URL(context.request.url).searchParams.get('campaign_queue_id')),financial697:await finance697(db,context.env,new URL(context.request.url).searchParams.get('campaign_queue_id')),financial698:await finance698(db,context.env,new URL(context.request.url).searchParams.get('campaign_queue_id')),financial699:await finance699(db,context.env,new URL(context.request.url).searchParams.get('campaign_queue_id')),financial700:await finance700(db,context.env,new URL(context.request.url).searchParams.get('campaign_queue_id')),financial701:await finance701(db,context.env,new URL(context.request.url).searchParams.get('campaign_queue_id')),financial702:await finance702(db,context.env,new URL(context.request.url).searchParams.get('campaign_queue_id')),financial703:await finance703(db,context.env,new URL(context.request.url).searchParams.get('campaign_queue_id')),financial704:await finance704(db,context.env,new URL(context.request.url).searchParams.get('campaign_queue_id')),financial705:await finance705(db,context.env,new URL(context.request.url).searchParams.get('campaign_queue_id')),financial706:await finance706(db,context.env,new URL(context.request.url).searchParams.get('campaign_queue_id')),financial707:await finance707(db,context.env,new URL(context.request.url).searchParams.get('campaign_queue_id')),financial708:await finance708(db,context.env,new URL(context.request.url).searchParams.get('campaign_queue_id')),queue:data.queue.map(normalizeQueueRow),mode:'review_first_api_when_configured'},200,{ 'Cache-Control':'no-store'});
+return jsonResponse({ ok:true,...data,receipts673:await receipts673(db),engagement675:await engagement675(db),financial676:await financial676(db),financial678:await financialSummary678(db,context.request.headers.get('x-campaign-queue-id')||new URL(context.request.url).searchParams.get('campaign_queue_id')),financial679:await campaignNet679(db,new URL(context.request.url).searchParams.get('campaign_queue_id')),financial680:await finance680(db,context.env,new URL(context.request.url).searchParams.get('campaign_queue_id')),financial681:await finance681(db,context.env,new URL(context.request.url).searchParams.get('campaign_queue_id')),financial682:await finance682(db,context.env,new URL(context.request.url).searchParams.get('campaign_queue_id')),financial683:await financial683(db,context.env,new URL(context.request.url).searchParams.get('campaign_queue_id')),financial684:await financial684(db,context.env,new URL(context.request.url).searchParams.get('campaign_queue_id')),financial685:await financial685(db,context.env,new URL(context.request.url).searchParams.get('campaign_queue_id')),financialRecoveryQueue686:await globalFinanceQueue686(db),financial687:await finance687(db,context.env,new URL(context.request.url).searchParams.get('campaign_queue_id')),financial688:await finance688(db,context.env,new URL(context.request.url).searchParams.get('campaign_queue_id')),financial689:await finance689(db,context.env,new URL(context.request.url).searchParams.get('campaign_queue_id')),financial690:await finance690(db,context.env,new URL(context.request.url).searchParams.get('campaign_queue_id')),financial691:await finance691(db,context.env,new URL(context.request.url).searchParams.get('campaign_queue_id')),financial692:await finance692(db,context.env,new URL(context.request.url).searchParams.get('campaign_queue_id')),financial693:await finance693(db,context.env,new URL(context.request.url).searchParams.get('campaign_queue_id')),financial694:await finance694(db,context.env,new URL(context.request.url).searchParams.get('campaign_queue_id')),financial695:await finance695(db,context.env,new URL(context.request.url).searchParams.get('campaign_queue_id')),financial696:await finance696(db,context.env,new URL(context.request.url).searchParams.get('campaign_queue_id')),financial697:await finance697(db,context.env,new URL(context.request.url).searchParams.get('campaign_queue_id')),financial698:await finance698(db,context.env,new URL(context.request.url).searchParams.get('campaign_queue_id')),financial699:await finance699(db,context.env,new URL(context.request.url).searchParams.get('campaign_queue_id')),financial700:await finance700(db,context.env,new URL(context.request.url).searchParams.get('campaign_queue_id')),financial701:await finance701(db,context.env,new URL(context.request.url).searchParams.get('campaign_queue_id')),financial702:await finance702(db,context.env,new URL(context.request.url).searchParams.get('campaign_queue_id')),financial703:await finance703(db,context.env,new URL(context.request.url).searchParams.get('campaign_queue_id')),financial704:await finance704(db,context.env,new URL(context.request.url).searchParams.get('campaign_queue_id')),financial705:await finance705(db,context.env,new URL(context.request.url).searchParams.get('campaign_queue_id')),financial706:await finance706(db,context.env,new URL(context.request.url).searchParams.get('campaign_queue_id')),financial707:await finance707(db,context.env,new URL(context.request.url).searchParams.get('campaign_queue_id')),financial708:await finance708(db,context.env,new URL(context.request.url).searchParams.get('campaign_queue_id')),financial709:await finance709(db,context.env,new URL(context.request.url).searchParams.get('campaign_queue_id')),queue:data.queue.map(normalizeQueueRow),mode:'review_first_api_when_configured'},200,{ 'Cache-Control':'no-store'});
 } catch (error){
 await captureRuntimeIncident(context.env,context.request,{
 incident_scope:'admin_social',
@@ -7438,6 +7598,7 @@ else if (action==='owner_ninth_reviewer_field_acceptance_707') result=await orig
 else if (action==='owner_financial_custody_audit_707') result=await originalFinancialCustodyAudit707(db,context.env,adminUser,payload);
 else if (action==='owner_ninth_reviewer_continuity_708') result=await ownerNinthAcceptanceContinuity708(db,context.env,adminUser,payload);
 else if (action==='owner_financial_custody_renewal_708') result=await ownerCustodyRenewal708(db,context.env,adminUser,payload);
+else if (action==='owner_financial_custody_exception_escalation_709') result=await ownerCustodyExceptionEscalation709(db,context.env,adminUser,payload);
 else if (action==='expense_attestation_678') result=await expenseAttestation678(db,context.env,adminUser,payload,recordApiAttempt);
 else if (action==='owner_marketing_signoff_678') result=await ownerSignoff678(db,adminUser,payload,recordApiAttempt);
 else throw new Error(`Unsupported social queue action: ${action}`);
