@@ -1623,6 +1623,42 @@ select699();
 
 
 
+ let audit709=null;
+ function draw709(data){
+  if(!$('dd709-finance'))return;
+  const v=data.financial709||null;audit709=v;
+  $('dd709FinanceStatus').textContent=v?.campaign_queue_id?
+   v.status+' · original source history '+(v.history_complete?'VERIFIED':'HOLD')+
+   ' · bookkeeping closed FALSE':
+   'HOLD · Reinspect exact original owner financial campaign.';
+  $('dd709FinanceStats').textContent=v?.campaign_queue_id?
+   'Eligible renewals '+v.eligible_count+' · due '+v.escalation_due_count+
+   ' · critical 72h '+v.critical_72h_count+
+   ' · owner escalation receipts '+v.escalated_count+' · invalid '+v.invalid_count:
+   'Original Build 708 reviewer continuity must exist before aging.';
+  const list=$('dd709FinanceCases'),sel=$('dd709EscalationSource');
+  list.replaceChildren();
+  sel.replaceChildren(new Option('Select one owner-reviewed 24+ hour original renewal',''));
+  for(const x of v?.items||[]){
+   const age=x.renewal_aging_709;
+   const li=document.createElement('li');
+   li.textContent='Original ninth #'+x.review_706_receipt_id+
+     ' / 708 reviewer continuity #'+x.continuity_708_receipt_id+
+     ' / custody '+(x.custody_708_receipt_id||'HOLD')+
+     ' · '+age.status+
+     ' · '+(age.age_hours===null?'unverified':age.age_hours+'h')+
+     ' · owner escalation '+(x.custody_exception_escalated_709?'RECORDED #'+x.custody_exception_escalation_receipt_id_709:'HOLD')+
+     ' · independent external review / accounting close HOLD';
+   list.appendChild(li);
+   if(v.history_complete&&age.escalation_due&&!x.custody_exception_escalated_709)
+    sel.add(new Option('Original continuity #'+x.continuity_708_receipt_id+
+       ' · '+age.age_hours+'h · 706 manifest source',
+      String(x.continuity_708_receipt_id)));
+  }
+  if(!list.childElementCount){const li=document.createElement('li');
+   li.textContent='No original 708 independent reviewer renewal recorded yet.';
+   list.appendChild(li);}
+ }
  let audit708=null;
  function draw708(data){
   if(!$('dd708-finance'))return;
@@ -2113,7 +2149,7 @@ draw698(d);
 draw699(d);
 draw700(d);
 draw701(d);
-draw702(d);draw703(d);draw704(d);draw705(d);draw706(d);draw707(d);draw708(d);
+draw702(d);draw703(d);draw704(d);draw705(d);draw706(d);draw707(d);draw708(d);draw709(d);
 if(!id)return;
 if(!v||v.queue_id!==id)throw Error('Fresh exact financial evidence was not returned.');
 state=v;
@@ -2175,6 +2211,46 @@ $('dd699Refresh').addEventListener('click',()=>void refresh());
 
 
 
+ $('dd709FinanceRefresh').addEventListener('click',()=>void refresh());
+ $('dd709EscalationForm').addEventListener('submit',async event=>{
+  event.preventDefault();const btn=$('dd709EscalationSubmit');btn.disabled=true;
+  try{
+   const id=Number($('dd709EscalationSource').value),
+    x=audit709?.items?.find(x=>x.continuity_708_receipt_id===id&&
+      x.renewal_aging_709.escalation_due&&!x.custody_exception_escalated_709),
+    note=$('dd709EscalationNote').value.trim();
+   if(!state?.queue_id||!audit709?.history_complete||!x||
+      !$('dd709EscalationReviewed').checked||note.length<25||note.length>600)
+    throw Error('Select eligible original ninth-signed source, 24h aged owner review and source-pinned custody SHA.');
+   const d=await api({action:'owner_financial_custody_exception_escalation_709',
+    social_post_queue_id:state.queue_id,original_708_continuity_receipt_id:id,
+    expected_source_revision:state.source_revision,
+    expected_fingerprint_sha256:state.fingerprint_sha256,
+    expected_706_manifest_sha256:x.retention_manifest_sha256,
+    expected_708_custody_digest_sha256:x.custody_708_digest_sha256||null,
+    owner_exception_reviewed:true,resolution_note:note},state.queue_id);
+   $('dd709EscalationResult').textContent=d.result.status+
+    ' · protected custody exception #'+d.result.receipt_id+
+    ' · age '+d.result.age_hours+'h. No external escalation sent, no newly signed independent reviewer or book closure.';
+   $('dd709EscalationReviewed').checked=false;
+   await refresh();
+  }catch(e){$('dd709EscalationResult').textContent='HOLD · '+e.message;}
+  finally{btn.disabled=false;}
+ });
+ $('dd709FinanceExport').addEventListener('click',async()=>{
+  try{
+   const id=Number($('dd685Campaign').value);
+   if(!id||id!==state?.queue_id||!window.DDAuth?.apiFetch)
+    throw Error('Authenticated original financial owner and exact campaign required.');
+   const res=await window.DDAuth.apiFetch(endpoint+
+    '?export=financial709&campaign_queue_id='+encodeURIComponent(id));
+   if(!res.ok)throw Error('Original source-bound escalation dossier denied. HTTP '+res.status);
+   const blob=await res.blob(),url=URL.createObjectURL(blob),a=document.createElement('a');
+   a.href=url;a.download='devilndove-ninth-renewal-aging-'+id+'-709.json';
+   document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1000);
+   $('dd709EscalationResult').textContent='Protected 709 original ninth-signer renewal aging dossier downloaded; external escalation remains manual and books HOLD.';
+  }catch(e){$('dd709EscalationResult').textContent='HOLD · '+e.message;}
+ });
  $('dd708FinanceRefresh').addEventListener('click',()=>void refresh());
  $('dd708ContinuityForm').addEventListener('submit',async event=>{
   event.preventDefault();const button=$('dd708ContinuitySubmit');button.disabled=true;
