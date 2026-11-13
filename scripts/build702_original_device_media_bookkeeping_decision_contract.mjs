@@ -31,7 +31,8 @@ assert.equal(canCloseMedia702(open,photo,reattest,{...live,media:[{...photo,r2_b
 assert.equal(canCloseMedia702({...open,media_kind:'video',attachment_id:16,r2_key:movie.r2_key},movie,reattest,live,now),true);
 assert.equal(canCloseMedia702({...open,media_kind:'video',attachment_id:16,r2_key:movie.r2_key},
  {...movie,publication_status:'public'},reattest,live,now),false);
-const current={queue_id:5,source_revision:'source702',fingerprint_sha256:digest};
+const current={queue_id:5,source_revision:'source702',fingerprint_sha256:digest,
+ master_fresh:true,history_complete:true,open_cases:[]};
 const prior={history_complete:true,review:{items:[{
  original_live_source_receipt_id:703,bookkeeping_review_receipt_id:807,
  older_receipt_id:10,newer_receipt_id:11,
@@ -77,6 +78,15 @@ assert.equal(result.bookkeeping_closed,false);
 assert.equal(result.financial_certified,false);
 result=await assessFinance702(current,prior,[await makeRow('hold_discrepancy',2)],signer,now);
 assert.equal(result.status,'INDEPENDENT_SIGNED_BOOKKEEPING_DISCREPANCY_HOLD');
+for(const blocked of [{...current,master_fresh:false},
+  {...current,history_complete:false},
+  {...current,open_cases:[{case_id:'open',status:'owner_exception_opened_685'}]}]){
+ const x=await assessFinance702(blocked,prior,[row],signer,now);
+ assert.equal(x.history_complete,false,'A recommendation with stale Master or open exceptions must fail closed');
+ const hold=await assessFinance702(blocked,prior,[await makeRow('hold_discrepancy',1)],signer,now);
+ assert.equal(hold.history_complete,true,'An independently signed HOLD can always be recorded');
+}
+
 for(const tamper of [
  {signature:'invalid'},{independent_closure_signer_id:'other'},
  {bookkeeping_review_receipt_id:806},{original_live_source_receipt_id:704},
