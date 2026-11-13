@@ -1616,6 +1616,69 @@ select699();
 }
 
 
+
+let audit702=null;
+function draw702(data){
+ if(!$('dd702-finance'))return;
+ const v=data.financial702||null;audit702=v;
+ $('dd702FinanceStatus').textContent=v?.campaign_queue_id?
+   v.status+' · original source history '+(v.history_complete?'COMPLETE':'HOLD')+
+   ' · actual bookkeeping close HOLD':
+   'HOLD · Select and refresh original financial campaign.';
+ $('dd702FinanceStats').textContent=v?.campaign_queue_id?
+   'Independent sixth signer '+(v.independent_signer_configured?'CONFIGURED':'HOLD')+
+   ' · signed decisions '+v.review.recorded_count+' · pending '+v.review.pending_count+
+   ' · invalid '+v.review.invalid_count:
+   'No source-bound independent closure decision.';
+ const list=$('dd702FinanceCases');list.replaceChildren();
+ const select=$('dd702FinanceSource');select.replaceChildren(
+   new Option('Choose exact independently reviewed ledger',''));
+ for(const item of v?.review?.items||[]){
+   const li=document.createElement('li');
+   li.textContent='Original live source #'+item.original_live_source_receipt_id+
+    ' · independently verified bookkeeper receipt #'+item.bookkeeping_review_receipt_id+
+    ' · closure decision '+(item.signed_closure_decision_recorded?
+      'VERIFIED #'+item.decision_receipt_id+' / '+item.signed_decision:'PENDING')+
+    ' · accounting posting HOLD';
+   list.appendChild(li);
+   if(!item.signed_closure_decision_recorded&&v.history_complete)
+     select.add(new Option('Bookkeeper review #'+item.bookkeeping_review_receipt_id+
+       ' · source #'+item.original_live_source_receipt_id,
+       String(item.bookkeeping_review_receipt_id)));
+ }
+ if(!list.childElementCount){const li=document.createElement('li');
+   li.textContent='No fresh Build 701 independently signed bookkeeping receipt.';list.appendChild(li);}
+}
+function claimFor702(){
+ if(!state?.queue_id||!audit702?.history_complete||
+   !audit702.independent_signer_configured)
+   throw Error('Refresh exact current original independent financial history and sixth signer first.');
+ const reviewId=Number($('dd702FinanceSource').value),
+   original=(audit702.review?.items||[]).find(x=>
+     x.bookkeeping_review_receipt_id===reviewId&&!x.signed_closure_decision_recorded),
+   decision=$('dd702FinanceDecision').value,
+   remaining=Number($('dd702FinanceExceptions').value),
+   signer=$('dd702FinanceSigner').value.trim(),
+   nonce=$('dd702FinanceNonce').value.trim(),
+   issued=$('dd702FinanceIssued').value.trim();
+ if(!original||!['hold_discrepancy','recommend_owner_manual_close'].includes(decision)||
+   !Number.isSafeInteger(remaining)||remaining<0||remaining>10000||
+   (decision==='recommend_owner_manual_close'&&remaining!==0)||
+   signer!==audit702.expected_signer_id||!nonce||!issued||
+   !/^[a-f0-9]{64}$/.test(original.bookkeeping_ledger_sha256||''))
+   throw Error('Exact original bookkeeper receipt, sixth signer, decision and bounded exception count required. HOLD.');
+ return {v:1,purpose:'devilndove_independent_bookkeeping_closure_decision_702',
+   source:'devilndove',queue_id:state.queue_id,
+   original_live_source_receipt_id:original.original_live_source_receipt_id,
+   bookkeeping_review_receipt_id:reviewId,
+   older_receipt_id:original.older_receipt_id,newer_receipt_id:original.newer_receipt_id,
+   external_document_sha256:original.external_document_sha256,
+   bookkeeping_ledger_sha256:original.bookkeeping_ledger_sha256,
+   source_revision:state.source_revision,fingerprint_sha256:state.fingerprint_sha256,
+   independent_closure_signer_id:signer,
+   remaining_exception_count:remaining,decision,nonce,issued_at:issued};
+}
+
 let audit701=null;
 function draw701(d){
  if(!$('dd701-finance'))return;
@@ -1731,6 +1794,7 @@ draw698(d);
 draw699(d);
 draw700(d);
 draw701(d);
+draw702(d);
 if(!id)return;
 if(!v||v.queue_id!==id)throw Error('Fresh exact financial evidence was not returned.');
 state=v;
@@ -1758,7 +1822,7 @@ await refresh();
 document.addEventListener('DOMContentLoaded',()=>{
 if(!$('dd685-finance'))return;
 (async()=>{try{
-const d=await api(null);draw686(d);draw687(d);draw688(d);draw689(d);draw690(d);draw691(d);draw692(d);draw693(d);draw694(d);draw695(d);draw696(d);draw697(d);draw698(d);draw699(d);draw700(d);draw701(d);const seen=new Set();
+const d=await api(null);draw686(d);draw687(d);draw688(d);draw689(d);draw690(d);draw691(d);draw692(d);draw693(d);draw694(d);draw695(d);draw696(d);draw697(d);draw698(d);draw699(d);draw700(d);draw701(d);draw702(d);const seen=new Set();
 for(const q of d.queue||[])if(q.utm_campaign&&!seen.has(q.social_post_queue_id)){
 seen.add(q.social_post_queue_id);
 $('dd685Campaign').add(new Option(q.utm_campaign+' · #'+q.social_post_queue_id,q.social_post_queue_id));
@@ -1784,6 +1848,55 @@ $('dd697Refresh').addEventListener('click',()=>void refresh());
 $('dd698Refresh').addEventListener('click',()=>void refresh());
 $('dd699Refresh').addEventListener('click',()=>void refresh());
 
+
+
+$('dd702FinanceRefresh').addEventListener('click',()=>void refresh());
+$('dd702FinancePrepare').addEventListener('click',()=>{
+ try{
+   const claim=claimFor702();$('dd702FinanceClaim').value=JSON.stringify(claim);
+   $('dd702FinanceResult').textContent='Exact source-bound claim prepared for an independent sixth signer. No private key belongs in this form.';
+ }catch(error){$('dd702FinanceResult').textContent='HOLD · '+error.message;}
+});
+$('dd702FinanceForm').addEventListener('submit',async event=>{
+ event.preventDefault();const button=$('dd702FinanceSubmit');button.disabled=true;
+ try{
+   if(!$('dd702FinanceReviewed').checked)
+     throw Error('Original owner must explicitly review independent closure decision and all remaining exceptions.');
+   const claim=claimFor702(),note=$('dd702FinanceNote').value.trim();
+   if($('dd702FinanceClaim').value!==JSON.stringify(claim))
+     throw Error('Original financial claim changed. Prepare and sign a new exact claim.');
+   if(note.length<20||note.length>400)throw Error('Provide a 20–400 character source-bound owner note.');
+   const data=await api({action:'owner_bookkeeping_decision_702',
+     social_post_queue_id:state.queue_id,
+     bookkeeping_review_receipt_id:claim.bookkeeping_review_receipt_id,
+     decision:claim.decision,remaining_exception_count:claim.remaining_exception_count,
+     independent_closure_signer_id:claim.independent_closure_signer_id,
+     nonce:claim.nonce,issued_at:claim.issued_at,
+     signature:$('dd702FinanceSignature').value.trim(),
+     expected_source_revision:state.source_revision,
+     expected_fingerprint_sha256:state.fingerprint_sha256,
+     owner_reviewed:true,resolution_note:note},state.queue_id);
+   $('dd702FinanceResult').textContent=data.result.status+' · independently signed decision #'+
+     data.result.receipt_id+' · financial source, bookkeeping postings, accounting close and CONNECTED still HOLD.';
+   $('dd702FinanceReviewed').checked=false;
+   $('dd702FinanceClaim').value='';$('dd702FinanceSignature').value='';
+   await refresh();
+ }catch(error){$('dd702FinanceResult').textContent='HOLD · '+error.message;}
+ finally{button.disabled=false;}
+});
+$('dd702FinanceExport').addEventListener('click',async()=>{
+ try{
+   const id=Number($('dd685Campaign').value);
+   if(!id||id!==state?.queue_id||!window.DDAuth?.apiFetch)
+     throw Error('Signed-in Admin and exact current campaign required.');
+   const response=await window.DDAuth.apiFetch(endpoint+'?export=financial702&campaign_queue_id='+encodeURIComponent(id));
+   if(!response.ok)throw Error('Protected independent decision export denied. HTTP '+response.status);
+   const blob=await response.blob(),url=URL.createObjectURL(blob),a=document.createElement('a');
+   a.href=url;a.download='devilndove-bookkeeping-decision-'+id+'-702.json';
+   document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1000);
+   $('dd702FinanceResult').textContent='Signed decision ledger exported. Actual ledger close/POST remains HOLD.';
+ }catch(error){$('dd702FinanceResult').textContent='HOLD · '+error.message;}
+});
 
 $('dd701Refresh').addEventListener('click',()=>void refresh());
 $('dd701Prepare').addEventListener('click',()=>{
