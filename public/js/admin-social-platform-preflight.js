@@ -1622,6 +1622,46 @@ select699();
 
 
 
+
+ let audit708=null;
+ function draw708(data){
+  if(!$('dd708-finance'))return;
+  const v=data.financial708||null;audit708=v;
+  $('dd708FinanceStatus').textContent=v?.campaign_queue_id?
+   v.status+' · original source history '+(v.history_complete?'VERIFIED':'HOLD')+
+   ' · financial book closure HOLD':
+   'HOLD · Select exact original campaign and refresh 706/707 source.';
+  $('dd708FinanceStats').textContent=v?.campaign_queue_id?
+   'Eligible source chains '+v.eligible_count+' · renewed reviewer acceptance '+
+   v.renewed_acceptance_count+' · renewed custody '+v.renewed_custody_count+
+   ' · invalid '+v.invalid_count:
+   'Original ninth review, prior Build 707 field acceptance and custody required.';
+  const cont=$('dd708ContinuitySource'),cust=$('dd708CustodySource'),
+   list=$('dd708FinanceCases');
+  cont.replaceChildren(new Option('Select original 707 signed-source acceptance',''));
+  cust.replaceChildren(new Option('Select verified 708 acceptance renewal',''));
+  list.replaceChildren();
+  for(const x of v?.items||[]){
+   const li=document.createElement('li');
+   li.textContent='Ninth signed #'+x.review_706_receipt_id+
+     ' / 707 field #'+x.field_707_receipt_id+
+     ' / original custody #'+x.custody_707_receipt_id+
+     ' · 708 acceptance '+(x.continuity_708_verified?'VERIFIED #'+x.continuity_708_receipt_id:'HOLD')+
+     ' · custody '+(x.custody_708_verified?'DIGEST VERIFIED #'+x.custody_708_receipt_id:'HOLD')+
+     ' · external book closure HOLD';
+   list.appendChild(li);
+   if(v.history_complete&&!x.continuity_708_verified)
+    cont.add(new Option('Original ninth #'+x.review_706_receipt_id+
+      ' / 707 owner field #'+x.field_707_receipt_id,String(x.field_707_receipt_id)));
+   if(v.history_complete&&x.continuity_708_verified&&!x.custody_708_verified)
+    cust.add(new Option('708 owner acceptance #'+x.continuity_708_receipt_id,
+      String(x.continuity_708_receipt_id)));
+  }
+  if(!list.childElementCount){const li=document.createElement('li');
+   li.textContent='No original signed ninth reviewer and 707 custody chain eligible for renewal.';
+   list.appendChild(li);}
+ }
+
  let audit707=null;
  function draw707(data){
   if(!$('dd707-finance'))return;
@@ -2073,7 +2113,7 @@ draw698(d);
 draw699(d);
 draw700(d);
 draw701(d);
-draw702(d);draw703(d);draw704(d);draw705(d);draw706(d);draw707(d);
+draw702(d);draw703(d);draw704(d);draw705(d);draw706(d);draw707(d);draw708(d);
 if(!id)return;
 if(!v||v.queue_id!==id)throw Error('Fresh exact financial evidence was not returned.');
 state=v;
@@ -2101,7 +2141,7 @@ await refresh();
 document.addEventListener('DOMContentLoaded',()=>{
 if(!$('dd685-finance'))return;
 (async()=>{try{
-const d=await api(null);draw686(d);draw687(d);draw688(d);draw689(d);draw690(d);draw691(d);draw692(d);draw693(d);draw694(d);draw695(d);draw696(d);draw697(d);draw698(d);draw699(d);draw700(d);draw701(d);draw702(d);draw703(d);draw704(d);draw705(d);draw706(d);draw707(d);const seen=new Set();
+const d=await api(null);draw686(d);draw687(d);draw688(d);draw689(d);draw690(d);draw691(d);draw692(d);draw693(d);draw694(d);draw695(d);draw696(d);draw697(d);draw698(d);draw699(d);draw700(d);draw701(d);draw702(d);draw703(d);draw704(d);draw705(d);draw706(d);draw707(d);draw708(d);const seen=new Set();
 for(const q of d.queue||[])if(q.utm_campaign&&!seen.has(q.social_post_queue_id)){
 seen.add(q.social_post_queue_id);
 $('dd685Campaign').add(new Option(q.utm_campaign+' · #'+q.social_post_queue_id,q.social_post_queue_id));
@@ -2133,6 +2173,72 @@ $('dd699Refresh').addEventListener('click',()=>void refresh());
 
 
 
+
+
+ $('dd708FinanceRefresh').addEventListener('click',()=>void refresh());
+ $('dd708ContinuityForm').addEventListener('submit',async event=>{
+  event.preventDefault();const button=$('dd708ContinuitySubmit');button.disabled=true;
+  try{
+   const id=Number($('dd708ContinuitySource').value),
+    x=audit708?.items?.find(x=>x.field_707_receipt_id===id&&
+     x.field_707_verified&&x.custody_707_verified&&!x.continuity_708_verified),
+    note=$('dd708ContinuityNote').value.trim();
+   if(!state?.queue_id||!audit708?.history_complete||!x||
+      !$('dd708ContinuityReviewed').checked||note.length<25||note.length>600)
+    throw Error('Select exact original ninth-signed 706/707 acceptance and custody, and review manually.');
+   if(!crypto?.randomUUID)throw Error('Secure renewal challenge requires HTTPS.');
+   const d=await api({action:'owner_ninth_reviewer_continuity_708',
+    social_post_queue_id:state.queue_id,original_707_field_receipt_id:id,
+    renewal_nonce:'finance708-'+crypto.randomUUID(),
+    expected_source_revision:state.source_revision,
+    expected_fingerprint_sha256:state.fingerprint_sha256,
+    expected_manifest_sha256:x.retention_manifest_sha256,
+    expected_review_packet_sha256:x.review_packet_sha256,
+    owner_continuity_reviewed:true,resolution_note:note},state.queue_id);
+   $('dd708ContinuityResult').textContent=d.result.status+
+    ' · source-bound receipt #'+d.result.receipt_id+
+    ' · original ninth signature reverified; no new independent signature or book close.';
+   $('dd708ContinuityReviewed').checked=false;await refresh();
+  }catch(error){$('dd708ContinuityResult').textContent='HOLD · '+error.message;}
+  finally{button.disabled=false;}
+ });
+ $('dd708CustodyForm').addEventListener('submit',async event=>{
+  event.preventDefault();const button=$('dd708CustodySubmit');button.disabled=true;
+  try{
+   const id=Number($('dd708CustodySource').value),
+    x=audit708?.items?.find(x=>x.continuity_708_receipt_id===id&&
+     x.continuity_708_verified&&!x.custody_708_verified),
+    note=$('dd708CustodyNote').value.trim();
+   if(!state?.queue_id||!audit708?.history_complete||!x||
+      !$('dd708CustodyReviewed').checked||note.length<25||note.length>600)
+    throw Error('Original source-bound 708 acceptance and explicit owner evidence custody review required.');
+   const d=await api({action:'owner_financial_custody_renewal_708',
+    social_post_queue_id:state.queue_id,owner_continuity_receipt_id:id,
+    expected_source_revision:state.source_revision,
+    expected_fingerprint_sha256:state.fingerprint_sha256,
+    expected_manifest_sha256:x.retention_manifest_sha256,
+    owner_custody_rechecked:true,resolution_note:note},state.queue_id);
+   $('dd708CustodyResult').textContent=d.result.status+' · receipt #'+d.result.receipt_id+
+    ' · canonical renewed SHA-256 '+d.result.renewal_manifest_sha256+
+    '. No bank posting, permanent retention guarantee or external financial close.';
+   $('dd708CustodyReviewed').checked=false;await refresh();
+  }catch(error){$('dd708CustodyResult').textContent='HOLD · '+error.message;}
+  finally{button.disabled=false;}
+ });
+ $('dd708FinanceExport').addEventListener('click',async()=>{
+  try{
+   const id=Number($('dd685Campaign').value);
+   if(!id||id!==state?.queue_id||!window.DDAuth?.apiFetch)
+    throw Error('Select authenticated original financial campaign.');
+   const response=await window.DDAuth.apiFetch(endpoint+
+     '?export=financial708&campaign_queue_id='+encodeURIComponent(id));
+   if(!response.ok)throw Error('Protected source-bound export denied. HTTP '+response.status);
+   const blob=await response.blob(),url=URL.createObjectURL(blob),a=document.createElement('a');
+   a.href=url;a.download='devilndove-ninth-custody-renewal-'+id+'-708.json';
+   document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1000);
+   $('dd708CustodyResult').textContent='Protected source-bound continuity and custody renewal export prepared. Books HOLD.';
+  }catch(error){$('dd708CustodyResult').textContent='HOLD · '+error.message;}
+ });
 
  $('dd707FinanceRefresh').addEventListener('click',()=>void refresh());
  $('dd707FieldForm').addEventListener('submit',async event=>{

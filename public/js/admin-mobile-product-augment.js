@@ -700,6 +700,11 @@ document.addEventListener('DOMContentLoaded',()=>{
     if($('dd706SignoffStatus'))$('dd706SignoffStatus').textContent='HOLD · Original owner recovery and explicit closure not inspected.';
     if($('dd706SignoffSource'))$('dd706SignoffSource').replaceChildren(new Option('Refresh original linked closure',''));
     if($('dd706SignoffReviewed'))$('dd706SignoffReviewed').checked=false;
+     if($('dd708MediaStatus'))$('dd708MediaStatus').textContent='HOLD · Reinspect original camera draft.';
+     if($('dd708DriftSource'))$('dd708DriftSource').replaceChildren(new Option('Reinspect original signed media',''));
+     if($('dd708RecoverySource'))$('dd708RecoverySource').replaceChildren(new Option('Reinspect signed source recovery',''));
+     if($('dd708DriftReviewed'))$('dd708DriftReviewed').checked=false;
+     if($('dd708RecoveryReviewed'))$('dd708RecoveryReviewed').checked=false;
   }
   async function send702(action,fields={}){
     if(!window.DDAuth?.isLoggedIn?.()||!window.DDAuth.apiFetch)
@@ -712,6 +717,33 @@ document.addEventListener('DOMContentLoaded',()=>{
     for(const [k,v] of Object.entries(fields))form.set(k,String(v));
     return responseJson(await window.DDAuth.apiFetch('/api/admin/mobile-create-product',
       {method:'POST',body:form}),'Protected original device evidence unavailable.');
+  }
+  function draw708(v){
+    const status=$('dd708MediaStatus'),list=$('dd708MediaCases'),
+      opened=$('dd708DriftSource'),recovered=$('dd708RecoverySource');
+    if(!status||!list||!opened||!recovered)return;
+    list.replaceChildren();
+    opened.replaceChildren(new Option('Choose current server-observed original signed mismatch',''));
+    recovered.replaceChildren(new Option('Choose originally signed, newly re-attested restored media',''));
+    for(const c of v.exception_aging_703||[]){
+      if(!c.owner_recovery_signoff_receipt_id)continue;
+      const li=document.createElement('li');
+      li.textContent='Original #'+c.receipt_id+' / signed #'+
+        c.owner_recovery_signoff_receipt_id+' · '+c.signed_drift_status_708+
+        ' · '+c.media_signoff_drift_707;list.appendChild(li);
+      if(c.signed_drift_open_ready_708)opened.add(new Option(
+        'Current D1/R2 mismatch · original #'+c.receipt_id,
+        c.receipt_id+'|'+c.owner_recovery_signoff_receipt_id));
+      if(c.signed_drift_recovery_ready_708)recovered.add(new Option(
+        'Original source restored · drift #'+c.signed_drift_receipt_id_708,
+        c.receipt_id+'|'+c.owner_recovery_signoff_receipt_id+'|'+c.signed_drift_receipt_id_708));
+    }
+    if(!list.childElementCount){const li=document.createElement('li');
+      li.textContent='No original signed linked attachment to review.';list.appendChild(li);}
+    status.textContent='Unreconciled drift '+(v.signed_drift_open_count_708||0)+
+      ' · source-matched recovery ready '+(v.signed_drift_recovery_ready_708||0)+
+      ' · revalidated '+(v.signed_drift_reconciled_count_708||0)+
+      ' · on-demand D1/R2 HEAD only; no media repair or independent phone witness.';
   }
   function draw707(v){
     const status=$('dd707MediaAuditStatus'),list=$('dd707MediaAuditCases');
@@ -839,6 +871,7 @@ document.addEventListener('DOMContentLoaded',()=>{
     draw705(v);
     draw706(v);
     draw707(v);
+    draw708(v);
   }
   async function inspect702(){
     const data=await send702('camera702_inspect');
@@ -846,6 +879,51 @@ document.addEventListener('DOMContentLoaded',()=>{
       throw Error('Original draft changed during protected readback. HOLD.');
     show702(data);return data;
   }
+
+  $('dd708MediaRefresh')?.addEventListener('click',async()=>{
+    try{const data=await send702('camera708_inspect');
+      if(!data.ok||Number(data.product_id)!==Number(active?.product_id))
+        throw Error('Original camera draft changed during 708 readback. HOLD.');
+      show702(data);
+    }catch(error){$('dd708MediaStatus').textContent='HOLD · '+error.message;}
+  });
+  $('dd708DriftRecord')?.addEventListener('click',async()=>{
+    const button=$('dd708DriftRecord');button.disabled=true;
+    try{
+      const [a,b]=String($('dd708DriftSource').value||'').split('|');
+      const caseId=Number(a),signoffId=Number(b),
+       c=gate702?.exception_aging_703?.find(x=>x.receipt_id===caseId&&
+        x.owner_recovery_signoff_receipt_id===signoffId&&x.signed_drift_open_ready_708);
+      if(!c||!$('dd708DriftReviewed').checked)
+        throw Error('Select a fresh signed D1/R2 mismatch and acknowledge owner review.');
+      const result=await action702('camera708_signed_drift_open',{
+        open_receipt_id:caseId,original_signoff_receipt_id:signoffId,owner_reviewed:'true'});
+      $('dd708MediaResult').textContent=result.status+' · drift receipt #'+result.receipt_id+
+        '. Media remains unmodified and unrecorded uploads remain HOLD.';
+      $('dd708DriftReviewed').checked=false;
+    }catch(error){$('dd708MediaResult').textContent='HOLD · '+error.message;}
+    finally{button.disabled=false;}
+  });
+  $('dd708RecoveryRecord')?.addEventListener('click',async()=>{
+    const button=$('dd708RecoveryRecord');button.disabled=true;
+    try{
+      const [a,b,d]=String($('dd708RecoverySource').value||'').split('|');
+      const caseId=Number(a),signoffId=Number(b),driftId=Number(d),
+       c=gate702?.exception_aging_703?.find(x=>x.receipt_id===caseId&&
+        x.owner_recovery_signoff_receipt_id===signoffId&&
+        x.signed_drift_receipt_id_708===driftId&&x.signed_drift_recovery_ready_708);
+      if(!c||!$('dd708RecoveryReviewed').checked)
+        throw Error('Fresh original owner re-attestation and exact restored D1/R2 source required.');
+      const result=await action702('camera708_signed_drift_revalidate',{
+        open_receipt_id:caseId,original_signoff_receipt_id:signoffId,
+        drift_receipt_id:driftId,owner_reviewed:'true'});
+      $('dd708MediaResult').textContent=result.status+' · verified original recovery receipt #'+
+        result.receipt_id+'. No publication, independent phone claim or unrecorded upload closure.';
+      $('dd708RecoveryReviewed').checked=false;
+    }catch(error){$('dd708MediaResult').textContent='HOLD · '+error.message;}
+    finally{button.disabled=false;}
+  });
+
   $('dd707MediaAuditRefresh')?.addEventListener('click',async()=>{
      try{
        const data=await send702('camera707_inspect');
@@ -962,6 +1040,7 @@ document.addEventListener('DOMContentLoaded',()=>{
     result702.textContent=data.status+' · protected receipt #'+data.receipt_id+
       '. Physical device and any unrecorded uploads are not independently verified. No publication or accounting close.';
     await inspect702();
+    return data;
   }
   $('dd702Reattest')?.addEventListener('click',async()=>{
     const button=$('dd702Reattest');button.disabled=true;
