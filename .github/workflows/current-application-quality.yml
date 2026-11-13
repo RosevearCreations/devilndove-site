@@ -73,6 +73,14 @@ jobs:
           node --check public/js/admin-mobile-product-augment.js
           node --check public/js/admin-social-platform-preflight.js
           node scripts/build707_ninth_field_media_drift_custody_contract.mjs
+      - name: Build 708 original signed media drift recovery, ninth-reviewer continuity and custody digest negative regression
+        run: |
+          node --check functions/api/admin/_cameraField702.mjs
+          node --check functions/api/admin/mobile-create-product.js
+          node --check functions/api/admin/social-post-queue.js
+          node --check public/js/admin-mobile-product-augment.js
+          node --check public/js/admin-social-platform-preflight.js
+          node scripts/build708_signed_media_recovery_ninth_continuity_custody_contract.mjs
       - name: QL-336 pending child-shell and nonproduction endpoint isolation
         run: |
           node --test scripts/release467_build610_ql336_child_shell.test.mjs
