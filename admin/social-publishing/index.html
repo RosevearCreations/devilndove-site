@@ -306,6 +306,57 @@
 </section>
 
 
+<section class="card" id="dd703-finance" aria-labelledby="dd703-finance-title">
+<p class="eyebrow">Build 703 · Independent external bookkeeping posting document &amp; original owner acceptance</p>
+<h2 id="dd703-finance-title">Inspect signed posting evidence, then accept or dispute it</h2>
+<p>The seventh independent signer may attest the exact SHA-256 and reference of an external bookkeeping posting document. This does not prove that a financial provider was updated. Original owner approval accepts the <em>document for manual financial close review</em>; it does not post money, repair an original ledger, certify accounts, or close the books automatically.</p>
+<button class="btn secondary" type="button" id="dd703FinanceRefresh">Refresh posting evidence and owner history</button>
+<button class="btn secondary" type="button" id="dd703FinanceExport">Export protected Build 703 ledger</button>
+<p id="dd703FinanceStatus" role="status" aria-live="polite">HOLD · Independent posting document required.</p>
+<p class="small" id="dd703FinanceStats">Exact original source and signer not yet verified.</p>
+<ol class="clean" id="dd703FinanceCases"><li>No original signed closure decision available.</li></ol>
+<form id="dd703FinancePostingForm">
+<h3>1. Independently signed external posting document intake</h3>
+<label>Original Build 702 independent manual closure recommendation
+<select class="input" id="dd703FinanceSource" required><option value="">Choose original signed decision receipt</option></select></label>
+<label>External posting document SHA-256
+<input class="input" id="dd703FinanceDigest" maxlength="64" pattern="[A-Fa-f0-9]{64}" required autocomplete="off"></label>
+<label>Original external bookkeeping posting reference
+<input class="input" id="dd703FinanceReference" maxlength="160" required autocomplete="off"></label>
+<label>Independent seventh public-verifier signer ID
+<input class="input" id="dd703FinanceSigner" maxlength="120" required autocomplete="off"></label>
+<label>Fresh independently signed nonce
+<input class="input" id="dd703FinanceNonce" maxlength="100" required autocomplete="off"></label>
+<label>External UTC signature issue time
+<input class="input" id="dd703FinanceIssued" maxlength="40" required placeholder="2026-11-12T22:00:00.000Z"></label>
+<button class="btn secondary" type="button" id="dd703FinancePrepare">Prepare exact independent claim for external signing</button>
+<label>Canonical posting-document claim for external signing
+<textarea class="input" id="dd703FinanceClaim" rows="5" readonly></textarea></label>
+<label>Independent Ed25519 signature (never private key)
+<textarea class="input" id="dd703FinanceSignature" rows="2" maxlength="120" required autocomplete="off"></textarea></label>
+<label>Original owner posting document review note (20–400 characters)
+<textarea class="input" id="dd703FinancePostingNote" rows="3" minlength="20" maxlength="400" required></textarea></label>
+<label><input type="checkbox" id="dd703FinancePostingReviewed" required> We reviewed the original signed closure recommendation and posting document digest, understand this is not live provider readback, and approve evidence intake.</label>
+<button class="btn secondary" type="submit" id="dd703FinancePostingSubmit">Record signed posting document intake</button>
+</form>
+<p id="dd703FinancePostingResult" role="status" aria-live="polite">No independent posting document admitted.</p>
+<form id="dd703FinanceOwnerForm">
+<h3>2. Original owner financial closure evidence acceptance</h3>
+<label>Verified seventh-signer original posting document
+<select class="input" id="dd703FinanceOwnerSource" required><option value="">Choose verified posting receipt</option></select></label>
+<label>Original owner decision
+<select class="input" id="dd703FinanceOwnerDecision" required>
+<option value="hold_posting_discrepancy">Dispute posting document — HOLD</option>
+<option value="accept_document_for_manual_financial_close">Accept document for manual financial closure review (not actual book close)</option>
+</select></label>
+<label>Original owner reason (25–600 characters)
+<textarea class="input" id="dd703FinanceOwnerNote" rows="3" minlength="25" maxlength="600" required></textarea></label>
+<label><input type="checkbox" id="dd703FinanceOwnerReviewed" required> We examined original source, posting digest, unresolved cases and independent verification. Our action does not constitute actual external accounting close or financial certification.</label>
+<button class="btn secondary" type="submit" id="dd703FinanceOwnerSubmit">Record protected original-owner financial decision</button>
+</form>
+<p id="dd703FinanceOwnerResult" role="status" aria-live="polite">No owner financial acceptance receipt. Actual book closure remains HOLD.</p>
+</section>
+
 <section class="card" id="dd702-finance" aria-labelledby="dd702-finance-title">
  <p class="eyebrow">Build 702 · Sixth-signer independent bookkeeping closure decision</p>
  <h2 id="dd702-finance-title">Sign a bookkeeping decision — hold or recommend manual closure</h2>
