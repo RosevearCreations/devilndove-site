@@ -713,6 +713,9 @@ document.addEventListener('DOMContentLoaded',()=>{
      if($('dd710MediaStatus'))$('dd710MediaStatus').textContent='HOLD · Reinspect original source.';
      if($('dd710ResolutionSource'))$('dd710ResolutionSource').replaceChildren(new Option('Reinspect original recurrence',''));
      if($('dd710ResolutionReviewed'))$('dd710ResolutionReviewed').checked=false;
+     if($('dd711MediaStatus'))$('dd711MediaStatus').textContent='HOLD · Reinspect original signed media and owner source.';
+     if($('dd711StabilitySource'))$('dd711StabilitySource').replaceChildren(new Option('Reinspect original signed source',''));
+     if($('dd711StabilityReviewed'))$('dd711StabilityReviewed').checked=false;
   }
   async function send702(action,fields={}){
     if(!window.DDAuth?.isLoggedIn?.()||!window.DDAuth.apiFetch)
@@ -725,6 +728,34 @@ document.addEventListener('DOMContentLoaded',()=>{
     for(const [k,v] of Object.entries(fields))form.set(k,String(v));
     return responseJson(await window.DDAuth.apiFetch('/api/admin/mobile-create-product',
       {method:'POST',body:form}),'Protected original device evidence unavailable.');
+  }
+  function draw711(v){
+   const status=$('dd711MediaStatus'),list=$('dd711MediaCases'),
+    sel=$('dd711StabilitySource');
+   if(!status||!list||!sel)return;
+   list.replaceChildren();sel.replaceChildren(new Option('Choose original post-resolution signed source',''));
+   for(const x of v.exception_aging_703||[]){
+    if(!x.signed_media_resolution_receipt_id_710)continue;
+    const li=document.createElement('li');
+    li.textContent='Original resolution #'+x.signed_media_resolution_receipt_id_710+
+     ' / recurrence #'+x.signed_media_recurrence_receipt_id_709+
+     ' · '+x.signed_media_stability_status_711+
+     ' · age '+(x.signed_media_post_resolution_age_hours_711??'unknown')+' hours'+
+     ' · current actual D1/R2 '+x.media_signoff_drift_707;
+    list.appendChild(li);
+    if(x.signed_media_stability_ready_711)
+     sel.add(new Option('Original #'+x.signed_media_resolution_receipt_id_710+
+      ' · '+x.signed_media_post_resolution_age_hours_711+'h signed stable',
+      [x.receipt_id,x.owner_recovery_signoff_receipt_id,
+       x.signed_media_recurrence_receipt_id_709,x.signed_media_resolution_receipt_id_710].join('|')));
+   }
+   if(!list.childElementCount){const li=document.createElement('li');
+    li.textContent='No original Build 710 recurrence resolution found.';
+    list.appendChild(li);}
+   status.textContent='Eligible '+(v.signed_media_stability_ready_711||0)+
+    ' · recorded '+(v.signed_media_stability_recorded_711||0)+
+    ' · renewed source drift HOLD '+(v.signed_media_stability_drift_hold_711||0)+
+    '. On-demand original R2 HEAD only; continuous monitoring OFF.';
   }
   function draw710(v){
    const status=$('dd710MediaStatus'),list=$('dd710MediaCases'),
@@ -946,6 +977,7 @@ document.addEventListener('DOMContentLoaded',()=>{
     draw708(v);
     draw709(v);
     draw710(v);
+    draw711(v);
   }
   async function inspect702(){
     const data=await send702('camera702_inspect');
@@ -954,6 +986,34 @@ document.addEventListener('DOMContentLoaded',()=>{
     show702(data);return data;
   }
 
+  $('dd711MediaRefresh')?.addEventListener('click',async()=>{
+    try{const d=await send702('camera711_inspect');
+      if(!d.ok||Number(d.product_id)!==Number(active?.product_id))
+       throw Error('Original saved camera draft changed during post-resolution source check. HOLD.');
+      show702(d);
+    }catch(e){$('dd711MediaStatus').textContent='HOLD · '+e.message;}
+  });
+  $('dd711StabilityRecord')?.addEventListener('click',async()=>{
+    const btn=$('dd711StabilityRecord');btn.disabled=true;
+    try{
+     const [caseId,signoff,recurrence,resolution]=
+      String($('dd711StabilitySource').value||'').split('|').map(Number);
+     const item=gate702?.exception_aging_703?.find(x=>x.receipt_id===caseId&&
+      x.owner_recovery_signoff_receipt_id===signoff&&
+      x.signed_media_recurrence_receipt_id_709===recurrence&&
+      x.signed_media_resolution_receipt_id_710===resolution&&x.signed_media_stability_ready_711);
+     if(!item||!$('dd711StabilityReviewed').checked)
+      throw Error('Original 24h aged source, later owner re-attestation and live signed R2 evidence required.');
+     const d=await action702('camera711_post_resolution_stability',{
+      open_receipt_id:caseId,original_signoff_receipt_id:signoff,
+      original_709_recurrence_receipt_id:recurrence,
+      original_710_resolution_receipt_id:resolution,owner_reviewed:'true'});
+     $('dd711MediaResult').textContent=d.status+' · original D1 stability #'+d.receipt_id+
+      ' · no continuous monitoring, phone witness, unrelated media closure or publication.';
+     $('dd711StabilityReviewed').checked=false;
+    }catch(e){$('dd711MediaResult').textContent='HOLD · '+e.message;}
+    finally{btn.disabled=false;}
+  });
   $('dd710MediaRefresh')?.addEventListener('click',async()=>{
     try{const d=await send702('camera710_inspect');
       if(!d.ok||Number(d.product_id)!==Number(active?.product_id))
