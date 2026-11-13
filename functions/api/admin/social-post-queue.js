@@ -5284,6 +5284,7 @@ export async function assessFinance703(current,prior,postingRows,ownerRows,signe
      seenOwner.add(postingId);
      linked.owner_acceptance_receipt_id=receipt;
      linked.owner_acceptance_decision=d.decision;
+     linked.owner_acceptance_recorded_at=row.attempted_at;
    }else ownerInvalid++;
    ownerHistory.push({receipt_id:receipt,posting_receipt_id:postingId,
      owner_source_bound_acceptance:accepted,decision:accepted?d.decision:null});
