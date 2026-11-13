@@ -135,12 +135,38 @@ export function canOwnerSignoff706(open,recovery,closure,latest,media,live,now=D
   return {status:'SIGNED_LINKED_MEDIA_SOURCE_STABLE_ON_DEMAND_707',stable:true};
  }
 
+
+// Build 708: a drift exception exists only when a signed original linked
+// attachment mismatches the current actual server-side D1/R2 HEAD readback.
+export function canOpenSignedDrift708(open,signoff,audit){
+ return open?.kind==='linked'&&open.closed===true&&
+  Number.isSafeInteger(Number(signoff?.admin_action_audit_id))&&
+  Number(signoff.admin_action_audit_id)>0&&
+  audit?.stable===false&&audit.status==='HOLD_707_SIGNED_MEDIA_D1_R2_DRIFT';
+}
+export function canReconcileSignedDrift708(drift,signoff,latest,audit,now=Date.now()){
+ const d=drift?.data||{},observed=isoTime(drift?.created_at),
+  attested=isoTime(latest?.data?.issued_at);
+ return d.build===708&&d.drift_observed_status==='HOLD_707_SIGNED_MEDIA_D1_R2_DRIFT'&&
+  Number.isSafeInteger(Number(drift?.admin_action_audit_id))&&
+  Number(drift.admin_action_audit_id)>Number(signoff?.admin_action_audit_id)&&
+  Number(d.original_signoff_receipt_id)===Number(signoff.admin_action_audit_id)&&
+  d.original_signed_r2_key===signoff.data?.r2_key&&
+  Number(d.original_signed_r2_bytes)===Number(signoff.data?.verified_r2_bytes)&&
+  Number.isSafeInteger(Number(latest?.admin_action_audit_id))&&
+  Number(latest.admin_action_audit_id)>Number(drift.admin_action_audit_id)&&
+  Number.isFinite(observed)&&Number.isFinite(attested)&&
+  attested>=observed&&attested<=now+300000&&
+  latest.data?.owner_re_attested===true&&
+  audit?.stable===true&&audit.status==='SIGNED_LINKED_MEDIA_SOURCE_STABLE_ON_DEMAND_707';
+}
+
 export async function handleCamera702({db,form,adminUser,id,token,live,ready701}){
  const action=String(form.get('action')||'');
  const auditRows=await db.prepare(
  "SELECT admin_action_audit_id,action_type,created_at,details_json FROM admin_action_audit "+
  "WHERE target_type='product' AND target_id=? AND actor_user_id=? "+
- "AND action_type IN ('camera701_owner_field_receipt','camera702_owner_reattest','camera702_media_issue_open','camera702_media_issue_close','camera703_media_aging_escalation','camera704_media_owner_followup','camera705_media_recovery_reconciled','camera706_owner_linked_recovery_signoff') "+
+ "AND action_type IN ('camera701_owner_field_receipt','camera702_owner_reattest','camera702_media_issue_open','camera702_media_issue_close','camera703_media_aging_escalation','camera704_media_owner_followup','camera705_media_recovery_reconciled','camera706_owner_linked_recovery_signoff','camera708_signed_media_drift_open','camera708_signed_media_drift_recovered') "+
  "ORDER BY admin_action_audit_id DESC LIMIT 81").bind(id,adminUser.user_id).all();
  const raw=Array.isArray(auditRows?.results)?auditRows.results:[];
  if(raw.length>80)return out({ok:false,error:'Unbounded original device receipt history; independent review required. HOLD.'},409);
@@ -170,6 +196,10 @@ export async function handleCamera702({db,form,adminUser,id,token,live,ready701}
    x.data?.original_701_receipt_id===originalId);
  const signoffs=history.filter(x=>x.action_type==='camera706_owner_linked_recovery_signoff'&&
    x.data?.original_701_receipt_id===originalId);
+ const driftRows=history.filter(x=>x.action_type==='camera708_signed_media_drift_open'&&
+    x.data?.original_701_receipt_id===originalId);
+ const driftRecoveryRows=history.filter(x=>x.action_type==='camera708_signed_media_drift_recovered'&&
+    x.data?.original_701_receipt_id===originalId);
  const aging=cases.map(x=>{
    const esc=escalationRecords.find(e=>Number(e.data?.open_receipt_id)===x.receipt_id);
    const followup=followupRows.find(y=>Number(y.data?.open_receipt_id)===x.receipt_id&&
@@ -183,6 +213,12 @@ export async function handleCamera702({db,form,adminUser,id,token,live,ready701}
    const current=live?.media?.find(m=>m.kind===x.media_kind&&
      Number(m.attachment_id)===Number(x.attachment_id));
    const drift707=signoff?auditSignoffDrift707({...x,original_701_receipt_id:originalId},recovery,closure,signoff,latest,current,live):null;
+   const originalDrift=driftRows.find(y=>Number(y.data?.open_receipt_id)===x.receipt_id&&
+     Number(y.data?.original_signoff_receipt_id)===Number(signoff?.admin_action_audit_id));
+   const driftRecovery=driftRecoveryRows.find(y=>Number(y.data?.drift_receipt_id)===Number(originalDrift?.admin_action_audit_id)&&
+     Number(y.data?.original_signoff_receipt_id)===Number(signoff?.admin_action_audit_id));
+   const recoveryReady=!!originalDrift&&!driftRecovery&&
+     canReconcileSignedDrift708(originalDrift,signoff,latest,drift707);
    return {...ageMedia703(x),escalated:!!esc,
      escalation_receipt_id:Number(esc?.admin_action_audit_id||0),
      followup_receipt_id:Number(followup?.admin_action_audit_id||0),
@@ -193,6 +229,15 @@ export async function handleCamera702({db,form,adminUser,id,token,live,ready701}
      owner_recovery_signoff_receipt_id:Number(signoff?.admin_action_audit_id||0),
      media_signoff_drift_707:drift707?.status||'NO_ORIGINAL_SIGNOFF_707',
      media_signoff_stable_707:drift707?.stable===true,
+     signed_drift_open_ready_708:!originalDrift&&canOpenSignedDrift708(x,signoff,drift707),
+     signed_drift_receipt_id_708:Number(originalDrift?.admin_action_audit_id||0),
+     signed_drift_recovery_receipt_id_708:Number(driftRecovery?.admin_action_audit_id||0),
+     signed_drift_recovery_ready_708:recoveryReady,
+     signed_drift_status_708:!signoff?'HOLD_NO_ORIGINAL_SIGNOFF':
+       !originalDrift?'NO_RECORDED_DRIFT_EXCEPTION':
+       driftRecovery?(drift707?.stable?'SOURCE_RECHECK_RECONCILED_708':'HOLD_RECURRENT_MEDIA_DRIFT_AFTER_RECOVERY_708'):
+       recoveryReady?'ORIGINAL_MEDIA_RECOVERY_READY_FOR_OWNER_RECONCILIATION_708':
+       'HOLD_SIGNED_MEDIA_DRIFT_NOT_RECOVERED_708',
      owner_recovery_signoff_ready:!signoff&&
        canOwnerSignoff706({...x,original_701_receipt_id:originalId},
          recovery,closure,latest,current,live),
@@ -216,9 +261,13 @@ export async function handleCamera702({db,form,adminUser,id,token,live,ready701}
   stable_signed_media_count_707:aging.filter(x=>x.media_signoff_stable_707).length,
   signed_media_recheck_hold_count_707:aging.filter(x=>x.owner_recovery_signoff_receipt_id>0&&!x.media_signoff_stable_707).length,
   on_demand_d1_r2_head_check_only_707:true,
+  signed_drift_open_count_708:aging.filter(x=>x.signed_drift_receipt_id_708>0&&!x.signed_drift_recovery_receipt_id_708).length,
+  signed_drift_recovery_ready_708:aging.filter(x=>x.signed_drift_recovery_ready_708).length,
+  signed_drift_reconciled_count_708:aging.filter(x=>x.signed_drift_recovery_receipt_id_708>0).length,
+  automatic_media_restoration_708:false,independent_physical_witness_708:false,
   independently_authenticated_phone:false,
   unrecorded_upload_recovery_certified:false,publication_performed:false});
- if(action==='camera702_inspect'||action==='camera703_inspect'||action==='camera704_inspect'||action==='camera705_inspect'||action==='camera706_inspect'||action==='camera707_inspect')return state();
+ if(action==='camera702_inspect'||action==='camera703_inspect'||action==='camera704_inspect'||action==='camera705_inspect'||action==='camera706_inspect'||action==='camera707_inspect'||action==='camera708_inspect')return state();
  if(!original)return out({ok:false,error:'Original owner-reported Build 701 receipt required. HOLD.'},409);
  const note=String(form.get('owner_device_notes')||'').trim();
  const nonce=String(form.get('nonce')||'');
@@ -403,5 +452,80 @@ export async function handleCamera702({db,form,adminUser,id,token,live,ready701}
      independent_physical_phone_verified:false,
      unrecorded_upload_recovery_certified:false,publication_performed:false});
  }
- return out({ok:false,error:'Unsupported Build 702/703/704/705/706/707 action.'},400);
+ if(action==='camera708_signed_drift_open'){
+   const caseId=Number(form.get('open_receipt_id')),
+    signoffId=Number(form.get('original_signoff_receipt_id')),
+    caseInfo=cases.find(x=>x.receipt_id===caseId&&x.kind==='linked'&&x.closed),
+    signoff=signoffs.find(x=>Number(x.admin_action_audit_id)===signoffId&&
+     Number(x.data?.open_receipt_id)===caseId),
+    recovery=recoveryRows.find(x=>Number(x.data?.open_receipt_id)===caseId&&
+      Number(x.admin_action_audit_id)===Number(signoff?.data?.recovery_receipt_id)),
+    closure=closeRows.find(x=>Number(x.admin_action_audit_id)===Number(signoff?.data?.closure_receipt_id)&&
+      Number(x.data?.open_receipt_id)===caseId),
+    media=live?.media?.find(x=>x.kind===caseInfo?.media_kind&&
+      Number(x.attachment_id)===Number(caseInfo?.attachment_id)),
+    audit=signoff?auditSignoffDrift707({...caseInfo,original_701_receipt_id:originalId},
+      recovery,closure,signoff,latest,media,live):null;
+   if(form.get('owner_reviewed')!=='true'||!caseInfo||!signoff||
+     driftRows.some(x=>Number(x.data?.original_signoff_receipt_id)===signoffId)||
+     !canOpenSignedDrift708(caseInfo,signoff,audit))
+    return out({ok:false,error:'A fresh server-observed original signed D1/R2 media mismatch and unrecorded drift exception are required. No automatic repair. HOLD.'},409);
+   const receipt=await append('camera708_signed_media_drift_open',{
+     build:708,open_receipt_id:caseId,original_signoff_receipt_id:signoffId,
+     original_recovery_receipt_id:Number(signoff.data.recovery_receipt_id),
+     original_closure_receipt_id:Number(signoff.data.closure_receipt_id),
+     original_signed_r2_key:signoff.data.r2_key,
+     original_signed_r2_bytes:Number(signoff.data.verified_r2_bytes),
+     observed_current_r2_key:media?.r2_key||null,
+     observed_current_r2_bytes:Number(media?.r2_bytes||0),
+     observed_current_r2_head_confirmed:media?.confirmed===true,
+     drift_observed_status:audit.status,server_side_r2_head_checked:true,
+     independent_physical_media_witness:false,automatic_restoration:false,
+     unresolved_unrecorded_media_cleared:false,
+     status:'ORIGINAL_SIGNED_MEDIA_DRIFT_EXCEPTION_DURABLY_OPEN_708'
+   },'drift708-open');
+   return out({ok:true,status:'ORIGINAL_SIGNED_MEDIA_DRIFT_EXCEPTION_DURABLY_OPEN_708',
+     receipt_id:receipt,open_receipt_id:caseId,automatic_restoration:false,
+     independently_witnessed_phone:false,publication_performed:false});
+ }
+ if(action==='camera708_signed_drift_revalidate'){
+   const caseId=Number(form.get('open_receipt_id')),
+    driftId=Number(form.get('drift_receipt_id')),
+    signoffId=Number(form.get('original_signoff_receipt_id')),
+    caseInfo=cases.find(x=>x.receipt_id===caseId&&x.kind==='linked'&&x.closed),
+    signoff=signoffs.find(x=>Number(x.admin_action_audit_id)===signoffId&&
+      Number(x.data?.open_receipt_id)===caseId),
+    drift=driftRows.find(x=>Number(x.admin_action_audit_id)===driftId&&
+      Number(x.data?.open_receipt_id)===caseId&&
+      Number(x.data?.original_signoff_receipt_id)===signoffId),
+    recovery=recoveryRows.find(x=>Number(x.admin_action_audit_id)===Number(signoff?.data?.recovery_receipt_id)),
+    closure=closeRows.find(x=>Number(x.admin_action_audit_id)===Number(signoff?.data?.closure_receipt_id)),
+    media=live?.media?.find(x=>x.kind===caseInfo?.media_kind&&
+      Number(x.attachment_id)===Number(caseInfo?.attachment_id)),
+    audit=signoff?auditSignoffDrift707({...caseInfo,original_701_receipt_id:originalId},
+      recovery,closure,signoff,latest,media,live):null;
+   if(form.get('owner_reviewed')!=='true'||!caseInfo||!drift||!signoff||
+     driftRecoveryRows.some(x=>Number(x.data?.drift_receipt_id)===driftId)||
+     !canReconcileSignedDrift708(drift,signoff,latest,audit))
+    return out({ok:false,error:'A later owner re-attestation and fresh exact D1/R2 HEAD matching the original signed key/bytes are required after a durable drift case. HOLD.'},409);
+   const receipt=await append('camera708_signed_media_drift_recovered',{
+     build:708,open_receipt_id:caseId,drift_receipt_id:driftId,
+     original_signoff_receipt_id:signoffId,
+     original_recovery_receipt_id:Number(signoff.data.recovery_receipt_id),
+     original_closure_receipt_id:Number(signoff.data.closure_receipt_id),
+     fresh_original_reattest_receipt_id:Number(latest.admin_action_audit_id),
+     original_signed_r2_key:signoff.data.r2_key,
+     verified_current_r2_key:media.r2_key,
+     verified_current_r2_bytes:media.r2_bytes,
+     source_status:'SIGNED_LINKED_MEDIA_SOURCE_STABLE_ON_DEMAND_707',
+     independent_server_side_r2_head_rechecked:true,
+     independent_physical_media_witness:false,automatic_restoration:false,
+     original_unrecorded_uploads_closed:false,publication_performed:false,
+     status:'SOURCE_MATCHED_DRIFT_RECOVERY_REVALIDATED_UNRECORDED_HOLD_708'
+   },'drift708-revalidate');
+   return out({ok:true,status:'SOURCE_MATCHED_DRIFT_RECOVERY_REVALIDATED_UNRECORDED_HOLD_708',
+     receipt_id:receipt,open_receipt_id:caseId,independently_witnessed_phone:false,
+     unrecorded_media_closed:false,publication_performed:false});
+ }
+ return out({ok:false,error:'Unsupported Build 702/703/704/705/706/707/708 action.'},400);
 }
