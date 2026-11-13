@@ -305,6 +305,45 @@
 <p class="small">All actions require authenticated owner review and durable readback. No automatic replay, repair, financial certification, receiver activation or claim of continuously CONNECTED infrastructure is made.</p>
 </section>
 
+
+<section class="card" id="dd702-finance" aria-labelledby="dd702-finance-title">
+ <p class="eyebrow">Build 702 · Sixth-signer independent bookkeeping closure decision</p>
+ <h2 id="dd702-finance-title">Sign a bookkeeping decision — hold or recommend manual closure</h2>
+ <p>A distinct sixth independent Ed25519 signer must review a verified Build 701 ledger SHA-256 and original Build 700 live-source receipt. The signed decision is an auditable HOLD or <strong>manual closure recommendation only</strong>. It does not post accounting entries, repair the external source, close actual books, certify profitability or assert CONNECTED.</p>
+ <button class="btn secondary" id="dd702FinanceRefresh" type="button">Refresh independent closure decision gate</button>
+ <button class="btn secondary" id="dd702FinanceExport" type="button">Export protected Build 702 signed decisions</button>
+ <p id="dd702FinanceStatus" role="status" aria-live="polite">HOLD · Exact original independent bookkeeping evidence required.</p>
+ <p id="dd702FinanceStats" class="small">Sixth signer, original source and review history not verified.</p>
+ <ol id="dd702FinanceCases" class="clean"><li>No signed bookkeeping review selected.</li></ol>
+ <form id="dd702FinanceForm">
+  <label>Verified original Build 701 bookkeeping review
+   <select class="input" id="dd702FinanceSource" required><option value="">Select original signed review receipt</option></select></label>
+  <label>Independent closure decision
+   <select class="input" id="dd702FinanceDecision" required>
+    <option value="hold_discrepancy">HOLD — independent bookkeeping discrepancy remains</option>
+    <option value="recommend_owner_manual_close">Recommend owner manual closure (NOT actual book close)</option>
+   </select></label>
+  <label>Remaining exception count (must be zero for recommendation)
+   <input class="input" id="dd702FinanceExceptions" type="number" min="0" max="10000" step="1" value="0" required></label>
+  <label>Independent sixth closure signer ID (server-configured)
+   <input class="input" id="dd702FinanceSigner" maxlength="120" autocomplete="off" required></label>
+  <label>Fresh sixth-signer nonce
+   <input class="input" id="dd702FinanceNonce" maxlength="100" autocomplete="off" required></label>
+  <label>Signed UTC issue time
+   <input class="input" id="dd702FinanceIssued" maxlength="40" placeholder="2026-11-12T20:00:00.000Z" autocomplete="off" required></label>
+  <button class="btn secondary" type="button" id="dd702FinancePrepare">Prepare exact external closure decision claim</button>
+  <label>Canonical claim for external independent signing
+   <textarea class="input" id="dd702FinanceClaim" rows="5" readonly></textarea></label>
+  <label>Sixth independent Ed25519 signature (base64url, never private key)
+   <textarea class="input" id="dd702FinanceSignature" maxlength="120" rows="2" autocomplete="off" required></textarea></label>
+  <label>Original owner decision reason (20–400 characters)
+   <textarea class="input" id="dd702FinanceNote" minlength="20" maxlength="400" rows="3" required></textarea></label>
+  <label><input type="checkbox" id="dd702FinanceReviewed" required> We reviewed the exact original ledger and independently signed decision; no accounting posting, actual closure or continuous connection is inferred.</label>
+  <button class="btn secondary" id="dd702FinanceSubmit" type="submit">Record independent bookkeeping closure decision</button>
+ </form>
+ <p id="dd702FinanceResult" role="status" aria-live="polite">No independently signed closure decision recorded. Actual books remain HOLD.</p>
+</section>
+
 <section class="card" id="dd701-finance" aria-labelledby="dd701-title">
  <p class="eyebrow">Build 701 · Independent financial bookkeeping acceptance review</p>
  <h2 id="dd701-title">Fifth-signer bookkeeping evidence review — original source remains the authority</h2>
