@@ -234,7 +234,7 @@ export function recurrenceResolutionReadback710(resolution,recurrence,signoff,au
   d.original_signed_r2_key===recurrence?.data?.original_signed_r2_key&&
   Number(d.original_signed_r2_bytes)===Number(signoff?.data?.verified_r2_bytes)&&
   Number(d.original_signed_r2_bytes)===Number(recurrence?.data?.original_signed_r2_bytes)&&
-  d.restored_source_status='SIGNED_LINKED_MEDIA_SOURCE_STABLE_ON_DEMAND_707'&&
+  d.restored_source_status==='SIGNED_LINKED_MEDIA_SOURCE_STABLE_ON_DEMAND_707'&&
   audit?.stable===true;
 }
 
