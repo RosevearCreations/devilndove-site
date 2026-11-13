@@ -691,6 +691,8 @@ document.addEventListener('DOMContentLoaded',()=>{
     if(media702)media702.replaceChildren();
     if(issue702)issue702.replaceChildren(new Option('Reinspect current original media first',''));
     if(case702)case702.replaceChildren(new Option('Reinspect open original exceptions first',''));
+    if($('dd703AgeStatus'))$('dd703AgeStatus').textContent='HOLD · Reinspect the original saved draft before aging review.';
+    if($('dd703AgeCase'))$('dd703AgeCase').replaceChildren(new Option('Read original cases first',''));
   }
   async function send702(action,fields={}){
     if(!window.DDAuth?.isLoggedIn?.()||!window.DDAuth.apiFetch)
@@ -703,6 +705,25 @@ document.addEventListener('DOMContentLoaded',()=>{
     for(const [k,v] of Object.entries(fields))form.set(k,String(v));
     return responseJson(await window.DDAuth.apiFetch('/api/admin/mobile-create-product',
       {method:'POST',body:form}),'Protected original device evidence unavailable.');
+  }
+  function draw703(v){
+    const status=$('dd703AgeStatus'),select=$('dd703AgeCase');
+    if(!status||!select)return;
+    select.replaceChildren(new Option('Choose an aged original open case',''));
+    const aged=v.exception_aging_703||[];
+    for(const item of aged){
+      const caseInfo=(v.exceptions||[]).find(x=>x.receipt_id===item.receipt_id);
+      if(item.escalation_due&&!item.escalated&&caseInfo&&!caseInfo.closed){
+        select.add(new Option('Case #'+item.receipt_id+' · '+caseInfo.kind+' '+
+          caseInfo.media_kind+' · '+item.age_hours+'h · '+item.status,
+          String(item.receipt_id)));
+      }
+    }
+    status.textContent='Original exceptions '+aged.length+
+      ' · unresolved '+v.unresolved_count+
+      ' · manual escalation due '+v.escalation_due_count+
+      ' · critical 48h '+v.critical_aging_count+
+      '. Invalid timestamps and unrecorded uploads remain HOLD.';
   }
   function show702(v){
     gate702=v;media702.replaceChildren();
@@ -733,6 +754,7 @@ document.addEventListener('DOMContentLoaded',()=>{
         case702.add(new Option('Linked '+x.media_kind+' #'+x.attachment_id+
           ' / case #'+x.receipt_id,String(x.receipt_id)));
     }
+    draw703(v);
   }
   async function inspect702(){
     const data=await send702('camera702_inspect');
@@ -740,6 +762,25 @@ document.addEventListener('DOMContentLoaded',()=>{
       throw Error('Original draft changed during protected readback. HOLD.');
     show702(data);return data;
   }
+  $('dd703AgeRefresh')?.addEventListener('click',async()=>{
+    try{await inspect702();}
+    catch(error){$('dd703AgeStatus').textContent='HOLD · '+error.message;}
+  });
+  $('dd703Escalate')?.addEventListener('click',async()=>{
+    const button=$('dd703Escalate');button.disabled=true;
+    try{
+      const id=Number($('dd703AgeCase').value);
+      if(!Number.isSafeInteger(id)||id<1)
+        throw Error('Select an original open case aged at least 24 hours.');
+      if(!gate702?.exception_aging_703?.some(x=>x.receipt_id===id&&
+         x.escalation_due&&!x.escalated))
+        throw Error('Original source age no longer eligible; re-inspect.');
+      await action702('camera703_escalate',{open_receipt_id:id});
+      $('dd703AgeResult').textContent='Source-bound case #'+id+
+        ' escalated for owner follow-up. No media recovery or phone acceptance inferred.';
+    }catch(error){$('dd703AgeResult').textContent='HOLD · '+error.message;}
+    finally{button.disabled=false;}
+  });
   $('dd702Inspect')?.addEventListener('click',async()=>{
     try{status702.textContent='Reading exact original receipt and Cloudflare D1/R2 links…';await inspect702();}
     catch(error){gate702=null;status702.textContent='HOLD · '+error.message;}
