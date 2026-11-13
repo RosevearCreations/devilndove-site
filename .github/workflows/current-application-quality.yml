@@ -49,6 +49,14 @@ jobs:
           node --check public/js/admin-mobile-product-augment.js
           node --check public/js/admin-social-platform-preflight.js
           node scripts/build704_media_followup_live_posting_source_contract.mjs
+      - name: Build 705 original media recovery and independent second posting source continuity regression
+        run: |
+          node --check functions/api/admin/_cameraField702.mjs
+          node --check functions/api/admin/mobile-create-product.js
+          node --check functions/api/admin/social-post-queue.js
+          node --check public/js/admin-mobile-product-augment.js
+          node --check public/js/admin-social-platform-preflight.js
+          node scripts/build705_posting_continuity_media_reconciliation_contract.mjs
       - name: QL-336 pending child-shell and nonproduction endpoint isolation
         run: |
           node --test scripts/release467_build610_ql336_child_shell.test.mjs
