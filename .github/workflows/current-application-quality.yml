@@ -33,6 +33,14 @@ jobs:
           node --check public/js/admin-mobile-product-augment.js
           node --check public/js/admin-social-platform-preflight.js
           node scripts/build702_original_device_media_bookkeeping_decision_contract.mjs
+      - name: Build 703 original D1 media aging, seventh signed posting document and original owner financial acceptance regression
+        run: |
+          node --check functions/api/admin/_cameraField702.mjs
+          node --check functions/api/admin/mobile-create-product.js
+          node --check functions/api/admin/social-post-queue.js
+          node --check public/js/admin-mobile-product-augment.js
+          node --check public/js/admin-social-platform-preflight.js
+          node scripts/build703_original_media_financial_posting_contract.mjs
       - name: QL-336 pending child-shell and nonproduction endpoint isolation
         run: |
           node --test scripts/release467_build610_ql336_child_shell.test.mjs
