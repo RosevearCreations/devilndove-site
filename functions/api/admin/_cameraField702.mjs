@@ -197,15 +197,56 @@ export function canEscalateMediaRecurrence709(recurrence,signoff,audit,now=Date.
   audit?.status==='HOLD_707_SIGNED_MEDIA_D1_R2_DRIFT'&&audit.stable===false;
 }
 
+
+// Build 710 requires the original Build 709 recurrence, its original 708
+// recovery, later owner re-attestation, and independently re-read original R2.
+// A receipt is resolution *evidence*, not a physical-phone or all-media close.
+export function canResolveOriginalRecurrence710(recurrence,recovered,signoff,latest,audit,now=Date.now()){
+ const d=recurrence?.data||{},resolutionAt=isoTime(latest?.data?.issued_at),
+  recurrenceAt=isoTime(recurrence?.created_at);
+ return d.build===709&&
+  d.recurrence_observed_status==='HOLD_707_SIGNED_MEDIA_D1_R2_DRIFT'&&
+  d.status==='RECURRENT_SIGNED_ORIGINAL_MEDIA_DRIFT_OPEN_OWNER_HOLD_709'&&
+  Number.isSafeInteger(Number(recurrence?.admin_action_audit_id))&&
+  Number(recurrence.admin_action_audit_id)>Number(recovered?.admin_action_audit_id)&&
+  Number(d.recovered_708_receipt_id)===Number(recovered.admin_action_audit_id)&&
+  Number(d.original_signoff_receipt_id)===Number(signoff?.admin_action_audit_id)&&
+  d.original_signed_r2_key===signoff?.data?.r2_key&&
+  Number(d.original_signed_r2_bytes)===Number(signoff?.data?.verified_r2_bytes)&&
+  Number.isSafeInteger(Number(latest?.admin_action_audit_id))&&
+  Number(latest.admin_action_audit_id)>Number(recurrence.admin_action_audit_id)&&
+  latest.data?.owner_re_attested===true&&
+  Number.isFinite(resolutionAt)&&Number.isFinite(recurrenceAt)&&
+  resolutionAt>=recurrenceAt&&resolutionAt<=now+300000&&
+  audit?.stable===true&&audit.status==='SIGNED_LINKED_MEDIA_SOURCE_STABLE_ON_DEMAND_707';
+}
+export function recurrenceResolutionReadback710(resolution,recurrence,signoff,audit){
+ const d=resolution?.data||{};
+ return d.build===710&&recurrence?.data?.build===709&&
+  d.owner_resolution_decision==='accept_original_signed_source_only'&&
+  d.physical_phone_independently_witnessed===false&&
+  d.unrecorded_uploads_closed===false&&d.automatic_publication===false&&
+  Number.isSafeInteger(Number(resolution?.admin_action_audit_id))&&
+  Number(resolution.admin_action_audit_id)>Number(recurrence?.admin_action_audit_id)&&
+  Number(d.recurrence_receipt_id)===Number(recurrence.admin_action_audit_id)&&
+  Number(d.original_signoff_receipt_id)===Number(signoff?.admin_action_audit_id)&&
+  d.original_signed_r2_key===signoff?.data?.r2_key&&
+  d.original_signed_r2_key===recurrence?.data?.original_signed_r2_key&&
+  Number(d.original_signed_r2_bytes)===Number(signoff?.data?.verified_r2_bytes)&&
+  Number(d.original_signed_r2_bytes)===Number(recurrence?.data?.original_signed_r2_bytes)&&
+  d.restored_source_status==='SIGNED_LINKED_MEDIA_SOURCE_STABLE_ON_DEMAND_707'&&
+  audit?.stable===true;
+}
+
 export async function handleCamera702({db,form,adminUser,id,token,live,ready701}){
  const action=String(form.get('action')||'');
  const auditRows=await db.prepare(
  "SELECT admin_action_audit_id,action_type,created_at,details_json FROM admin_action_audit "+
  "WHERE target_type='product' AND target_id=? AND actor_user_id=? "+
- "AND action_type IN ('camera701_owner_field_receipt','camera702_owner_reattest','camera702_media_issue_open','camera702_media_issue_close','camera703_media_aging_escalation','camera704_media_owner_followup','camera705_media_recovery_reconciled','camera706_owner_linked_recovery_signoff','camera708_signed_media_drift_open','camera708_signed_media_drift_recovered','camera709_signed_media_recurrence_open','camera709_signed_media_recurrence_escalation') "+
- "ORDER BY admin_action_audit_id DESC LIMIT 121").bind(id,adminUser.user_id).all();
+ "AND action_type IN ('camera701_owner_field_receipt','camera702_owner_reattest','camera702_media_issue_open','camera702_media_issue_close','camera703_media_aging_escalation','camera704_media_owner_followup','camera705_media_recovery_reconciled','camera706_owner_linked_recovery_signoff','camera708_signed_media_drift_open','camera708_signed_media_drift_recovered','camera709_signed_media_recurrence_open','camera709_signed_media_recurrence_escalation','camera710_signed_media_recurrence_resolved') "+
+ "ORDER BY admin_action_audit_id DESC LIMIT 141").bind(id,adminUser.user_id).all();
  const raw=Array.isArray(auditRows?.results)?auditRows.results:[];
- if(raw.length>120)return out({ok:false,error:'Unbounded original device receipt history; independent review required. HOLD.'},409);
+ if(raw.length>140)return out({ok:false,error:'Unbounded original device receipt history; independent review required. HOLD.'},409);
  const history=raw.map(row=>({...row,data:parse(row.details_json)}));
  const accepted=history.find(row=>row.action_type==='camera701_owner_field_receipt'&&
   row.data?.build===701&&row.data.product_id===id&&
@@ -240,6 +281,9 @@ export async function handleCamera702({db,form,adminUser,id,token,live,ready701}
     x.data?.original_701_receipt_id===originalId);
  const recurrenceEscalationRows=history.filter(x=>x.action_type==='camera709_signed_media_recurrence_escalation'&&
     x.data?.original_701_receipt_id===originalId);
+ const recurrenceResolutionRows=history.filter(x=>
+    x.action_type==='camera710_signed_media_recurrence_resolved'&&
+    x.data?.original_701_receipt_id===originalId);
  const aging=cases.map(x=>{
    const esc=escalationRecords.find(e=>Number(e.data?.open_receipt_id)===x.receipt_id);
    const followup=followupRows.find(y=>Number(y.data?.open_receipt_id)===x.receipt_id&&
@@ -265,6 +309,12 @@ export async function handleCamera702({db,form,adminUser,id,token,live,ready701}
    const recurrenceEscalation=recurrenceEscalationRows.find(y=>
      Number(y.data?.recurrence_receipt_id)===Number(recurrence?.admin_action_audit_id));
    const recurrenceAge=recurrence?mediaRecurrenceAge709(recurrence):null;
+   const resolution=recurrenceResolutionRows.find(y=>
+     Number(y.data?.recurrence_receipt_id)===Number(recurrence?.admin_action_audit_id)&&
+     Number(y.data?.original_signoff_receipt_id)===Number(signoff?.admin_action_audit_id));
+   const resolvedNow=resolution?recurrenceResolutionReadback710(resolution,recurrence,signoff,drift707):false;
+   const resolutionReady=!!recurrence&&!resolution&&
+     canResolveOriginalRecurrence710(recurrence,driftRecovery,signoff,latest,drift707);
    return {...ageMedia703(x),escalated:!!esc,
      escalation_receipt_id:Number(esc?.admin_action_audit_id||0),
      followup_receipt_id:Number(followup?.admin_action_audit_id||0),
@@ -283,11 +333,19 @@ export async function handleCamera702({db,form,adminUser,id,token,live,ready701}
        canOpenMediaRecurrence709(driftRecovery,signoff,drift707),
      signed_media_recurrence_receipt_id_709:Number(recurrence?.admin_action_audit_id||0),
      signed_media_recurrence_age_hours_709:recurrenceAge?.hours??null,
+     signed_media_resolution_ready_710:resolutionReady,
+     signed_media_resolution_receipt_id_710:Number(resolution?.admin_action_audit_id||0),
+     signed_media_resolution_valid_now_710:resolvedNow,
+     signed_media_resolution_status_710:!recurrence?'NO_ORIGINAL_RECURRENCE_TO_RESOLVE':
+       !resolution?(resolutionReady?'ORIGINAL_SIGNED_MEDIA_RECURRENCE_RESOLUTION_READY_710':
+        'HOLD_710_FRESH_ORIGINAL_R2_AND_OWNER_REATTEST_REQUIRED'):
+       resolvedNow?'ORIGINAL_SIGNED_MEDIA_RECURRENCE_SOURCE_RESOLVED_ON_DEMAND_710':
+        'HOLD_710_RECURRENT_MEDIA_DRIFT_AFTER_RESOLUTION',
      signed_media_recurrence_status_709:!recurrence?
        'NO_ORIGINAL_SIGNED_MEDIA_RECURRENCE_RECORD':
        drift707?.stable?'SOURCE_STABLE_AFTER_RECORDED_RECURRENCE_MONITOR_709':
        recurrenceAge?.status||'HOLD_RECURRENCE_AGE_UNVERIFIED',
-     signed_media_recurrence_escalation_due_709:!!recurrence&&!recurrenceEscalation&&
+     signed_media_recurrence_escalation_due_709:!!recurrence&&!resolution&&!recurrenceEscalation&&
        canEscalateMediaRecurrence709(recurrence,signoff,drift707),
      signed_media_recurrence_escalation_receipt_id_709:Number(recurrenceEscalation?.admin_action_audit_id||0),
      signed_drift_status_708:!signoff?'HOLD_NO_ORIGINAL_SIGNOFF':
@@ -327,9 +385,13 @@ export async function handleCamera702({db,form,adminUser,id,token,live,ready701}
   signed_media_recurrence_due_709:aging.filter(x=>x.signed_media_recurrence_escalation_due_709).length,
   signed_media_recurrence_escalated_709:aging.filter(x=>x.signed_media_recurrence_escalation_receipt_id_709>0).length,
   on_demand_recurrence_readback_only_709:true,automated_escalation_sent_709:false,
+  signed_media_resolution_ready_710:aging.filter(x=>x.signed_media_resolution_ready_710).length,
+  signed_media_resolved_count_710:aging.filter(x=>x.signed_media_resolution_receipt_id_710>0).length,
+  signed_media_resolution_recheck_hold_710:aging.filter(x=>x.signed_media_resolution_receipt_id_710>0&&!x.signed_media_resolution_valid_now_710).length,
+  on_demand_original_media_resolution_only_710:true,unrecorded_media_closed_710:false,
   independently_authenticated_phone:false,
   unrecorded_upload_recovery_certified:false,publication_performed:false});
- if(action==='camera702_inspect'||action==='camera703_inspect'||action==='camera704_inspect'||action==='camera705_inspect'||action==='camera706_inspect'||action==='camera707_inspect'||action==='camera708_inspect'||action==='camera709_inspect')return state();
+ if(action==='camera702_inspect'||action==='camera703_inspect'||action==='camera704_inspect'||action==='camera705_inspect'||action==='camera706_inspect'||action==='camera707_inspect'||action==='camera708_inspect'||action==='camera709_inspect'||action==='camera710_inspect')return state();
  if(!original)return out({ok:false,error:'Original owner-reported Build 701 receipt required. HOLD.'},409);
  const note=String(form.get('owner_device_notes')||'').trim();
  const nonce=String(form.get('nonce')||'');
@@ -631,6 +693,7 @@ export async function handleCamera702({db,form,adminUser,id,token,live,ready701}
    }
    const recurrenceId=Number(form.get('recurrence_receipt_id'));
    if(!recurrence||Number(recurrence.admin_action_audit_id)!==recurrenceId||
+     recurrenceResolutionRows.some(x=>Number(x.data?.recurrence_receipt_id)===recurrenceId)||
      recurrenceEscalationRows.some(x=>Number(x.data?.recurrence_receipt_id)===recurrenceId)||
      !canEscalateMediaRecurrence709(recurrence,signoff,drift))
      return out({ok:false,error:'24h aged original recurrence and fresh live D1/R2 mismatch required; no duplicate or automated escalation. HOLD.'},409);
@@ -650,5 +713,51 @@ export async function handleCamera702({db,form,adminUser,id,token,live,ready701}
      status:'ORIGINAL_MEDIA_RECURRENCE_ESCALATION_RECEIPT_OWNER_FOLLOWUP_REQUIRED_709',
      receipt_id:receipt,automated_escalation_sent:false,publication_performed:false});
  }
- return out({ok:false,error:'Unsupported Build 702/703/704/705/706/707/708/709 action.'},400);
+ if(action==='camera710_signed_recurrence_resolve'){
+   const caseId=Number(form.get('open_receipt_id')),
+    recurrenceId=Number(form.get('recurrence_receipt_id')),
+    signoffId=Number(form.get('original_signoff_receipt_id')),
+    recoveredId=Number(form.get('recovered_708_receipt_id')),
+    c=cases.find(x=>x.receipt_id===caseId&&x.kind==='linked'&&x.closed),
+    signoff=signoffs.find(x=>Number(x.admin_action_audit_id)===signoffId&&
+      Number(x.data?.open_receipt_id)===caseId),
+    recovered=driftRecoveryRows.find(x=>Number(x.admin_action_audit_id)===recoveredId&&
+      Number(x.data?.original_signoff_receipt_id)===signoffId&&
+      Number(x.data?.open_receipt_id)===caseId),
+    recurrence=recurrenceRows.find(x=>Number(x.admin_action_audit_id)===recurrenceId&&
+      Number(x.data?.open_receipt_id)===caseId&&
+      Number(x.data?.recovered_708_receipt_id)===recoveredId),
+    recovery=recoveryRows.find(x=>
+      Number(x.admin_action_audit_id)===Number(signoff?.data?.recovery_receipt_id)),
+    closure=closeRows.find(x=>
+      Number(x.admin_action_audit_id)===Number(signoff?.data?.closure_receipt_id)),
+    media=live?.media?.find(x=>x.kind===c?.media_kind&&
+      Number(x.attachment_id)===Number(c?.attachment_id)),
+    audit=signoff?auditSignoffDrift707({...c,original_701_receipt_id:originalId},
+      recovery,closure,signoff,latest,media,live):null;
+   if(form.get('owner_reviewed')!=='true'||!c||!signoff||!recovered||!recurrence||
+     recurrenceResolutionRows.some(x=>Number(x.data?.recurrence_receipt_id)===recurrenceId)||
+     !canResolveOriginalRecurrence710(recurrence,recovered,signoff,latest,audit))
+     return out({ok:false,error:'Original 709 recurrence, 708 recovery, later original owner re-attestation and fresh actual D1/R2 HEAD matching the exact signed source required. HOLD.'},409);
+   const receipt=await append('camera710_signed_media_recurrence_resolved',{
+     build:710,open_receipt_id:caseId,recurrence_receipt_id:recurrenceId,
+     recovered_708_receipt_id:recoveredId,original_signoff_receipt_id:signoffId,
+     original_709_escalation_receipt_id:Number(recurrenceEscalationRows.find(x=>
+       Number(x.data?.recurrence_receipt_id)===recurrenceId)?.admin_action_audit_id||0),
+     fresh_owner_reattest_receipt_id:Number(latest.admin_action_audit_id),
+     original_signed_r2_key:signoff.data.r2_key,
+     original_signed_r2_bytes:Number(signoff.data.verified_r2_bytes),
+     restored_r2_key:media.r2_key,restored_r2_bytes:media.r2_bytes,
+     restored_source_status:audit.status,
+     owner_resolution_decision:'accept_original_signed_source_only',
+     server_side_r2_head_rechecked:true,physical_phone_independently_witnessed:false,
+     unrecorded_uploads_closed:false,automatic_publication:false,
+     financial_closed:false,
+     status:'OWNER_SIGNED_MEDIA_RECURRENCE_SOURCE_RESTORED_UNRECORDED_HOLD_710'
+   },'recurrence710-resolution-'+recurrenceId);
+   return out({ok:true,status:'OWNER_SIGNED_MEDIA_RECURRENCE_SOURCE_RESTORED_UNRECORDED_HOLD_710',
+     receipt_id:receipt,open_receipt_id:caseId,physical_phone_independently_witnessed:false,
+     unrecorded_media_closed:false,publication_performed:false});
+ }
+ return out({ok:false,error:'Unsupported Build 702/703/704/705/706/707/708/709/710 action.'},400);
 }
