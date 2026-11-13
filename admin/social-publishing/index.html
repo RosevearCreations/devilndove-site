@@ -360,6 +360,41 @@
  <p id="dd706RetentionResult" role="status" aria-live="polite">No owner financial retention receipt; actual accounting closure HOLD.</p>
 </section>
 
+<section class="card" id="dd710-finance" aria-labelledby="dd710FinanceTitle">
+ <p class="eyebrow">Build 710 · Original overdue custody follow-up and independent ninth-source provenance</p>
+ <h2 id="dd710FinanceTitle">Resolve follow-up evidence without claiming an external financial close</h2>
+ <p>This on-demand review starts from an original Build 709 escalation, its validated ninth-reviewer signed source and 706/708 manifest SHA-256. At least 24 hours after escalation, an owner can record a source-bound follow-up; an independent provenance stability audit then recomputes a canonical SHA-256 over the original signed source and 706/707/708/709/710 receipt chain. Neither action sends a real external notice, obtains a new independent signature or closes accounting books.</p>
+ <button id="dd710FinanceRefresh" class="btn secondary" type="button">Recheck original overdue escalation and ninth-source stability</button>
+ <button id="dd710FinanceExport" class="btn secondary" type="button">Export protected 710 custody and provenance dossier</button>
+ <p id="dd710FinanceStatus" role="status" aria-live="polite">HOLD · Original 709 escalation not inspected.</p>
+ <p id="dd710FinanceStats" class="small">Original independently reviewed ninth evidence required.</p>
+ <ol class="clean" id="dd710FinanceCases"><li>No source-pinned overdue custody follow-up audited.</li></ol>
+ <form id="dd710FollowupForm">
+ <h3>1. Overdue original custody escalation follow-up</h3>
+ <label>Original 709 escalation aged 24+ hours
+  <select id="dd710FollowupSource" class="input" required><option value="">Refresh source history first</option></select></label>
+ <label>Owner follow-up disposition
+  <select id="dd710FollowupDisposition" class="input" required>
+   <option value="owner_manual_source_followup_pending">Owner must manually investigate source</option>
+   <option value="manual_independent_reviewer_contact_pending">Manual independent reviewer contact pending (not sent)</option>
+  </select></label>
+ <label>Original custody exception follow-up observation (25–600 characters)
+  <textarea id="dd710FollowupNote" class="input" rows="3" minlength="25" maxlength="600" required></textarea></label>
+ <label><input id="dd710FollowupReviewed" type="checkbox" required> We rechecked original 709 escalation time, exact 706 manifest and 708 custody digest. External contact remains unconfirmed and financial closure stays HOLD.</label>
+ <button id="dd710FollowupSubmit" class="btn secondary" type="submit">Record source-pinned owner follow-up</button>
+ </form>
+ <p id="dd710FollowupResult" role="status" aria-live="polite">No real external message or independent reviewer signature has been recorded.</p>
+ <form id="dd710ProvenanceForm">
+ <h3>2. Ninth-reviewer provenance stability audit</h3>
+ <label>Verified original Build 710 custody follow-up receipt
+  <select id="dd710ProvenanceSource" class="input" required><option value="">Complete source-bound follow-up first</option></select></label>
+ <label>Independent source provenance observation (25–600 characters)
+  <textarea id="dd710ProvenanceNote" class="input" rows="3" minlength="25" maxlength="600" required></textarea></label>
+ <label><input id="dd710ProvenanceReviewed" type="checkbox" required> We revalidated the existing original ninth Ed25519 review and exact 706–710 custody IDs. No new external signature, financial certificate or booking close is claimed.</label>
+ <button id="dd710ProvenanceSubmit" class="btn secondary" type="submit">Rehash original ninth provenance and record owner audit</button>
+ </form>
+ <p id="dd710ProvenanceResult" role="status" aria-live="polite">Ninth-reviewer provenance digest not yet audited. HOLD.</p>
+</section>
 <section class="card" id="dd709-finance" aria-labelledby="dd709FinanceTitle">
  <p class="eyebrow">Build 709 · Independent original reviewer-source aging and financial custody exception escalation</p>
  <h2 id="dd709FinanceTitle">On-demand ninth-reviewer renewal aging and owner custody escalation</h2>

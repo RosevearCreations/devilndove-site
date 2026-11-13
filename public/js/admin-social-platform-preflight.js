@@ -1623,6 +1623,46 @@ select699();
 
 
 
+ let audit710=null;
+ function draw710(data){
+  if(!$('dd710-finance'))return;
+  const v=data.financial710||null;audit710=v;
+  $('dd710FinanceStatus').textContent=v?.campaign_queue_id?
+    v.status+' · exact original source history '+(v.history_complete?'VERIFIED':'HOLD')+
+    ' · actual book closure HOLD':
+    'HOLD · Select exact original financial campaign and refresh.';
+  $('dd710FinanceStats').textContent=v?.campaign_queue_id?
+    'Original escalations '+v.eligible_count+' · overdue follow-ups due '+
+    v.due_followup_count+' · follow-up receipts '+v.completed_followup_count+
+    ' · verified ninth provenance '+v.provenance_audited_count+' · invalid '+v.invalid_count:
+    'Requires original signed ninth-reviewer evidence and 709 custody escalation.';
+  const follow=$('dd710FollowupSource'),provenance=$('dd710ProvenanceSource'),
+    list=$('dd710FinanceCases');
+  follow.replaceChildren(new Option('Select original overdue owner custody escalation',''));
+  provenance.replaceChildren(new Option('Select verified original owner follow-up',''));
+  list.replaceChildren();
+  for(const x of v?.items||[]){
+    const age=x.followup_710_age;
+    const li=document.createElement('li');
+    li.textContent='Original escalation #'+x.custody_exception_escalation_receipt_id_709+
+      ' / ninth signed #'+x.review_706_receipt_id+
+      ' / original 708 custody #'+(x.custody_708_receipt_id||'HOLD')+
+      ' · '+age.status+' ('+(age.age_hours??'unknown')+'h)'+
+      ' · owner follow-up '+(x.followup_710_verified?'VERIFIED #'+x.followup_710_receipt_id:'HOLD')+
+      ' · ninth source '+(x.provenance_710_verified?'SHA VERIFIED #'+x.provenance_710_receipt_id:'HOLD')+
+      ' · external notice/book close HOLD';
+    list.appendChild(li);
+    if(v.history_complete&&x.followup_710_due&&!x.followup_710_verified)
+      follow.add(new Option('Original 709 escalation #'+x.custody_exception_escalation_receipt_id_709+
+        ' · '+age.age_hours+'h',String(x.custody_exception_escalation_receipt_id_709)));
+    if(v.history_complete&&x.followup_710_verified&&!x.provenance_710_verified)
+      provenance.add(new Option('Original follow-up #'+x.followup_710_receipt_id+
+        ' / ninth signed #'+x.review_706_receipt_id,String(x.followup_710_receipt_id)));
+  }
+  if(!list.childElementCount){const li=document.createElement('li');
+   li.textContent='No original Build 709 owner custody escalation eligible for overdue follow-up.';
+   list.appendChild(li);}
+ }
  let audit709=null;
  function draw709(data){
   if(!$('dd709-finance'))return;
@@ -2149,7 +2189,7 @@ draw698(d);
 draw699(d);
 draw700(d);
 draw701(d);
-draw702(d);draw703(d);draw704(d);draw705(d);draw706(d);draw707(d);draw708(d);draw709(d);
+draw702(d);draw703(d);draw704(d);draw705(d);draw706(d);draw707(d);draw708(d);draw709(d);draw710(d);
 if(!id)return;
 if(!v||v.queue_id!==id)throw Error('Fresh exact financial evidence was not returned.');
 state=v;
@@ -2211,6 +2251,71 @@ $('dd699Refresh').addEventListener('click',()=>void refresh());
 
 
 
+ $('dd710FinanceRefresh').addEventListener('click',()=>void refresh());
+ $('dd710FollowupForm').addEventListener('submit',async event=>{
+  event.preventDefault();const button=$('dd710FollowupSubmit');button.disabled=true;
+  try{
+   const escalationId=Number($('dd710FollowupSource').value),
+    x=audit710?.items?.find(x=>x.custody_exception_escalation_receipt_id_709===escalationId&&
+      x.followup_710_due&&!x.followup_710_verified),
+    disposition=$('dd710FollowupDisposition').value,
+    note=$('dd710FollowupNote').value.trim();
+   if(!state?.queue_id||!audit710?.history_complete||!x||
+     !$('dd710FollowupReviewed').checked||note.length<25||note.length>600||
+     !['manual_independent_reviewer_contact_pending','owner_manual_source_followup_pending'].includes(disposition))
+    throw Error('Original 24-hour overdue escalation and owner review of exact 706/708 evidence required.');
+   const d=await api({action:'owner_custody_escalation_followup_710',
+    social_post_queue_id:state.queue_id,original_709_escalation_receipt_id:escalationId,
+    followup_disposition:disposition,
+    expected_source_revision:state.source_revision,
+    expected_fingerprint_sha256:state.fingerprint_sha256,
+    expected_706_manifest_sha256:x.retention_manifest_sha256,
+    expected_708_custody_digest_sha256:x.custody_708_digest_sha256||null,
+    owner_followup_reviewed:true,resolution_note:note},state.queue_id);
+   $('dd710FollowupResult').textContent=d.result.status+' · receipt #'+d.result.receipt_id+
+     '. No independent reviewer contact or bookkeeping close was independently confirmed.';
+   $('dd710FollowupReviewed').checked=false;await refresh();
+  }catch(e){$('dd710FollowupResult').textContent='HOLD · '+e.message;}
+  finally{button.disabled=false;}
+ });
+ $('dd710ProvenanceForm').addEventListener('submit',async event=>{
+  event.preventDefault();const button=$('dd710ProvenanceSubmit');button.disabled=true;
+  try{
+   const followupId=Number($('dd710ProvenanceSource').value),
+    x=audit710?.items?.find(x=>x.followup_710_receipt_id===followupId&&
+      x.followup_710_verified&&!x.provenance_710_verified),
+    note=$('dd710ProvenanceNote').value.trim();
+   if(!state?.queue_id||!audit710?.history_complete||!x||
+     !$('dd710ProvenanceReviewed').checked||note.length<25||note.length>600)
+    throw Error('Original protected overdue follow-up and prior independently signed ninth-reviewer custody source required.');
+   const d=await api({action:'owner_ninth_reviewer_provenance_audit_710',
+    social_post_queue_id:state.queue_id,original_710_followup_receipt_id:followupId,
+    expected_source_revision:state.source_revision,
+    expected_fingerprint_sha256:state.fingerprint_sha256,
+    expected_706_manifest_sha256:x.retention_manifest_sha256,
+    expected_708_custody_digest_sha256:x.custody_708_digest_sha256||null,
+    owner_provenance_reviewed:true,resolution_note:note},state.queue_id);
+   $('dd710ProvenanceResult').textContent=d.result.status+' · receipt #'+d.result.receipt_id+
+     ' · SHA-256 '+d.result.provenance_manifest_sha256+
+     '. No new independent signature, external notice or financial closure claimed.';
+   $('dd710ProvenanceReviewed').checked=false;await refresh();
+  }catch(e){$('dd710ProvenanceResult').textContent='HOLD · '+e.message;}
+  finally{button.disabled=false;}
+ });
+ $('dd710FinanceExport').addEventListener('click',async()=>{
+  try{
+   const id=Number($('dd685Campaign').value);
+   if(!id||id!==state?.queue_id||!window.DDAuth?.apiFetch)
+    throw Error('Authenticated exact original campaign required.');
+   const response=await window.DDAuth.apiFetch(endpoint+
+     '?export=financial710&campaign_queue_id='+encodeURIComponent(id));
+   if(!response.ok)throw Error('Protected 710 original ninth-source evidence export rejected. HTTP '+response.status);
+   const blob=await response.blob(),url=URL.createObjectURL(blob),a=document.createElement('a');
+   a.href=url;a.download='devilndove-overdue-custody-ninth-provenance-'+id+'-710.json';
+   document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1000);
+   $('dd710ProvenanceResult').textContent='Protected original source-bound provenance dossier exported. Books remain HOLD.';
+  }catch(e){$('dd710ProvenanceResult').textContent='HOLD · '+e.message;}
+ });
  $('dd709FinanceRefresh').addEventListener('click',()=>void refresh());
  $('dd709EscalationForm').addEventListener('submit',async event=>{
   event.preventDefault();const btn=$('dd709EscalationSubmit');btn.disabled=true;
