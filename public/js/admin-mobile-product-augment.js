@@ -713,6 +713,28 @@ document.addEventListener('DOMContentLoaded',()=>{
     return responseJson(await window.DDAuth.apiFetch('/api/admin/mobile-create-product',
       {method:'POST',body:form}),'Protected original device evidence unavailable.');
   }
+  function draw707(v){
+    const status=$('dd707MediaAuditStatus'),list=$('dd707MediaAuditCases');
+    if(!status||!list)return;
+    const checked=(v.exception_aging_703||[]).filter(x=>x.owner_recovery_signoff_receipt_id>0);
+    status.textContent='Signed linked cases '+(v.owner_recovery_signed_count_706||0)+
+     ' · stable on this authenticated D1/R2 HEAD recheck '+(v.stable_signed_media_count_707||0)+
+     ' · HOLD for current source recheck '+(v.signed_media_recheck_hold_count_707||0)+
+     '. Unrecorded uploads and physical-phone witness remain separate HOLD.';
+    list.replaceChildren();
+    for(const item of checked){
+      const li=document.createElement('li');
+      li.textContent='Original case #'+item.receipt_id+
+        ' / sign-off #'+item.owner_recovery_signoff_receipt_id+
+        ' · '+item.media_signoff_drift_707;
+      list.appendChild(li);
+    }
+    if(!checked.length){
+      const li=document.createElement('li');
+      li.textContent='No original linked Build 706 owner sign-offs to recheck. HOLD.';
+      list.appendChild(li);
+    }
+  }
   function draw706(v){
     const select=$('dd706SignoffSource'),status=$('dd706SignoffStatus');
     if(!select||!status)return;
@@ -816,6 +838,7 @@ document.addEventListener('DOMContentLoaded',()=>{
     draw704(v);
     draw705(v);
     draw706(v);
+    draw707(v);
   }
   async function inspect702(){
     const data=await send702('camera702_inspect');
@@ -823,7 +846,15 @@ document.addEventListener('DOMContentLoaded',()=>{
       throw Error('Original draft changed during protected readback. HOLD.');
     show702(data);return data;
   }
-  $('dd706SignoffRefresh')?.addEventListener('click',async()=>{
+  $('dd707MediaAuditRefresh')?.addEventListener('click',async()=>{
+     try{
+       const data=await send702('camera707_inspect');
+       if(!data.ok||Number(data.product_id)!==Number(active?.product_id))
+         throw Error('Original camera capture changed during signed-media recheck. HOLD.');
+       show702(data);
+     }catch(error){$('dd707MediaAuditStatus').textContent='HOLD · '+error.message;}
+   });
+   $('dd706SignoffRefresh')?.addEventListener('click',async()=>{
     try{await inspect702();}
     catch(error){$('dd706SignoffStatus').textContent='HOLD · '+error.message;}
   });
