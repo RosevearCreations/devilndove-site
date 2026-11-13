@@ -121,6 +121,22 @@
  <button class="btn secondary" type="button" id="dd703Escalate">Record owner media exception escalation</button>
  <p id="dd703AgeResult" class="small" role="status" aria-live="polite">Escalation is not an independently verified media upload or device acceptance.</p>
 </section>
+<section class="card" id="dd704Followup" style="margin-top:12px;padding:12px" aria-labelledby="dd704FollowupTitle">
+ <p class="eyebrow">Build 704 · Original escalated phone-media follow-up</p>
+ <h3 id="dd704FollowupTitle">Record one owner follow-up for each escalated unresolved issue</h3>
+ <p class="small">Choose an original 24-hour age escalation already recorded on this draft. Owner follow-up documents action still needed; it never repairs R2, retries files automatically, or clears unrecorded uploads.</p>
+ <button class="btn secondary" type="button" id="dd704FollowupRefresh">Refresh escalated original cases</button>
+ <p id="dd704FollowupStatus" class="small" role="status" aria-live="polite">HOLD · Recheck original escalated case history.</p>
+ <label>Original escalated, unresolved case<select class="input" id="dd704FollowupSource"><option value="">Refresh original saved draft</option></select></label>
+ <label>Owner follow-up action<select class="input" id="dd704FollowupDisposition">
+  <option value="manual_retry_scheduled">Schedule manual retry on same original draft</option>
+  <option value="original_phone_recheck_pending">Original phone device recheck pending</option>
+  <option value="external_media_source_investigation">Investigate missing external media source</option>
+ </select></label>
+ <p class="small">Use the Build 702 owner device notes above (25–600 characters) to record the actual follow-up reason.</p>
+ <button class="btn secondary" type="button" id="dd704FollowupRecord">Record source-bound owner follow-up (media remains HOLD)</button>
+ <p id="dd704FollowupResult" class="small" role="status" aria-live="polite">Original uploads remain on HOLD pending real media proof.</p>
+</section>
 <p class="small" id="dd700ExportStatus" role="status" aria-live="polite">Owner field acceptance is NOT recorded until a real-phone trial and independent Cloudflare media readback are both complete. This is a local evidence export, not an automatic deployment gate.</p>
 </section>
 
