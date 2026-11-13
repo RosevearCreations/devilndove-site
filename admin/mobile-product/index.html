@@ -90,6 +90,25 @@
   <button class="btn secondary" id="dd701Adopt" type="button">Adopt owner phone receipt (same original draft)</button>
   <p id="dd701AdoptStatus" class="small" role="status" aria-live="polite">HOLD · Original phone proof not adopted. Unverified media must be manually retried on this draft.</p>
 </div>
+<div class="card" id="dd702PhoneAudit" style="margin-top:12px;padding:12px" aria-labelledby="dd702Title">
+  <p class="eyebrow">Build 702 · Original device re-attestation &amp; media exception triage</p>
+  <h3 id="dd702Title">Re-attest this phone capture and inspect unresolved uploads</h3>
+  <p class="small">All actions require the same authenticated original owner and draft. We re-read the actual Cloudflare R2 HEADs and D1 links. Physical phone use is owner-reported, not independently witnessed. An upload without a linked R2 object remains HOLD even if the owner remembers retrying it.</p>
+  <button class="btn secondary" id="dd702Inspect" type="button">Inspect original phone receipt and linked media</button>
+  <p id="dd702Status" class="small" role="status" aria-live="polite">HOLD · Inspect the original Build 701 receipt first.</p>
+  <div id="dd702Media" class="small" aria-live="polite"></div>
+  <label for="dd702Notes">Original owner observations (device, browser, manual retry, exception results — no passwords)</label>
+  <textarea class="input" id="dd702Notes" minlength="25" maxlength="600" rows="3" placeholder="Record the actual phone retest, any interrupted upload and exactly what was verified."></textarea>
+  <button class="btn secondary" id="dd702Reattest" type="button">Re-attest actual phone result and verified links</button>
+  <p class="small">Re-attestation reuses the five physical phone checkboxes above and requires the same original Build 701 media snapshot. A changed attachment must first be reviewed under Build 701.</p>
+  <h4>Unresolved attachment issue</h4>
+  <label>Reported issue<select class="input" id="dd702Issue"><option value="">Inspect first to choose a missing linked attachment or report an unrecorded upload</option></select></label>
+  <button class="btn secondary" id="dd702Open" type="button">Record unresolved media exception (HOLD)</button>
+  <h4>Previously recorded linked exception</h4>
+  <label>Open case<select class="input" id="dd702OpenCases"><option value="">No case loaded</option></select></label>
+  <button class="btn secondary" id="dd702Close" type="button">Close verified linked R2 recovery only</button>
+  <p id="dd702Result" class="small" role="status" aria-live="polite">No independent media exception closure. Unrecorded uploads cannot be automatically cleared.</p>
+</div>
 <p class="small" id="dd700ExportStatus" role="status" aria-live="polite">Owner field acceptance is NOT recorded until a real-phone trial and independent Cloudflare media readback are both complete. This is a local evidence export, not an automatic deployment gate.</p>
 </section>
 

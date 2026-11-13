@@ -25,6 +25,14 @@ jobs:
       - uses: actions/setup-node@v7
         with:
           node-version: '24'
+      - name: Build 702 original owner phone re-attestation, linked media exception triage and independent signed bookkeeper decision contract
+        run: |
+          node --check functions/api/admin/_cameraField702.mjs
+          node --check functions/api/admin/mobile-create-product.js
+          node --check functions/api/admin/social-post-queue.js
+          node --check public/js/admin-mobile-product-augment.js
+          node --check public/js/admin-social-platform-preflight.js
+          node scripts/build702_original_device_media_bookkeeping_decision_contract.mjs
       - name: QL-336 pending child-shell and nonproduction endpoint isolation
         run: |
           node --test scripts/release467_build610_ql336_child_shell.test.mjs
