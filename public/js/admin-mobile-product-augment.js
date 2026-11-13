@@ -697,6 +697,9 @@ document.addEventListener('DOMContentLoaded',()=>{
     if($('dd704FollowupSource'))$('dd704FollowupSource').replaceChildren(new Option('Refresh original saved draft',''));
     if($('dd705RecoveryStatus'))$('dd705RecoveryStatus').textContent='HOLD · Reinspect the original owner-linked recovery.';
     if($('dd705RecoverySource'))$('dd705RecoverySource').replaceChildren(new Option('Refresh original recovery first',''));
+    if($('dd706SignoffStatus'))$('dd706SignoffStatus').textContent='HOLD · Original owner recovery and explicit closure not inspected.';
+    if($('dd706SignoffSource'))$('dd706SignoffSource').replaceChildren(new Option('Refresh original linked closure',''));
+    if($('dd706SignoffReviewed'))$('dd706SignoffReviewed').checked=false;
   }
   async function send702(action,fields={}){
     if(!window.DDAuth?.isLoggedIn?.()||!window.DDAuth.apiFetch)
@@ -709,6 +712,25 @@ document.addEventListener('DOMContentLoaded',()=>{
     for(const [k,v] of Object.entries(fields))form.set(k,String(v));
     return responseJson(await window.DDAuth.apiFetch('/api/admin/mobile-create-product',
       {method:'POST',body:form}),'Protected original device evidence unavailable.');
+  }
+  function draw706(v){
+    const select=$('dd706SignoffSource'),status=$('dd706SignoffStatus');
+    if(!select||!status)return;
+    select.replaceChildren(new Option('Choose verified original linked case closure',''));
+    for(const age of v.exception_aging_703||[]){
+      const info=(v.exceptions||[]).find(x=>x.receipt_id===age.receipt_id);
+      if(info&&info.closed&&info.kind==='linked'&&
+         age.recovery_receipt_id&&age.closure_receipt_id&&
+         age.owner_recovery_signoff_ready&&!age.owner_recovery_signoff_receipt_id)
+        select.add(new Option('Original '+info.media_kind+' attachment #'+info.attachment_id+
+         ' · recovery #'+age.recovery_receipt_id+
+         ' · explicit closure #'+age.closure_receipt_id,
+         age.receipt_id+'|'+age.recovery_receipt_id+'|'+age.closure_receipt_id));
+    }
+    status.textContent='Original linked R2 owner sign-offs eligible: '+
+      (v.owner_recovery_signoff_ready_706||0)+
+      ' · signed linked-media cases '+(v.owner_recovery_signed_count_706||0)+
+      '. Unrecorded uploads remain on HOLD; no automatic publication.';
   }
   function draw705(v){
     const select=$('dd705RecoverySource'),status=$('dd705RecoveryStatus');
@@ -793,6 +815,7 @@ document.addEventListener('DOMContentLoaded',()=>{
     draw703(v);
     draw704(v);
     draw705(v);
+    draw706(v);
   }
   async function inspect702(){
     const data=await send702('camera702_inspect');
@@ -800,6 +823,31 @@ document.addEventListener('DOMContentLoaded',()=>{
       throw Error('Original draft changed during protected readback. HOLD.');
     show702(data);return data;
   }
+  $('dd706SignoffRefresh')?.addEventListener('click',async()=>{
+    try{await inspect702();}
+    catch(error){$('dd706SignoffStatus').textContent='HOLD · '+error.message;}
+  });
+  $('dd706SignoffRecord')?.addEventListener('click',async()=>{
+    const button=$('dd706SignoffRecord');button.disabled=true;
+    try{
+      const [openText,recoveryText,closeText]=
+        String($('dd706SignoffSource').value||'').split('|');
+      const caseId=Number(openText),recoveryId=Number(recoveryText),
+        closureId=Number(closeText);
+      const entry=gate702?.exception_aging_703?.find(x=>x.receipt_id===caseId&&
+        x.recovery_receipt_id===recoveryId&&x.closure_receipt_id===closureId&&
+        x.owner_recovery_signoff_ready&&!x.owner_recovery_signoff_receipt_id);
+      if(!entry||!$('dd706SignoffReviewed').checked)
+        throw Error('Select original verified linked D1/R2 recovery, explicit closure, and acknowledge owner review.');
+      const result=await action702('camera706_owner_signoff',{
+        open_receipt_id:caseId,recovery_receipt_id:recoveryId,
+        closure_receipt_id:closureId,owner_reviewed:'true'});
+      $('dd706SignoffResult').textContent=result.status+
+        ' · original case #'+caseId+' signed. Physical device witness, unrecorded uploads, and publication remain HOLD.';
+      $('dd706SignoffReviewed').checked=false;
+    }catch(error){$('dd706SignoffResult').textContent='HOLD · '+error.message;}
+    finally{button.disabled=false;}
+  });
   $('dd705RecoveryRefresh')?.addEventListener('click',async()=>{
     try{await inspect702();}
     catch(error){$('dd705RecoveryStatus').textContent='HOLD · '+error.message;}
