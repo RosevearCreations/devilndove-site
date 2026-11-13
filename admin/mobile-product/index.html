@@ -109,6 +109,18 @@
   <button class="btn secondary" id="dd702Close" type="button">Close verified linked R2 recovery only</button>
   <p id="dd702Result" class="small" role="status" aria-live="polite">No independent media exception closure. Unrecorded uploads cannot be automatically cleared.</p>
 </div>
+<section class="card" id="dd703Aging" style="margin-top:12px;padding:12px" aria-labelledby="dd703AgingTitle">
+ <p class="eyebrow">Build 703 · Original phone media exception aging</p>
+ <h3 id="dd703AgingTitle">Owner escalation for unresolved uploads</h3>
+ <p class="small">Read the original same-owner D1 audit. An unresolved issue becomes eligible for manual escalation after 24 hours; 48-hour cases are critical. The case must remain open and have a valid server timestamp. No automatic recovery or clearing unrecorded uploads.</p>
+ <button class="btn secondary" type="button" id="dd703AgeRefresh">Refresh original exception age</button>
+ <p id="dd703AgeStatus" class="small" role="status" aria-live="polite">HOLD · Inspect the original saved phone draft first.</p>
+ <label>Original exception due for owner escalation
+  <select class="input" id="dd703AgeCase"><option value="">Read current original cases first</option></select></label>
+ <p class="small">Use the 25–600 character original owner notes in Build 702 above to explain the follow-up decision.</p>
+ <button class="btn secondary" type="button" id="dd703Escalate">Record owner media exception escalation</button>
+ <p id="dd703AgeResult" class="small" role="status" aria-live="polite">Escalation is not an independently verified media upload or device acceptance.</p>
+</section>
 <p class="small" id="dd700ExportStatus" role="status" aria-live="polite">Owner field acceptance is NOT recorded until a real-phone trial and independent Cloudflare media readback are both complete. This is a local evidence export, not an automatic deployment gate.</p>
 </section>
 
