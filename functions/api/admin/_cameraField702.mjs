@@ -222,7 +222,8 @@ export function canResolveOriginalRecurrence710(recurrence,recovered,signoff,lat
 }
 export function recurrenceResolutionReadback710(resolution,recurrence,signoff,audit){
  const d=resolution?.data||{};
- return d.build===710&&d.owner_resolution_decision==='accept_original_signed_source_only'&&
+ return d.build===710&&recurrence?.data?.build===709&&
+  d.owner_resolution_decision==='accept_original_signed_source_only'&&
   d.physical_phone_independently_witnessed===false&&
   d.unrecorded_uploads_closed===false&&d.automatic_publication===false&&
   Number.isSafeInteger(Number(resolution?.admin_action_audit_id))&&
@@ -230,8 +231,10 @@ export function recurrenceResolutionReadback710(resolution,recurrence,signoff,au
   Number(d.recurrence_receipt_id)===Number(recurrence.admin_action_audit_id)&&
   Number(d.original_signoff_receipt_id)===Number(signoff?.admin_action_audit_id)&&
   d.original_signed_r2_key===signoff?.data?.r2_key&&
+  d.original_signed_r2_key===recurrence?.data?.original_signed_r2_key&&
   Number(d.original_signed_r2_bytes)===Number(signoff?.data?.verified_r2_bytes)&&
-  d.restored_source_status==='SIGNED_LINKED_MEDIA_SOURCE_STABLE_ON_DEMAND_707'&&
+  Number(d.original_signed_r2_bytes)===Number(recurrence?.data?.original_signed_r2_bytes)&&
+  d.restored_source_status='SIGNED_LINKED_MEDIA_SOURCE_STABLE_ON_DEMAND_707'&&
   audit?.stable===true;
 }
 
@@ -342,7 +345,7 @@ export async function handleCamera702({db,form,adminUser,id,token,live,ready701}
        'NO_ORIGINAL_SIGNED_MEDIA_RECURRENCE_RECORD':
        drift707?.stable?'SOURCE_STABLE_AFTER_RECORDED_RECURRENCE_MONITOR_709':
        recurrenceAge?.status||'HOLD_RECURRENCE_AGE_UNVERIFIED',
-     signed_media_recurrence_escalation_due_709:!!recurrence&&!recurrenceEscalation&&
+     signed_media_recurrence_escalation_due_709:!!recurrence&&!resolution&&!recurrenceEscalation&&
        canEscalateMediaRecurrence709(recurrence,signoff,drift707),
      signed_media_recurrence_escalation_receipt_id_709:Number(recurrenceEscalation?.admin_action_audit_id||0),
      signed_drift_status_708:!signoff?'HOLD_NO_ORIGINAL_SIGNOFF':
@@ -690,6 +693,7 @@ export async function handleCamera702({db,form,adminUser,id,token,live,ready701}
    }
    const recurrenceId=Number(form.get('recurrence_receipt_id'));
    if(!recurrence||Number(recurrence.admin_action_audit_id)!==recurrenceId||
+     recurrenceResolutionRows.some(x=>Number(x.data?.recurrence_receipt_id)===recurrenceId)||
      recurrenceEscalationRows.some(x=>Number(x.data?.recurrence_receipt_id)===recurrenceId)||
      !canEscalateMediaRecurrence709(recurrence,signoff,drift))
      return out({ok:false,error:'24h aged original recurrence and fresh live D1/R2 mismatch required; no duplicate or automated escalation. HOLD.'},409);
