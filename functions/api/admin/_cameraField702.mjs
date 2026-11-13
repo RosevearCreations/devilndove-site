@@ -102,6 +102,39 @@ export function canOwnerSignoff706(open,recovery,closure,latest,media,live,now=D
   Number(closure.data.attachment_id)===Number(open.attachment_id)&&
   canCloseMedia702(open,media,latest?.data,live,now);
 }
+
+ // Build 707: independent on-demand D1/R2 HEAD comparison to an original owner
+ // sign-off. This is not continuous monitoring or an independent phone witness.
+ export function auditSignoffDrift707(open,recovery,closure,signoff,latest,media,live,now=Date.now()){
+  const d=signoff?.data||{},signedAt=isoTime(signoff?.created_at),
+   closedAt=isoTime(closure?.created_at);
+  const pinned=open?.kind==='linked'&&open.closed===true&&
+   Number.isSafeInteger(Number(signoff?.admin_action_audit_id))&&
+   Number(signoff.admin_action_audit_id)>Number(closure?.admin_action_audit_id)&&
+   Number(d.open_receipt_id)===Number(open.receipt_id)&&
+   Number(d.recovery_receipt_id)===Number(recovery?.admin_action_audit_id)&&
+   Number(d.closure_receipt_id)===Number(closure?.admin_action_audit_id)&&
+   d.owner_signoff_decision==='accept_verified_linked_recovery_only'&&
+   d.original_issue_closed_by_explicit_owner_action===true&&
+   d.physical_device_independently_witnessed===false&&
+   d.unrecorded_upload_recovery_certified===false&&
+   d.financial_closed===false&&
+   d.media_kind===open.media_kind&&d.r2_key===open.r2_key&&
+   Number(d.attachment_id)===Number(open.attachment_id)&&
+   Number(d.verified_r2_bytes)>0&&
+   Number.isFinite(signedAt)&&Number.isFinite(closedAt)&&
+   signedAt>=closedAt&&signedAt<=now+300000;
+  if(!pinned)return {status:'HOLD_707_SIGNOFF_CUSTODY_MISMATCH',stable:false};
+  if(!media||media.confirmed!==true||media.r2_key!==d.r2_key||
+   Number(media.r2_bytes)!==Number(d.verified_r2_bytes)||
+   media.kind!==d.media_kind||Number(media.attachment_id)!==Number(d.attachment_id)||
+   !live?.media?.some(m=>m===media))
+    return {status:'HOLD_707_SIGNED_MEDIA_D1_R2_DRIFT',stable:false};
+  if(!canOwnerSignoff706(open,recovery,closure,latest,media,live,now))
+   return {status:'HOLD_707_FRESH_OWNER_REATTESTATION_OR_SOURCE_REQUIRED',stable:false};
+  return {status:'SIGNED_LINKED_MEDIA_SOURCE_STABLE_ON_DEMAND_707',stable:true};
+ }
+
 export async function handleCamera702({db,form,adminUser,id,token,live,ready701}){
  const action=String(form.get('action')||'');
  const auditRows=await db.prepare(
@@ -149,6 +182,7 @@ export async function handleCamera702({db,form,adminUser,id,token,live,ready701}
      Number(y.data?.closure_receipt_id)===Number(closure?.admin_action_audit_id));
    const current=live?.media?.find(m=>m.kind===x.media_kind&&
      Number(m.attachment_id)===Number(x.attachment_id));
+   const drift707=signoff?auditSignoffDrift707({...x,original_701_receipt_id:originalId},recovery,closure,signoff,latest,current,live):null;
    return {...ageMedia703(x),escalated:!!esc,
      escalation_receipt_id:Number(esc?.admin_action_audit_id||0),
      followup_receipt_id:Number(followup?.admin_action_audit_id||0),
@@ -157,6 +191,8 @@ export async function handleCamera702({db,form,adminUser,id,token,live,ready701}
      recovery_receipt_id:Number(recovery?.admin_action_audit_id||0),
      closure_receipt_id:Number(closure?.admin_action_audit_id||0),
      owner_recovery_signoff_receipt_id:Number(signoff?.admin_action_audit_id||0),
+     media_signoff_drift_707:drift707?.status||'NO_ORIGINAL_SIGNOFF_707',
+     media_signoff_stable_707:drift707?.stable===true,
      owner_recovery_signoff_ready:!signoff&&
        canOwnerSignoff706({...x,original_701_receipt_id:originalId},
          recovery,closure,latest,current,live),
@@ -177,9 +213,12 @@ export async function handleCamera702({db,form,adminUser,id,token,live,ready701}
   reconciled_linked_count_705:aging.filter(x=>x.recovery_receipt_id>0).length,
   owner_recovery_signoff_ready_706:aging.filter(x=>x.owner_recovery_signoff_ready).length,
   owner_recovery_signed_count_706:aging.filter(x=>x.owner_recovery_signoff_receipt_id>0).length,
+  stable_signed_media_count_707:aging.filter(x=>x.media_signoff_stable_707).length,
+  signed_media_recheck_hold_count_707:aging.filter(x=>x.owner_recovery_signoff_receipt_id>0&&!x.media_signoff_stable_707).length,
+  on_demand_d1_r2_head_check_only_707:true,
   independently_authenticated_phone:false,
   unrecorded_upload_recovery_certified:false,publication_performed:false});
- if(action==='camera702_inspect'||action==='camera703_inspect'||action==='camera704_inspect'||action==='camera705_inspect'||action==='camera706_inspect')return state();
+ if(action==='camera702_inspect'||action==='camera703_inspect'||action==='camera704_inspect'||action==='camera705_inspect'||action==='camera706_inspect'||action==='camera707_inspect')return state();
  if(!original)return out({ok:false,error:'Original owner-reported Build 701 receipt required. HOLD.'},409);
  const note=String(form.get('owner_device_notes')||'').trim();
  const nonce=String(form.get('nonce')||'');
@@ -364,5 +403,5 @@ export async function handleCamera702({db,form,adminUser,id,token,live,ready701}
      independent_physical_phone_verified:false,
      unrecorded_upload_recovery_certified:false,publication_performed:false});
  }
- return out({ok:false,error:'Unsupported Build 702/703/704/705/706 action.'},400);
+ return out({ok:false,error:'Unsupported Build 702/703/704/705/706/707 action.'},400);
 }

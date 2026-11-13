@@ -360,6 +360,36 @@
  <p id="dd706RetentionResult" role="status" aria-live="polite">No owner financial retention receipt; actual accounting closure HOLD.</p>
 </section>
 
+<section class="card" id="dd707-finance" aria-labelledby="dd707-finance-title">
+ <p class="eyebrow">Build 707 · Ninth reviewer field acceptance and protected custody audit</p>
+ <h2 id="dd707-finance-title">Accept original independent review in the field, then audit retained evidence</h2>
+ <p>Owner-reported acceptance is bound to the original cryptographically verified ninth Ed25519 signature, Build 706 source receipt and SHA-256 retention manifest. It does not create a new independent signature or verify a physical device. The custody audit rechecks the original source and manifest, but cannot certify financial books or guarantee permanent storage.</p>
+ <button class="btn secondary" type="button" id="dd707FinanceRefresh">Refresh original ninth-signer and custody state</button>
+ <button class="btn secondary" type="button" id="dd707FinanceExport">Export authenticated 707 evidence audit</button>
+ <p id="dd707FinanceStatus" role="status" aria-live="polite">HOLD · Original Build 706 evidence not inspected.</p>
+ <p id="dd707FinanceStats" class="small">Ninth signed review and original financial retention required.</p>
+ <ol class="clean" id="dd707FinanceCases"><li>No verified source acceptance or custody audit.</li></ol>
+ <form id="dd707FieldForm">
+  <h3>1. Original owner field acceptance of ninth independent review</h3>
+  <label>Verified original ninth-signer review and protected retention receipt
+   <select id="dd707FieldSource" class="input" required><option value="">Refresh original Build 706 evidence</option></select></label>
+  <label>Owner field review notes (25–600 characters)
+   <textarea id="dd707FieldNote" class="input" rows="3" minlength="25" maxlength="600" required></textarea></label>
+  <label><input id="dd707FieldReviewed" type="checkbox" required> We reviewed the ninth signed off-platform report and its original retention SHA in the field. This is owner-reported review, not independent phone verification or financial closure.</label>
+  <button id="dd707FieldSubmit" class="btn secondary" type="submit">Record source-bound ninth-reviewer field acceptance</button>
+ </form>
+ <p id="dd707FieldResult" role="status" aria-live="polite">No owner field acceptance recorded. HOLD.</p>
+ <form id="dd707CustodyForm">
+  <h3>2. Protected original financial evidence custody audit</h3>
+  <label>Verified Build 707 field acceptance
+   <select id="dd707CustodySource" class="input" required><option value="">Record original field acceptance first</option></select></label>
+  <label>Owner custody and manifest inspection notes (25–600 characters)
+   <textarea id="dd707CustodyNote" class="input" rows="3" minlength="25" maxlength="600" required></textarea></label>
+  <label><input id="dd707CustodyReviewed" type="checkbox" required> We checked the current signed source, original Build 706 retained manifest SHA-256 and preserved HOLD state. This does not constitute external accounting close or a legal retention guarantee.</label>
+  <button id="dd707CustodySubmit" class="btn secondary" type="submit">Append independently read-back custody audit receipt</button>
+ </form>
+ <p id="dd707CustodyResult" role="status" aria-live="polite">No owner custody audit recorded. Financial books HOLD.</p>
+</section>
 <section class="card" id="dd705-finance" aria-labelledby="dd705-finance-title">
  <p class="eyebrow">Build 705 · Independently signed live posting continuity &amp; owner financial evidence review</p>
  <h2 id="dd705-finance-title">Verify a second live posting receipt and review source continuity</h2>
