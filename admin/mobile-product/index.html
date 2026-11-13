@@ -137,6 +137,17 @@
  <button class="btn secondary" type="button" id="dd704FollowupRecord">Record source-bound owner follow-up (media remains HOLD)</button>
  <p id="dd704FollowupResult" class="small" role="status" aria-live="polite">Original uploads remain on HOLD pending real media proof.</p>
 </section>
+<section class="card" id="dd705Recovery" style="margin-top:12px;padding:12px" aria-labelledby="dd705RecoveryTitle">
+ <p class="eyebrow">Build 705 · Original media follow-up recovery reconciliation</p>
+ <h3 id="dd705RecoveryTitle">Verify a followed-up original linked attachment</h3>
+ <p class="small">Only a previously escalated and followed-up linked photo/video can be reconciled using its exact D1 attachment and new R2 HEAD, after a fresh original owner phone re-attestation. Unrecorded uploads remain HOLD. A reconciliation receipt does not close the original case; explicitly use the Build 702 verified linked-case closure after inspecting the receipt.</p>
+ <button class="btn secondary" type="button" id="dd705RecoveryRefresh">Refresh original linked recovery evidence</button>
+ <p class="small" id="dd705RecoveryStatus" role="status" aria-live="polite">HOLD · Original recovery source not inspected.</p>
+ <label>Eligible original linked recovery<select class="input" id="dd705RecoverySource"><option value="">Refresh original followed-up case first</option></select></label>
+ <p class="small">Enter meaningful original-owner follow-up observations (25–600 characters) in the Build 702 notes field above.</p>
+ <button class="btn secondary" type="button" id="dd705RecoveryRecord">Record independently source-matched linked-media recovery evidence</button>
+ <p class="small" id="dd705RecoveryResult" role="status" aria-live="polite">No original recovery reconciled. No automatic case closure, media publication or phone witness.</p>
+</section>
 <p class="small" id="dd700ExportStatus" role="status" aria-live="polite">Owner field acceptance is NOT recorded until a real-phone trial and independent Cloudflare media readback are both complete. This is a local evidence export, not an automatic deployment gate.</p>
 </section>
 

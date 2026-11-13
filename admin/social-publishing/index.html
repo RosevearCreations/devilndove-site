@@ -306,6 +306,42 @@
 </section>
 
 
+<section class="card" id="dd705-finance" aria-labelledby="dd705-finance-title">
+ <p class="eyebrow">Build 705 · Independently signed live posting continuity &amp; owner financial evidence review</p>
+ <h2 id="dd705-finance-title">Verify a second live posting receipt and review source continuity</h2>
+ <p>Only a Build 704 independent source readback with original owner financial readiness is eligible. A second read-only HTTPS request must carry a fresh challenge and a later independently signed posting snapshot matching the exact original receipt and ledger digest. No browser-configured provider URL or key is accepted. A verified follow-up snapshot is not a transaction, audited profit, final accounting book closure or continuously CONNECTED evidence.</p>
+ <button type="button" class="btn secondary" id="dd705FinanceRefresh">Refresh exact original posting continuity</button>
+ <button type="button" class="btn secondary" id="dd705FinanceExport">Export protected Build 705 evidence</button>
+ <p id="dd705FinanceStatus" role="status" aria-live="polite">HOLD · Original financial source chain required.</p>
+ <p id="dd705FinanceStats" class="small">No second independently signed posting receipt.</p>
+ <ol id="dd705FinanceCases" class="clean"><li>Select the original financial campaign first.</li></ol>
+ <form id="dd705FinanceRenewForm">
+  <h3>1. Renew independently signed live posting evidence</h3>
+  <label>Original Build 704 signed source readback and owner readiness
+   <select class="input" id="dd705FinanceSource" required><option value="">Select eligible original signed source receipt</option></select></label>
+  <label>Owner continuation reason (25–600 characters)
+   <textarea class="input" id="dd705FinanceRenewNote" minlength="25" maxlength="600" rows="3" required></textarea></label>
+  <label><input type="checkbox" id="dd705FinanceRenewReviewed" required> We reviewed the original exact posting, independent signer and source revision. A new signed read-only snapshot is a source-evidence check, not a book closure.</label>
+  <button type="submit" class="btn secondary" id="dd705FinanceRenewSubmit">Obtain fresh independent posting continuity receipt</button>
+ </form>
+ <p id="dd705FinanceRenewResult" role="status" aria-live="polite">No second independently signed source receipt admitted.</p>
+ <form id="dd705FinanceOwnerForm">
+  <h3>2. Original owner financial evidence review</h3>
+  <label>Fresh independently signed posting continuity receipt
+   <select class="input" id="dd705FinanceOwnerSource" required><option value="">Select source-bound signed renewal receipt</option></select></label>
+  <label>Original owner decision
+   <select class="input" id="dd705FinanceDecision">
+    <option value="hold_posting_continuity_drift">HOLD — posting continuity / ledger evidence discrepancy</option>
+    <option value="recommend_manual_financial_closure_review">Recommend final manual financial closure evidence review — books still HOLD</option>
+   </select></label>
+  <label>Original owner source-bound evidence review notes (25–600 characters)
+   <textarea class="input" id="dd705FinanceOwnerNote" minlength="25" maxlength="600" rows="3" required></textarea></label>
+  <label><input type="checkbox" id="dd705FinanceOwnerReviewed" required> We reviewed both original independently signed live posting receipts and current source exceptions; this is a protected financial evidence decision, not a completed accounting close or certification.</label>
+  <button type="submit" class="btn secondary" id="dd705FinanceOwnerSubmit">Record owner financial evidence decision</button>
+ </form>
+ <p id="dd705FinanceOwnerResult" role="status" aria-live="polite">No protected original owner evidence review receipt recorded.</p>
+</section>
+
 <section class="card" id="dd704-finance" aria-labelledby="dd704-finance-title">
 <p class="eyebrow">Build 704 · Live posting source readback and financial closure readiness</p>
 <h2 id="dd704-finance-title">Independently confirm a live bookkeeping posting source</h2>

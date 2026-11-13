@@ -62,12 +62,23 @@ export function ownerFollowupEligible704(caseInfo,escalation,prior,now=Date.now(
    escalated<=now+300000&&now-escalated>=-300000;
 }
 
+// Build 705: recording recovery evidence is not the same as closing the case.
+export function canReconcileLinked705(open,followup,latest,media,live,now=Date.now()){
+ const started=isoTime(followup?.created_at),attested=isoTime(latest?.data?.issued_at);
+ return open?.kind==='linked'&&!open.closed&&
+   !!followup?.data&&Number(followup.data.open_receipt_id)===Number(open.receipt_id)&&
+   Number(followup.data.escalation_receipt_id)>Number(open.receipt_id)&&
+   Number(followup.admin_action_audit_id)>Number(followup.data.escalation_receipt_id)&&
+   Number.isFinite(started)&&started<=now+300000&&
+   Number.isFinite(attested)&&attested>=started&&
+   canCloseMedia702(open,media,latest?.data,live,now);
+}
 export async function handleCamera702({db,form,adminUser,id,token,live,ready701}){
  const action=String(form.get('action')||'');
  const auditRows=await db.prepare(
  "SELECT admin_action_audit_id,action_type,created_at,details_json FROM admin_action_audit "+
  "WHERE target_type='product' AND target_id=? AND actor_user_id=? "+
- "AND action_type IN ('camera701_owner_field_receipt','camera702_owner_reattest','camera702_media_issue_open','camera702_media_issue_close','camera703_media_aging_escalation','camera704_media_owner_followup') "+
+ "AND action_type IN ('camera701_owner_field_receipt','camera702_owner_reattest','camera702_media_issue_open','camera702_media_issue_close','camera703_media_aging_escalation','camera704_media_owner_followup','camera705_media_recovery_reconciled') "+
  "ORDER BY admin_action_audit_id DESC LIMIT 81").bind(id,adminUser.user_id).all();
  const raw=Array.isArray(auditRows?.results)?auditRows.results:[];
  if(raw.length>80)return out({ok:false,error:'Unbounded original device receipt history; independent review required. HOLD.'},409);
@@ -92,15 +103,25 @@ export async function handleCamera702({db,form,adminUser,id,token,live,ready701}
    x.data?.original_701_receipt_id===originalId);
  const followupRows=history.filter(x=>x.action_type==='camera704_media_owner_followup'&&
    x.data?.original_701_receipt_id===originalId);
+ const recoveryRows=history.filter(x=>x.action_type==='camera705_media_recovery_reconciled'&&
+   x.data?.original_701_receipt_id===originalId);
  const aging=cases.map(x=>{
    const esc=escalationRecords.find(e=>Number(e.data?.open_receipt_id)===x.receipt_id);
    const followup=followupRows.find(y=>Number(y.data?.open_receipt_id)===x.receipt_id&&
      Number(y.data?.escalation_receipt_id)===Number(esc?.admin_action_audit_id));
+   const recovery=recoveryRows.find(y=>Number(y.data?.open_receipt_id)===x.receipt_id&&
+     Number(y.data?.followup_receipt_id)===Number(followup?.admin_action_audit_id));
+   const current=live?.media?.find(m=>m.kind===x.media_kind&&
+     Number(m.attachment_id)===Number(x.attachment_id));
    return {...ageMedia703(x),escalated:!!esc,
      escalation_receipt_id:Number(esc?.admin_action_audit_id||0),
      followup_receipt_id:Number(followup?.admin_action_audit_id||0),
      followup_disposition:followup?.data?.followup_disposition||null,
-     followup_due:ownerFollowupEligible704(x,esc,followupRows)};
+     followup_due:ownerFollowupEligible704(x,esc,followupRows),
+     recovery_receipt_id:Number(recovery?.admin_action_audit_id||0),
+     linked_recovery_reconciliation_ready:!recovery&&
+       canReconcileLinked705({...x,original_701_receipt_id:originalId},
+         followup,latest,current,live)};
  });
  const state=()=>out({ok:true,status:original?'OWNER_701_SOURCE_FOUND':'HOLD_ORIGINAL_PHONE_701_REQUIRED',
   product_id:id,original_701_receipt_id:originalId,
@@ -111,9 +132,11 @@ export async function handleCamera702({db,form,adminUser,id,token,live,ready701}
   escalation_due_count:aging.filter(x=>x.escalation_due&&!x.escalated).length,
   critical_aging_count:aging.filter(x=>x.status==='CRITICAL_ORIGINAL_MEDIA_EXCEPTION_AGED_48H').length,
   owner_followup_due_704:aging.filter(x=>x.followup_due).length,
+  linked_recovery_ready_705:aging.filter(x=>x.linked_recovery_reconciliation_ready).length,
+  reconciled_linked_count_705:aging.filter(x=>x.recovery_receipt_id>0).length,
   independently_authenticated_phone:false,
   unrecorded_upload_recovery_certified:false,publication_performed:false});
- if(action==='camera702_inspect'||action==='camera703_inspect'||action==='camera704_inspect')return state();
+ if(action==='camera702_inspect'||action==='camera703_inspect'||action==='camera704_inspect'||action==='camera705_inspect')return state();
  if(!original)return out({ok:false,error:'Original owner-reported Build 701 receipt required. HOLD.'},409);
  const note=String(form.get('owner_device_notes')||'').trim();
  const nonce=String(form.get('nonce')||'');
@@ -237,5 +260,33 @@ export async function handleCamera702({db,form,adminUser,id,token,live,ready701}
      receipt_id:receiptId,open_receipt_id:caseId,
      original_media_recovery_verified:false,publication_performed:false});
  }
- return out({ok:false,error:'Unsupported Build 702/703/704 action.'},400);
+ if(action==='camera705_reconcile_linked'){
+   const caseId=Number(form.get('open_receipt_id')),
+     followupId=Number(form.get('followup_receipt_id')),
+     item=cases.find(x=>x.receipt_id===caseId&&!x.closed),
+     followup=followupRows.find(x=>Number(x.admin_action_audit_id)===followupId&&
+       Number(x.data?.open_receipt_id)===caseId),
+     media=live?.media?.find(x=>x.kind===item?.media_kind&&
+       Number(x.attachment_id)===Number(item?.attachment_id));
+   if(!item||!followup||!goodId(latest?.admin_action_audit_id)||
+     recoveryRows.some(x=>Number(x.data?.open_receipt_id)===caseId)||
+     !canReconcileLinked705({...item,original_701_receipt_id:originalId},
+       followup,latest,media,live))
+     return out({ok:false,error:'An open original linked case, unique 704 follow-up, subsequent owner re-attestation and exact current D1/R2 HEAD are required. Unrecorded uploads remain HOLD.'},409);
+   const receipt=await append('camera705_media_recovery_reconciled',{
+     build:705,open_receipt_id:caseId,followup_receipt_id:followupId,
+     original_reattest_receipt_id:Number(latest.admin_action_audit_id),
+     recovery_kind:'LINKED_D1_ATTACHMENT_R2_HEAD_VERIFIED_ONLY',
+     media_kind:item.media_kind,attachment_id:item.attachment_id,
+     r2_key:item.r2_key,r2_bytes:media.r2_bytes,
+     unrecorded_upload_recovery_verified:false,
+     independent_physical_device_witness:false,original_issue_closed:false,
+     status:'LINKED_RECOVERY_EVIDENCE_RECONCILED_FINAL_OWNER_CASE_CLOSE_HOLD'
+   },'reconcile');
+   return out({ok:true,status:'LINKED_RECOVERY_EVIDENCE_RECONCILED_FINAL_OWNER_CASE_CLOSE_HOLD',
+     receipt_id:receipt,open_receipt_id:caseId,
+     unrecorded_upload_recovery_verified:false,original_issue_closed:false,
+     publication_performed:false});
+ }
+ return out({ok:false,error:'Unsupported Build 702/703/704/705 action.'},400);
 }
