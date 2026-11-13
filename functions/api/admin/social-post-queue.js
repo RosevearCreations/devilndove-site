@@ -5005,8 +5005,10 @@ export async function assessFinance702(current,prior,reviewRows,signer={},now=Da
      recorded-reviewTime<=86400000&&
      !seen.has(reviewId)&&decision&&
      Number.isSafeInteger(remaining)&&remaining>=0&&remaining<=10000&&
-     (d.decision==='hold_discrepancy'||remaining===0)&&
-     row.attempt_status==='independent_bookkeeping_closure_decision_702'&&
+     (d.decision==='hold_discrepancy'||remaining===0&&current?.master_fresh===true&&
+       current?.history_complete===true&&Array.isArray(current?.open_cases)&&
+       current.open_cases.length===0)&&
+     row.attempt_status='independent_bookkeeping_closure_decision_702'&&
      d.original_live_source_receipt_id===match.original_live_source_receipt_id&&
      d.older_receipt_id===match.older_receipt_id&&d.newer_receipt_id===match.newer_receipt_id&&
      d.external_document_sha256===match.external_document_sha256&&
@@ -5103,7 +5105,9 @@ async function ownerBookkeepingDecision702(db,env,user,p){
    p.expected_fingerprint_sha256!==current.fingerprint_sha256||
    !['hold_discrepancy','recommend_owner_manual_close'].includes(decision)||
    !Number.isSafeInteger(remaining)||remaining<0||remaining>10000||
-   decision==='recommend_owner_manual_close'&&remaining!==0||
+   decision==='recommend_owner_manual_close'&&(remaining!==0||
+     current.master_fresh!==true||current.history_complete!==true||
+     !Array.isArray(current.open_cases)||current.open_cases.length!==0)||
    note.length<20||note.length>400||!nonce684(nonce)||
    !fresh684(issued,1200000)||p.independent_closure_signer_id!==signer||
    !/^[A-Za-z0-9+/_=-]{80,120}$/.test(signature)||
