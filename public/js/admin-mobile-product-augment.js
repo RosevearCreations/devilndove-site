@@ -695,6 +695,8 @@ document.addEventListener('DOMContentLoaded',()=>{
     if($('dd703AgeCase'))$('dd703AgeCase').replaceChildren(new Option('Read original cases first',''));
     if($('dd704FollowupStatus'))$('dd704FollowupStatus').textContent='HOLD · Read original escalated cases first.';
     if($('dd704FollowupSource'))$('dd704FollowupSource').replaceChildren(new Option('Refresh original saved draft',''));
+    if($('dd705RecoveryStatus'))$('dd705RecoveryStatus').textContent='HOLD · Reinspect the original owner-linked recovery.';
+    if($('dd705RecoverySource'))$('dd705RecoverySource').replaceChildren(new Option('Refresh original recovery first',''));
   }
   async function send702(action,fields={}){
     if(!window.DDAuth?.isLoggedIn?.()||!window.DDAuth.apiFetch)
@@ -707,6 +709,23 @@ document.addEventListener('DOMContentLoaded',()=>{
     for(const [k,v] of Object.entries(fields))form.set(k,String(v));
     return responseJson(await window.DDAuth.apiFetch('/api/admin/mobile-create-product',
       {method:'POST',body:form}),'Protected original device evidence unavailable.');
+  }
+  function draw705(v){
+    const select=$('dd705RecoverySource'),status=$('dd705RecoveryStatus');
+    if(!select||!status)return;
+    select.replaceChildren(new Option('Choose original confirmed linked recovery',''));
+    for(const age of v.exception_aging_703||[]){
+      const caseInfo=(v.exceptions||[]).find(x=>x.receipt_id===age.receipt_id);
+      if(caseInfo&&!caseInfo.closed&&caseInfo.kind==='linked'&&
+         age.linked_recovery_reconciliation_ready&&!age.recovery_receipt_id)
+        select.add(new Option('Original '+caseInfo.media_kind+' #'+caseInfo.attachment_id+
+          ' · case #'+caseInfo.receipt_id+' · follow-up #'+age.followup_receipt_id,
+          age.receipt_id+'|'+age.followup_receipt_id));
+    }
+    status.textContent='Fresh owner re-attested D1/R2 linked recoveries ready: '+
+      (v.linked_recovery_ready_705||0)+' · source-matched reconciliation receipts '+
+      (v.reconciled_linked_count_705||0)+
+      '. Unrecorded uploads are not independently recovered.';
   }
   function draw704(v){
     const select=$('dd704FollowupSource'),status=$('dd704FollowupStatus');
@@ -773,6 +792,7 @@ document.addEventListener('DOMContentLoaded',()=>{
     }
     draw703(v);
     draw704(v);
+    draw705(v);
   }
   async function inspect702(){
     const data=await send702('camera702_inspect');
@@ -780,6 +800,29 @@ document.addEventListener('DOMContentLoaded',()=>{
       throw Error('Original draft changed during protected readback. HOLD.');
     show702(data);return data;
   }
+  $('dd705RecoveryRefresh')?.addEventListener('click',async()=>{
+    try{await inspect702();}
+    catch(error){$('dd705RecoveryStatus').textContent='HOLD · '+error.message;}
+  });
+  $('dd705RecoveryRecord')?.addEventListener('click',async()=>{
+    const button=$('dd705RecoveryRecord');button.disabled=true;
+    try{
+      const [openText,followupText]=String($('dd705RecoverySource').value||'').split('|');
+      const openId=Number(openText),followupId=Number(followupText);
+      const source=gate702?.exception_aging_703?.find(x=>
+        x.receipt_id===openId&&x.followup_receipt_id===followupId&&
+        x.linked_recovery_reconciliation_ready&&!x.recovery_receipt_id);
+      if(!source||!Number.isSafeInteger(openId)||openId<1||
+        !Number.isSafeInteger(followupId)||followupId<1)
+        throw Error('Choose one original linked-media recovery with a fresh re-attestation.');
+      const result=await action702('camera705_reconcile_linked',{
+        open_receipt_id:openId,followup_receipt_id:followupId});
+      $('dd705RecoveryResult').textContent=result.status+
+        ' · original case #'+openId+
+        ' remains open until protected Build 702 case closure. Unrecorded uploads HOLD.';
+    }catch(error){$('dd705RecoveryResult').textContent='HOLD · '+error.message;}
+    finally{button.disabled=false;}
+  });
   $('dd704FollowupRefresh')?.addEventListener('click',async()=>{
     try{await inspect702();}
     catch(error){$('dd704FollowupStatus').textContent='HOLD · '+error.message;}

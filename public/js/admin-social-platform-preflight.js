@@ -1619,6 +1619,50 @@ select699();
 
 
 
+
+let audit705=null;
+function draw705(data){
+ if(!$('dd705-finance'))return;
+ const v=data.financial705||null;audit705=v;
+ $('dd705FinanceStatus').textContent=v?.campaign_queue_id?
+   v.status+' · original posting history '+(v.history_complete?'COMPLETE':'HOLD')+
+     ' · actual financial book close HOLD':
+   'HOLD · Select and refresh original financial campaign.';
+ $('dd705FinanceStats').textContent=v?.campaign_queue_id?
+   'Independent source '+(v.independent_source_configured?'CONFIGURED':'HOLD')+
+   ' · eligible '+v.eligible_count+
+   ' · signed fresh receipts '+v.continuity_verified_count+
+   ' · owner reviewed '+v.owner_reviewed_count+
+   ' · invalid '+v.invalid_count:
+   'No original signed live posting ready for continuity review.';
+ const list=$('dd705FinanceCases'),renew=$('dd705FinanceSource'),
+   owner=$('dd705FinanceOwnerSource');
+ list.replaceChildren();
+ renew.replaceChildren(new Option('Choose original signed posting readback',''));
+ owner.replaceChildren(new Option('Choose second signed source receipt',''));
+ for(const x of v?.items||[]){
+   const li=document.createElement('li');
+   li.textContent='Posting #'+x.posting_receipt_id+' · original live #'+x.live_receipt_id+
+     ' · owner readiness #'+x.financial_readiness_receipt_id+
+     ' · second signed source '+(x.continuity_verified?
+       'VERIFIED #'+x.continuity_receipt_id:'HOLD')+
+     ' · owner evidence review '+(x.review_receipt_id||'pending')+
+     ' · bookkeeping closure HOLD';
+   list.appendChild(li);
+   if(!x.continuity_verified&&v.history_complete)
+     renew.add(new Option('Original independent live receipt #'+x.live_receipt_id,
+       String(x.live_receipt_id)));
+   if(x.continuity_verified&&!x.review_decision&&v.history_complete)
+     owner.add(new Option('Fresh independent continuity #'+x.continuity_receipt_id,
+       String(x.continuity_receipt_id)));
+ }
+ if(!list.childElementCount){
+   const li=document.createElement('li');
+   li.textContent='No independently signed original posting with verified Build 704 owner readiness.';
+   list.appendChild(li);
+ }
+}
+
 let audit704=null;
 function draw704(data){
  if(!$('dd704-finance'))return;
@@ -1909,7 +1953,7 @@ draw698(d);
 draw699(d);
 draw700(d);
 draw701(d);
-draw702(d);draw703(d);draw704(d);
+draw702(d);draw703(d);draw704(d);draw705(d);
 if(!id)return;
 if(!v||v.queue_id!==id)throw Error('Fresh exact financial evidence was not returned.');
 state=v;
@@ -1937,7 +1981,7 @@ await refresh();
 document.addEventListener('DOMContentLoaded',()=>{
 if(!$('dd685-finance'))return;
 (async()=>{try{
-const d=await api(null);draw686(d);draw687(d);draw688(d);draw689(d);draw690(d);draw691(d);draw692(d);draw693(d);draw694(d);draw695(d);draw696(d);draw697(d);draw698(d);draw699(d);draw700(d);draw701(d);draw702(d);draw703(d);draw704(d);const seen=new Set();
+const d=await api(null);draw686(d);draw687(d);draw688(d);draw689(d);draw690(d);draw691(d);draw692(d);draw693(d);draw694(d);draw695(d);draw696(d);draw697(d);draw698(d);draw699(d);draw700(d);draw701(d);draw702(d);draw703(d);draw704(d);draw705(d);const seen=new Set();
 for(const q of d.queue||[])if(q.utm_campaign&&!seen.has(q.social_post_queue_id)){
 seen.add(q.social_post_queue_id);
 $('dd685Campaign').add(new Option(q.utm_campaign+' · #'+q.social_post_queue_id,q.social_post_queue_id));
@@ -1966,6 +2010,69 @@ $('dd699Refresh').addEventListener('click',()=>void refresh());
 
 
 
+
+
+$('dd705FinanceRefresh').addEventListener('click',()=>void refresh());
+$('dd705FinanceRenewForm').addEventListener('submit',async event=>{
+ event.preventDefault();const button=$('dd705FinanceRenewSubmit');button.disabled=true;
+ try{
+   const originalId=Number($('dd705FinanceSource').value),
+    item=(audit705?.items||[]).find(x=>x.live_receipt_id===originalId&&!x.continuity_verified),
+    note=$('dd705FinanceRenewNote').value.trim();
+   if(!state?.queue_id||!audit705?.history_complete||!audit705.independent_source_configured||
+      !item||!$('dd705FinanceRenewReviewed').checked||note.length<25||note.length>600)
+     throw Error('Original signed source, Build 704 owner readiness and explicit original owner continuity reason required.');
+   const d=await api({action:'live_posting_continuity_705',
+    social_post_queue_id:state.queue_id,prior_live_receipt_id:originalId,
+    expected_source_revision:state.source_revision,
+    expected_fingerprint_sha256:state.fingerprint_sha256,
+    owner_reviewed:true,resolution_note:note},state.queue_id);
+   $('dd705FinanceRenewResult').textContent=d.result.status+
+     ' · fresh independent signed source receipt #'+d.result.receipt_id+
+     '. Actual financial bookkeeping close remains HOLD.';
+   $('dd705FinanceRenewReviewed').checked=false;await refresh();
+ }catch(error){$('dd705FinanceRenewResult').textContent='HOLD · '+error.message;}
+ finally{button.disabled=false;}
+});
+$('dd705FinanceOwnerForm').addEventListener('submit',async event=>{
+ event.preventDefault();const button=$('dd705FinanceOwnerSubmit');button.disabled=true;
+ try{
+   const continuityId=Number($('dd705FinanceOwnerSource').value),
+     original=(audit705?.items||[]).find(x=>x.continuity_receipt_id===continuityId&&
+        x.continuity_verified&&!x.review_decision),
+     decision=$('dd705FinanceDecision').value,
+     note=$('dd705FinanceOwnerNote').value.trim();
+   if(!original||!audit705.history_complete||
+     !['hold_posting_continuity_drift','recommend_manual_financial_closure_review'].includes(decision)||
+     !$('dd705FinanceOwnerReviewed').checked||note.length<25||note.length>600)
+     throw Error('Select the exact fresh signed receipt and explicitly review the original owner financial evidence.');
+   const d=await api({action:'owner_financial_evidence_review_705',
+      social_post_queue_id:state.queue_id,continuity_receipt_id:continuityId,
+      expected_posting_document_sha256:original.posting_document_sha256,
+      expected_source_revision:state.source_revision,
+      expected_fingerprint_sha256:state.fingerprint_sha256,
+      owner_reviewed:true,decision,resolution_note:note},state.queue_id);
+   $('dd705FinanceOwnerResult').textContent=d.result.status+
+      ' · protected owner review receipt #'+d.result.receipt_id+
+      ' · actual financial books remain HOLD.';
+   $('dd705FinanceOwnerReviewed').checked=false;await refresh();
+ }catch(error){$('dd705FinanceOwnerResult').textContent='HOLD · '+error.message;}
+ finally{button.disabled=false;}
+});
+$('dd705FinanceExport').addEventListener('click',async()=>{
+ try{
+   const id=Number($('dd685Campaign').value);
+   if(!id||id!==state?.queue_id||!window.DDAuth?.apiFetch)
+     throw Error('Authenticated original owner and exact current campaign required.');
+   const res=await window.DDAuth.apiFetch(endpoint+'?export=financial705&campaign_queue_id='+encodeURIComponent(id));
+   if(!res.ok)throw Error('Protected signed continuity export rejected. HTTP '+res.status);
+   const blob=await res.blob(),url=URL.createObjectURL(blob),a=document.createElement('a');
+   a.href=url;a.download='devilndove-posting-continuity-'+id+'-705.json';
+   document.body.appendChild(a);a.click();a.remove();
+   setTimeout(()=>URL.revokeObjectURL(url),1000);
+   $('dd705FinanceOwnerResult').textContent='Source-bound signed posting continuity and owner evidence exported. Actual books remain HOLD.';
+ }catch(error){$('dd705FinanceOwnerResult').textContent='HOLD · '+error.message;}
+});
 
 $('dd704FinanceRefresh').addEventListener('click',()=>void refresh());
 $('dd704FinanceLiveForm').addEventListener('submit',async event=>{

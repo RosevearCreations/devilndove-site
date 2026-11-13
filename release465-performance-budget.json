@@ -16,7 +16,7 @@
     "max_js_bytes": 600000,
     "max_css_bytes": 500000,
     "max_html_bytes": 500000,
-    "max_runtime_source_bytes": 19179000,
+    "max_runtime_source_bytes": 19199000,
     "max_runtime_source_files": 1855,
     "max_inline_data_uri_bytes": 650000
   },
@@ -33,6 +33,22 @@
     "production_mutation": false
   },
   "budget_reviews": [
+    {
+      "build": 705,
+      "date": "2026-11-12",
+      "scope": "Original 704 follow-up D1/R2 recovery reconciliation, second nonce-bound independently signed live posting source readback and owner financial evidence review",
+      "prior_limit_bytes": 19179000,
+      "new_limit_bytes": 19199000,
+      "delta_bytes": 20000,
+      "delta_percent": 0.104,
+      "prior_measured_runtime_source_bytes": 19150360,
+      "observed_runtime_files_last_release": 1855,
+      "source_file_limit_unchanged": 1855,
+      "review_reason": "Narrow +20,000-byte (~0.104%) reviewed allowance over the Build 704 retained ceiling for same-owner source-bound R2 recovery proof, second signed provider GET and owner financial review panels; expected cumulative delta remains below 19,199,000 bytes. Runtime-file count, JS/CSS/HTML individual caps, zero-D1 path and exact-SHA Preview/Production gates remain unchanged. No new D1 migration, provider write, upload repair, automatic book close, financial certification or CONNECTED declaration.",
+      "external_provider_live_continuity": "HOLD_UNTIL_ORIGINAL_INDEPENDENT_SIGNED_PROVIDER_READBACK",
+      "original_case_closure": "HOLD_REQUIRES_EXPLICIT_OWNER_CASE_CLOSURE",
+      "bookkeeping_actually_closed": false
+    },
     {
       "build": 704,
       "date": "2026-11-12",
