@@ -169,6 +169,23 @@
  <p class="small" id="dd707MediaAuditStatus" role="status" aria-live="polite">HOLD · No current source readback.</p>
  <ol class="clean" id="dd707MediaAuditCases"><li>Refresh the same original saved camera draft.</li></ol>
 </section>
+<section class="card" id="dd709MediaRecurrence" style="margin-top:12px;padding:12px" aria-labelledby="dd709RecurrenceTitle">
+ <p class="eyebrow">Build 709 · Original signed-media recurrence watch</p>
+ <h3 id="dd709RecurrenceTitle">Monitor recurrence after Build 708 media restoration</h3>
+ <p class="small">Only on-demand original server D1/R2 HEAD rechecks; no unattended monitoring, automatic repair or independent phone witness. A recurrent mismatch is recorded only after a proven original Build 708 recovery. After 24 hours, an owner can record a source-confirmed escalation (48 hours critical).</p>
+ <button class="btn secondary" id="dd709MediaRefresh" type="button">Recheck original signed media recurrence</button>
+ <p id="dd709MediaStatus" class="small" role="status" aria-live="polite">HOLD · Original recovered media not yet inspected.</p>
+ <label>New observed drift after original 708 restored source
+  <select class="input" id="dd709RecurrenceSource"><option value="">Recheck original recovered D1/R2 source</option></select></label>
+ <label><input id="dd709RecurrenceReviewed" type="checkbox"> We inspected the original recovery and actual current server mismatch. Unrecorded media remains HOLD.</label>
+ <button class="btn secondary" id="dd709RecurrenceRecord" type="button">Record original signed-media recurrence</button>
+ <label>Existing 24+ hour recurring signed-media exception
+  <select class="input" id="dd709EscalationSource"><option value="">No currently verified escalation due</option></select></label>
+ <label><input id="dd709EscalationReviewed" type="checkbox"> We checked the original signed key/bytes, recurring case age and fresh server mismatch. No automated external escalation was sent.</label>
+ <button class="btn secondary" id="dd709EscalationRecord" type="button">Record owner recurrence escalation</button>
+ <p id="dd709MediaResult" class="small" role="status" aria-live="polite">Write original owner device notes (25–600 characters) in the existing evidence notes field above.</p>
+ <ol class="clean" id="dd709MediaCases"><li>No recurrence yet inspected.</li></ol>
+</section>
 <section class="card" id="dd708MediaRecovery" style="margin-top:12px;padding:12px" aria-labelledby="dd708MediaRecoveryTitle">
  <p class="eyebrow">Build 708 · Independent signed-media drift exception and recovery readback</p>
  <h3 id="dd708MediaRecoveryTitle">Record an original signed-media mismatch; verify only exact restored source</h3>
