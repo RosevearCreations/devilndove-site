@@ -148,6 +148,19 @@
  <button class="btn secondary" type="button" id="dd705RecoveryRecord">Record independently source-matched linked-media recovery evidence</button>
  <p class="small" id="dd705RecoveryResult" role="status" aria-live="polite">No original recovery reconciled. No automatic case closure, media publication or phone witness.</p>
 </section>
+<section class="card" id="dd706Signoff" style="margin-top:12px;padding:12px" aria-labelledby="dd706SignoffTitle">
+ <p class="eyebrow">Build 706 · Original owner linked-media recovery sign-off</p>
+ <h3 id="dd706SignoffTitle">Sign off a recovered and explicitly closed original attachment</h3>
+ <p class="small">Original owner sign-off requires a Build 704 follow-up, protected Build 705 recovery receipt, the later explicit Build 702 linked-case closure receipt, fresh original device re-attestation and currently confirmed exact D1/R2 HEAD. This never independently witnesses the phone or recovers unrecorded uploads. Sign-off does not publish media.</p>
+ <button class="btn secondary" type="button" id="dd706SignoffRefresh">Refresh original recovery and explicit closure receipts</button>
+ <p id="dd706SignoffStatus" class="small" role="status" aria-live="polite">HOLD · No original linked recovery sign-off evidence inspected.</p>
+ <label>Original linked recovery and closure source
+ <select class="input" id="dd706SignoffSource"><option value="">Refresh exact original case first</option></select></label>
+ <label><input type="checkbox" id="dd706SignoffReviewed"> We have checked the linked R2 attachment, original recovery and explicit closure receipts. Physical phone verification, unrecorded uploads and publication remain separate.</label>
+ <p class="small">Record a 25–600-character original owner reason in the Build 702 device notes field above.</p>
+ <button class="btn secondary" type="button" id="dd706SignoffRecord">Record original owner sign-off — linked recovery only</button>
+ <p id="dd706SignoffResult" class="small" role="status" aria-live="polite">No new sign-off receipt; missing and unrecorded media remain on HOLD.</p>
+</section>
 <p class="small" id="dd700ExportStatus" role="status" aria-live="polite">Owner field acceptance is NOT recorded until a real-phone trial and independent Cloudflare media readback are both complete. This is a local evidence export, not an automatic deployment gate.</p>
 </section>
 

@@ -306,6 +306,60 @@
 </section>
 
 
+<section class="card" id="dd706-finance" aria-labelledby="dd706-finance-title">
+ <p class="eyebrow">Build 706 · Ninth independent review and protected financial evidence retention</p>
+ <h2 id="dd706-finance-title">Review bookkeeping continuity exceptions and retain original closure evidence</h2>
+ <p>The ninth independently enrolled verifier signs an exception assessment of the exact original Build 705 two-readback chain and owner decision. A signed review may record an unresolved exception or no new discrepancy observed; neither is proof of final accounting closure. Only original owner-authenticated evidence can be retained. External review packets are referenced by SHA-256, not uploaded or independently fetched by this screen.</p>
+ <button class="btn secondary" type="button" id="dd706FinanceRefresh">Refresh original ninth-signer continuity gate</button>
+ <button class="btn secondary" type="button" id="dd706FinanceExport">Export original protected exception and retention receipts</button>
+ <p id="dd706FinanceStatus" role="status" aria-live="polite">HOLD · Independent review gate not inspected.</p>
+ <p id="dd706FinanceStats" class="small">Original Build 705 signed continuity and independently enrolled ninth verifier required.</p>
+ <ol class="clean" id="dd706FinanceCases"><li>No ninth independent review or retained evidence verified.</li></ol>
+ <form id="dd706FinanceReviewForm">
+  <h3>1. Original independent bookkeeping exception review</h3>
+  <label>Original second live posting and owner review receipt
+   <select class="input" id="dd706ReviewSource" required><option value="">Refresh original signed Build 705 review first</option></select></label>
+  <label>External review packet SHA-256 (64 hexadecimal characters)
+   <input class="input" id="dd706ReviewDigest" pattern="[a-fA-F0-9]{64}" maxlength="64" minlength="64" required placeholder="Independent review packet's SHA-256"/></label>
+  <label>Independent reviewer disposition
+   <select class="input" id="dd706ReviewDisposition">
+    <option value="hold_unresolved_continuity_exception">HOLD — bookkeeping continuity exception still unresolved</option>
+    <option value="no_new_continuity_exception_observed">Independent review found no new continuity discrepancy (books still HOLD)</option>
+   </select></label>
+  <label>Server-enrolled ninth verifier identity
+   <input class="input" id="dd706ReviewSigner" readonly placeholder="Independent ninth verifier not enrolled"/></label>
+  <label>Fresh independently generated challenge nonce
+   <input class="input" id="dd706ReviewNonce" required placeholder="Off-platform ninth verifier review nonce"/></label>
+  <label>Fresh issued-at time in UTC ISO-8601
+   <input class="input" id="dd706ReviewIssued" required placeholder="2026-11-13T14:00:00.000Z"/></label>
+  <button class="btn secondary" type="button" id="dd706ReviewPrepare">Prepare canonical ninth-signer review claim (no private key here)</button>
+  <label>Canonical claim for off-platform independent reviewer signature
+   <textarea class="input" id="dd706ReviewClaim" rows="5" readonly></textarea></label>
+  <label>Independent Ed25519 detached signature (base64url)
+   <textarea class="input" id="dd706ReviewSignature" rows="2" required placeholder="Original ninth independent verifier signed off-platform"></textarea></label>
+  <label>Original owner reviewed source and reason (25–600 characters)
+   <textarea class="input" id="dd706ReviewNote" rows="3" minlength="25" maxlength="600" required></textarea></label>
+  <label><input type="checkbox" id="dd706ReviewReviewed" required> We verified the original two live posting receipts, exact source, original owner review and ninth independent signature. Neither a no-exception review nor a signature certifies book closure.</label>
+  <button type="submit" class="btn secondary" id="dd706ReviewSubmit">Admit independently signed exception review</button>
+ </form>
+ <p id="dd706ReviewResult" role="status" aria-live="polite">No ninth-signer review admitted. HOLD.</p>
+ <form id="dd706RetentionForm">
+  <h3>2. Original owner financial closure evidence retention</h3>
+  <label>Independently signed ninth exception review receipt
+   <select class="input" id="dd706RetentionSource" required><option value="">Choose ninth-signer review receipt</option></select></label>
+  <label>Owner retention decision
+   <select class="input" id="dd706RetentionDisposition">
+    <option value="retain_exception_on_hold">Retain source-bound unresolved exception on HOLD</option>
+    <option value="retain_for_final_manual_financial_review">Retain exact source-bound evidence for separate manual final financial review (books still HOLD)</option>
+   </select></label>
+  <label>Owner record retention reason and custody (25–600 characters)
+   <textarea class="input" id="dd706RetentionNote" rows="3" minlength="25" maxlength="600" required></textarea></label>
+  <label><input type="checkbox" id="dd706RetentionReviewed" required> We inspected ninth-signer original review and source pins. Retention is an append-only D1 receipt plus SHA-256 manifest; permanent storage, external bookkeeping closure and legal retention duration are not promised.</label>
+  <button type="submit" class="btn secondary" id="dd706RetentionSubmit">Append owner-retained financial evidence digest</button>
+ </form>
+ <p id="dd706RetentionResult" role="status" aria-live="polite">No owner financial retention receipt; actual accounting closure HOLD.</p>
+</section>
+
 <section class="card" id="dd705-finance" aria-labelledby="dd705-finance-title">
  <p class="eyebrow">Build 705 · Independently signed live posting continuity &amp; owner financial evidence review</p>
  <h2 id="dd705-finance-title">Verify a second live posting receipt and review source continuity</h2>
