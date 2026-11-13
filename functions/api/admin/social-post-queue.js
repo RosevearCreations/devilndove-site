@@ -5881,6 +5881,7 @@ export async function assessFinance705(current,prior,renewalRows,ownerRows,signe
   if(accepted){
     ownerSeen.add(original.continuity_receipt_id);
     original.review_receipt_id=receipt;original.review_decision=d.decision;
+    original.review_recorded_at=row.attempted_at;
   }else ownerInvalid++;
   ownerHistory.push({receipt_id:receipt,continuity_receipt_id:Number(d.continuity_receipt_id),
     owner_evidence_verified:accepted,decision:accepted?d.decision:null});
@@ -6157,7 +6158,7 @@ export async function assessFinance706(current,prior,reviewRows,retentionRows,si
   const decision=['hold_unresolved_continuity_exception','no_new_continuity_exception_observed']
     .includes(d.reviewer_disposition);
   const gate=valid&&!!prior?.history_complete&&distinct&&
-   !!source&&eligibleExceptionReview706(current,source,now)&&
+   !!source&&eligibleExceptionReview706(current,source,at)&&
    Number.isSafeInteger(id)&&id>source.review_receipt_id&&id<previousId&&
    at!==null&&at<=previousAt&&issued!==null&&issued<=at&&
    at-issued<=1200000&&ownerAt!==null&&at>=ownerAt&&
