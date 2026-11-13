@@ -719,8 +719,8 @@ document.addEventListener('DOMContentLoaded',()=>{
         ' · '+(m.confirmed?'R2 HEAD VERIFIED':'MISSING/HOLD')+
         ' · '+m.r2_bytes+' bytes · '+m.publication_status;
       media702.appendChild(p);
-      if(!m.confirmed&&m.r2_key)
-        issue702.add(new Option('Missing linked '+m.kind+' #'+m.attachment_id,
+      if(!m.confirmed)
+        issue702.add(new Option((m.r2_key?'Missing linked ':'Invalid linked key ') +m.kind+' #'+m.attachment_id,
           'linked|'+m.kind+'|'+m.attachment_id));
     }
     case702.replaceChildren(new Option('Choose a previously opened linked exception',''));
