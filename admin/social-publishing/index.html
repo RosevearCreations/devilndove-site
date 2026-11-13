@@ -306,6 +306,42 @@
 </section>
 
 
+<section class="card" id="dd704-finance" aria-labelledby="dd704-finance-title">
+<p class="eyebrow">Build 704 · Live posting source readback and financial closure readiness</p>
+<h2 id="dd704-finance-title">Independently confirm a live bookkeeping posting source</h2>
+<p>After the original owner accepted a Build 703 signed posting document, request a fresh, read-only HTTPS GET against a server-pinned external posting source. The independent eighth Ed25519 signer must confirm the original source reference and SHA-256 with a one-time challenge. No URL or bearer is entered in the browser. A passing snapshot is <strong>not</strong> a book closure, financial certification or continuous connection.</p>
+<button class="btn secondary" type="button" id="dd704FinanceRefresh">Refresh original live posting gate</button>
+<button class="btn secondary" type="button" id="dd704FinanceExport">Export protected live readback and owner readiness receipts</button>
+<p id="dd704FinanceStatus" role="status" aria-live="polite">HOLD · Live posting evidence not yet inspected.</p>
+<p id="dd704FinanceStats" class="small">Original independent signer and source configuration not verified.</p>
+<ol class="clean" id="dd704FinanceCases"><li>No original signed posting document accepted for live readback.</li></ol>
+<form id="dd704FinanceLiveForm">
+<h3>1. Read live external posting source (one time only)</h3>
+<label>Exact owner-accepted Build 703 posting document receipt
+<select class="input" id="dd704FinancePosting"><option value="">Choose signed owner-accepted posting document</option></select></label>
+<label>Owner reason for read-only source check (20–400 characters)
+<textarea class="input" id="dd704FinanceLiveNote" rows="3" minlength="20" maxlength="400" required></textarea></label>
+<label><input type="checkbox" id="dd704FinanceLiveReviewed" required> We inspected the original source receipt and approve one read-only GET to the independently configured pinned HTTPS provider. A signed receipt cannot automatically close accounts.</label>
+<button class="btn secondary" type="submit" id="dd704FinanceLiveSubmit">Request fresh signed live posting readback</button>
+</form>
+<p id="dd704FinanceLiveResult" role="status" aria-live="polite">No independently signed live posting receipt admitted.</p>
+<form id="dd704FinanceOwnerForm">
+<h3>2. Original owner financial closure readiness review</h3>
+<label>Exact independently signed live source receipt
+<select class="input" id="dd704FinanceLiveSource"><option value="">Choose readback of original posting source</option></select></label>
+<label>Owner disposition
+<select class="input" id="dd704FinanceDecision">
+<option value="hold_external_posting">HOLD — original posting mismatch or incomplete evidence</option>
+<option value="ready_for_final_owner_closure_review">Ready for final manual owner closure review (not completed book close)</option>
+</select></label>
+<label>Owner source-bound readiness note (25–600 characters)
+<textarea class="input" id="dd704FinanceOwnerNote" rows="3" minlength="25" maxlength="600" required></textarea></label>
+<label><input type="checkbox" id="dd704FinanceOwnerReviewed" required> We have checked the exact original posting and fresh independent signature; financial certification, actual ledger close and continuously CONNECTED remain separate.</label>
+<button class="btn secondary" type="submit" id="dd704FinanceOwnerSubmit">Record audited financial closure readiness</button>
+</form>
+<p id="dd704FinanceOwnerResult" role="status" aria-live="polite">No original owner financial readiness receipt. Books remain HOLD.</p>
+</section>
+
 <section class="card" id="dd703-finance" aria-labelledby="dd703-finance-title">
 <p class="eyebrow">Build 703 · Independent external bookkeeping posting document &amp; original owner acceptance</p>
 <h2 id="dd703-finance-title">Inspect signed posting evidence, then accept or dispute it</h2>
