@@ -710,6 +710,9 @@ document.addEventListener('DOMContentLoaded',()=>{
      if($('dd709EscalationSource'))$('dd709EscalationSource').replaceChildren(new Option('Reinspect recurrence aging',''));
      if($('dd709RecurrenceReviewed'))$('dd709RecurrenceReviewed').checked=false;
      if($('dd709EscalationReviewed'))$('dd709EscalationReviewed').checked=false;
+     if($('dd710MediaStatus'))$('dd710MediaStatus').textContent='HOLD · Reinspect original source.';
+     if($('dd710ResolutionSource'))$('dd710ResolutionSource').replaceChildren(new Option('Reinspect original recurrence',''));
+     if($('dd710ResolutionReviewed'))$('dd710ResolutionReviewed').checked=false;
   }
   async function send702(action,fields={}){
     if(!window.DDAuth?.isLoggedIn?.()||!window.DDAuth.apiFetch)
@@ -722,6 +725,34 @@ document.addEventListener('DOMContentLoaded',()=>{
     for(const [k,v] of Object.entries(fields))form.set(k,String(v));
     return responseJson(await window.DDAuth.apiFetch('/api/admin/mobile-create-product',
       {method:'POST',body:form}),'Protected original device evidence unavailable.');
+  }
+  function draw710(v){
+   const status=$('dd710MediaStatus'),list=$('dd710MediaCases'),
+     select=$('dd710ResolutionSource');
+   if(!status||!list||!select)return;
+   list.replaceChildren();
+   select.replaceChildren(new Option('Select verified original 709 recurrence resolution',''));
+   for(const x of v.exception_aging_703||[]){
+     if(!x.signed_media_recurrence_receipt_id_709)continue;
+     const li=document.createElement('li');
+     li.textContent='Original recurring media #'+x.signed_media_recurrence_receipt_id_709+
+       ' / signed #'+x.owner_recovery_signoff_receipt_id+
+       ' · '+x.signed_media_resolution_status_710+
+       ' · current signed R2 '+x.media_signoff_drift_707;
+     list.appendChild(li);
+     if(x.signed_media_resolution_ready_710)
+       select.add(new Option('Original recurrence #'+x.signed_media_recurrence_receipt_id_709+
+        ' · fresh signed D1/R2 restored',
+        [x.receipt_id,x.owner_recovery_signoff_receipt_id,
+         x.signed_drift_recovery_receipt_id_708,x.signed_media_recurrence_receipt_id_709].join('|')));
+   }
+   if(!list.childElementCount){const li=document.createElement('li');
+    li.textContent='No original signed recurrence or subsequent source recovery present.';
+    list.appendChild(li);}
+   status.textContent='Original recurrence recoveries ready '+(v.signed_media_resolution_ready_710||0)+
+    ' · signed resolution receipts '+(v.signed_media_resolved_count_710||0)+
+    ' · subsequent drift HOLD '+(v.signed_media_resolution_recheck_hold_710||0)+
+    '. Actual D1/R2 recheck only; unrecorded uploads and physical device witness HOLD.';
   }
   function draw709(v){
    const status=$('dd709MediaStatus'),list=$('dd709MediaCases'),
@@ -914,6 +945,7 @@ document.addEventListener('DOMContentLoaded',()=>{
     draw707(v);
     draw708(v);
     draw709(v);
+    draw710(v);
   }
   async function inspect702(){
     const data=await send702('camera702_inspect');
@@ -922,6 +954,35 @@ document.addEventListener('DOMContentLoaded',()=>{
     show702(data);return data;
   }
 
+  $('dd710MediaRefresh')?.addEventListener('click',async()=>{
+    try{const d=await send702('camera710_inspect');
+      if(!d.ok||Number(d.product_id)!==Number(active?.product_id))
+        throw Error('Original camera draft changed during protected recurrence resolution readback. HOLD.');
+      show702(d);
+    }catch(e){$('dd710MediaStatus').textContent='HOLD · '+e.message;}
+  });
+  $('dd710ResolutionRecord')?.addEventListener('click',async()=>{
+    const button=$('dd710ResolutionRecord');button.disabled=true;
+    try{
+      const [caseId,signoff,recovered,recurrence]=
+        String($('dd710ResolutionSource').value||'').split('|').map(Number);
+      const source=gate702?.exception_aging_703?.find(x=>x.receipt_id===caseId&&
+        x.owner_recovery_signoff_receipt_id===signoff&&
+        x.signed_drift_recovery_receipt_id_708===recovered&&
+        x.signed_media_recurrence_receipt_id_709===recurrence&&
+        x.signed_media_resolution_ready_710);
+      if(!source||!$('dd710ResolutionReviewed').checked)
+        throw Error('Original source recovery, later re-attestation and explicit owner review required.');
+      const d=await action702('camera710_signed_recurrence_resolve',{
+        open_receipt_id:caseId,original_signoff_receipt_id:signoff,
+        recovered_708_receipt_id:recovered,recurrence_receipt_id:recurrence,
+        owner_reviewed:'true'});
+      $('dd710MediaResult').textContent=d.status+' · original source resolution receipt #'+
+        d.receipt_id+'. Independent phone witness, unrelated uploads and publication remain HOLD.';
+      $('dd710ResolutionReviewed').checked=false;
+    }catch(e){$('dd710MediaResult').textContent='HOLD · '+e.message;}
+    finally{button.disabled=false;}
+  });
   $('dd709MediaRefresh')?.addEventListener('click',async()=>{
     try{const d=await send702('camera709_inspect');
       if(!d.ok||Number(d.product_id)!==Number(active?.product_id))
