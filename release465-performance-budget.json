@@ -16,7 +16,7 @@
     "max_js_bytes": 600000,
     "max_css_bytes": 500000,
     "max_html_bytes": 500000,
-    "max_runtime_source_bytes": 19199000,
+    "max_runtime_source_bytes": 19249000,
     "max_runtime_source_files": 1855,
     "max_inline_data_uri_bytes": 650000
   },
@@ -33,6 +33,21 @@
     "production_mutation": false
   },
   "budget_reviews": [
+    {
+      "build": 706,
+      "date": "2026-11-13",
+      "scope": "Original media linked-recovery owner sign-off, distinct ninth independently signed bookkeeping continuity exception review, SHA-256 manifest financial closure evidence retention",
+      "prior_limit_bytes": 19199000,
+      "new_limit_bytes": 19249000,
+      "delta_bytes": 50000,
+      "delta_percent": 0.26,
+      "source_file_limit_unchanged": 1855,
+      "per_file_html_js_css_limits_unchanged": true,
+      "review_reason": "A narrowly reviewed +50,000-byte (0.2604%) runtime code budget above Build 705 supports first-party original-phone D1/R2 sign-off proof, independent ninth Ed25519 reviewer source chain, immutable D1 receipt manifest digest verification, Admin workbench evidence review. Existing per-file limits and runtime count remain unchanged. Full System Gate, Quality, Preview and exact SHA Cloudflare Production gates enforce this ceiling; no D1 migration, provider write, automatic media recovery, bookkeeping close, legal retention-policy guarantee, profit certification, or continuously CONNECTED assertion.",
+      "financial_bookkeeping_closure": "HOLD_UNTIL_INDEPENDENT_EXTERNAL_CLOSURE",
+      "original_unrecorded_media": "HOLD_NO_AUTOMATIC_REPAIR",
+      "ninth_signer": "HOLD_UNTIL_INDEPENDENTLY_ENROLLED"
+    },
     {
       "build": 705,
       "date": "2026-11-12",
