@@ -1089,6 +1089,14 @@ jobs:
         run: node scripts/build700_original_device_media_live_source_contract.mjs
       - name: Build 701 original phone field receipt, bounded media recovery and independent bookkeeper signature regression
         run: node scripts/build701_phone_media_bookkeeping_contract.mjs
+      - name: Build 702 original owner phone re-attestation, linked media exception triage and independent signed bookkeeper decision contract
+        run: |
+          node --check functions/api/admin/_cameraField702.mjs
+          node --check functions/api/admin/mobile-create-product.js
+          node --check functions/api/admin/social-post-queue.js
+          node --check public/js/admin-mobile-product-augment.js
+          node --check public/js/admin-social-platform-preflight.js
+          node scripts/build702_original_device_media_bookkeeping_decision_contract.mjs
       - name: JavaScript syntax
         run: |
           node --check functions/_middleware.js
