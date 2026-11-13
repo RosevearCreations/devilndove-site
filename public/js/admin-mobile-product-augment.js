@@ -693,6 +693,8 @@ document.addEventListener('DOMContentLoaded',()=>{
     if(case702)case702.replaceChildren(new Option('Reinspect open original exceptions first',''));
     if($('dd703AgeStatus'))$('dd703AgeStatus').textContent='HOLD · Reinspect the original saved draft before aging review.';
     if($('dd703AgeCase'))$('dd703AgeCase').replaceChildren(new Option('Read original cases first',''));
+    if($('dd704FollowupStatus'))$('dd704FollowupStatus').textContent='HOLD · Read original escalated cases first.';
+    if($('dd704FollowupSource'))$('dd704FollowupSource').replaceChildren(new Option('Refresh original saved draft',''));
   }
   async function send702(action,fields={}){
     if(!window.DDAuth?.isLoggedIn?.()||!window.DDAuth.apiFetch)
@@ -705,6 +707,21 @@ document.addEventListener('DOMContentLoaded',()=>{
     for(const [k,v] of Object.entries(fields))form.set(k,String(v));
     return responseJson(await window.DDAuth.apiFetch('/api/admin/mobile-create-product',
       {method:'POST',body:form}),'Protected original device evidence unavailable.');
+  }
+  function draw704(v){
+    const select=$('dd704FollowupSource'),status=$('dd704FollowupStatus');
+    if(!select||!status)return;
+    select.replaceChildren(new Option('Select one escalated unresolved original case',''));
+    for(const age of v.exception_aging_703||[]){
+      const c=(v.exceptions||[]).find(x=>x.receipt_id===age.receipt_id);
+      if(c&&!c.closed&&age.escalated&&age.followup_due&&!age.followup_receipt_id)
+        select.add(new Option('Original '+c.kind+' '+c.media_kind+
+          ' #'+c.receipt_id+' · escalated receipt #'+age.escalation_receipt_id+
+          ' · '+age.age_hours+'h',
+          age.receipt_id+'|'+age.escalation_receipt_id));
+    }
+    status.textContent='Original escalated cases due for owner follow-up: '+
+      (v.owner_followup_due_704||0)+'. Escalation follow-up never clears original R2 or unrecorded media.';
   }
   function draw703(v){
     const status=$('dd703AgeStatus'),select=$('dd703AgeCase');
@@ -755,6 +772,7 @@ document.addEventListener('DOMContentLoaded',()=>{
           ' / case #'+x.receipt_id,String(x.receipt_id)));
     }
     draw703(v);
+    draw704(v);
   }
   async function inspect702(){
     const data=await send702('camera702_inspect');
@@ -762,6 +780,32 @@ document.addEventListener('DOMContentLoaded',()=>{
       throw Error('Original draft changed during protected readback. HOLD.');
     show702(data);return data;
   }
+  $('dd704FollowupRefresh')?.addEventListener('click',async()=>{
+    try{await inspect702();}
+    catch(error){$('dd704FollowupStatus').textContent='HOLD · '+error.message;}
+  });
+  $('dd704FollowupRecord')?.addEventListener('click',async()=>{
+    const button=$('dd704FollowupRecord');button.disabled=true;
+    try{
+      const [caseString,escalationString]=String($('dd704FollowupSource').value||'').split('|');
+      const openId=Number(caseString),escalationId=Number(escalationString);
+      if(!Number.isSafeInteger(openId)||openId<1||
+        !Number.isSafeInteger(escalationId)||escalationId<1)
+        throw Error('Choose an original escalated case awaiting a first owner follow-up.');
+      const source=gate702?.exception_aging_703?.find(x=>x.receipt_id===openId&&
+        x.escalation_receipt_id===escalationId&&x.followup_due&&!x.followup_receipt_id);
+      if(!source)throw Error('Case no longer eligible; refresh the original source.');
+      const disposition=$('dd704FollowupDisposition').value;
+      if(!['manual_retry_scheduled','original_phone_recheck_pending',
+        'external_media_source_investigation'].includes(disposition))
+        throw Error('Choose a pending follow-up disposition.');
+      await action702('camera704_followup',{open_receipt_id:openId,
+        escalation_receipt_id:escalationId,followup_disposition:disposition});
+      $('dd704FollowupResult').textContent='Owner follow-up for original case #'+openId+
+        ' recorded. No auto retry, file restoration or physical device acceptance inferred.';
+    }catch(error){$('dd704FollowupResult').textContent='HOLD · '+error.message;}
+    finally{button.disabled=false;}
+  });
   $('dd703AgeRefresh')?.addEventListener('click',async()=>{
     try{await inspect702();}
     catch(error){$('dd703AgeStatus').textContent='HOLD · '+error.message;}

@@ -1618,6 +1618,54 @@ select699();
 
 
 
+
+let audit704=null;
+function draw704(data){
+ if(!$('dd704-finance'))return;
+ audit704=data.financial704||null;
+ const v=audit704;
+ $('dd704FinanceStatus').textContent=v?.campaign_queue_id?
+  v.status+' · exact original source history '+(v.history_complete?'COMPLETE':'HOLD')+
+  ' · actual book close remains HOLD':
+  'HOLD · Select original campaign and refresh live posting source evidence.';
+ $('dd704FinanceStats').textContent=v?.campaign_queue_id?
+   'Eighth verifier '+(v.independent_signer_configured?'CONFIGURED':'HOLD')+
+   ' · pinned origin '+(v.origin_authorized?'AUTHORIZED':'HOLD')+
+   ' · eligible '+v.readback.eligible+
+   ' · signed live receipts '+v.readback.verified_count+
+   ' · owner decisions '+v.readback.owner_reviewed_count+
+   ' · invalid '+v.readback.invalid_count:
+   'Original owner-accepted posting and pinned source required.';
+ const list=$('dd704FinanceCases'),posting=$('dd704FinancePosting'),
+   live=$('dd704FinanceLiveSource');
+ list.replaceChildren();
+ posting.replaceChildren(new Option('Select original owner-accepted posting document',''));
+ live.replaceChildren(new Option('Select independently signed live posting source receipt',''));
+ for(const x of v?.readback?.items||[]){
+   const li=document.createElement('li');
+   li.textContent='Original posting #'+x.posting_receipt_id+
+     ' · owner document acceptance #'+x.owner_acceptance_receipt_id+
+     ' · independent live source '+(x.independent_live_source_verified?
+       'VERIFIED #'+x.live_receipt_id:'HOLD')+
+     ' · financial owner readiness '+(x.financial_readiness_receipt_id||'pending')+
+     ' · actual book close HOLD';
+   list.appendChild(li);
+   if(!x.independent_live_source_verified&&v.history_complete)
+     posting.add(new Option('Original posting document #'+x.posting_receipt_id+
+      ' / owner acceptance #'+x.owner_acceptance_receipt_id,
+      String(x.posting_receipt_id)));
+   if(x.independent_live_source_verified&&!x.financial_readiness_decision&&
+      v.history_complete)
+     live.add(new Option('Independent live source receipt #'+x.live_receipt_id,
+      String(x.live_receipt_id)));
+ }
+ if(!list.childElementCount){
+  const li=document.createElement('li');
+  li.textContent='No original owner-accepted posting document eligible for independent live readback.';
+  list.appendChild(li);
+ }
+}
+
 let audit703=null;
 function draw703(data){
  if(!$('dd703-finance'))return;
@@ -1861,7 +1909,7 @@ draw698(d);
 draw699(d);
 draw700(d);
 draw701(d);
-draw702(d);draw703(d);
+draw702(d);draw703(d);draw704(d);
 if(!id)return;
 if(!v||v.queue_id!==id)throw Error('Fresh exact financial evidence was not returned.');
 state=v;
@@ -1889,7 +1937,7 @@ await refresh();
 document.addEventListener('DOMContentLoaded',()=>{
 if(!$('dd685-finance'))return;
 (async()=>{try{
-const d=await api(null);draw686(d);draw687(d);draw688(d);draw689(d);draw690(d);draw691(d);draw692(d);draw693(d);draw694(d);draw695(d);draw696(d);draw697(d);draw698(d);draw699(d);draw700(d);draw701(d);draw702(d);draw703(d);const seen=new Set();
+const d=await api(null);draw686(d);draw687(d);draw688(d);draw689(d);draw690(d);draw691(d);draw692(d);draw693(d);draw694(d);draw695(d);draw696(d);draw697(d);draw698(d);draw699(d);draw700(d);draw701(d);draw702(d);draw703(d);draw704(d);const seen=new Set();
 for(const q of d.queue||[])if(q.utm_campaign&&!seen.has(q.social_post_queue_id)){
 seen.add(q.social_post_queue_id);
 $('dd685Campaign').add(new Option(q.utm_campaign+' · #'+q.social_post_queue_id,q.social_post_queue_id));
@@ -1917,6 +1965,70 @@ $('dd699Refresh').addEventListener('click',()=>void refresh());
 
 
 
+
+
+$('dd704FinanceRefresh').addEventListener('click',()=>void refresh());
+$('dd704FinanceLiveForm').addEventListener('submit',async event=>{
+ event.preventDefault();const button=$('dd704FinanceLiveSubmit');button.disabled=true;
+ try{
+   const postingId=Number($('dd704FinancePosting').value),
+     source=(audit704?.readback?.items||[]).find(x=>x.posting_receipt_id===postingId&&
+       !x.independent_live_source_verified),
+     note=$('dd704FinanceLiveNote').value.trim();
+   if(!state?.queue_id||!audit704?.history_complete||!source||
+     !audit704.independent_signer_configured||!audit704.origin_authorized||
+     !$('dd704FinanceLiveReviewed').checked||note.length<20||note.length>400)
+     throw Error('Fresh original owner-accepted posting, independent source and explicit original owner reason required.');
+   const d=await api({action:'live_posting_source_readback_704',
+     social_post_queue_id:state.queue_id,posting_receipt_id:postingId,
+     expected_source_revision:state.source_revision,
+     expected_fingerprint_sha256:state.fingerprint_sha256,
+     owner_reviewed:true,resolution_note:note},state.queue_id);
+   $('dd704FinanceLiveResult').textContent=d.result.status+
+     ' · signed source readback receipt #'+d.result.receipt_id+
+     '. Actual books still HOLD pending explicit final owner closure.';
+   $('dd704FinanceLiveReviewed').checked=false;await refresh();
+ }catch(error){$('dd704FinanceLiveResult').textContent='HOLD · '+error.message;}
+ finally{button.disabled=false;}
+});
+$('dd704FinanceOwnerForm').addEventListener('submit',async event=>{
+ event.preventDefault();const button=$('dd704FinanceOwnerSubmit');button.disabled=true;
+ try{
+   const liveId=Number($('dd704FinanceLiveSource').value),
+     x=(audit704?.readback?.items||[]).find(x=>x.live_receipt_id===liveId&&
+       x.independent_live_source_verified&&!x.financial_readiness_decision),
+     decision=$('dd704FinanceDecision').value,
+     note=$('dd704FinanceOwnerNote').value.trim();
+   if(!x||!audit704?.history_complete||!$('dd704FinanceOwnerReviewed').checked||
+     !['hold_external_posting','ready_for_final_owner_closure_review'].includes(decision)||
+     note.length<25||note.length>600)
+     throw Error('Select fresh independently signed original live source and explicitly review actual owner readiness.');
+   const d=await api({action:'owner_financial_readiness_704',
+     social_post_queue_id:state.queue_id,live_receipt_id:liveId,decision,
+     expected_posting_document_sha256:x.posting_document_sha256,
+     expected_source_revision:state.source_revision,
+     expected_fingerprint_sha256:state.fingerprint_sha256,
+     owner_reviewed:true,resolution_note:note},state.queue_id);
+   $('dd704FinanceOwnerResult').textContent=d.result.status+
+     ' · owner readiness receipt #'+d.result.receipt_id+
+     '. No actual financial book close or certification.';
+   $('dd704FinanceOwnerReviewed').checked=false;await refresh();
+ }catch(error){$('dd704FinanceOwnerResult').textContent='HOLD · '+error.message;}
+ finally{button.disabled=false;}
+});
+$('dd704FinanceExport').addEventListener('click',async()=>{
+ try{
+   const id=Number($('dd685Campaign').value);
+   if(!id||id!==state?.queue_id||!window.DDAuth?.apiFetch)
+     throw Error('Exact original campaign and authenticated owner required.');
+   const res=await window.DDAuth.apiFetch(endpoint+'?export=financial704&campaign_queue_id='+encodeURIComponent(id));
+   if(!res.ok)throw Error('Source-bound original live posting export denied. HTTP '+res.status);
+   const blob=await res.blob(),url=URL.createObjectURL(blob),a=document.createElement('a');
+   a.href=url;a.download='devilndove-live-posting-readiness-'+id+'-704.json';
+   document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1000);
+   $('dd704FinanceOwnerResult').textContent='Protected signed source snapshot ledger exported. Actual books remain HOLD.';
+ }catch(error){$('dd704FinanceOwnerResult').textContent='HOLD · '+error.message;}
+});
 
 $('dd703FinanceRefresh').addEventListener('click',()=>void refresh());
 $('dd703FinancePrepare').addEventListener('click',()=>{
