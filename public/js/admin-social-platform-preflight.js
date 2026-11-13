@@ -1622,7 +1622,7 @@ select699();
 
 
 
- 
+
  let audit708=null;
  function draw708(data){
   if(!$('dd708-finance'))return;
@@ -2174,7 +2174,7 @@ $('dd699Refresh').addEventListener('click',()=>void refresh());
 
 
 
- 
+
  $('dd708FinanceRefresh').addEventListener('click',()=>void refresh());
  $('dd708ContinuityForm').addEventListener('submit',async event=>{
   event.preventDefault();const button=$('dd708ContinuitySubmit');button.disabled=true;
