@@ -360,6 +360,36 @@
  <p id="dd706RetentionResult" role="status" aria-live="polite">No owner financial retention receipt; actual accounting closure HOLD.</p>
 </section>
 
+<section class="card" id="dd708-finance" aria-labelledby="dd708-finance-title">
+ <p class="eyebrow">Build 708 · Ninth-reviewer acceptance continuity and financial custody renewal</p>
+ <h2 id="dd708-finance-title">Revalidate original ninth-reviewer acceptance and renew the financial evidence custody chain</h2>
+ <p>Read the existing independently signed ninth-reviewer source again, and bind an owner-confirmed continuity receipt to the Build 707 field and custody receipts. A separate owner custody renewal cryptographically hashes the canonical original Build 706 manifest and newer evidence chain. Neither action obtains a new independent signature, proves a real phone, certifies bookkeeping closure or promises permanent retention.</p>
+ <button id="dd708FinanceRefresh" type="button" class="btn secondary">Refresh original independent signer acceptance and custody</button>
+ <button id="dd708FinanceExport" type="button" class="btn secondary">Export protected 708 custody renewal dossier</button>
+ <p id="dd708FinanceStatus" role="status" aria-live="polite">HOLD · Original 706/707 source chain not inspected.</p>
+ <p id="dd708FinanceStats" class="small">Exact original ninth-reviewer signature, field acceptance and custody audit required.</p>
+ <ol class="clean" id="dd708FinanceCases"><li>No eligible source-bound renewal yet.</li></ol>
+ <form id="dd708ContinuityForm">
+  <h3>1. Original ninth-reviewer field acceptance continuity</h3>
+  <label>Original Build 707 field acceptance and verified custody
+   <select id="dd708ContinuitySource" class="input" required><option value="">Refresh original source chain</option></select></label>
+  <label>Owner field continuity reason (25–600 characters)
+   <textarea id="dd708ContinuityNote" rows="3" class="input" minlength="25" maxlength="600" required></textarea></label>
+  <label><input id="dd708ContinuityReviewed" type="checkbox" required> We independently rechecked the original ninth-signed source and exact earlier SHA-256 retention manifest. No new signature, external accounting close or physical phone witness is claimed.</label>
+  <button id="dd708ContinuitySubmit" type="submit" class="btn secondary">Record owner-reviewed ninth acceptance continuity</button>
+ </form>
+ <p id="dd708ContinuityResult" role="status" aria-live="polite">No new original acceptance continuity receipt. HOLD.</p>
+ <form id="dd708CustodyForm">
+  <h3>2. Original financial custody SHA-256 renewal</h3>
+  <label>Verified owner ninth-reviewer acceptance continuity receipt
+   <select id="dd708CustodySource" class="input" required><option value="">Record continuity first</option></select></label>
+  <label>Owner custody renewal reason (25–600 characters)
+   <textarea id="dd708CustodyNote" rows="3" class="input" minlength="25" maxlength="600" required></textarea></label>
+  <label><input id="dd708CustodyReviewed" type="checkbox" required> We checked current source revision, 706 retained manifest, original ninth reviewer, 707 custody and newer continuity evidence. Books remain HOLD; no automatic deletion or guaranteed legal retention.</label>
+  <button id="dd708CustodySubmit" type="submit" class="btn secondary">Rehash manifest and record protected custody renewal</button>
+ </form>
+ <p id="dd708CustodyResult" role="status" aria-live="polite">No renewed custody digest or book closure admitted. HOLD.</p>
+</section>
 <section class="card" id="dd707-finance" aria-labelledby="dd707-finance-title">
  <p class="eyebrow">Build 707 · Ninth reviewer field acceptance and protected custody audit</p>
  <h2 id="dd707-finance-title">Accept original independent review in the field, then audit retained evidence</h2>
