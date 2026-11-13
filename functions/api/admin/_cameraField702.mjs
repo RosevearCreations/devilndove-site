@@ -109,7 +109,7 @@ export async function handleCamera702({db,form,adminUser,id,token,live,ready701}
    if(!['linked','unrecorded'].includes(kind)||!['photo','video'].includes(mediaKind))
     return out({ok:false,error:'Choose a linked R2 failure or an explicitly unrecorded photo/video upload.'},400);
    const item=kind==='linked'?live.media?.find(m=>m.kind===mediaKind&&m.attachment_id===attachment):null;
-   if(kind==='linked'&&(!item||item.confirmed||!item.r2_key)||
+   if(kind==='linked'&&(!item||item.confirmed)||
      kind==='unrecorded'&&attachment!==0)
     return out({ok:false,error:'A linked failure requires a missing exact original R2 object; unrecorded uploads require HOLD.'},409);
    if(cases.some(x=>!x.closed&&x.kind===kind&&x.media_kind===mediaKind&&
