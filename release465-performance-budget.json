@@ -16,7 +16,7 @@
     "max_js_bytes": 600000,
     "max_css_bytes": 500000,
     "max_html_bytes": 500000,
-    "max_runtime_source_bytes": 19144000,
+    "max_runtime_source_bytes": 19179000,
     "max_runtime_source_files": 1855,
     "max_inline_data_uri_bytes": 650000
   },
@@ -33,6 +33,21 @@
     "production_mutation": false
   },
   "budget_reviews": [
+    {
+      "build": 704,
+      "date": "2026-11-12",
+      "scope": "Owner source-bound original media escalation follow-up, pinned one-time HTTPS live bookkeeping posting source readback with eighth distinct Ed25519 public signer, and separately reviewed owner financial closure readiness HOLD",
+      "prior_limit_bytes": 19144000,
+      "new_limit_bytes": 19179000,
+      "delta_bytes": 35000,
+      "delta_percent": 0.183,
+      "observed_current_runtime_source_bytes": 19150360,
+      "observed_runtime_source_files": 1855,
+      "source_file_limit_unchanged": 1855,
+      "review_reason": "Reviewed exact measured runtime source 19,150,360 bytes, 6,360 over previously retained 19,144,000-byte ceiling. A bounded +35,000-byte allowance (under 0.183%) covers the eight-verifier signed source GET, owner source-bound readiness review, original escalated media follow-up and Admin evidence controls with headroom. All per-file JS/CSS/HTML limits unchanged, runtime count unchanged, zero-D1 proof and exact SHA Preview/Cloudflare Production gates intact. No new storage, D1 schema, provider write, automatic clearing, actual book closure, financial certification or continuously CONNECTED claim.",
+      "independent_live_provider_proof": "CONFIGURATION_AND_RUNTIME_EVIDENCE_REQUIRED",
+      "bookkeeping_actually_closed": "HOLD"
+    },
     {
       "build": 702,
       "date": "2026-11-12",

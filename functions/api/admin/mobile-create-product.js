@@ -599,7 +599,7 @@ export async function onRequestPost(context) {
     // Build 700 owner-directed field proof: an explicit read-only check of
     // the ORIGINAL camera draft, its linked media, and actual R2 HEAD state.
     const adopt701=form.get('action')==='camera701_adopt_receipt';
-    const action702=['camera702_inspect','camera702_reattest','camera702_triage_open','camera702_triage_close','camera703_inspect','camera703_escalate'].includes(form.get('action'));
+    const action702=['camera702_inspect','camera702_reattest','camera702_triage_open','camera702_triage_close','camera703_inspect','camera703_escalate','camera704_inspect','camera704_followup'].includes(form.get('action'));
     if(form.get('action')==='camera700_readback'||adopt701||action702){
       const origin=request.headers.get('Origin');
       if(origin&&origin!==new URL(request.url).origin)
