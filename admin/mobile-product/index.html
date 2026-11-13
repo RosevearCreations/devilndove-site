@@ -83,6 +83,13 @@
 <label class="small" for="dd700DeviceNotes">Actual test notes (device/OS/browser and results — do not include passwords or personal data)</label>
 <textarea id="dd700DeviceNotes" class="input" rows="3" maxlength="600" placeholder="e.g. Android Firefox · camera photo attached, offline retry restored, video skipped"></textarea>
 <button class="btn secondary" id="dd700Export" type="button">Export field trial evidence (local JSON)</button>
+<div class="card" id="dd701FieldReceipt" style="margin-top:12px;padding:12px">
+  <p class="eyebrow">Build 701 · Original phone owner-reported receipt</p>
+  <h3>Adopt the exact phone field proof and review media recovery exceptions</h3>
+  <p class="small">After testing on a physical phone, re-read the original linked D1/R2 objects above, complete the five owner checklist items and add notes. This action rechecks every attachment and records a durable Admin audit receipt. Unrecorded failed uploads or the physical phone itself cannot be independently verified here.</p>
+  <button class="btn secondary" id="dd701Adopt" type="button">Adopt owner phone receipt (same original draft)</button>
+  <p id="dd701AdoptStatus" class="small" role="status" aria-live="polite">HOLD · Original phone proof not adopted. Unverified media must be manually retried on this draft.</p>
+</div>
 <p class="small" id="dd700ExportStatus" role="status" aria-live="polite">Owner field acceptance is NOT recorded until a real-phone trial and independent Cloudflare media readback are both complete. This is a local evidence export, not an automatic deployment gate.</p>
 </section>
 

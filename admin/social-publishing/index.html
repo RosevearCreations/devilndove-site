@@ -304,6 +304,32 @@
 <p id="dd693Result" role="status" aria-live="polite">No Build 693 owner receipt recorded.</p>
 <p class="small">All actions require authenticated owner review and durable readback. No automatic replay, repair, financial certification, receiver activation or claim of continuously CONNECTED infrastructure is made.</p>
 </section>
+
+<section class="card" id="dd701-finance" aria-labelledby="dd701-title">
+ <p class="eyebrow">Build 701 · Independent financial bookkeeping acceptance review</p>
+ <h2 id="dd701-title">Fifth-signer bookkeeping evidence review — original source remains the authority</h2>
+ <p>Only an independent bookkeeper can sign the exact original source receipt and SHA-256 of an external bookkeeping ledger export. This is a protected review receipt, not an automatic bookkeeping close, financial certification, source repair or CONNECTED claim.</p>
+ <button class="btn secondary" id="dd701Refresh" type="button">Refresh independent bookkeeping review</button>
+ <button class="btn secondary" id="dd701Export" type="button">Export protected 701 review ledger</button>
+ <p id="dd701Status" role="status" aria-live="polite">HOLD · Independent bookkeeping review requires fresh signed original source evidence.</p>
+ <p id="dd701Stats" class="small">Independent fifth signer not yet verified.</p>
+ <ol id="dd701Cases" class="clean"><li>No independently signed source case selected.</li></ol>
+ <form id="dd701Form">
+  <label>Original source-of-record receipt<select class="input" id="dd701Source" required><option value="">Choose a verified original source receipt</option></select></label>
+  <label>Independent bookkeeping ledger export SHA-256<input class="input" id="dd701Digest" maxlength="64" required autocomplete="off" pattern="[a-fA-F0-9]{64}"></label>
+  <label>Independently enrolled bookkeeper ID<input class="input" id="dd701Signer" maxlength="120" autocomplete="off" required></label>
+  <label>Fresh external nonce<input class="input" id="dd701Nonce" maxlength="100" autocomplete="off" required></label>
+  <label>External signed UTC time<input class="input" id="dd701Issued" maxlength="40" placeholder="2026-11-12T20:00:00.000Z" autocomplete="off" required></label>
+  <button class="btn secondary" id="dd701Prepare" type="button">Prepare exact canonical independent claim</button>
+  <label>Claim to sign off-platform<textarea class="input" id="dd701Claim" rows="5" readonly></textarea></label>
+  <label>External Ed25519 signature (not a private key)<textarea class="input" id="dd701Signature" maxlength="120" rows="2" required></textarea></label>
+  <label>Original owner review note<textarea class="input" id="dd701Note" minlength="20" maxlength="400" rows="3" required></textarea></label>
+  <label><input id="dd701Reviewed" type="checkbox" required> We reviewed the actual independent bookkeeper source and understand books are not closed by this receipt.</label>
+  <button class="btn secondary" id="dd701Submit" type="submit">Record signed independent bookkeeping review</button>
+ </form>
+ <p id="dd701Result" role="status" aria-live="polite">No original bookkeeping review accepted. No automatic source repair or accounting close.</p>
+</section>
+
 <section class="card" id="dd700-finance" aria-labelledby="dd700-finance-title">
 <p class="eyebrow">Build 700 · Independent live original financial source-of-record readback</p>
 <h2 id="dd700-finance-title">Read the real external original source — never infer financial repair</h2>

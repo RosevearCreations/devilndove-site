@@ -562,6 +562,7 @@ document.addEventListener('DOMContentLoaded',()=>{
     proofExportStatus=$('dd700ExportStatus'),deviceNotes=$('dd700DeviceNotes');
   function resetProof700(){
     field700=null;
+    if(document.getElementById('dd701AdoptStatus'))document.getElementById('dd701AdoptStatus').textContent='HOLD · Re-read exact original media before adopting a phone receipt.';
     if(proofDetails)proofDetails.replaceChildren();
     if(proofStatus)proofStatus.textContent='HOLD · Original field proof not yet read back.';
     if(proofExportStatus)proofExportStatus.textContent=
@@ -647,6 +648,36 @@ document.addEventListener('DOMContentLoaded',()=>{
     }catch(err){proofExportStatus.textContent='HOLD · '+err.message;}
   });
 
+
+  // Build 701: an owner-only adoption, server-side fresh media proof, no publication.
+  const adopt701=$('dd701Adopt'),status701=$('dd701AdoptStatus');
+  adopt701?.addEventListener('click',async()=>{
+    if(saving)return;
+    adopt701.disabled=true;
+    try{
+      if(!field700||!active?.product_id||Number(field700.product_id)!==Number(active.product_id))
+        throw Error('Read back the original same-owner D1/R2 attachments first.');
+      const checks={};
+      for(const el of document.querySelectorAll('[data-dd700-check]'))
+        checks[el.getAttribute('data-dd700-check')]=el.checked===true;
+      const notes=(deviceNotes?.value||'').trim();
+      if(!Object.values(checks).every(Boolean)||Object.keys(checks).length!==5||
+        notes.length<25||notes.length>600)
+        throw Error('Finish all five physical-phone checklist items and meaningful notes.');
+      const form=new FormData();
+      form.set('action','camera701_adopt_receipt');
+      form.set('product_id',String(active.product_id));
+      form.set('capture_reference',active.token);
+      form.set('owner_checklist_json',JSON.stringify(checks));
+      form.set('owner_device_notes',notes);
+      form.set('media_snapshot_json',JSON.stringify(field700.media));
+      const result=await responseJson(await window.DDAuth.apiFetch('/api/admin/mobile-create-product',
+        {method:'POST',body:form}),'Original phone receipt adoption failed.');
+      status701.textContent='Owner-reported phone receipt #'+result.receipt_id+
+        ' adopted for original DD draft. Linked D1/R2 media recovery reviewed. Independent physical device and unrecorded uploads remain unverified; no publication.';
+    }catch(error){status701.textContent='HOLD · '+error.message;}
+    finally{adopt701.disabled=false;}
+  });
   save.addEventListener('click',async()=>{
     if(saving)return;
     const movie=video.files?.[0]||null;
