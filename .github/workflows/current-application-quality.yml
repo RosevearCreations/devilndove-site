@@ -1087,6 +1087,8 @@ jobs:
         run: node scripts/build699_camera_media_shop_source_witness_contract.mjs
       - name: Build 700 original physical camera device evidence, actual R2 HEAD media readback and fourth-signer external source-of-record gate
         run: node scripts/build700_original_device_media_live_source_contract.mjs
+      - name: Build 701 original phone field receipt, bounded media recovery and independent bookkeeper signature regression
+        run: node scripts/build701_phone_media_bookkeeping_contract.mjs
       - name: JavaScript syntax
         run: |
           node --check functions/_middleware.js

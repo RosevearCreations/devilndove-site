@@ -47,6 +47,23 @@ export function camera700SummarizeReadback(photoRows,videoRows){
  unverified_count:unverified.length,media:items,device_accepted:false,
  field_trial_accepted:false,publication_performed:false};
 }
+
+ // Build 701: owner-submitted checklist is a report, not independent physical-device proof.
+export function camera701Ready(readback,flags,notes,clientMedia){
+ const keys=['phone','draft','photo','recovery','video'];
+ if(!flags||typeof flags!=='object'||Object.keys(flags).sort().join('|')!==keys.slice().sort().join('|')||
+   keys.some(k=>flags[k]!==true)||typeof notes!=='string'||
+   notes.trim().length<25||notes.trim().length>600)return false;
+ if(readback?.status!=='MEDIA_R2_D1_READBACK_CONFIRMED'||
+   readback?.bounded_rows!==true||readback.photo_count<1||
+   readback.unverified_count!==0||!Array.isArray(readback.media)||
+   !readback.media.length||readback.confirmed_count!==readback.media.length)return false;
+ const compact=m=>[m.kind,m.attachment_id,m.r2_key,m.r2_bytes,m.confirmed,m.publication_status];
+ return Array.isArray(clientMedia)&&
+   JSON.stringify(clientMedia.map(compact))===JSON.stringify(readback.media.map(compact))&&
+   readback.media.every(m=>m.confirmed===true&&Number(m.r2_bytes)>0&&
+     (m.kind==='photo'||(m.kind==='video'&&m.publication_status==='internal_review')));
+}
 export function cameraCaptureToken699(v){
  const s=String(v||'').trim();
  return /^camera699-[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/.test(s)?s:null;
@@ -580,7 +597,8 @@ export async function onRequestPost(context) {
 
     // Build 700 owner-directed field proof: an explicit read-only check of
     // the ORIGINAL camera draft, its linked media, and actual R2 HEAD state.
-    if(form.get('action')==='camera700_readback'){
+    const adopt701=form.get('action')==='camera701_adopt_receipt';
+    if(form.get('action')==='camera700_readback'||adopt701){
       const origin=request.headers.get('Origin');
       if(origin&&origin!==new URL(request.url).origin)
         return json({ok:false,error:'Same-origin original device proof required.'},403);
@@ -617,6 +635,43 @@ export async function onRequestPost(context) {
       for(const row of videos)videoProof.push(await inspect(row,'video'));
       const result=camera700SummarizeReadback(photoProof,videoProof);
       if(photos.length>=25||videos.length>=25)result.status='HOLD_BOUNDED_MEDIA_HISTORY_LIMIT';
+      if(adopt701){
+        const notes=normalizeText(form.get('owner_device_notes'));
+        let flags=null,clientMedia=null;
+        try{flags=JSON.parse(String(form.get('owner_checklist_json')||''));clientMedia=JSON.parse(String(form.get('media_snapshot_json')||''));}catch{}
+        const proof={...result,bounded_rows:photos.length<25&&videos.length<25};
+        if(!camera701Ready(proof,flags,notes,clientMedia))
+          return json({ok:false,error:'Original phone owner checklist, matching fresh D1/R2 receipt and 25–600 character notes required. Missing media must be retried on the original draft. HOLD.'},409);
+        const content={build:701,product_id:id,capture_reference:token,actor_user_id:Number(adminUser.user_id),
+          owner_reported_real_phone:true,owner_reported_retry_recovered:true,
+          photo_count:proof.photo_count,video_count:proof.video_count,
+          media_snapshot:proof.media,owner_checklist:flags,owner_notes:notes,
+          independent_device_witness_verified:false,
+          attached_media_recovery_reviewed:true,unrecorded_failed_uploads_certified:false,
+          product_published:false,financial_bookkeeping_certified:false};
+        const bytes=new TextEncoder().encode(JSON.stringify(content));
+        const digest=Array.from(new Uint8Array(await crypto.subtle.digest('SHA-256',bytes)),
+          b=>b.toString(16).padStart(2,'0')).join('');
+        const receiptKey='camera701-'+id+'-'+digest;
+        const insert=await db.prepare(
+          "INSERT INTO admin_action_audit (actor_user_id,action_type,target_type,target_id,target_key,request_method,request_path,details_json,created_at) "+
+          "SELECT ?,'camera701_owner_field_receipt','product',?,?,'POST','/api/admin/mobile-create-product',?,CURRENT_TIMESTAMP "+
+          "WHERE NOT EXISTS (SELECT 1 FROM admin_action_audit WHERE actor_user_id=? AND action_type='camera701_owner_field_receipt' AND target_key=?)"
+        ).bind(adminUser.user_id,id,receiptKey,JSON.stringify(content),adminUser.user_id,receiptKey).run();
+        if(!insert?.success)throw Error('Original phone owner audit write did not commit. HOLD.');
+        const receipts=await db.prepare("SELECT admin_action_audit_id,details_json FROM admin_action_audit WHERE actor_user_id=? AND action_type='camera701_owner_field_receipt' AND target_id=? AND target_key=? LIMIT 2")
+          .bind(adminUser.user_id,id,receiptKey).all();
+        const stored=receipts.results||[];
+        if(stored.length!==1||stored[0].details_json!==JSON.stringify(content))
+          throw Error('Unique original phone receipt did not read back exactly. HOLD.');
+        return json({ok:true,status:'OWNER_FIELD_RECEIPT_ADOPTED_MEDIA_RECOVERY_REVIEW_ONLY',
+          receipt_id:Number(stored[0].admin_action_audit_id),product_id:id,
+          media_recovery_verified_for_linked_attachments:true,
+          independent_physical_device_verified:false,
+          external_unrecorded_media_recovery_certified:false,publication_performed:false,
+          field_trial_independently_accepted:false,
+          inspected_at:new Date().toISOString()},200);
+      }
       return json({ok:true,product_id:id,product_number_label:formatProductNumberLabel(product.product_number||id),
         capture_reference_verified:true,original_owner_verified:true,
         r2_head_checked:true,inspected_at:new Date().toISOString(),

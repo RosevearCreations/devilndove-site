@@ -1615,6 +1615,56 @@ if(!list.childElementCount){const li=document.createElement('li');li.textContent
 select699();
 }
 
+
+let audit701=null;
+function draw701(d){
+ if(!$('dd701-finance'))return;
+ audit701=d.financial701||null;const v=audit701;
+ $('dd701Status').textContent=v?.campaign_queue_id?
+   v.status+' · current original source history '+(v.history_complete?'COMPLETE':'HOLD')+
+   ' · bookkeeping close HOLD':'HOLD · Select and refresh the original campaign.';
+ $('dd701Stats').textContent=v?.campaign_queue_id?
+   'Independent signer '+(v.independent_signer_configured?'CONFIGURED':'HOLD')+
+   ' · valid reviews '+v.review.recorded_count+
+   ' · pending '+v.review.pending_count+' · invalid '+v.review.invalid_count:
+   'Original fifth signer and source review not available.';
+ const list=$('dd701Cases');list.replaceChildren();
+ const select=$('dd701Source');select.replaceChildren(new Option('Choose actual signed source receipt',''));
+ for(const x of v?.review?.items||[]){
+   const li=document.createElement('li');
+   li.textContent='Signed source #'+x.original_live_source_receipt_id+
+     ' · bookkeeper review '+(x.independent_bookkeeping_evidence_reviewed?
+       'VERIFIED #'+x.bookkeeping_review_receipt_id:'PENDING')+
+     ' · accounting close HOLD';
+   list.appendChild(li);
+   if(!x.independent_bookkeeping_evidence_reviewed&&v.history_complete)
+     select.add(new Option('Original live source receipt #'+x.original_live_source_receipt_id,
+       String(x.original_live_source_receipt_id)));
+ }
+ if(!list.childElementCount){const li=document.createElement('li');
+   li.textContent='No independently signed Build 700 source proof. HOLD.';list.appendChild(li);}
+}
+function claimFor701(){
+ if(!state?.queue_id||!audit701?.history_complete||
+   !audit701.independent_signer_configured)throw Error('Refresh exact original signed financial source first.');
+ const id=Number($('dd701Source').value),source=(audit701.review?.items||[])
+   .find(x=>x.original_live_source_receipt_id===id&&!x.independent_bookkeeping_evidence_reviewed);
+ const digest=$('dd701Digest').value.trim().toLowerCase(),
+   signer=$('dd701Signer').value.trim(),nonce=$('dd701Nonce').value.trim(),
+   issued=$('dd701Issued').value.trim();
+ if(!source||!/^[a-f0-9]{64}$/.test(digest)||
+   signer!==audit701.independent_verifier_id||!nonce||!issued)
+   throw Error('Original source, external SHA-256 and independently configured fifth signer required. HOLD.');
+ return {v:1,purpose:'devilndove_independent_bookkeeping_evidence_review_701',
+   source:'devilndove',queue_id:state.queue_id,original_live_source_receipt_id:id,
+   older_receipt_id:source.older_receipt_id,newer_receipt_id:source.newer_receipt_id,
+   external_document_sha256:source.external_document_sha256,
+   bookkeeping_ledger_sha256:digest,source_revision:state.source_revision,
+   fingerprint_sha256:state.fingerprint_sha256,independent_bookkeeper_id:signer,
+   nonce,issued_at:issued,
+   decision:'independent_bookkeeping_evidence_review_not_accounting_close'};
+}
+
 let audit700=null;
 function select700(){
 const el=$('dd700FinanceSource');if(!el)return;
@@ -1680,6 +1730,7 @@ draw697(d);
 draw698(d);
 draw699(d);
 draw700(d);
+draw701(d);
 if(!id)return;
 if(!v||v.queue_id!==id)throw Error('Fresh exact financial evidence was not returned.');
 state=v;
@@ -1707,7 +1758,7 @@ await refresh();
 document.addEventListener('DOMContentLoaded',()=>{
 if(!$('dd685-finance'))return;
 (async()=>{try{
-const d=await api(null);draw686(d);draw687(d);draw688(d);draw689(d);draw690(d);draw691(d);draw692(d);draw693(d);draw694(d);draw695(d);draw696(d);draw697(d);draw698(d);draw699(d);draw700(d);const seen=new Set();
+const d=await api(null);draw686(d);draw687(d);draw688(d);draw689(d);draw690(d);draw691(d);draw692(d);draw693(d);draw694(d);draw695(d);draw696(d);draw697(d);draw698(d);draw699(d);draw700(d);draw701(d);const seen=new Set();
 for(const q of d.queue||[])if(q.utm_campaign&&!seen.has(q.social_post_queue_id)){
 seen.add(q.social_post_queue_id);
 $('dd685Campaign').add(new Option(q.utm_campaign+' · #'+q.social_post_queue_id,q.social_post_queue_id));
@@ -1732,6 +1783,51 @@ $('dd696Refresh').addEventListener('click',()=>void refresh());
 $('dd697Refresh').addEventListener('click',()=>void refresh());
 $('dd698Refresh').addEventListener('click',()=>void refresh());
 $('dd699Refresh').addEventListener('click',()=>void refresh());
+
+
+$('dd701Refresh').addEventListener('click',()=>void refresh());
+$('dd701Prepare').addEventListener('click',()=>{
+ try{$('dd701Claim').value=JSON.stringify(claimFor701());
+   $('dd701Result').textContent='Exact independent bookkeeping claim prepared. A separate fifth signer must sign off-platform.';}
+ catch(error){$('dd701Result').textContent='HOLD · '+error.message;}
+});
+$('dd701Form').addEventListener('submit',async event=>{
+ event.preventDefault();const button=$('dd701Submit');button.disabled=true;
+ try{
+   if(!$('dd701Reviewed').checked)throw Error('Explicit original owner bookkeeping review required.');
+   const claim=claimFor701(),note=$('dd701Note').value.trim();
+   if($('dd701Claim').value!==JSON.stringify(claim))throw Error('Bookkeeping source changed; prepare and independently sign the exact current claim.');
+   if(note.length<20||note.length>400)throw Error('Owner review note must be 20–400 characters.');
+   const response=await api({action:'owner_bookkeeping_review_701',
+     social_post_queue_id:state.queue_id,
+     original_live_source_receipt_id:claim.original_live_source_receipt_id,
+     bookkeeping_ledger_sha256:claim.bookkeeping_ledger_sha256,
+     independent_bookkeeper_id:claim.independent_bookkeeper_id,
+     nonce:claim.nonce,issued_at:claim.issued_at,
+     signature:$('dd701Signature').value.trim(),
+     expected_source_revision:state.source_revision,
+     expected_fingerprint_sha256:state.fingerprint_sha256,
+     owner_reviewed:true,resolution_note:note},state.queue_id);
+   $('dd701Result').textContent=response.result.status+' · signed review receipt #'+
+     response.result.receipt_id+' · source correction and accounting close still HOLD.';
+   $('dd701Claim').value='';$('dd701Signature').value='';
+   $('dd701Reviewed').checked=false;await refresh();
+ }catch(error){$('dd701Result').textContent='HOLD · '+error.message;}
+ finally{button.disabled=false;}
+});
+$('dd701Export').addEventListener('click',async()=>{
+ try{
+   const id=Number($('dd685Campaign').value);
+   if(!id||id!==state?.queue_id||!window.DDAuth?.apiFetch)
+     throw Error('Refresh and authenticate for the exact campaign first.');
+   const response=await window.DDAuth.apiFetch(endpoint+'?export=financial701&campaign_queue_id='+encodeURIComponent(id));
+   if(!response.ok)throw Error('Protected bookkeeping review export denied. HTTP '+response.status);
+   const blob=await response.blob(),url=URL.createObjectURL(blob),a=document.createElement('a');
+   a.href=url;a.download='devilndove-bookkeeping-review-'+id+'-701.json';
+   document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1000);
+   $('dd701Result').textContent='Protected review exported · no accounting close or CONNECTED assertion.';
+ }catch(error){$('dd701Result').textContent='HOLD · '+error.message;}
+});
 
 $('dd700FinanceRefresh').addEventListener('click',()=>void refresh());
 $('dd700FinanceForm').addEventListener('submit',async event=>{
