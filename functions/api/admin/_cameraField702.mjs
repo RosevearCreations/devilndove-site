@@ -48,12 +48,26 @@ export function mediaEscalationEligible703(caseInfo,aged,existing){
    Number.isSafeInteger(Number(caseInfo.receipt_id))&&Number(caseInfo.receipt_id)>0&&
    !existing.some(x=>Number(x.data?.open_receipt_id)===Number(caseInfo.receipt_id));
 }
+
+export function ownerFollowupEligible704(caseInfo,escalation,prior,now=Date.now()){
+ if(!caseInfo||caseInfo.closed||!escalation||
+   Number(escalation.data?.open_receipt_id)!==Number(caseInfo.receipt_id)||
+   !Number.isSafeInteger(Number(escalation.admin_action_audit_id))||
+   Number(escalation.admin_action_audit_id)<=Number(caseInfo.receipt_id)||
+   Array.isArray(prior)&&prior.some(x=>
+     Number(x.data?.escalation_receipt_id)===Number(escalation.admin_action_audit_id)))return false;
+ const original=ageMedia703(caseInfo,now);
+ const escalated=isoTime(escalation.created_at);
+ return original.escalation_due&&Number.isFinite(escalated)&&
+   escalated<=now+300000&&now-escalated>=-300000;
+}
+
 export async function handleCamera702({db,form,adminUser,id,token,live,ready701}){
  const action=String(form.get('action')||'');
  const auditRows=await db.prepare(
  "SELECT admin_action_audit_id,action_type,created_at,details_json FROM admin_action_audit "+
  "WHERE target_type='product' AND target_id=? AND actor_user_id=? "+
- "AND action_type IN ('camera701_owner_field_receipt','camera702_owner_reattest','camera702_media_issue_open','camera702_media_issue_close','camera703_media_aging_escalation') "+
+ "AND action_type IN ('camera701_owner_field_receipt','camera702_owner_reattest','camera702_media_issue_open','camera702_media_issue_close','camera703_media_aging_escalation','camera704_media_owner_followup') "+
  "ORDER BY admin_action_audit_id DESC LIMIT 81").bind(id,adminUser.user_id).all();
  const raw=Array.isArray(auditRows?.results)?auditRows.results:[];
  if(raw.length>80)return out({ok:false,error:'Unbounded original device receipt history; independent review required. HOLD.'},409);
@@ -76,8 +90,18 @@ export async function handleCamera702({db,form,adminUser,id,token,live,ready701}
     closed:closed.has(Number(x.admin_action_audit_id))}));
  const escalationRecords=history.filter(x=>x.action_type==='camera703_media_aging_escalation'&&
    x.data?.original_701_receipt_id===originalId);
- const aging=cases.map(x=>({...ageMedia703(x),escalated:escalationRecords.some(e=>
-     Number(e.data?.open_receipt_id)===x.receipt_id)}));
+ const followupRows=history.filter(x=>x.action_type==='camera704_media_owner_followup'&&
+   x.data?.original_701_receipt_id===originalId);
+ const aging=cases.map(x=>{
+   const esc=escalationRecords.find(e=>Number(e.data?.open_receipt_id)===x.receipt_id);
+   const followup=followupRows.find(y=>Number(y.data?.open_receipt_id)===x.receipt_id&&
+     Number(y.data?.escalation_receipt_id)===Number(esc?.admin_action_audit_id));
+   return {...ageMedia703(x),escalated:!!esc,
+     escalation_receipt_id:Number(esc?.admin_action_audit_id||0),
+     followup_receipt_id:Number(followup?.admin_action_audit_id||0),
+     followup_disposition:followup?.data?.followup_disposition||null,
+     followup_due:ownerFollowupEligible704(x,esc,followupRows)};
+ });
  const state=()=>out({ok:true,status:original?'OWNER_701_SOURCE_FOUND':'HOLD_ORIGINAL_PHONE_701_REQUIRED',
   product_id:id,original_701_receipt_id:originalId,
   reattest_receipt_id:Number(latest?.admin_action_audit_id||0),
@@ -86,9 +110,10 @@ export async function handleCamera702({db,form,adminUser,id,token,live,ready701}
   exception_aging_703:aging.slice(0,50),
   escalation_due_count:aging.filter(x=>x.escalation_due&&!x.escalated).length,
   critical_aging_count:aging.filter(x=>x.status==='CRITICAL_ORIGINAL_MEDIA_EXCEPTION_AGED_48H').length,
+  owner_followup_due_704:aging.filter(x=>x.followup_due).length,
   independently_authenticated_phone:false,
   unrecorded_upload_recovery_certified:false,publication_performed:false});
- if(action==='camera702_inspect'||action==='camera703_inspect')return state();
+ if(action==='camera702_inspect'||action==='camera703_inspect'||action==='camera704_inspect')return state();
  if(!original)return out({ok:false,error:'Original owner-reported Build 701 receipt required. HOLD.'},409);
  const note=String(form.get('owner_device_notes')||'').trim();
  const nonce=String(form.get('nonce')||'');
@@ -189,5 +214,28 @@ export async function handleCamera702({db,form,adminUser,id,token,live,ready701}
      receipt_id:receipt,open_receipt_id:openId,source_age_minutes:aged.age_minutes,
      independently_verified_upload_recovery:false,publication_performed:false});
  }
- return out({ok:false,error:'Unsupported Build 702/703 action.'},400);
+ if(action==='camera704_followup'){
+   const caseId=Number(form.get('open_receipt_id')),
+     escalationId=Number(form.get('escalation_receipt_id')),
+     disposition=String(form.get('followup_disposition')||'');
+   const item=cases.find(x=>x.receipt_id===caseId),
+     escalation=escalationRecords.find(x=>
+       Number(x.admin_action_audit_id)===escalationId&&
+       Number(x.data?.open_receipt_id)===caseId);
+   if(!['manual_retry_scheduled','original_phone_recheck_pending','external_media_source_investigation'].includes(disposition)||
+     !ownerFollowupEligible704(item,escalation,followupRows))
+     return out({ok:false,error:'Only an original unresolved case with an existing 24h owner escalation, no prior follow-up and a selected pending disposition can be recorded. HOLD.'},409);
+   const receiptId=await append('camera704_media_owner_followup',{
+     build:704,open_receipt_id:caseId,escalation_receipt_id:escalationId,
+     escalation_source_time:escalation.created_at,
+     followup_disposition:disposition,
+     status:'OWNER_ESCALATION_FOLLOWUP_RECORDED_MEDIA_RECOVERY_HOLD',
+     original_media_kind:item.media_kind,original_exception_kind:item.kind,
+     media_recovery_independently_verified:false,unrecorded_uploads_certified:false
+   },'followup');
+   return out({ok:true,status:'OWNER_ESCALATION_FOLLOWUP_RECORDED_MEDIA_RECOVERY_HOLD',
+     receipt_id:receiptId,open_receipt_id:caseId,
+     original_media_recovery_verified:false,publication_performed:false});
+ }
+ return out({ok:false,error:'Unsupported Build 702/703/704 action.'},400);
 }
