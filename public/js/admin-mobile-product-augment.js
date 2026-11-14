@@ -734,6 +734,27 @@ document.addEventListener('DOMContentLoaded',()=>{
     return responseJson(await window.DDAuth.apiFetch('/api/admin/mobile-create-product',
       {method:'POST',body:form}),'Protected original device evidence unavailable.');
   }
+  function draw717(v){
+   const status=$('dd717MediaStatus'),list=$('dd717MediaCases');
+   if(!status||!list)return;
+   list.replaceChildren();
+   for(const x of v.exception_aging_703||[]){
+    if(!x.signed_media_recurrence_receipt_id_709)continue;
+    const li=document.createElement('li');
+    li.textContent='Original recurrence #'+x.signed_media_recurrence_receipt_id_709+
+     ' · '+x.original_closure_fresh_status_717+
+     ' · latest source age '+(x.original_closure_attestation_age_hours_717??'HOLD')+'h';
+    list.appendChild(li);
+   }
+   if(!list.childElementCount){
+    const li=document.createElement('li');
+    li.textContent='No original signed 709 recurrence recorded; no new incident inferred.';
+    list.appendChild(li);
+   }
+   status.textContent='Fresh original closure '+(v.original_closure_fresh_count_717||0)+
+    ' · original source HOLD '+(v.original_closure_freshness_hold_717||0)+
+    '. Re-attestation is owner recorded; no independent physical phone or outside closure claim.';
+  }
   function draw716(v){
    const status=$('dd716MediaStatus'),list=$('dd716MediaCases');
    if(!status||!list)return;
@@ -1106,6 +1127,7 @@ document.addEventListener('DOMContentLoaded',()=>{
     draw714(v);
     draw715(v);
     draw716(v);
+    draw717(v);
   }
   async function inspect702(){
     const data=await send702('camera702_inspect');
@@ -1114,6 +1136,14 @@ document.addEventListener('DOMContentLoaded',()=>{
     show702(data);return data;
   }
 
+  $('dd717MediaRefresh')?.addEventListener('click',async()=>{
+   try{
+    const d=await send702('camera717_inspect');
+    if(!d.ok||Number(d.product_id)!==Number(active?.product_id))
+     throw Error('Original authenticated owner draft changed. HOLD.');
+    show702(d);
+   }catch(e){$('dd717MediaStatus').textContent='HOLD · '+e.message;}
+  });
   $('dd716MediaRefresh')?.addEventListener('click',async()=>{
    try{
     const d=await send702('camera716_inspect');
