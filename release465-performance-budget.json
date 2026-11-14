@@ -16,7 +16,7 @@
     "max_js_bytes": 600000,
     "max_css_bytes": 500000,
     "max_html_bytes": 500000,
-    "max_runtime_source_bytes": 19465000,
+    "max_runtime_source_bytes": 19481000,
     "max_runtime_source_files": 1855,
     "max_inline_data_uri_bytes": 650000
   },
@@ -33,6 +33,23 @@
     "production_mutation": false
   },
   "budget_reviews": [
+    {
+      "build": 713,
+      "date": "2026-11-13",
+      "scope": "Original signed-media multi-horizon on-demand D1/R2 readback, original ninth-reviewer Ed25519 authority and owner custody outcome continuity, owner audit UIs and no-store source report",
+      "prior_limit_bytes": 19465000,
+      "new_limit_bytes": 19481000,
+      "delta_bytes": 16000,
+      "delta_percent": 0.0822,
+      "observed_source_gate_runtime_bytes": 19473040,
+      "observed_source_gate_runtime_files": 1855,
+      "remaining_headroom_bytes": 7960,
+      "source_file_limit_unchanged": 1855,
+      "per_file_limits_unchanged": true,
+      "review_reason": "Actual exact Build 713 feature source gate reported 19,473,040 runtime bytes, 8,040 bytes above protected 19,465,000 cap. A bounded 16,000-byte (0.0822%) allowance covers exact-source net new on-demand proof and leaves 7,960 bytes headroom. Runtime source count remains 1855 with prior individual HTML/JS/CSS, inline media, security, CI, exact-SHA Preview and Production live integrity boundaries intact; no D1 migration, private signing key, background watcher, provider write, automatic closure, or false physical-phone / independent financial acceptance.",
+      "owner_financial_approval": "NOT_INFERRED",
+      "production_runtime_master_acceptance": "EVIDENCE_GATED_HOLD"
+    },
     {
       "build": 706,
       "date": "2026-11-13",
