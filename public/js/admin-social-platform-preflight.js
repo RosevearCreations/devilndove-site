@@ -1623,6 +1623,35 @@ select699();
 
 
 
+ function draw713(data){
+  if(!$('dd713-finance'))return;
+  const v=data.financial713||null;
+  $('dd713FinanceStatus').textContent=v?.campaign_queue_id?
+    v.status+' · original ninth authority '+(v.history_complete?'SOURCE-VERIFIED':'HOLD')+
+    ' · outside replies and book closure HOLD':
+    'HOLD · Original signed custody and ninth reviewer not verified.';
+  $('dd713FinanceStats').textContent=v?.campaign_queue_id?
+    'Original follow-up outcomes rechecked '+v.outcome_evidence_rechecked+
+    ' · owner follow-up due '+v.outstanding_custody_followups+
+    ' · invalid '+v.invalid_count+
+    ' · ninth reviewer '+(v.original_ninth_reviewer_id||'unverified'):
+    'Select the same original financial campaign and refresh.';
+  const list=$('dd713FinanceCases');list.replaceChildren();
+  for(const x of v?.items||[]){
+   const li=document.createElement('li');
+   li.textContent='Original ninth #'+x.original_ninth_review_receipt_id+
+    ' / 711 renewal #'+x.renewal_receipt_id_711+
+    ' / 712 custody #'+(x.custody_evidence_receipt_id_712||'pending')+
+    ' · '+x.renewal_horizon+
+    ' · '+x.status;
+   list.appendChild(li);
+  }
+  if(!list.childElementCount){
+    const li=document.createElement('li');
+    li.textContent='No source-pinned ninth renewal available for independent audit. HOLD.';
+    list.appendChild(li);
+  }
+ }
  let audit712=null;
  function draw712(data){
   if(!$('dd712-finance'))return;
@@ -2265,7 +2294,7 @@ draw698(d);
 draw699(d);
 draw700(d);
 draw701(d);
-draw702(d);draw703(d);draw704(d);draw705(d);draw706(d);draw707(d);draw708(d);draw709(d);draw710(d);draw711(d);draw712(d);
+draw702(d);draw703(d);draw704(d);draw705(d);draw706(d);draw707(d);draw708(d);draw709(d);draw710(d);draw711(d);draw712(d);draw713(d);
 if(!id)return;
 if(!v||v.queue_id!==id)throw Error('Fresh exact financial evidence was not returned.');
 state=v;
@@ -2327,6 +2356,21 @@ $('dd699Refresh').addEventListener('click',()=>void refresh());
 
 
 
+ $('dd713FinanceRefresh').addEventListener('click',()=>void refresh());
+ $('dd713FinanceExport').addEventListener('click',async()=>{
+  try{
+   const id=Number($('dd685Campaign').value);
+   if(!id||id!==state?.queue_id||!window.DDAuth?.apiFetch)
+    throw Error('Original authenticated campaign required.');
+   const response=await window.DDAuth.apiFetch(endpoint+
+    '?export=financial713&campaign_queue_id='+encodeURIComponent(id));
+   if(!response.ok)throw Error('Protected Build 713 export denied. HTTP '+response.status);
+   const blob=await response.blob(),url=URL.createObjectURL(blob),a=document.createElement('a');
+   a.href=url;a.download='devilndove-custody-ninth-authority-'+id+'-713.json';
+   document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1000);
+   $('dd713FinanceStatus').textContent='Protected source-bound Build 713 report exported; outside closure remains HOLD.';
+  }catch(e){$('dd713FinanceStatus').textContent='HOLD · '+e.message;}
+ });
  $('dd712FinanceRefresh').addEventListener('click',()=>void refresh());
  $('dd712CustodyForm').addEventListener('submit',async event=>{
   event.preventDefault();const button=$('dd712CustodySubmit');button.disabled=true;
