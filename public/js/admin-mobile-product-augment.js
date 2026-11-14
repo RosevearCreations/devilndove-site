@@ -716,7 +716,9 @@ document.addEventListener('DOMContentLoaded',()=>{
      if($('dd711MediaStatus'))$('dd711MediaStatus').textContent='HOLD · Reinspect original signed media and owner source.';
      if($('dd711StabilitySource'))$('dd711StabilitySource').replaceChildren(new Option('Reinspect original signed source',''));
      if($('dd711StabilityReviewed'))$('dd711StabilityReviewed').checked=false;
-     if($('dd712MediaStatus'))$('dd712MediaStatus').textContent='HOLD · Reinspect original source.';
+     if($('dd713MediaStatus'))$('dd713MediaStatus').textContent='HOLD · Reinspect original 712 source and R2 HEAD.';
+    if($('dd713MediaCases'))$('dd713MediaCases').replaceChildren();
+    if($('dd712MediaStatus'))$('dd712MediaStatus').textContent='HOLD · Reinspect original source.';
      if($('dd712HorizonSource'))$('dd712HorizonSource').replaceChildren(new Option('Reinspect original stability',''));
      if($('dd712HorizonReviewed'))$('dd712HorizonReviewed').checked=false;
   }
@@ -731,6 +733,27 @@ document.addEventListener('DOMContentLoaded',()=>{
     for(const [k,v] of Object.entries(fields))form.set(k,String(v));
     return responseJson(await window.DDAuth.apiFetch('/api/admin/mobile-create-product',
       {method:'POST',body:form}),'Protected original device evidence unavailable.');
+  }
+  function draw713(v){
+   const status=$('dd713MediaStatus'),list=$('dd713MediaCases');
+   if(!status||!list)return;
+   list.replaceChildren();
+   for(const x of v.exception_aging_703||[]){
+    if(!x.signed_media_horizon_receipt_id_712)continue;
+    const li=document.createElement('li');
+    li.textContent='Original 712 horizon #'+x.signed_media_horizon_receipt_id_712+
+     ' · '+x.signed_media_multihorizon_status_713+
+     ' · original signed R2 '+x.media_signoff_drift_707+
+     ' · original stability age '+(x.signed_media_multihorizon_observed_age_hours_713??'unverified')+'h';
+    list.appendChild(li);
+   }
+   if(!list.childElementCount){
+    const li=document.createElement('li');li.textContent='No original Build 712 horizon receipt available; HOLD.';
+    list.appendChild(li);
+   }
+   status.textContent='Source-stable fresh reconciliation '+(v.signed_media_multihorizon_reconciled_713||0)+
+    ' · original-source HOLD '+(v.signed_media_multihorizon_hold_713||0)+
+    '. Requires original post-712 702 owner re-attestation; no continuous monitoring.';
   }
   function draw712(v){
    const status=$('dd712MediaStatus'),list=$('dd712MediaCases'),
@@ -1012,6 +1035,7 @@ document.addEventListener('DOMContentLoaded',()=>{
     draw710(v);
     draw711(v);
     draw712(v);
+    draw713(v);
   }
   async function inspect702(){
     const data=await send702('camera702_inspect');
@@ -1020,6 +1044,13 @@ document.addEventListener('DOMContentLoaded',()=>{
     show702(data);return data;
   }
 
+  $('dd713MediaRefresh')?.addEventListener('click',async()=>{
+   try{const d=await send702('camera713_inspect');
+    if(!d.ok||Number(d.product_id)!==Number(active?.product_id))
+     throw Error('Original source changed during Build 713 media continuity readback.');
+    show702(d);
+   }catch(e){$('dd713MediaStatus').textContent='HOLD · '+e.message;}
+  });
   $('dd712MediaRefresh')?.addEventListener('click',async()=>{
     try{const d=await send702('camera712_inspect');
       if(!d.ok||Number(d.product_id)!==Number(active?.product_id))
