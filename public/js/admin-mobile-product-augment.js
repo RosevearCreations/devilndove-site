@@ -734,6 +734,29 @@ document.addEventListener('DOMContentLoaded',()=>{
     return responseJson(await window.DDAuth.apiFetch('/api/admin/mobile-create-product',
       {method:'POST',body:form}),'Protected original device evidence unavailable.');
   }
+  function draw716(v){
+   const status=$('dd716MediaStatus'),list=$('dd716MediaCases');
+   if(!status||!list)return;
+   list.replaceChildren();
+   for(const x of v.exception_aging_703||[]){
+    if(!x.signed_media_recurrence_receipt_id_709)continue;
+    const li=document.createElement('li');
+    li.textContent='Original recurrence #'+x.signed_media_recurrence_receipt_id_709+
+     ' · '+x.original_recurrence_outcome_status_716+
+     ' · owner escalation '+(x.original_recurrence_owner_escalation_recorded_716?'RECORDED':'NOT RECORDED')+
+     ' · outcome '+x.original_recurrence_outcome_716;
+    list.appendChild(li);
+   }
+   if(!list.childElementCount){
+    const li=document.createElement('li');
+    li.textContent='No original Build 709 recurrence found; no new incident inferred.';
+    list.appendChild(li);
+   }
+   status.textContent='Original signed outcomes reconciled '+(v.original_recurrence_outcome_reconciled_716||0)+
+    ' · source HOLD '+(v.original_recurrence_outcome_hold_716||0)+
+    ' · owner escalations recorded '+(v.original_recurrence_escalation_owner_recorded_716||0)+
+    '. No independent external escalation or physical phone proof claimed.';
+  }
   function draw715(v){
    const status=$('dd715MediaStatus'),list=$('dd715MediaCases');
    if(!status||!list)return;
@@ -1082,6 +1105,7 @@ document.addEventListener('DOMContentLoaded',()=>{
     draw713(v);
     draw714(v);
     draw715(v);
+    draw716(v);
   }
   async function inspect702(){
     const data=await send702('camera702_inspect');
@@ -1090,6 +1114,14 @@ document.addEventListener('DOMContentLoaded',()=>{
     show702(data);return data;
   }
 
+  $('dd716MediaRefresh')?.addEventListener('click',async()=>{
+   try{
+    const d=await send702('camera716_inspect');
+    if(!d.ok||Number(d.product_id)!==Number(active?.product_id))
+     throw Error('Original owner camera draft changed. HOLD.');
+    show702(d);
+   }catch(e){$('dd716MediaStatus').textContent='HOLD · '+e.message;}
+  });
   $('dd715MediaRefresh')?.addEventListener('click',async()=>{
    try{
     const d=await send702('camera715_inspect');
