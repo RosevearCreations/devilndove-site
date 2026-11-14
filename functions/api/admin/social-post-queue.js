@@ -7997,6 +7997,68 @@ export function assessFinance713(prior,base706,now=Date.now()){
   new_independent_signature_generated:false,continuous_monitoring_enabled:false,
   connection:'HOLD_INDEPENDENT_CONTINUOUS_RUNTIME_TELEMETRY'};
 }
+/* Build 714 revalidates original persisted ninth signer and owner custody evidence.
+ * No new signatures, automatic review or independent financial closure. */
+export function reviewOriginalCustodyDrift714(a713,a712,ninth,now=Date.now()){
+ const valid=a713?.history_complete===true&&a712?.history_complete===true&&
+  ninth?.history_complete===true&&ninth?.ninth_signer_configured===true&&
+  !!ninth.ninth_signer_id&&a713.original_ninth_reviewer_id===ninth.ninth_signer_id&&
+  a713.campaign_queue_id===a712.campaign_queue_id&&
+  a713.independent_external_reply_verified===false&&
+  a713.owner_financial_close_verified===false,
+  source=Array.isArray(a712?.items)?a712.items:[],
+  previous=Array.isArray(a713?.items)?a713.items:[],
+  items=[],ids=new Set();
+ let drift=0,due=0,reviewed=0,critical=0;
+ for(const x of previous.slice(0,40)){
+  const id=Number(x.renewal_receipt_id_711),
+   original=source.find(y=>Number(y.renewal_receipt_id_711)===id),
+   age=originalNinthRenewalAge712({attempted_at:original?.original_711_renewal_recorded_at},now),
+   matched=valid&&Number.isSafeInteger(id)&&id>0&&!ids.has(id)&&!!original&&
+    x.authority_continuity_stable===true&&original.source_stable_712===true&&
+    x.original_ninth_review_receipt_id===original.review_706_receipt_id&&
+    x.ninth_reviewer_id===ninth.ninth_signer_id&&
+    Number(x.custody_evidence_receipt_id_712||0)===
+     Number(original.custody_followup_evidence_receipt_id_712||0)&&
+    age.age_hours!==null&&!!original.renewal_manifest_sha256_711&&
+    !!original.provenance_710_digest_sha256;
+  ids.add(id);
+  const ageWindow=age.age_hours===null?'INVALID':age.age_hours>=72?'72H':
+   age.age_hours>=48?'48H':age.age_hours>=24?'24H':'UNDER_24H',
+   evidence=!!original?.custody_followup_evidence_recorded_712;
+  if(!matched)drift++;
+  else if(age.due&&!evidence){due++;if(age.age_hours>=72)critical++}
+  else if(evidence)reviewed++;
+  items.push({renewal_receipt_id_711:id,original_ninth_receipt_id:x.original_ninth_review_receipt_id,
+   original_custody_receipt_id:x.custody_evidence_receipt_id_712||null,
+   age_window:ageWindow,status:!matched?'HOLD_714_NINTH_AUTHORITY_OR_CUSTODY_PROVENANCE_DRIFT':
+    age.due&&!evidence?'OWNER_CUSTODY_FOLLOWUP_OVERDUE_'+ageWindow+'_714':
+    evidence?'OWNER_CUSTODY_EVIDENCE_REVALIDATED_EXTERNAL_REPLY_HOLD_714':
+    'ORIGINAL_NINTH_RENEWAL_REVIEW_NOT_DUE_714',
+   signed_source_stable:!!matched,independent_external_reply:false,financial_books_closed:false});
+ }
+ if(previous.length!==source.length||previous.length>40||
+  a713?.invalid_count>0||a712?.invalid_count>0||a712?.renewed_source_drift_count>0)drift++;
+ const complete=valid&&drift===0;
+ return {status:!complete?'HOLD_714_NINTH_AUTHORITY_DRIFT_OR_HISTORY_INCOMPLETE':
+  critical?'ORIGINAL_CUSTODY_ESCALATION_72H_OWNER_FOLLOWUP_REQUIRED_714':
+  due?'ORIGINAL_CUSTODY_ESCALATION_FOLLOWUP_DUE_714':
+  'ORIGINAL_NINTH_AUTHORITY_REVALIDATED_EXTERNAL_CLOSURE_HOLD_714',
+  campaign_queue_id:valid?a713.campaign_queue_id:null,history_complete:complete,
+  items,drift_count:drift,followup_due_count:due,followup_72h_count:critical,
+  owner_evidence_revalidated_count:reviewed,
+  original_ninth_reviewer_id:valid?ninth.ninth_signer_id:null,
+  independent_external_reply_verified:false,financial_books_closed:false,
+  new_independent_signature:false,continuous_monitoring:false};
+}
+async function finance714(db,env,id){
+ const n=Number(id);
+ if(!Number.isSafeInteger(n)||n<1)return reviewOriginalCustodyDrift714(null,null,null);
+ const a713=await finance713(db,env,n),a712=await finance712(db,env,n),
+  ninth=await finance706(db,env,n);
+ return reviewOriginalCustodyDrift714(a713,a712,ninth);
+}
+
 async function finance713(db,env,id){
  const n=Number(id);
  if(!Number.isSafeInteger(n)||n<1)return assessFinance713(null,null);
@@ -8068,6 +8130,19 @@ const db=getDb(context.env);
 if (!db) return jsonResponse({ ok:false,error:'Database binding is not configured.'},500);
 try{
 const params=new URL(context.request.url).searchParams;
+if(params.get('audit')==='financial714'||params.get('export')==='financial714'){
+ const n=Number(params.get('campaign_queue_id'));
+ if(!Number.isSafeInteger(n)||n<1)
+  return jsonResponse({ok:false,error:'Original authenticated campaign required.'},400,{'Cache-Control':'no-store'});
+ const report=await finance714(db,context.env,n);
+ const exporting=params.get('export')==='financial714';
+ return new Response(JSON.stringify({financial714:report,independent_reviewer_reply:false,
+  actual_financial_closure:false},null,exporting?2:0),
+  {status:200,headers:{'Content-Type':'application/json; charset=utf-8',
+  'Cache-Control':'private, no-store','X-Content-Type-Options':'nosniff',
+  ...(exporting?{'Content-Disposition':
+  'attachment; filename="devilndove-ninth-custody-trend-714-'+n+'.json"'}:{})}});
+}
 if(params.get('export')==='financial713'){
  const n=Number(params.get('campaign_queue_id'));
  if(!Number.isSafeInteger(n)||n<1)
