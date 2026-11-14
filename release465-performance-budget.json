@@ -16,7 +16,7 @@
     "max_js_bytes": 600000,
     "max_css_bytes": 500000,
     "max_html_bytes": 500000,
-    "max_runtime_source_bytes": 19494000,
+    "max_runtime_source_bytes": 19507000,
     "max_runtime_source_files": 1855,
     "max_inline_data_uri_bytes": 650000
   },
@@ -33,6 +33,23 @@
     "production_mutation": false
   },
   "budget_reviews": [
+    {
+      "build": 715,
+      "date": "2026-11-13",
+      "scope": "Original 709 source recurrence triage, 714 on-demand D1/R2 trend recheck, source-verified 712 owner custody SLA outcome and ninth Ed25519 re-attestation request readiness",
+      "prior_limit_bytes": 19494000,
+      "new_limit_bytes": 19507000,
+      "delta_bytes": 13000,
+      "delta_percent": 0.06669,
+      "observed_previous_build_runtime_bytes": 19485200,
+      "estimated_build_runtime_bytes": 19500144,
+      "source_file_limit_unchanged": 1855,
+      "per_file_js_css_html_limits_unchanged": true,
+      "review_reason": "Latest Build 714 exact dev source gate reported runtime_files 1855 and runtime_bytes 19,485,200 against cap 19,494,000. Build 715 adds narrowly reviewed read-only original D1/R2 source triage and owner custody/ninth readiness analysis, expected about 14,944 new runtime bytes. Budget raised by 13,000 (0.06669%) to 19,507,000, leaving roughly 6,856 bytes of expected headroom; mandatory exact-source System Gate measurement remains authoritative. No file-count or per-file cap increase, database schema migration, new signature, external provider action, background watcher, independent phone witness or financial closure.",
+      "outside_sla_confirmation": "HOLD_UNTIL_INDEPENDENT_SOURCE",
+      "new_ninth_re_attestation": "NOT_GENERATED",
+      "bookkeeping_close": "HOLD"
+    },
     {
       "build": 714,
       "date": "2026-11-13",
