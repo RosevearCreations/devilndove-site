@@ -734,6 +734,29 @@ document.addEventListener('DOMContentLoaded',()=>{
     return responseJson(await window.DDAuth.apiFetch('/api/admin/mobile-create-product',
       {method:'POST',body:form}),'Protected original device evidence unavailable.');
   }
+  function draw715(v){
+   const status=$('dd715MediaStatus'),list=$('dd715MediaCases');
+   if(!status||!list)return;
+   list.replaceChildren();
+   for(const x of v.exception_aging_703||[]){
+    if(!x.signed_media_recurrence_receipt_id_709)continue;
+    const li=document.createElement('li');
+    li.textContent='Original recurrence #'+x.signed_media_recurrence_receipt_id_709+
+     ' · '+x.original_recurrence_triage_status_715+
+     ' · priority '+x.original_recurrence_triage_priority_715+
+     ' · source age '+(x.original_recurrence_triage_age_hours_715??'invalid')+'h';
+    list.appendChild(li);
+   }
+   if(!list.childElementCount){
+    const li=document.createElement('li');
+    li.textContent='No original Build 709 recurrence receipt found; no new event inferred.';
+    list.appendChild(li);
+   }
+   status.textContent='Owner triage due '+(v.original_recurrence_triage_due_715||0)+
+    ' · source HOLD '+(v.original_recurrence_triage_hold_715||0)+
+    ' · stable original source '+(v.original_recurrence_triage_rechecked_715||0)+
+    '. No automatic source repair, new recurrence, physical phone witness or external escalation.';
+  }
   function draw714(v){
    const status=$('dd714MediaStatus'),list=$('dd714MediaCases');
    if(!status||!list)return;
@@ -1058,6 +1081,7 @@ document.addEventListener('DOMContentLoaded',()=>{
     draw712(v);
     draw713(v);
     draw714(v);
+    draw715(v);
   }
   async function inspect702(){
     const data=await send702('camera702_inspect');
@@ -1066,6 +1090,14 @@ document.addEventListener('DOMContentLoaded',()=>{
     show702(data);return data;
   }
 
+  $('dd715MediaRefresh')?.addEventListener('click',async()=>{
+   try{
+    const d=await send702('camera715_inspect');
+    if(!d.ok||Number(d.product_id)!==Number(active?.product_id))
+     throw Error('Original same-owner product changed during protected triage.');
+    show702(d);
+   }catch(e){$('dd715MediaStatus').textContent='HOLD · '+e.message;}
+  });
   $('dd714MediaRefresh')?.addEventListener('click',async()=>{
    try{const d=await send702('camera714_inspect');
     if(!d.ok||Number(d.product_id)!==Number(active?.product_id))
