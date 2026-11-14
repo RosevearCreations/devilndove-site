@@ -8125,6 +8125,167 @@ export function assessOriginalCustodySla715(a714,a713,a712,ninth,now=Date.now())
   external_sla_outcome_confirmed:false,books_closed:false,
   independent_phone_witness:false,background_monitoring:false};
 }
+/* Build 716 — independently signed, original-source-pinned ninth review intake.
+ * The signing key is never accepted or generated on the owner server. */
+export function claimIndependentNinth716(c){
+ return {v:1,purpose:'devilndove_independent_ninth_source_reattest_716',
+  queue_id:c.queue_id,original_706_review_receipt_id:c.original_706_review_receipt_id,
+  original_711_renewal_receipt_id:c.original_711_renewal_receipt_id,
+  original_712_owner_custody_receipt_id:c.original_712_owner_custody_receipt_id,
+  original_710_provenance_sha256:c.original_710_provenance_sha256,
+  original_711_renewal_sha256:c.original_711_renewal_sha256,
+  source_revision:c.source_revision,fingerprint_sha256:c.fingerprint_sha256,
+  independent_reviewer_id:c.independent_reviewer_id,
+  disposition:c.disposition,nonce:c.nonce,issued_at:c.issued_at};
+}
+const time716=x=>Date.parse(String(x||'').replace(
+ /^([0-9]{4}-[0-9]{2}-[0-9]{2}) ([0-9]{2}:[0-9]{2}:[0-9]{2})$/,'$1T$2Z'));
+export async function assessIndependentNinthIntake716(a715,a712,current,signerId,signerKey,rawRows=[],now=Date.now()){
+ const eligible=Array.isArray(a715?.items)?a715.items:[],
+  originals=Array.isArray(a712?.items)?a712.items:[],
+  valid=a715?.history_complete===true&&a712?.history_complete===true&&
+   a715.campaign_queue_id===a712.campaign_queue_id&&
+   current?.master_fresh===true&&current?.history_complete===true&&
+   current.queue_id===a715.campaign_queue_id&&
+   Array.isArray(current.open_cases)&&current.open_cases.length===0&&
+   !!signerId&&!!signerKey&&a715.original_ninth_reviewer_id===signerId;
+ let invalid=0,verified=0;
+ const rows=Array.isArray(rawRows)?rawRows:[],seen=new Set(),receipts=[];
+ for(const row of rows.slice(0,40)){
+  const data=safeJson(row.response_json,{}),c=data.claim||{},
+   id=Number(row.social_post_attempt_id),renewal=Number(c.original_711_renewal_receipt_id),
+   original=originals.find(x=>Number(x.renewal_receipt_id_711)===renewal),
+   item=eligible.find(x=>Number(x.renewal_receipt_id_711)===renewal),
+   at=time716(row.attempted_at),issued=time716(c.issued_at),
+   signature=String(data.signature||''),
+   allowDisposition=['reconfirm_original_ninth_source_under_hold',
+    'independent_custody_exception_requires_followup'].includes(c.disposition),
+   canonical=claimIndependentNinth716(c),
+   shape=Object.keys(c).length===Object.keys(canonical).length&&
+    Object.keys(c).every(k=>Object.hasOwn(canonical,k))&&
+    Object.keys(canonical).every(k=>c[k]===canonical[k]);
+  const gate=valid&&!!original&&!!item&&item.owner_followup_evidence_verified===true&&
+   Number.isSafeInteger(id)&&id>Number(item.original_custody_evidence_receipt_id)&&
+   Number.isSafeInteger(renewal)&&renewal>0&&!seen.has(renewal)&&
+   row.attempt_status==='independent_ninth_source_signed_intake_716'&&
+   c.queue_id===current.queue_id&&
+   c.original_706_review_receipt_id===original.review_706_receipt_id&&
+   c.original_712_owner_custody_receipt_id===item.original_custody_evidence_receipt_id&&
+   c.original_710_provenance_sha256===original.provenance_710_digest_sha256&&
+   c.original_711_renewal_sha256===original.renewal_manifest_sha256_711&&
+   c.source_revision===current.source_revision&&
+   c.fingerprint_sha256===current.fingerprint_sha256&&
+   c.independent_reviewer_id===signerId&&c.purpose===canonical.purpose&&c.v===1&&
+   allowDisposition&&shape&&nonce684(c.nonce)&&
+   Number.isFinite(at)&&Number.isFinite(issued)&&
+   at>=issued&&at-issued<=600000&&at<=now+300000&&issued<=now+300000&&
+   at>=time716(original.original_711_renewal_recorded_at)&&
+   data.owner_reviewed_original_source===true&&
+   Number.isSafeInteger(Number(data.owner_user_id))&&Number(data.owner_user_id)>0&&
+   data.financial_books_closed===false&&data.external_sla_closed===false&&
+   data.new_signature_generated_by_owner===false;
+  const ok=!!gate&&await verify684(signerKey,canonical,signature);
+  if(!ok)invalid++;else verified++;
+  seen.add(renewal);
+  receipts.push({receipt_id:id,original_711_renewal_receipt_id:renewal,
+   original_712_owner_custody_receipt_id:Number(c.original_712_owner_custody_receipt_id||0),
+   independent_signature_verified:!!ok,
+   status:ok?'FRESH_INDEPENDENT_NINTH_SOURCE_REATTESTED_BOOKS_HOLD_716':
+     'HOLD_716_NINTH_SIGNATURE_SOURCE_OR_REPLAY_INVALID',
+   external_sla_closed:false,financial_books_closed:false});
+ }
+ if(rows.length>40)invalid++;
+ return {status:!valid||invalid?'HOLD_716_INDEPENDENT_NINTH_SOURCE_OR_HISTORY_INVALID':
+   verified?'ORIGINAL_INDEPENDENT_NINTH_SIGNED_SOURCE_VERIFIED_BOOKS_HOLD_716':
+   'HOLD_716_FRESH_INDEPENDENT_NINTH_SIGNED_EVIDENCE_REQUIRED',
+  campaign_queue_id:valid?current.queue_id:null,
+  history_complete:!!valid&&invalid===0,
+  original_custody_sla_due_count:a715?.original_owner_followup_due_count||0,
+  original_owner_evidence_count:a715?.original_owner_evidence_verified_count||0,
+  source_reattest_request_ready_count:a715?.source_reattest_request_ready_count||0,
+  signed_evidence_verified_count:verified,invalid_count:invalid,
+  original_ninth_reviewer_id:valid?signerId:null,
+  receipts,independent_external_sla_closure_verified:false,
+  financial_books_closed:false,automatic_escalation:false,background_watcher:false};
+}
+async function finance716(db,env,id){
+ const n=Number(id);
+ if(!Number.isSafeInteger(n)||n<1)
+  return assessIndependentNinthIntake716(null,null,null,'','',[]);
+ const a715=await finance715(db,env,n),a712=await finance712(db,env,n),
+  current=await financial685(db,env,n),ninth=await finance706(db,env,n);
+ const source=rows(await db.prepare(
+  "SELECT social_post_attempt_id,attempt_status,response_json,attempted_at FROM social_post_attempts WHERE social_post_queue_id=? AND platform_key='finance_ninth_signed_intake_716' ORDER BY social_post_attempt_id DESC LIMIT 41").bind(n).all());
+ return assessIndependentNinthIntake716(a715,a712,current,ninth.ninth_signer_id,
+  normalizeText(env?.FINANCIAL_CONTINUITY_REVIEWER_PUBLIC_KEY_706),source);
+}
+async function intakeIndependentNinth716(db,env,user,p){
+ const n=Number(p.social_post_queue_id),current=await financial685(db,env,n),
+  a715=await finance715(db,env,n),a712=await finance712(db,env,n),
+  ninth=await finance706(db,env,n),existing=await finance716(db,env,n),
+  revision=normalizeText(p.expected_source_revision),
+  fingerprint=normalizeText(p.expected_fingerprint_sha256);
+ let evidence={};
+ try{
+  if(typeof p.signed_evidence_json!=='string'||p.signed_evidence_json.length>4096)
+   throw Error('Signed evidence too long or absent.');
+  evidence=JSON.parse(p.signed_evidence_json);
+ }catch{throw Error('Original independent signed JSON evidence missing or malformed. HOLD.')}
+ const c=evidence?.claim||{},signature=evidence?.signature,
+  renewalId=Number(c.original_711_renewal_receipt_id),
+  item=a715.items?.find(x=>x.renewal_receipt_id_711===renewalId),
+  original=a712.items?.find(x=>x.renewal_receipt_id_711===renewalId),
+  canonical=claimIndependentNinth716(c),
+  shape=Object.keys(c).length===Object.keys(canonical).length&&
+   Object.keys(c).every(k=>Object.hasOwn(canonical,k))&&
+   Object.keys(canonical).every(k=>c[k]===canonical[k]);
+ if(!Number.isSafeInteger(n)||n<1||!current.master_fresh||!current.history_complete||
+  current.open_cases?.length||!a715.history_complete||!a712.history_complete||
+  !existing.history_complete||existing.invalid_count||!ninth.history_complete||
+  !ninth.ninth_signer_configured||!ninth.ninth_signer_id||
+  !item||!original||!item.owner_followup_evidence_verified||
+  !item.ninth_re_attestation_readiness?.startsWith('READY_TO_REQUEST')||
+  p.owner_reviewed_original_source!==true||
+  revision!==current.source_revision||fingerprint!==current.fingerprint_sha256||
+  c.queue_id!==n||c.original_706_review_receipt_id!==original.review_706_receipt_id||
+  c.original_711_renewal_receipt_id!==renewalId||
+  c.original_712_owner_custody_receipt_id!==item.original_custody_evidence_receipt_id||
+  c.original_710_provenance_sha256!==original.provenance_710_digest_sha256||
+  c.original_711_renewal_sha256!==original.renewal_manifest_sha256_711||
+  c.source_revision!==current.source_revision||
+  c.fingerprint_sha256!==current.fingerprint_sha256||
+  c.independent_reviewer_id!==ninth.ninth_signer_id||
+  c.purpose!==canonical.purpose||c.v!==1||!shape||
+  !['reconfirm_original_ninth_source_under_hold',
+    'independent_custody_exception_requires_followup'].includes(c.disposition)||
+  !nonce684(c.nonce)||!fresh684(c.issued_at,600000)||
+  existing.receipts.some(x=>x.original_711_renewal_receipt_id===renewalId))
+  throw Error('Original owner SLA, source signer, fresh independent evidence or one-time claim mismatch. HOLD.');
+ const publicKey=normalizeText(env?.FINANCIAL_CONTINUITY_REVIEWER_PUBLIC_KEY_706);
+ if(!await verify684(publicKey,canonical,signature))
+  throw Error('Independent ninth Ed25519 signature invalid or not from enrolled reviewer. HOLD.');
+ const fresh=await financial685(db,env,n);
+ if(!fresh.master_fresh||!fresh.history_complete||fresh.open_cases?.length||
+  fresh.source_revision!==current.source_revision||
+  fresh.fingerprint_sha256!==current.fingerprint_sha256)
+  throw Error('Original financial source changed during signed intake. HOLD.');
+ const data={claim:canonical,signature,owner_user_id:user.user_id,
+  owner_reviewed_original_source:true,
+  independent_signature_cryptographically_verified:true,
+  financial_books_closed:false,external_sla_closed:false,
+  new_signature_generated_by_owner:false};
+ const receipt=await append684(db,user,n,'finance_ninth_signed_intake_716',
+  'independent_ninth_source_signed_intake_716',
+  'finance716-ninth-'+n+'-'+renewalId,data);
+ const after=await finance716(db,env,n);
+ if(!after.history_complete||
+  !after.receipts.some(x=>x.receipt_id===receipt&&x.independent_signature_verified))
+  throw Error('Original independent ninth D1 receipt did not pass on-demand source signature readback. HOLD.');
+ return {status:'INDEPENDENT_NINTH_SIGNED_SOURCE_INTAKE_VERIFIED_BOOKS_HOLD_716',
+  receipt_id:receipt,independent_signature_verified:true,
+  external_sla_closed:false,financial_books_closed:false,automatic_escalation:false};
+}
+
 async function finance715(db,env,id){
  const n=Number(id);
  if(!Number.isSafeInteger(n)||n<1)return assessOriginalCustodySla715(null,null,null,null);
@@ -8212,6 +8373,20 @@ const db=getDb(context.env);
 if (!db) return jsonResponse({ ok:false,error:'Database binding is not configured.'},500);
 try{
 const params=new URL(context.request.url).searchParams;
+if(params.get('audit')==='financial716'||params.get('export')==='financial716'){
+ const n=Number(params.get('campaign_queue_id'));
+ if(!Number.isSafeInteger(n)||n<1)
+  return jsonResponse({ok:false,error:'Exact authenticated original campaign required.'},
+   400,{'Cache-Control':'no-store'});
+ const report=await finance716(db,context.env,n),
+  exporting=params.get('export')==='financial716';
+ return new Response(JSON.stringify({financial716:report,
+  original_external_sla_closure_verified:false,financial_books_closed:false},null,exporting?2:0),
+ {status:200,headers:{'Content-Type':'application/json; charset=utf-8',
+  'Cache-Control':'private, no-store','X-Content-Type-Options':'nosniff',
+  ...(exporting?{'Content-Disposition':
+  'attachment; filename="devilndove-independent-ninth-source-716-'+n+'.json"'}:{})}});
+}
 if(params.get('audit')==='financial715'||params.get('export')==='financial715'){
  const n=Number(params.get('campaign_queue_id'));
  if(!Number.isSafeInteger(n)||n<1)
@@ -8629,6 +8804,7 @@ else if (action==='owner_ninth_reviewer_provenance_audit_710') result=await owne
 else if (action==='owner_custody_followup_outcome_reconciliation_711') result=await ownerCustodyOutcome711(db,context.env,adminUser,payload);
 else if (action==='owner_ninth_provenance_renewal_audit_711') result=await ownerNinthRenewal711(db,context.env,adminUser,payload);
 else if (action==='owner_custody_followup_evidence_712') result=await ownerCustodyEvidence712(db,context.env,adminUser,payload);
+else if (action==='independent_ninth_source_intake_716') result=await intakeIndependentNinth716(db,context.env,adminUser,payload);
 else if (action==='expense_attestation_678') result=await expenseAttestation678(db,context.env,adminUser,payload,recordApiAttempt);
 else if (action==='owner_marketing_signoff_678') result=await ownerSignoff678(db,adminUser,payload,recordApiAttempt);
 else throw new Error(`Unsupported social queue action: ${action}`);
