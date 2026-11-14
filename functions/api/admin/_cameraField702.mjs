@@ -464,6 +464,39 @@ export function reconcileOriginalRecurrenceOutcome716(triage,recurrence,escalati
   automatic_repair:false};
 }
 
+/* Build 717: fresh on-demand original closure source; a stale owner
+ * attestation cannot be called a fresh physical phone or third-party witness. */
+export function reviewOriginalClosureFreshness717(outcome,recurrence,resolution,horizon,latest,trend,now=Date.now()){
+ const hold=(status,age=null)=>({status,closure_fresh:false,age_hours:age,
+  original_recurrence_receipt_id:Number(recurrence?.admin_action_audit_id||0),
+  external_closure_confirmed:false,physical_phone_witness:false,
+  automated_repair:false,continuous_monitoring:false});
+ if(!recurrence)return hold('NO_ORIGINAL_RECORDED_RECURRENCE_717');
+ if(outcome?.source_reconciled!==true||trend?.stable!==true||!resolution||!horizon)
+  return hold('HOLD_717_ORIGINAL_SIGNED_CLOSURE_SOURCE_OR_R2_DRIFT');
+ const issued=isoTime(latest?.data?.issued_at),
+  recorded=isoTime(latest?.created_at),
+  resolved=isoTime(resolution.created_at),
+  at=isoTime(horizon.created_at);
+ if(!Number.isFinite(issued)||!Number.isFinite(recorded)||
+  !Number.isFinite(resolved)||!Number.isFinite(at)||
+  issued>now+300000||recorded>now+300000||
+  issued<resolved||issued<at||recorded<at||
+  Number(latest?.admin_action_audit_id)<=Number(horizon.admin_action_audit_id)||
+  Number(resolution.admin_action_audit_id)<=Number(recurrence.admin_action_audit_id))
+  return hold('HOLD_717_ORIGINAL_CLOSURE_TIME_ORDER_OR_REPLAY');
+ const age=Math.max(0,Math.floor((now-issued)/3600000));
+ if(now-issued>86400000)return hold('HOLD_717_OWNER_CLOSURE_REATTEST_FRESHNESS_EXPIRED',age);
+ return {status:'ORIGINAL_CLOSURE_SIGNED_R2_FRESH_RECHECK_ON_DEMAND_717',
+  closure_fresh:true,age_hours:age,
+  original_recurrence_receipt_id:Number(recurrence.admin_action_audit_id),
+  original_resolution_receipt_id:Number(resolution.admin_action_audit_id),
+  original_horizon_receipt_id:Number(horizon.admin_action_audit_id),
+  original_owner_reattest_receipt_id:Number(latest.admin_action_audit_id),
+  external_closure_confirmed:false,physical_phone_witness:false,
+  automated_repair:false,continuous_monitoring:false};
+}
+
 export async function handleCamera702({db,form,adminUser,id,token,live,ready701}){
  const action=String(form.get('action')||'');
  const auditRows=await db.prepare(
@@ -561,6 +594,7 @@ export async function handleCamera702({db,form,adminUser,id,token,live,ready701}
    const trend714=reviewOriginalMediaTrend714(recurrence,resolution,stability,horizonReceipt,multiHorizon713);
    const triage715=triageOriginalMediaRecurrence715(x,recurrence,resolution,recurrenceEscalation,trend714);
    const outcome716=reconcileOriginalRecurrenceOutcome716(triage715,recurrence,recurrenceEscalation,resolution,trend714);
+   const closure717=reviewOriginalClosureFreshness717(outcome716,recurrence,resolution,horizonReceipt,latest,trend714);
    const resolutionReady=!!recurrence&&!resolution&&
      canResolveOriginalRecurrence710(recurrence,driftRecovery,signoff,latest,drift707);
    return {...ageMedia703(x),escalated:!!esc,
@@ -588,6 +622,9 @@ export async function handleCamera702({db,form,adminUser,id,token,live,ready701}
      signed_media_stability_ready_711:stabilityReady,
      signed_media_stability_receipt_id_711:Number(stability?.admin_action_audit_id||0),
      signed_media_stability_valid_now_711:stabilityValid,
+     original_closure_fresh_status_717:closure717.status,
+     original_closure_fresh_now_717:closure717.closure_fresh,
+     original_closure_attestation_age_hours_717:closure717.age_hours,
      original_recurrence_outcome_status_716:outcome716.status,
      original_recurrence_outcome_716:outcome716.outcome,
      original_recurrence_outcome_reconciled_716:outcome716.source_reconciled,
@@ -678,6 +715,9 @@ export async function handleCamera702({db,form,adminUser,id,token,live,ready701}
   signed_media_horizon_recorded_712:aging.filter(x=>x.signed_media_horizon_receipt_id_712>0).length,
   signed_media_horizon_current_drift_hold_712:aging.filter(x=>
     x.signed_media_horizon_receipt_id_712>0&&!x.signed_media_horizon_valid_now_712).length,
+  original_closure_fresh_count_717:aging.filter(x=>x.original_closure_fresh_now_717).length,
+  original_closure_freshness_hold_717:aging.filter(x=>x.signed_media_recurrence_receipt_id_709>0&&!x.original_closure_fresh_now_717).length,
+  external_media_closure_confirmed_717:false,continuous_closure_watcher_717:false,
   original_recurrence_outcome_reconciled_716:aging.filter(x=>x.original_recurrence_outcome_reconciled_716).length,
   original_recurrence_outcome_hold_716:aging.filter(x=>x.original_recurrence_outcome_716==='HOLD').length,
   original_recurrence_escalation_owner_recorded_716:aging.filter(x=>x.original_recurrence_owner_escalation_recorded_716).length,
@@ -697,7 +737,7 @@ export async function handleCamera702({db,form,adminUser,id,token,live,ready701}
   background_media_horizon_watcher_712:false,
   independently_authenticated_phone:false,
   unrecorded_upload_recovery_certified:false,publication_performed:false});
- if(action==='camera702_inspect'||action==='camera703_inspect'||action==='camera704_inspect'||action==='camera705_inspect'||action==='camera706_inspect'||action==='camera707_inspect'||action==='camera708_inspect'||action==='camera709_inspect'||action==='camera710_inspect'||action==='camera711_inspect'||action==='camera712_inspect'||action==='camera713_inspect'||action==='camera714_inspect'||action==='camera715_inspect'||action==='camera716_inspect')return state();
+ if(action==='camera702_inspect'||action==='camera703_inspect'||action==='camera704_inspect'||action==='camera705_inspect'||action==='camera706_inspect'||action==='camera707_inspect'||action==='camera708_inspect'||action==='camera709_inspect'||action==='camera710_inspect'||action==='camera711_inspect'||action==='camera712_inspect'||action==='camera713_inspect'||action==='camera714_inspect'||action==='camera715_inspect'||action==='camera716_inspect'||action==='camera717_inspect')return state();
  if(!original)return out({ok:false,error:'Original owner-reported Build 701 receipt required. HOLD.'},409);
  const note=String(form.get('owner_device_notes')||'').trim();
  const nonce=String(form.get('nonce')||'');
