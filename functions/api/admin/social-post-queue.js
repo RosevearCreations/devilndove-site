@@ -4,6 +4,8 @@
 // but does not auto-post until official OAuth/API keys are configured and approved for each platform.
 
 import{ auditAdminAction,captureRuntimeIncident,getAdminUserFromRequest,getDb,jsonResponse,normalizeText } from '../_lib/adminAudit.js';
+import {claimIndependentNinth716,claimExternalCustodySla717,reviewOriginalExternalSlaContinuity718} from './_lib/projectFinanceEvidence.js';
+export {claimIndependentNinth716,claimExternalCustodySla717,reviewOriginalExternalSlaContinuity718};
 
 
 const finance678=(()=>{
@@ -8127,17 +8129,6 @@ export function assessOriginalCustodySla715(a714,a713,a712,ninth,now=Date.now())
 }
 /* Build 716 — independently signed, original-source-pinned ninth review intake.
  * The signing key is never accepted or generated on the owner server. */
-export function claimIndependentNinth716(c){
- return {v:1,purpose:'devilndove_independent_ninth_source_reattest_716',
-  queue_id:c.queue_id,original_706_review_receipt_id:c.original_706_review_receipt_id,
-  original_711_renewal_receipt_id:c.original_711_renewal_receipt_id,
-  original_712_owner_custody_receipt_id:c.original_712_owner_custody_receipt_id,
-  original_710_provenance_sha256:c.original_710_provenance_sha256,
-  original_711_renewal_sha256:c.original_711_renewal_sha256,
-  source_revision:c.source_revision,fingerprint_sha256:c.fingerprint_sha256,
-  independent_reviewer_id:c.independent_reviewer_id,
-  disposition:c.disposition,nonce:c.nonce,issued_at:c.issued_at};
-}
 const time716=x=>Date.parse(String(x||'').replace(
  /^([0-9]{4}-[0-9]{2}-[0-9]{2}) ([0-9]{2}:[0-9]{2}:[0-9]{2})$/,'$1T$2Z'));
 export async function assessIndependentNinthIntake716(a715,a712,current,signerId,signerKey,rawRows=[],now=Date.now()){
@@ -8211,19 +8202,6 @@ export async function assessIndependentNinthIntake716(a715,a712,current,signerId
 }
 /* Build 717: original 716 signatures are reverified through finance716 each
  * time. External SLA evidence must use a distinct independently controlled key. */
-export function claimExternalCustodySla717(c){
- return {v:1,purpose:'devilndove_external_custody_sla_confirmation_717',
-  queue_id:c.queue_id,
-  original_706_ninth_review_receipt_id:c.original_706_ninth_review_receipt_id,
-  original_711_renewal_receipt_id:c.original_711_renewal_receipt_id,
-  original_712_owner_custody_receipt_id:c.original_712_owner_custody_receipt_id,
-  original_716_independent_ninth_receipt_id:c.original_716_independent_ninth_receipt_id,
-  original_710_provenance_sha256:c.original_710_provenance_sha256,
-  original_711_renewal_sha256:c.original_711_renewal_sha256,
-  source_revision:c.source_revision,fingerprint_sha256:c.fingerprint_sha256,
-  external_verifier_id:c.external_verifier_id,
-  disposition:c.disposition,nonce:c.nonce,issued_at:c.issued_at};
-}
 export async function assessExternalCustodySla717(a716,a715,a712,current,
  verifierId,verifierKey,ninthId,ninthKey,rawRows=[],now=Date.now()){
  const old=Array.isArray(a716?.receipts)?a716.receipts:[],
@@ -8302,6 +8280,9 @@ export async function assessExternalCustodySla717(a716,a715,a712,current,
   if(ok)verified++;else invalid++;
   seen.add(rid);prevId=id;prevAt=Number.isFinite(at)?at:-Infinity;
   receipts.push({receipt_id:id,original_711_renewal_receipt_id:rid,
+   signed_issued_at:c.issued_at,received_at:row.attempted_at,
+   signed_disposition:c.disposition,external_verifier_id:c.external_verifier_id,
+   original_712_custody_receipt_id:Number(c.original_712_owner_custody_receipt_id||0),
    original_716_ninth_receipt_id:Number(c.original_716_independent_ninth_receipt_id||0),
    independent_external_signature_verified:!!ok,
    custody_sla_followup_attested:!!ok&&c.disposition==='confirm_independent_manual_custody_sla_followup',
@@ -8327,6 +8308,17 @@ export async function assessExternalCustodySla717(a716,a715,a712,current,
   actual_bookkeeping_closed:false,provider_posting_closed:false,
   automatic_external_contact:false,continuous_monitoring:false};
 }
+async function finance718(db,env,id){
+ const n=Number(id);
+ if(!Number.isSafeInteger(n)||n<1)
+  return reviewOriginalExternalSlaContinuity718(null,null,null,null,null);
+ const [a717,a716,a715,a712,current]=await Promise.all([
+  finance717(db,env,n),finance716(db,env,n),finance715(db,env,n),
+  finance712(db,env,n),financial685(db,env,n)
+ ]);
+ return reviewOriginalExternalSlaContinuity718(a717,a716,a715,a712,current);
+}
+
 async function finance717(db,env,id){
  const n=Number(id);
  if(!Number.isSafeInteger(n)||n<1)
@@ -8617,6 +8609,21 @@ const db=getDb(context.env);
 if (!db) return jsonResponse({ ok:false,error:'Database binding is not configured.'},500);
 try{
 const params=new URL(context.request.url).searchParams;
+if(params.get('audit')==='financial718'||params.get('export')==='financial718'){
+ const n=Number(params.get('campaign_queue_id'));
+ if(!Number.isSafeInteger(n)||n<1)
+  return jsonResponse({ok:false,error:'Exact authenticated original owner campaign required.'},
+   400,{'Cache-Control':'no-store'});
+ const report=await finance718(db,context.env,n),
+  exporting=params.get('export')==='financial718';
+ return new Response(JSON.stringify({financial718:report,
+  independent_external_contact_sent:false,
+  actual_financial_books_closed:false},null,exporting?2:0),
+ {status:200,headers:{'Content-Type':'application/json; charset=utf-8',
+  'Cache-Control':'private, no-store','X-Content-Type-Options':'nosniff',
+  ...(exporting?{'Content-Disposition':
+  'attachment; filename="devilndove-original-signed-sla-renewal-718-'+n+'.json"'}:{})}});
+}
 if(params.get('audit')==='financial717'||params.get('export')==='financial717'){
  const n=Number(params.get('campaign_queue_id'));
  if(!Number.isSafeInteger(n)||n<1)
