@@ -8188,6 +8188,7 @@ export async function assessIndependentNinthIntake716(a715,a712,current,signerId
   if(!ok)invalid++;else verified++;
   seen.add(renewal);
   receipts.push({receipt_id:id,original_711_renewal_receipt_id:renewal,
+   signed_issued_at:c.issued_at,received_at:row.attempted_at,
    original_712_owner_custody_receipt_id:Number(c.original_712_owner_custody_receipt_id||0),
    independent_signature_verified:!!ok,
    status:ok?'FRESH_INDEPENDENT_NINTH_SOURCE_REATTESTED_BOOKS_HOLD_716':
@@ -8238,7 +8239,7 @@ export async function assessExternalCustodySla717(a716,a715,a712,current,
   independent=!!verifierId&&!!verifierKey&&!!ninthId&&!!ninthKey&&
    verifierId!==ninthId&&verifierKey!==ninthKey&&
    verifierKey.length>=40&&ninthKey.length>=40;
- let invalid=0,verified=0,prevId=Infinity,prevAt=Infinity,continuity=0;
+ let invalid=0,verified=0,prevId=Infinity,prevAt=Infinity,continuity=0,renewalDue=0;
  const seen=new Set(),receipts=[];
  for(const rec of old){
   const id=Number(rec.original_711_renewal_receipt_id),
@@ -8252,6 +8253,9 @@ export async function assessExternalCustodySla717(a716,a715,a712,current,
    owned.original_ninth_receipt_id!==src.review_706_receipt_id||seen.has(id))
    invalid++;
   else continuity++;
+  const signedAt=time716(rec.received_at);
+  if(!Number.isFinite(signedAt)||signedAt>now+300000)invalid++;
+  else if(now-signedAt>=72*3600000)renewalDue++;
   seen.add(id);
  }
  seen.clear();
@@ -8287,6 +8291,8 @@ export async function assessExternalCustodySla717(a716,a715,a712,current,
    row.attempt_status==='independent_external_custody_sla_ack_717'&&
    Number.isFinite(issued)&&Number.isFinite(at)&&
    issued<=at&&at-issued<=86400000&&at<=now+300000&&
+   Number.isFinite(time716(signerReceipt.received_at))&&
+   issued>=time716(signerReceipt.received_at)&&
    at<=prevAt&&issued>=time716(src.original_711_renewal_recorded_at)&&
    d.owner_reviewed_original_source===true&&
    Number.isSafeInteger(Number(d.owner_user_id))&&Number(d.owner_user_id)>0&&
@@ -8314,6 +8320,7 @@ export async function assessExternalCustodySla717(a716,a715,a712,current,
   independent_external_verifier_configured:!!independent,
   original_ninth_signature_continuity_count:continuity,
   original_ninth_signatures_checked:old.length,
+  original_ninth_signed_72h_renewal_due_count:renewalDue,
   signed_external_receipt_verified_count:verified,invalid_count:invalid,
   original_owner_followups_due:a715?.original_owner_followup_due_count||0,
   receipts,independently_attested_sla_followup_count:receipts.filter(x=>x.custody_sla_followup_attested).length,
