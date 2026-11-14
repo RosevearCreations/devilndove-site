@@ -327,6 +327,36 @@ export function signedMediaHorizonReadback712(row,stability,resolution,recurrenc
   d.publication_performed===false&&audit?.stable===true&&
   audit?.status===d.rechecked_source_status;
 }
+
+/* Build 713: original D1 24/48/72 horizon chronology and current signed R2 HEAD
+ * are rechecked only on authenticated owner request; never continuously. */
+export function reconcileSignedMediaRecurrence713(row,stability,resolution,recurrence,signoff,latest,audit,now=Date.now()){
+ const hold=status=>({status,source_stable:false,observed_horizon_hours:null,
+  continuous_monitoring_enabled:false,independent_phone_witnessed:false});
+ if(!row||!stability)return hold('HOLD_713_ORIGINAL_712_HORIZON_REQUIRED');
+ const at=isoTime(row.created_at),origin=isoTime(stability.created_at);
+ if(!Number.isFinite(at)||!Number.isFinite(origin)||at<origin||at>now+300000)
+  return hold('HOLD_713_ORIGINAL_HORIZON_CHRONOLOGY');
+ const recorded=signedMediaHorizonAge712(stability,at);
+ if(!recorded.due||row.data?.observed_stability_horizon_hours!==recorded.age_hours||
+  row.data?.observed_horizon_status!==recorded.status)
+  return hold('HOLD_713_ORIGINAL_HORIZON_REPLAY_OR_TAMPER');
+ if(!signedMediaHorizonReadback712(row,stability,resolution,recurrence,signoff,audit))
+  return hold('HOLD_713_ORIGINAL_SIGNED_MEDIA_RECURRENCE_OR_SOURCE_DRIFT');
+ const attested=isoTime(latest?.data?.issued_at);
+ if(!Number.isSafeInteger(Number(latest?.admin_action_audit_id))||
+  Number(latest.admin_action_audit_id)<=Number(row.admin_action_audit_id)||
+  latest?.data?.owner_re_attested!==true||!Number.isFinite(attested)||
+  attested<at||attested>now+300000)
+  return hold('HOLD_713_FRESH_POST_HORIZON_OWNER_REATTEST_REQUIRED');
+ const current=signedMediaHorizonAge712(stability,now);
+ if(!current.due)return hold('HOLD_713_CURRENT_HORIZON_TIMESTAMP_INVALID');
+ return {status:'ORIGINAL_SIGNED_MEDIA_MULTIHORIZON_SOURCE_RECONCILED_ON_DEMAND_713',
+  source_stable:true,observed_horizon_hours:current.age_hours,
+  horizon_status:current.status,original_712_horizon_receipt_id:Number(row.admin_action_audit_id),
+  continuous_monitoring_enabled:false,independent_phone_witnessed:false};
+}
+
 export async function handleCamera702({db,form,adminUser,id,token,live,ready701}){
  const action=String(form.get('action')||'');
  const auditRows=await db.prepare(
@@ -419,6 +449,8 @@ export async function handleCamera702({db,form,adminUser,id,token,live,ready701}
     canReviewSignedMediaHorizon712(stability,resolution,recurrence,signoff,latest,drift707);
    const horizonValid=!!horizonReceipt&&
     signedMediaHorizonReadback712(horizonReceipt,stability,resolution,recurrence,signoff,drift707);
+   const multiHorizon713=reconcileSignedMediaRecurrence713(horizonReceipt,stability,
+    resolution,recurrence,signoff,latest,drift707);
    const resolutionReady=!!recurrence&&!resolution&&
      canResolveOriginalRecurrence710(recurrence,driftRecovery,signoff,latest,drift707);
    return {...ageMedia703(x),escalated:!!esc,
@@ -446,6 +478,9 @@ export async function handleCamera702({db,form,adminUser,id,token,live,ready701}
      signed_media_stability_ready_711:stabilityReady,
      signed_media_stability_receipt_id_711:Number(stability?.admin_action_audit_id||0),
      signed_media_stability_valid_now_711:stabilityValid,
+     signed_media_multihorizon_status_713:multiHorizon713.status,
+     signed_media_multihorizon_stable_now_713:multiHorizon713.source_stable,
+     signed_media_multihorizon_observed_age_hours_713:multiHorizon713.observed_horizon_hours,
      signed_media_horizon_age_hours_712:horizon.age_hours,
      signed_media_horizon_status_712:!stability?'HOLD_711_ORIGINAL_STABILITY_REQUIRED':
        !horizonReceipt?(horizonReady?'ORIGINAL_SIGNED_MEDIA_HORIZON_RECHECK_READY_712':
@@ -521,11 +556,15 @@ export async function handleCamera702({db,form,adminUser,id,token,live,ready701}
   signed_media_horizon_recorded_712:aging.filter(x=>x.signed_media_horizon_receipt_id_712>0).length,
   signed_media_horizon_current_drift_hold_712:aging.filter(x=>
     x.signed_media_horizon_receipt_id_712>0&&!x.signed_media_horizon_valid_now_712).length,
+  signed_media_multihorizon_reconciled_713:aging.filter(x=>x.signed_media_multihorizon_stable_now_713).length,
+  signed_media_multihorizon_hold_713:aging.filter(x=>x.signed_media_horizon_receipt_id_712>0&&
+   !x.signed_media_multihorizon_stable_now_713).length,
+  recurrence_reconciliation_on_demand_only_713:true,
   independent_server_d1_r2_readback_on_demand_712:true,
   background_media_horizon_watcher_712:false,
   independently_authenticated_phone:false,
   unrecorded_upload_recovery_certified:false,publication_performed:false});
- if(action==='camera702_inspect'||action==='camera703_inspect'||action==='camera704_inspect'||action==='camera705_inspect'||action==='camera706_inspect'||action==='camera707_inspect'||action==='camera708_inspect'||action==='camera709_inspect'||action==='camera710_inspect'||action==='camera711_inspect'||action==='camera712_inspect')return state();
+ if(action==='camera702_inspect'||action==='camera703_inspect'||action==='camera704_inspect'||action==='camera705_inspect'||action==='camera706_inspect'||action==='camera707_inspect'||action==='camera708_inspect'||action==='camera709_inspect'||action==='camera710_inspect'||action==='camera711_inspect'||action==='camera712_inspect'||action==='camera713_inspect')return state();
  if(!original)return out({ok:false,error:'Original owner-reported Build 701 receipt required. HOLD.'},409);
  const note=String(form.get('owner_device_notes')||'').trim();
  const nonce=String(form.get('nonce')||'');
