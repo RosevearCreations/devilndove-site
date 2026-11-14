@@ -48,6 +48,9 @@ const horizonReceipt={admin_action_audit_id:1000,data:{build:712,
  original_711_stability_receipt_id:950,original_710_resolution_receipt_id:930,
  original_709_recurrence_receipt_id:900,original_706_signoff_receipt_id:800,
  original_signed_r2_key:signed.data.r2_key,original_signed_r2_bytes:4096,
+ observed_current_r2_key:signed.data.r2_key,observed_current_r2_bytes:4096,
+ observed_stability_horizon_hours:50,observed_horizon_status:
+  'ORIGINAL_SIGNED_MEDIA_HORIZON_48H_RECHECK_DUE_712',
  rechecked_source_status:stable.status,automatic_media_repair:false,
  continuous_monitoring_enabled:false,independent_physical_phone_witness:false,
  unrecorded_uploads_closed:false,publication_performed:false}};
@@ -56,6 +59,8 @@ assert.equal(signedMediaHorizonReadback712(horizonReceipt,stability,resolution,r
 for(const patch of [{original_711_stability_receipt_id:9},{original_710_resolution_receipt_id:9},
  {original_709_recurrence_receipt_id:9},{original_706_signoff_receipt_id:9},
  {original_signed_r2_key:'another.jpg'},{original_signed_r2_bytes:0},
+ {observed_current_r2_key:'forged'},{observed_current_r2_bytes:0},
+ {observed_stability_horizon_hours:2},{observed_horizon_status:'UNVERIFIED'},
  {rechecked_source_status:'forged'}, {automatic_media_repair:true},
  {continuous_monitoring_enabled:true},{independent_physical_phone_witness:true},
  {unrecorded_uploads_closed:true},{publication_performed:true}]){
