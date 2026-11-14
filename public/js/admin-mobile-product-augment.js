@@ -734,6 +734,27 @@ document.addEventListener('DOMContentLoaded',()=>{
     return responseJson(await window.DDAuth.apiFetch('/api/admin/mobile-create-product',
       {method:'POST',body:form}),'Protected original device evidence unavailable.');
   }
+  function draw714(v){
+   const status=$('dd714MediaStatus'),list=$('dd714MediaCases');
+   if(!status||!list)return;
+   list.replaceChildren();
+   for(const x of v.exception_aging_703||[]){
+    if(!x.signed_media_horizon_receipt_id_712)continue;
+    const li=document.createElement('li');
+    li.textContent='Original signed horizon #'+x.signed_media_horizon_receipt_id_712+
+     ' · '+x.original_media_trend_status_714+
+     ' · window '+(x.original_media_trend_window_714||'HOLD')+
+     ' · age '+(x.original_media_trend_age_714??'unknown')+'h';
+    list.appendChild(li);
+   }
+   if(!list.childElementCount){
+    const li=document.createElement('li');li.textContent='Original signed 712 horizon missing; HOLD.';
+    list.appendChild(li);
+   }
+   status.textContent='Original source stable '+(v.original_media_trend_stable_714||0)+
+    ' · source HOLD '+(v.original_media_trend_hold_714||0)+
+    ' · read-on-demand only; no continuous new recurrence evidence.';
+  }
   function draw713(v){
    const status=$('dd713MediaStatus'),list=$('dd713MediaCases');
    if(!status||!list)return;
@@ -1036,6 +1057,7 @@ document.addEventListener('DOMContentLoaded',()=>{
     draw711(v);
     draw712(v);
     draw713(v);
+    draw714(v);
   }
   async function inspect702(){
     const data=await send702('camera702_inspect');
@@ -1044,6 +1066,13 @@ document.addEventListener('DOMContentLoaded',()=>{
     show702(data);return data;
   }
 
+  $('dd714MediaRefresh')?.addEventListener('click',async()=>{
+   try{const d=await send702('camera714_inspect');
+    if(!d.ok||Number(d.product_id)!==Number(active?.product_id))
+     throw Error('Original camera draft changed. HOLD.');
+    show702(d);
+   }catch(e){$('dd714MediaStatus').textContent='HOLD · '+e.message;}
+  });
   $('dd713MediaRefresh')?.addEventListener('click',async()=>{
    try{const d=await send702('camera713_inspect');
     if(!d.ok||Number(d.product_id)!==Number(active?.product_id))

@@ -1623,6 +1623,30 @@ select699();
 
 
 
+ function draw714(data){
+  const v=data.financial714;
+  if(!$('dd714-finance'))return;
+  $('dd714FinanceStatus').textContent=v?.campaign_queue_id?
+   v.status+' · outside reviewer and books still HOLD':
+   'HOLD · Original ninth source not independently rechecked.';
+  $('dd714FinanceStats').textContent=v?.campaign_queue_id?
+   'Authority drift '+v.drift_count+' · follow-up due '+v.followup_due_count+
+   ' · 72-hour cases '+v.followup_72h_count+
+   ' · owner evidence revalidated '+v.owner_evidence_revalidated_count:
+   'Original signed campaign needed.';
+  const list=$('dd714FinanceCases');list.replaceChildren();
+  for(const x of v?.items||[]){
+   const li=document.createElement('li');
+   li.textContent='Ninth renewal #'+x.renewal_receipt_id_711+
+    ' · custody #'+(x.original_custody_receipt_id||'missing')+
+    ' · '+x.age_window+' · '+x.status;
+   list.appendChild(li);
+  }
+  if(!list.childElementCount){
+   const li=document.createElement('li');li.textContent='No original renewal available; HOLD.';
+   list.appendChild(li);
+  }
+ }
  function draw713(data){
   if(!$('dd713-finance'))return;
   const v=data.financial713||null;
@@ -2356,6 +2380,29 @@ $('dd699Refresh').addEventListener('click',()=>void refresh());
 
 
 
+ async function refresh714(){
+  const id=Number($('dd685Campaign').value);
+  if(!id||id!==state?.queue_id||!window.DDAuth?.apiFetch)
+   throw Error('Choose the original owner campaign and refresh first.');
+  const response=await window.DDAuth.apiFetch(endpoint+
+   '?audit=financial714&campaign_queue_id='+encodeURIComponent(id));
+  if(!response.ok)throw Error('Protected Build 714 source audit unavailable.');
+  draw714(await response.json());
+ }
+ $('dd714FinanceRefresh').addEventListener('click',async()=>{
+  try{await refresh714();}catch(e){$('dd714FinanceStatus').textContent='HOLD · '+e.message;}
+ });
+ $('dd714FinanceExport').addEventListener('click',async()=>{
+  try{
+   await refresh714();
+   const id=Number(state.queue_id),response=await window.DDAuth.apiFetch(endpoint+
+    '?export=financial714&campaign_queue_id='+encodeURIComponent(id));
+   if(!response.ok)throw Error('Protected original 714 export denied.');
+   const url=URL.createObjectURL(await response.blob()),a=document.createElement('a');
+   a.href=url;a.download='devilndove-custody-drift-'+id+'-714.json';
+   document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1000);
+  }catch(e){$('dd714FinanceStatus').textContent='HOLD · '+e.message;}
+ });
  $('dd713FinanceRefresh').addEventListener('click',()=>void refresh());
  $('dd713FinanceExport').addEventListener('click',async()=>{
   try{

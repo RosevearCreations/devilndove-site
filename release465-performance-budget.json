@@ -16,7 +16,7 @@
     "max_js_bytes": 600000,
     "max_css_bytes": 500000,
     "max_html_bytes": 500000,
-    "max_runtime_source_bytes": 19481000,
+    "max_runtime_source_bytes": 19494000,
     "max_runtime_source_files": 1855,
     "max_inline_data_uri_bytes": 650000
   },
@@ -33,6 +33,23 @@
     "production_mutation": false
   },
   "budget_reviews": [
+    {
+      "build": 714,
+      "date": "2026-11-13",
+      "scope": "Original 709–713 source-bound 24/48/72-hour signed media recurrence trend, owner custody follow-up evidence revalidation, ninth signer authority drift and protected on-demand owner panels",
+      "prior_limit_bytes": 19481000,
+      "new_limit_bytes": 19494000,
+      "delta_bytes": 13000,
+      "delta_percent": 0.06673,
+      "prior_measured_runtime_bytes": 19473040,
+      "estimated_new_runtime_bytes": 19485179,
+      "source_file_limit_unchanged": 1855,
+      "per_file_js_css_html_limits_unchanged": true,
+      "review_reason": "Narrow +13,000-byte (0.0667%) runtime source allowance adds explicit original D1/R2 time-order review, source-pinned ninth signer/custody reconciliations and manually triggered read-only owner panels. Prior exact Build 713 observed 19,473,040 bytes; estimated +12,139 bytes from the reviewed Build 714 code, subject to mandatory actual-source System Gate measurement. Runtime file count stays 1855; per-file security, CSP, original D1 authority, production deployment and independent integrity gates unchanged. No schema migration, background polling, media publication, provider write, new cryptographic signature, financial book close, or independent physical device claim.",
+      "financial_close": "ORIGINAL_EXTERNAL_EVIDENCE_HOLD",
+      "original_phone_witness": "NOT_INDEPENDENTLY_VERIFIED",
+      "continuous_monitoring": false
+    },
     {
       "build": 713,
       "date": "2026-11-13",
