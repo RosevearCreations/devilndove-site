@@ -19,7 +19,7 @@ assert.match(media(recurrence,resolution,stability,horizon,{source_stable:false}
 const ninth={history_complete:true,ninth_signer_configured:true,ninth_signer_id:'original-nine'};
 const origin={renewal_receipt_id_711:110,review_706_receipt_id:80,
  original_711_renewal_recorded_at:iso(-90),source_stable_712:true,
- renewal_manifest_sha256:'a'.repeat(64),provenance_710_digest_sha256:'b'.repeat(64),
+ renewal_manifest_sha256_711:'a'.repeat(64),provenance_710_digest_sha256:'b'.repeat(64),
  custody_followup_evidence_recorded_712:true,custody_followup_evidence_receipt_id_712:130};
 const previous={history_complete:true,campaign_queue_id:7,original_ninth_reviewer_id:'original-nine',
  independent_external_reply_verified:false,owner_financial_close_verified:false,invalid_count:0,
