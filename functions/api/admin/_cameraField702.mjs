@@ -382,6 +382,52 @@ export function reviewOriginalMediaTrend714(recurrence,resolution,stability,hori
   continuous_watch:false,automatic_repair:false,independent_phone_witness:false};
 }
 
+/* Build 715: read-only triage uses the original 709 recurrence chronology and
+ * Build 714 current on-demand signed D1/R2 HEAD; owner notes are not a witness. */
+export function triageOriginalMediaRecurrence715(caseRow,recurrence,resolution,escalation,trend,now=Date.now()){
+ const id=Number(recurrence?.admin_action_audit_id||0),
+  opened=isoTime(recurrence?.created_at);
+ const hold=status=>({status,priority:'HOLD',recurrence_receipt_id:id||null,
+  recurrence_age_hours:null,external_escalation_confirmed:false,
+  automatic_media_repair:false,independent_phone_witness:false});
+ if(!recurrence)return {status:'NO_RECORDED_ORIGINAL_RECURRENCE_715',
+  priority:'NONE',recurrence_receipt_id:null,recurrence_age_hours:null,
+  external_escalation_confirmed:false,automatic_media_repair:false,independent_phone_witness:false};
+ if(!Number.isSafeInteger(id)||id<=Number(caseRow?.receipt_id||0)||
+  !Number.isFinite(opened)||opened>now+300000||
+  Number(recurrence?.data?.open_receipt_id)!==Number(caseRow?.receipt_id)||
+  Number(caseRow?.receipt_id)<=0)
+  return hold('HOLD_715_ORIGINAL_RECURRENCE_SOURCE_OR_TIMESTAMP_INVALID');
+ const age=Math.max(0,Math.floor((now-opened)/3600000));
+ if(escalation){
+  const at=isoTime(escalation.created_at);
+  if(Number(escalation.admin_action_audit_id)<=id||!Number.isFinite(at)||
+   at<opened||at>now+300000||
+   Number(escalation.data?.recurrence_receipt_id)!==id)
+   return hold('HOLD_715_ORIGINAL_ESCALATION_RECEIPT_REPLAY_OR_DRIFT');
+ }
+ if(resolution){
+  const at=isoTime(resolution.created_at);
+  if(Number(resolution.admin_action_audit_id)<=id||!Number.isFinite(at)||
+   at<opened||at>now+300000||
+   Number(resolution.data?.recurrence_receipt_id)!==id)
+   return hold('HOLD_715_ORIGINAL_RESOLUTION_SOURCE_INVALID');
+ }
+ const status=resolution&&trend?.stable===true?
+  'ORIGINAL_RECURRENCE_RESOLUTION_SOURCE_RECHECKED_715':
+  resolution?'HOLD_715_ORIGINAL_RECURRENCE_SOURCE_DRIFT_AFTER_RESOLUTION':
+  age>=48?'ORIGINAL_RECURRENCE_AGED_48H_OWNER_TRIAGE_REQUIRED_715':
+  age>=24?'ORIGINAL_RECURRENCE_AGED_24H_OWNER_FOLLOWUP_REQUIRED_715':
+  'ORIGINAL_RECURRENCE_UNDER_24H_OWNER_REVIEW_715';
+ return {status,priority:status.includes('HOLD')?'HOLD':
+  resolution?'REVIEW':age>=48?'HIGH':age>=24?'DUE':'WATCH',
+  recurrence_receipt_id:id,recurrence_age_hours:age,
+  original_escalation_receipt_id:Number(escalation?.admin_action_audit_id||0),
+  original_resolution_receipt_id:Number(resolution?.admin_action_audit_id||0),
+  current_source_stable:trend?.stable===true,
+  external_escalation_confirmed:false,automatic_media_repair:false,
+  independent_phone_witness:false};
+}
 export async function handleCamera702({db,form,adminUser,id,token,live,ready701}){
  const action=String(form.get('action')||'');
  const auditRows=await db.prepare(
@@ -477,6 +523,7 @@ export async function handleCamera702({db,form,adminUser,id,token,live,ready701}
    const multiHorizon713=reconcileSignedMediaRecurrence713(horizonReceipt,stability,
     resolution,recurrence,signoff,latest,drift707);
    const trend714=reviewOriginalMediaTrend714(recurrence,resolution,stability,horizonReceipt,multiHorizon713);
+   const triage715=triageOriginalMediaRecurrence715(x,recurrence,resolution,recurrenceEscalation,trend714);
    const resolutionReady=!!recurrence&&!resolution&&
      canResolveOriginalRecurrence710(recurrence,driftRecovery,signoff,latest,drift707);
    return {...ageMedia703(x),escalated:!!esc,
@@ -504,6 +551,10 @@ export async function handleCamera702({db,form,adminUser,id,token,live,ready701}
      signed_media_stability_ready_711:stabilityReady,
      signed_media_stability_receipt_id_711:Number(stability?.admin_action_audit_id||0),
      signed_media_stability_valid_now_711:stabilityValid,
+     original_recurrence_triage_status_715:triage715.status,
+     original_recurrence_triage_priority_715:triage715.priority,
+     original_recurrence_triage_age_hours_715:triage715.recurrence_age_hours,
+     original_recurrence_triage_source_stable_715:triage715.current_source_stable===true,
      original_media_trend_status_714:trend714.status,
      original_media_trend_window_714:trend714.trend_window,
      original_media_trend_age_714:trend714.age_hours,
@@ -586,6 +637,10 @@ export async function handleCamera702({db,form,adminUser,id,token,live,ready701}
   signed_media_horizon_recorded_712:aging.filter(x=>x.signed_media_horizon_receipt_id_712>0).length,
   signed_media_horizon_current_drift_hold_712:aging.filter(x=>
     x.signed_media_horizon_receipt_id_712>0&&!x.signed_media_horizon_valid_now_712).length,
+  original_recurrence_triage_hold_715:aging.filter(x=>x.original_recurrence_triage_priority_715==='HOLD').length,
+  original_recurrence_triage_due_715:aging.filter(x=>['HIGH','DUE'].includes(x.original_recurrence_triage_priority_715)).length,
+  original_recurrence_triage_rechecked_715:aging.filter(x=>x.original_recurrence_triage_source_stable_715).length,
+  automatic_recurrence_repair_715:false,background_recurrence_watcher_715:false,
   original_media_trend_stable_714:aging.filter(x=>x.original_media_trend_stable_714).length,
   original_media_trend_hold_714:aging.filter(x=>x.signed_media_horizon_receipt_id_712>0&&!x.original_media_trend_stable_714).length,
   background_media_trend_watcher_714:false,
@@ -597,7 +652,7 @@ export async function handleCamera702({db,form,adminUser,id,token,live,ready701}
   background_media_horizon_watcher_712:false,
   independently_authenticated_phone:false,
   unrecorded_upload_recovery_certified:false,publication_performed:false});
- if(action==='camera702_inspect'||action==='camera703_inspect'||action==='camera704_inspect'||action==='camera705_inspect'||action==='camera706_inspect'||action==='camera707_inspect'||action==='camera708_inspect'||action==='camera709_inspect'||action==='camera710_inspect'||action==='camera711_inspect'||action==='camera712_inspect'||action==='camera713_inspect'||action==='camera714_inspect')return state();
+ if(action==='camera702_inspect'||action==='camera703_inspect'||action==='camera704_inspect'||action==='camera705_inspect'||action==='camera706_inspect'||action==='camera707_inspect'||action==='camera708_inspect'||action==='camera709_inspect'||action==='camera710_inspect'||action==='camera711_inspect'||action==='camera712_inspect'||action==='camera713_inspect'||action==='camera714_inspect'||action==='camera715_inspect')return state();
  if(!original)return out({ok:false,error:'Original owner-reported Build 701 receipt required. HOLD.'},409);
  const note=String(form.get('owner_device_notes')||'').trim();
  const nonce=String(form.get('nonce')||'');
