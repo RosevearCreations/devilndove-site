@@ -73,6 +73,14 @@ jobs:
           node --check public/js/admin-mobile-product-augment.js
           node --check public/js/admin-social-platform-preflight.js
           node scripts/build707_ninth_field_media_drift_custody_contract.mjs
+      - name: Build 714 original recurrence trend, custody revalidation and ninth authority drift negative regression
+        run: |
+          node --check functions/api/admin/_cameraField702.mjs
+          node --check functions/api/admin/mobile-create-product.js
+          node --check functions/api/admin/social-post-queue.js
+          node --check public/js/admin-mobile-product-augment.js
+          node --check public/js/admin-social-platform-preflight.js
+          node scripts/build714_multihorizon_custody_authority_drift_contract.mjs
       - name: Build 713 original multi-horizon recurrence, custody escalation outcome and ninth authority negative regression
         run: |
           node --check functions/api/admin/_cameraField702.mjs
