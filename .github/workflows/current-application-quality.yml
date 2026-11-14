@@ -73,6 +73,14 @@ jobs:
           node --check public/js/admin-mobile-product-augment.js
           node --check public/js/admin-social-platform-preflight.js
           node scripts/build707_ninth_field_media_drift_custody_contract.mjs
+      - name: Build 718 independent outside SLA continuity, ninth renewal horizon and original closure escalation negative regression
+        run: |
+          node --check functions/api/admin/_cameraField702.mjs
+          node --check functions/api/admin/mobile-create-product.js
+          node --check functions/api/admin/social-post-queue.js
+          node --check public/js/admin-mobile-product-augment.js
+          node --check public/js/admin-social-platform-preflight.js
+          node scripts/build718_external_sla_continuity_ninth_renewal_media_escalation_contract.mjs
       - name: Build 717 fresh original closure, ninth signed receipt continuity and independent outside SLA Ed25519 negative regression
         run: |
           node --check functions/api/admin/_cameraField702.mjs
