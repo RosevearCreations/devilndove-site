@@ -314,6 +314,13 @@ export function signedMediaHorizonReadback712(row,stability,resolution,recurrenc
   Number(d.original_706_signoff_receipt_id)===Number(signoff?.admin_action_audit_id)&&
   d.original_signed_r2_key===signoff?.data?.r2_key&&
   Number(d.original_signed_r2_bytes)===Number(signoff?.data?.verified_r2_bytes)&&
+  d.observed_current_r2_key===signoff?.data?.r2_key&&
+  Number(d.observed_current_r2_bytes)===Number(signoff?.data?.verified_r2_bytes)&&
+  Number.isSafeInteger(Number(d.observed_stability_horizon_hours))&&
+  Number(d.observed_stability_horizon_hours)>=24&&
+  ['ORIGINAL_SIGNED_MEDIA_HORIZON_24H_RECHECK_DUE_712',
+   'ORIGINAL_SIGNED_MEDIA_HORIZON_48H_RECHECK_DUE_712',
+   'ORIGINAL_SIGNED_MEDIA_HORIZON_72H_RECHECK_DUE_712'].includes(d.observed_horizon_status)&&
   d.rechecked_source_status==='SIGNED_LINKED_MEDIA_SOURCE_STABLE_ON_DEMAND_707'&&
   d.automatic_media_repair===false&&d.continuous_monitoring_enabled===false&&
   d.independent_physical_phone_witness===false&&d.unrecorded_uploads_closed===false&&
