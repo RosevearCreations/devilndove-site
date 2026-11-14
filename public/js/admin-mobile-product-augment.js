@@ -716,6 +716,9 @@ document.addEventListener('DOMContentLoaded',()=>{
      if($('dd711MediaStatus'))$('dd711MediaStatus').textContent='HOLD · Reinspect original signed media and owner source.';
      if($('dd711StabilitySource'))$('dd711StabilitySource').replaceChildren(new Option('Reinspect original signed source',''));
      if($('dd711StabilityReviewed'))$('dd711StabilityReviewed').checked=false;
+     if($('dd712MediaStatus'))$('dd712MediaStatus').textContent='HOLD · Reinspect original source.';
+     if($('dd712HorizonSource'))$('dd712HorizonSource').replaceChildren(new Option('Reinspect original stability',''));
+     if($('dd712HorizonReviewed'))$('dd712HorizonReviewed').checked=false;
   }
   async function send702(action,fields={}){
     if(!window.DDAuth?.isLoggedIn?.()||!window.DDAuth.apiFetch)
@@ -728,6 +731,36 @@ document.addEventListener('DOMContentLoaded',()=>{
     for(const [k,v] of Object.entries(fields))form.set(k,String(v));
     return responseJson(await window.DDAuth.apiFetch('/api/admin/mobile-create-product',
       {method:'POST',body:form}),'Protected original device evidence unavailable.');
+  }
+  function draw712(v){
+   const status=$('dd712MediaStatus'),list=$('dd712MediaCases'),
+     sel=$('dd712HorizonSource');
+   if(!status||!list||!sel)return;
+   sel.replaceChildren(new Option('Select original source-matched 711 signed horizon',''));
+   list.replaceChildren();
+   for(const x of v.exception_aging_703||[]){
+    if(!x.signed_media_stability_receipt_id_711)continue;
+    const li=document.createElement('li');
+    li.textContent='Original 711 stability #'+x.signed_media_stability_receipt_id_711+
+     ' / signed resolution #'+x.signed_media_resolution_receipt_id_710+
+     ' · '+x.signed_media_horizon_status_712+
+     ' · horizon age '+(x.signed_media_horizon_age_hours_712??'unknown')+'h'+
+     ' · current original R2 '+x.media_signoff_drift_707;
+    list.appendChild(li);
+    if(x.signed_media_horizon_ready_712)
+     sel.add(new Option('Original 711 #'+x.signed_media_stability_receipt_id_711+
+      ' · '+x.signed_media_horizon_age_hours_712+'h verified source',
+      [x.receipt_id,x.owner_recovery_signoff_receipt_id,
+       x.signed_media_recurrence_receipt_id_709,x.signed_media_resolution_receipt_id_710,
+       x.signed_media_stability_receipt_id_711].join('|')));
+   }
+   if(!list.childElementCount){const li=document.createElement('li');
+    li.textContent='No original 711 post-resolution signed stability eligible.';
+    list.appendChild(li);}
+   status.textContent='24/48/72-hour on-demand horizon ready '+(v.signed_media_horizon_ready_712||0)+
+    ' · recorded '+(v.signed_media_horizon_recorded_712||0)+
+    ' · original source drift HOLD '+(v.signed_media_horizon_current_drift_hold_712||0)+
+    '. Continuous background watching remains disabled.';
   }
   function draw711(v){
    const status=$('dd711MediaStatus'),list=$('dd711MediaCases'),
@@ -978,6 +1011,7 @@ document.addEventListener('DOMContentLoaded',()=>{
     draw709(v);
     draw710(v);
     draw711(v);
+    draw712(v);
   }
   async function inspect702(){
     const data=await send702('camera702_inspect');
@@ -986,6 +1020,37 @@ document.addEventListener('DOMContentLoaded',()=>{
     show702(data);return data;
   }
 
+  $('dd712MediaRefresh')?.addEventListener('click',async()=>{
+    try{const d=await send702('camera712_inspect');
+      if(!d.ok||Number(d.product_id)!==Number(active?.product_id))
+       throw Error('Original owner camera draft changed before verified signed horizon source readback. HOLD.');
+      show702(d);
+    }catch(e){$('dd712MediaStatus').textContent='HOLD · '+e.message;}
+  });
+  $('dd712HorizonRecord')?.addEventListener('click',async()=>{
+    const btn=$('dd712HorizonRecord');btn.disabled=true;
+    try{
+     const [caseId,signoff,recurrence,resolution,stability]=
+      String($('dd712HorizonSource').value||'').split('|').map(Number);
+     const x=gate702?.exception_aging_703?.find(x=>x.receipt_id===caseId&&
+       x.owner_recovery_signoff_receipt_id===signoff&&
+       x.signed_media_recurrence_receipt_id_709===recurrence&&
+       x.signed_media_resolution_receipt_id_710===resolution&&
+       x.signed_media_stability_receipt_id_711===stability&&
+       x.signed_media_horizon_ready_712);
+     if(!x||!$('dd712HorizonReviewed').checked)
+      throw Error('Original 711 source aged 24+ hours, fresh later owner re-attestation and signed HEAD required.');
+     const d=await action702('camera712_signed_horizon_review',{
+      open_receipt_id:caseId,original_706_signoff_receipt_id:signoff,
+      original_709_recurrence_receipt_id:recurrence,
+      original_710_resolution_receipt_id:resolution,
+      original_711_stability_receipt_id:stability,owner_reviewed:'true'});
+     $('dd712MediaResult').textContent=d.status+' · original D1/R2 horizon #'+d.receipt_id+
+      '. No independent phone witness, automated media repair or continuous monitoring.';
+     $('dd712HorizonReviewed').checked=false;
+    }catch(e){$('dd712MediaResult').textContent='HOLD · '+e.message;}
+    finally{btn.disabled=false;}
+  });
   $('dd711MediaRefresh')?.addEventListener('click',async()=>{
     try{const d=await send702('camera711_inspect');
       if(!d.ok||Number(d.product_id)!==Number(active?.product_id))

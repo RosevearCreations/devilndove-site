@@ -1623,6 +1623,45 @@ select699();
 
 
 
+ let audit712=null;
+ function draw712(data){
+  if(!$('dd712-finance'))return;
+  const v=data.financial712||null;audit712=v;
+  $('dd712FinanceStatus').textContent=v?.campaign_queue_id?
+   v.status+' · original ninth source history '+(v.history_complete?'VERIFIED':'HOLD')+
+   ' · external reply and accounting closure HOLD':
+   'HOLD · Select exact owner financial campaign and refresh protected renewal sources.';
+  $('dd712FinanceStats').textContent=v?.campaign_queue_id?
+   'Verified original renewals '+v.eligible_count+
+   ' · source drift '+v.renewed_source_drift_count+
+   ' · horizon due '+v.horizon_due_count+
+   ' · owner follow-up evidence '+v.evidence_recorded_count+
+   ' · invalid '+v.invalid_count:
+   'Requires the existing original independently signed 711 renewal and 706/708/710 source digests.';
+  const list=$('dd712FinanceCases'),sel=$('dd712CustodySource');
+  list.replaceChildren();
+  sel.replaceChildren(new Option('Select source-verified original 711 renewal aged 24+ hours',''));
+  for(const x of v?.items||[]){
+   const li=document.createElement('li');
+   li.textContent='Original ninth #'+x.review_706_receipt_id+
+    ' / 711 owner renewal #'+x.renewal_receipt_id_711+
+    ' · '+x.original_ninth_drift_712+
+    ' · '+(x.renewal_horizon_712?.status||'HOLD_ORIGINAL_TIMESTAMP')+
+    ' ('+(x.renewal_horizon_712?.age_hours??'unknown')+'h)'+
+    ' · follow-up evidence '+(x.custody_followup_evidence_recorded_712?
+     'RECORDED #'+x.custody_followup_evidence_receipt_id_712:'HOLD')+
+    ' · independent external reviewer/actual books HOLD';
+   list.appendChild(li);
+   if(v.history_complete&&x.source_stable_712&&x.renewal_horizon_712?.due&&
+     !x.custody_followup_evidence_recorded_712)
+    sel.add(new Option('Original signed ninth renewal #'+x.renewal_receipt_id_711+
+      ' · '+x.renewal_horizon_712.age_hours+'h · original source SHA stable',
+      String(x.renewal_receipt_id_711)));
+  }
+  if(!list.childElementCount){const li=document.createElement('li');
+   li.textContent='No original independently signed ninth-renewal source eligible for audit.';
+   list.appendChild(li);}
+ }
  let audit711=null;
  function draw711(data){
   if(!$('dd711-finance'))return;
@@ -2226,7 +2265,7 @@ draw698(d);
 draw699(d);
 draw700(d);
 draw701(d);
-draw702(d);draw703(d);draw704(d);draw705(d);draw706(d);draw707(d);draw708(d);draw709(d);draw710(d);draw711(d);
+draw702(d);draw703(d);draw704(d);draw705(d);draw706(d);draw707(d);draw708(d);draw709(d);draw710(d);draw711(d);draw712(d);
 if(!id)return;
 if(!v||v.queue_id!==id)throw Error('Fresh exact financial evidence was not returned.');
 state=v;
@@ -2288,6 +2327,50 @@ $('dd699Refresh').addEventListener('click',()=>void refresh());
 
 
 
+ $('dd712FinanceRefresh').addEventListener('click',()=>void refresh());
+ $('dd712CustodyForm').addEventListener('submit',async event=>{
+  event.preventDefault();const button=$('dd712CustodySubmit');button.disabled=true;
+  try{
+   const renewalId=Number($('dd712CustodySource').value),
+    x=audit712?.items?.find(x=>x.renewal_receipt_id_711===renewalId&&
+     x.source_stable_712&&x.renewal_horizon_712?.due&&
+     !x.custody_followup_evidence_recorded_712),
+    disposition=$('dd712CustodyDisposition').value,
+    reference=$('dd712CustodyReference').value.trim(),
+    note=$('dd712CustodyNote').value.trim();
+   if(!state?.queue_id||!audit712?.history_complete||!x||
+    !$('dd712CustodyReviewed').checked||note.length<25||note.length>600||
+    reference.length<8||reference.length>160)
+    throw Error('Select original signed 711 renewal aged 24h, exact source-digest and owner evidence review.');
+   const d=await api({action:'owner_custody_followup_evidence_712',
+    social_post_queue_id:state.queue_id,original_711_renewal_receipt_id:renewalId,
+    manual_evidence_disposition:disposition,manual_evidence_reference:reference,
+    expected_source_revision:state.source_revision,
+    expected_fingerprint_sha256:state.fingerprint_sha256,
+    expected_706_manifest_sha256:x.retention_manifest_sha256,
+    expected_710_provenance_sha256:x.provenance_710_digest_sha256,
+    expected_711_renewal_sha256:x.renewal_manifest_sha256_711,
+    owner_reviewed_original_source:true,resolution_note:note},state.queue_id);
+   $('dd712CustodyResult').textContent=d.result.status+' · protected D1 receipt #'+
+    d.result.receipt_id+'. Independently verified reviewer response and financial closure remain HOLD.';
+   $('dd712CustodyReviewed').checked=false;await refresh();
+  }catch(e){$('dd712CustodyResult').textContent='HOLD · '+e.message;}
+  finally{button.disabled=false;}
+ });
+ $('dd712FinanceExport').addEventListener('click',async()=>{
+  try{
+   const id=Number($('dd685Campaign').value);
+   if(!id||id!==state?.queue_id||!window.DDAuth?.apiFetch)
+    throw Error('Authenticated original owner campaign and exact source evidence required.');
+   const response=await window.DDAuth.apiFetch(endpoint+
+    '?export=financial712&campaign_queue_id='+encodeURIComponent(id));
+   if(!response.ok)throw Error('Protected original 712 renewal drift export denied. HTTP '+response.status);
+   const blob=await response.blob(),url=URL.createObjectURL(blob),a=document.createElement('a');
+   a.href=url;a.download='devilndove-ninth-renewal-drift-custody-'+id+'-712.json';
+   document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1000);
+   $('dd712CustodyResult').textContent='Authenticated original Build 712 source dossier downloaded; no external signature or financial close assumed.';
+  }catch(e){$('dd712CustodyResult').textContent='HOLD · '+e.message;}
+ });
  $('dd711FinanceRefresh').addEventListener('click',()=>void refresh());
  $('dd711OutcomeForm').addEventListener('submit',async event=>{
   event.preventDefault();const btn=$('dd711OutcomeSubmit');btn.disabled=true;
