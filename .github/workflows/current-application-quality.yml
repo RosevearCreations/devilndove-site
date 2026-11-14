@@ -73,6 +73,14 @@ jobs:
           node --check public/js/admin-mobile-product-augment.js
           node --check public/js/admin-social-platform-preflight.js
           node scripts/build707_ninth_field_media_drift_custody_contract.mjs
+      - name: Build 716 original recurrence triage, custody SLA continuity and independent Ed25519 ninth intake negative regression
+        run: |
+          node --check functions/api/admin/_cameraField702.mjs
+          node --check functions/api/admin/mobile-create-product.js
+          node --check functions/api/admin/social-post-queue.js
+          node --check public/js/admin-mobile-product-augment.js
+          node --check public/js/admin-social-platform-preflight.js
+          node scripts/build716_recurrence_sla_independent_ninth_intake_contract.mjs
       - name: Build 715 original recurrence exception, owner custody SLA and ninth re-attestation readiness negative regression
         run: |
           node --check functions/api/admin/_cameraField702.mjs
