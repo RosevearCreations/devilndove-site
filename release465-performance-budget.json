@@ -16,7 +16,7 @@
     "max_js_bytes": 600000,
     "max_css_bytes": 500000,
     "max_html_bytes": 500000,
-    "max_runtime_source_bytes": 19542000,
+    "max_runtime_source_bytes": 19572000,
     "max_runtime_source_files": 1855,
     "max_inline_data_uri_bytes": 650000
   },
@@ -33,6 +33,24 @@
     "production_mutation": false
   },
   "budget_reviews": [
+    {
+      "build": 717,
+      "date": "2026-11-13",
+      "scope": "Fresh signed original media closure re-attestation, original independent ninth signed D1 continuity replay and independently Ed25519-verified external custody SLA source admission",
+      "prior_limit_bytes": 19542000,
+      "new_limit_bytes": 19572000,
+      "delta_bytes": 30000,
+      "delta_percent": 0.15352,
+      "previous_exact_dev_measured_runtime_bytes": 19526102,
+      "expected_current_runtime_bytes": 19553670,
+      "estimated_source_budget_headroom_bytes": 18330,
+      "runtime_source_file_limit_unchanged": 1855,
+      "per_file_js_css_html_limits_unchanged": true,
+      "review_reason": "Build 716 measured 19,526,102 runtime bytes / 1855 runtime files on exact dev System Gate. Build 717 adds narrowly reviewed real signed Ed25519 external custody attestation verification, D1 source chronological readback, independent ninth continuity/aging and original live R2 fresh owner closure review plus small owner panels. Bounded +30k (0.1535%) to measured source allowance allows ~18k expected headroom; mandatory exact source gate measurement remains authoritative. Individual JS/CSS/HTML limits, file-count, D1 schema, CSP, signers, authentication and protected Production release gates stay unchanged. No new signing private keys in app, automatic outside contact, external completed SLA claim without third-party signature, automatic media repair, verified phone witness, or actual financial close.",
+      "d1_schema_migration": "NONE_CODE_ONLY",
+      "distinct_external_signer": "REQUIRED_FOR_POSITIVE_ATTESTATION",
+      "actual_financial_books_closed": false
+    },
     {
       "build": 716,
       "date": "2026-11-13",
