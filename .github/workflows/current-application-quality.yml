@@ -73,6 +73,10 @@ jobs:
           node --check public/js/admin-mobile-product-augment.js
           node --check public/js/admin-social-platform-preflight.js
           node scripts/build707_ninth_field_media_drift_custody_contract.mjs
+      - name: Build 719 exact-SHA production evidence, independent SLA and signed media HOLD regression
+        run: |
+          node --check scripts/build719_production_evidence_reconciliation.mjs
+          node scripts/build719_production_evidence_reconciliation_contract.mjs
       - name: Build 718 independent outside SLA continuity, ninth renewal horizon and original closure escalation negative regression
         run: |
           node --check functions/api/admin/_cameraField702.mjs
