@@ -8051,6 +8051,88 @@ export function reviewOriginalCustodyDrift714(a713,a712,ninth,now=Date.now()){
   independent_external_reply_verified:false,financial_books_closed:false,
   new_independent_signature:false,continuous_monitoring:false};
 }
+/* Build 715: source-bound owner custody SLA classification and ninth
+ * re-attestation readiness; never a new signature or third-party reply. */
+export function assessOriginalCustodySla715(a714,a713,a712,ninth,now=Date.now()){
+ const original=Array.isArray(a712?.items)?a712.items:[],
+  prior=Array.isArray(a714?.items)?a714.items:[],
+  evidence=Array.isArray(a712?.evidence_receipts)?a712.evidence_receipts:[],
+  valid=a714?.history_complete===true&&a713?.history_complete===true&&
+   a712?.history_complete===true&&ninth?.history_complete===true&&
+   ninth?.ninth_signer_configured===true&&!!ninth.ninth_signer_id&&
+   a714.original_ninth_reviewer_id===ninth.ninth_signer_id&&
+   a713.original_ninth_reviewer_id===ninth.ninth_signer_id&&
+   a714.campaign_queue_id===a713.campaign_queue_id&&
+   a713.campaign_queue_id===a712.campaign_queue_id,
+  seen=new Set(),items=[];
+ let invalid=0,ownerDocumented=0,due=0,ready=0;
+ for(const x of prior.slice(0,40)){
+  const id=Number(x.renewal_receipt_id_711),
+   orig=original.find(z=>Number(z.renewal_receipt_id_711)===id),
+   age=originalNinthRenewalAge712({attempted_at:orig?.original_711_renewal_recorded_at},now),
+   receiptId=Number(orig?.custody_followup_evidence_receipt_id_712||0),
+   receipts=evidence.filter(z=>Number(z.original_711_renewal_receipt_id)===id),
+   receipt=receipts[0],
+   proof=!!receiptId&&receipts.length===1&&Number(receipt?.receipt_id)===receiptId&&
+    receipt.verified===true&&x.original_custody_receipt_id===receiptId,
+   absent=!receiptId&&receipts.length===0&&
+    !orig?.custody_followup_evidence_recorded_712&&
+    !x.original_custody_receipt_id,
+   source=valid&&Number.isSafeInteger(id)&&id>0&&!seen.has(id)&&!!orig&&
+    x.signed_source_stable===true&&age.age_hours!==null&&
+    x.original_ninth_receipt_id===orig.review_706_receipt_id&&
+    !!orig.retention_manifest_sha256&&!!orig.provenance_710_digest_sha256&&
+    !!orig.renewal_manifest_sha256_711&&
+    (proof||absent);
+  seen.add(id);
+  if(!source)invalid++;
+  if(source&&proof)ownerDocumented++;
+  if(source&&age.due&&!proof)due++;
+  const canRequest=source&&proof&&ninth.ninth_signer_configured===true;
+  if(canRequest)ready++;
+  const sla=age.age_hours===null?'INVALID_TIME':
+   age.age_hours>=72?'72H':age.age_hours>=48?'48H':
+   age.age_hours>=24?'24H':'NOT_DUE';
+  items.push({renewal_receipt_id_711:id,
+   original_ninth_receipt_id:x.original_ninth_receipt_id||null,
+   original_custody_evidence_receipt_id:receiptId||null,
+   age_hours:age.age_hours,sla_window:sla,
+   status:!source?'HOLD_715_ORIGINAL_CUSTODY_SLA_OR_NINTH_SOURCE_DRIFT':
+    proof?'OWNER_CUSTODY_FOLLOWUP_RECEIPT_RECHECKED_EXTERNAL_OUTCOME_UNVERIFIED_715':
+    age.due?'ORIGINAL_CUSTODY_OWNER_SLA_FOLLOWUP_DUE_'+sla+'_715':
+    'ORIGINAL_CUSTODY_OWNER_FOLLOWUP_NOT_DUE_715',
+   owner_followup_evidence_verified:!!(source&&proof),
+   independent_external_outcome_verified:false,
+   ninth_re_attestation_readiness:canRequest?
+    'READY_TO_REQUEST_FRESH_INDEPENDENT_NINTH_SIGNED_SOURCE_715':
+    'HOLD_715_NEW_NINTH_RE_ATTESTATION_SOURCE_REQUIRED',
+   new_independent_signature_obtained:false,financial_bookkeeping_closed:false});
+ }
+ if(prior.length!==original.length||prior.length>40||evidence.length>40||
+  a714?.drift_count>0||a713?.invalid_count>0||a712?.invalid_count>0)invalid++;
+ const complete=valid&&invalid===0;
+ return {status:!complete?'HOLD_715_CUSTODY_SLA_OR_NINTH_SOURCE_INVALID':
+  !items.length?'HOLD_715_ORIGINAL_NINTH_SOURCE_REQUIRED':
+  due?'ORIGINAL_CUSTODY_OWNER_SLA_FOLLOWUP_REQUIRED_EXTERNAL_OUTCOME_HOLD_715':
+  'ORIGINAL_OWNER_CUSTODY_EVIDENCE_RECHECKED_NINTH_SOURCE_REQUEST_ONLY_715',
+  campaign_queue_id:complete?a714.campaign_queue_id:null,
+  history_complete:complete,items,invalid_count:invalid,
+  original_ninth_reviewer_id:complete?ninth.ninth_signer_id:null,
+  original_owner_evidence_verified_count:ownerDocumented,
+  original_owner_followup_due_count:due,
+  source_reattest_request_ready_count:ready,
+  independently_signed_new_source_available:false,
+  external_sla_outcome_confirmed:false,books_closed:false,
+  independent_phone_witness:false,background_monitoring:false};
+}
+async function finance715(db,env,id){
+ const n=Number(id);
+ if(!Number.isSafeInteger(n)||n<1)return assessOriginalCustodySla715(null,null,null,null);
+ const a714=await finance714(db,env,n),a713=await finance713(db,env,n),
+  a712=await finance712(db,env,n),ninth=await finance706(db,env,n);
+ return assessOriginalCustodySla715(a714,a713,a712,ninth);
+}
+
 async function finance714(db,env,id){
  const n=Number(id);
  if(!Number.isSafeInteger(n)||n<1)return reviewOriginalCustodyDrift714(null,null,null);
@@ -8130,6 +8212,21 @@ const db=getDb(context.env);
 if (!db) return jsonResponse({ ok:false,error:'Database binding is not configured.'},500);
 try{
 const params=new URL(context.request.url).searchParams;
+if(params.get('audit')==='financial715'||params.get('export')==='financial715'){
+ const n=Number(params.get('campaign_queue_id'));
+ if(!Number.isSafeInteger(n)||n<1)
+  return jsonResponse({ok:false,error:'Exact authenticated original campaign required.'},
+   400,{'Cache-Control':'no-store'});
+ const report=await finance715(db,context.env,n),
+  exporting=params.get('export')==='financial715';
+ return new Response(JSON.stringify({financial715:report,
+  independent_outside_response_verified:false,new_ninth_signature_generated:false,
+  actual_financial_close:false},null,exporting?2:0),
+  {status:200,headers:{'Content-Type':'application/json; charset=utf-8',
+  'Cache-Control':'private, no-store','X-Content-Type-Options':'nosniff',
+  ...(exporting?{'Content-Disposition':
+  'attachment; filename="devilndove-original-custody-sla-ninth-readiness-715-'+n+'.json"'}:{})}});
+}
 if(params.get('audit')==='financial714'||params.get('export')==='financial714'){
  const n=Number(params.get('campaign_queue_id'));
  if(!Number.isSafeInteger(n)||n<1)

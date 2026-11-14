@@ -73,6 +73,14 @@ jobs:
           node --check public/js/admin-mobile-product-augment.js
           node --check public/js/admin-social-platform-preflight.js
           node scripts/build707_ninth_field_media_drift_custody_contract.mjs
+      - name: Build 715 original recurrence exception, owner custody SLA and ninth re-attestation readiness negative regression
+        run: |
+          node --check functions/api/admin/_cameraField702.mjs
+          node --check functions/api/admin/mobile-create-product.js
+          node --check functions/api/admin/social-post-queue.js
+          node --check public/js/admin-mobile-product-augment.js
+          node --check public/js/admin-social-platform-preflight.js
+          node scripts/build715_recurrence_custody_sla_ninth_readiness_contract.mjs
       - name: Build 714 original recurrence trend, custody revalidation and ninth authority drift negative regression
         run: |
           node --check functions/api/admin/_cameraField702.mjs
