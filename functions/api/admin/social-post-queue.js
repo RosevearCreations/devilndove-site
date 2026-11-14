@@ -8302,6 +8302,9 @@ export async function assessExternalCustodySla717(a716,a715,a712,current,
   if(ok)verified++;else invalid++;
   seen.add(rid);prevId=id;prevAt=Number.isFinite(at)?at:-Infinity;
   receipts.push({receipt_id:id,original_711_renewal_receipt_id:rid,
+   signed_issued_at:c.issued_at,received_at:row.attempted_at,
+   signed_disposition:c.disposition,external_verifier_id:c.external_verifier_id,
+   original_712_custody_receipt_id:Number(c.original_712_owner_custody_receipt_id||0),
    original_716_ninth_receipt_id:Number(c.original_716_independent_ninth_receipt_id||0),
    independent_external_signature_verified:!!ok,
    custody_sla_followup_attested:!!ok&&c.disposition==='confirm_independent_manual_custody_sla_followup',
@@ -8327,6 +8330,136 @@ export async function assessExternalCustodySla717(a716,a715,a712,current,
   actual_bookkeeping_closed:false,provider_posting_closed:false,
   automatic_external_contact:false,continuous_monitoring:false};
 }
+/* Build 718: receipt chronology and renewal horizons are inspected on demand,
+ * after original 716 and 717 independently verified Ed25519 readbacks. This
+ * audit does not issue fresh signatures or contact an outside verifier. */
+export function reviewOriginalExternalSlaContinuity718(a717,a716,a715,a712,current,now=Date.now()){
+ const nth=Array.isArray(a716?.receipts)?a716.receipts:[],
+  outside=Array.isArray(a717?.receipts)?a717.receipts:[],
+  owner=Array.isArray(a715?.items)?a715.items:[],
+  original=Array.isArray(a712?.items)?a712.items:[],
+  valid=a717?.history_complete===true&&a716?.history_complete===true&&
+   a715?.history_complete===true&&a712?.history_complete===true&&
+   Number(a717?.invalid_count)===0&&Number(a716?.invalid_count)===0&&
+   current?.master_fresh===true&&current?.history_complete===true&&
+   Array.isArray(current.open_cases)&&current.open_cases.length===0&&
+   Number.isSafeInteger(Number(current.queue_id))&&Number(current.queue_id)>0&&
+   a717.campaign_queue_id===current.queue_id&&
+   a716.campaign_queue_id===current.queue_id&&
+   a715.campaign_queue_id===current.queue_id&&
+   a712.campaign_queue_id===current.queue_id;
+ let invalid=0,renewal24=0,renewal48=0,renewal72=0,
+  outsideAged=0,pendingOutside=0,confirmed=0,unresolved=0;
+ const ids=new Set(),seenOutside=new Set(),items=[];
+ const ageHours=at=>{
+  const t=time716(at);
+  return Number.isFinite(t)&&t<=now+300000?
+   Math.max(0,Math.floor((now-t)/3600000)):null;
+ };
+ for(const row of nth.slice(0,40)){
+  const renewal=Number(row.original_711_renewal_receipt_id),
+   src=original.find(x=>Number(x.renewal_receipt_id_711)===renewal),
+   own=owner.find(x=>Number(x.renewal_receipt_id_711)===renewal),
+   age=ageHours(row.received_at),
+   external=outside.filter(x=>Number(x.original_711_renewal_receipt_id)===renewal),
+   ext=external[0],extAge=ageHours(ext?.received_at),
+   extIssued=time716(ext?.signed_issued_at),
+   ninthTime=time716(row.received_at),
+   due=age===null?'INVALID':age>=72?'72H':age>=48?'48H':
+    age>=24?'24H':'UNDER_24H',
+   source=valid&&Number.isSafeInteger(renewal)&&renewal>0&&
+    !ids.has(renewal)&&!!src&&!!own&&
+    row.independent_signature_verified===true&&
+    Number.isSafeInteger(Number(row.receipt_id))&&
+    Number(row.receipt_id)>Number(row.original_712_owner_custody_receipt_id)&&
+    own.owner_followup_evidence_verified===true&&
+    Number(own.original_custody_evidence_receipt_id)===
+     Number(row.original_712_owner_custody_receipt_id)&&
+    Number(own.original_ninth_receipt_id)===Number(src.review_706_receipt_id)&&
+    age!==null&&ageHours(src.original_711_renewal_recorded_at)!==null&&
+    ninthTime>=time716(src.original_711_renewal_recorded_at);
+  ids.add(renewal);
+  if(!source)invalid++;
+  if(source&&age>=24)renewal24++;
+  if(source&&age>=48)renewal48++;
+  if(source&&age>=72)renewal72++;
+  let externalValid=false;
+  if(external.length>1)invalid++;
+  if(ext){
+   externalValid=source&&a717.independent_external_verifier_configured===true&&
+    external.length===1&&ext.independent_external_signature_verified===true&&
+    Number.isSafeInteger(Number(ext.receipt_id))&&
+    Number(ext.receipt_id)>Number(row.receipt_id)&&
+    Number(ext.original_716_ninth_receipt_id)===Number(row.receipt_id)&&
+    Number(ext.original_712_custody_receipt_id)===
+     Number(row.original_712_owner_custody_receipt_id)&&
+    !!ext.external_verifier_id&&extAge!==null&&
+    Number.isFinite(extIssued)&&extIssued>=ninthTime&&
+    extIssued<=time716(ext.received_at)&&
+    !seenOutside.has(Number(ext.receipt_id));
+   if(!externalValid)invalid++;
+   else{
+    seenOutside.add(Number(ext.receipt_id));
+    if(extAge>=72)outsideAged++;
+    if(ext.custody_sla_followup_attested===true)confirmed++;
+    else unresolved++;
+   }
+  }else if(source)pendingOutside++;
+  items.push({original_711_renewal_receipt_id:renewal,
+   original_716_signed_ninth_receipt_id:Number(row.receipt_id||0),
+   original_717_signed_outside_receipt_id:Number(ext?.receipt_id||0)||null,
+   ninth_signature_age_hours:age,
+   ninth_renewal_horizon:due,
+   external_signed_source_age_hours:extAge,
+   status:!source||ext&&!externalValid?
+    'HOLD_718_ORIGINAL_NINTH_OR_EXTERNAL_SIGNED_SOURCE_DRIFT':
+    !ext?'ORIGINAL_NINTH_SIGNED_RENEWAL_OUTSIDE_SLA_SOURCE_HOLD_718':
+    ext.custody_sla_followup_attested===true?
+     'ORIGINAL_OUTSIDE_SIGNED_SLA_FOLLOWUP_CONTINUITY_CONFIRMED_BOOKS_HOLD_718':
+     'ORIGINAL_OUTSIDE_SIGNED_SLA_EXCEPTION_UNRESOLVED_BOOKS_HOLD_718',
+   renewal_owner_review_due:source&&age>=24,
+   external_followup_independently_signed:!!externalValid,
+   independent_external_sla_followup_attested:!!externalValid&&
+    ext.custody_sla_followup_attested===true,
+   actual_financial_close:false});
+ }
+ if(nth.length>40||outside.length>40||nth.length!==owner.length)invalid++;
+ for(const ext of outside){
+  if(!ids.has(Number(ext.original_711_renewal_receipt_id)))invalid++;
+ }
+ const complete=valid&&invalid===0;
+ return {status:!complete?'HOLD_718_EXTERNAL_SLA_ORIGINAL_SIGNATURE_CONTINUITY_DRIFT':
+   !a717.independent_external_verifier_configured?
+    'HOLD_718_DISTINCT_OUTSIDE_VERIFIER_NOT_CONFIGURED':
+   pendingOutside?'ORIGINAL_NINTH_RENEWAL_OUTSIDE_SLA_PENDING_HOLD_718':
+   !items.length?'HOLD_718_ORIGINAL_SIGNED_NINTH_RENEWAL_REQUIRED':
+   renewal72||outsideAged?'ORIGINAL_SIGNED_SOURCE_RENEWAL_AGED_OWNER_REVIEW_DUE_718':
+   'ORIGINAL_INDEPENDENT_SIGNED_CONTINUITY_RECONCILED_BOOKS_HOLD_718',
+  campaign_queue_id:complete?current.queue_id:null,
+  history_complete:complete,items,invalid_count:invalid,
+  original_ninth_signed_24h_review_due:renewal24,
+  original_ninth_signed_48h_review_due:renewal48,
+  original_ninth_signed_72h_review_due:renewal72,
+  independently_signed_outside_72h_review_due:outsideAged,
+  outside_sla_signed_followup_confirmation_count:confirmed,
+  outside_sla_signed_unresolved_exception_count:unresolved,
+  outstanding_outside_signed_source_count:pendingOutside,
+  distinct_external_verifier_configured:!!a717?.independent_external_verifier_configured,
+  new_ninth_signature_generated:false,
+  independent_outside_contact_sent:false,
+  actual_bookkeeping_closed:false,continuous_background_monitoring:false};
+}
+async function finance718(db,env,id){
+ const n=Number(id);
+ if(!Number.isSafeInteger(n)||n<1)
+  return reviewOriginalExternalSlaContinuity718(null,null,null,null,null);
+ const [a717,a716,a715,a712,current]=await Promise.all([
+  finance717(db,env,n),finance716(db,env,n),finance715(db,env,n),
+  finance712(db,env,n),financial685(db,env,n)
+ ]);
+ return reviewOriginalExternalSlaContinuity718(a717,a716,a715,a712,current);
+}
+
 async function finance717(db,env,id){
  const n=Number(id);
  if(!Number.isSafeInteger(n)||n<1)
@@ -8617,6 +8750,21 @@ const db=getDb(context.env);
 if (!db) return jsonResponse({ ok:false,error:'Database binding is not configured.'},500);
 try{
 const params=new URL(context.request.url).searchParams;
+if(params.get('audit')==='financial718'||params.get('export')==='financial718'){
+ const n=Number(params.get('campaign_queue_id'));
+ if(!Number.isSafeInteger(n)||n<1)
+  return jsonResponse({ok:false,error:'Exact authenticated original owner campaign required.'},
+   400,{'Cache-Control':'no-store'});
+ const report=await finance718(db,context.env,n),
+  exporting=params.get('export')==='financial718';
+ return new Response(JSON.stringify({financial718:report,
+  independent_external_contact_sent:false,
+  actual_financial_books_closed:false},null,exporting?2:0),
+ {status:200,headers:{'Content-Type':'application/json; charset=utf-8',
+  'Cache-Control':'private, no-store','X-Content-Type-Options':'nosniff',
+  ...(exporting?{'Content-Disposition':
+  'attachment; filename="devilndove-original-signed-sla-renewal-718-'+n+'.json"'}:{})}});
+}
 if(params.get('audit')==='financial717'||params.get('export')==='financial717'){
  const n=Number(params.get('campaign_queue_id'));
  if(!Number.isSafeInteger(n)||n<1)
