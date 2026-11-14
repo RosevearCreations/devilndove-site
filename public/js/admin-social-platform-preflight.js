@@ -1623,6 +1623,33 @@ select699();
 
 
 
+ function draw715(data){
+  if(!$('dd715-finance'))return;
+  const v=data.financial715||null;
+  $('dd715FinanceStatus').textContent=v?.campaign_queue_id?
+   v.status+' · independent external SLA and new ninth signature HOLD':
+   'HOLD · Original signer and custody source not independently verified.';
+  $('dd715FinanceStats').textContent=v?.campaign_queue_id?
+   'Verified owner evidence '+v.original_owner_evidence_verified_count+
+   ' · owner follow-ups due '+v.original_owner_followup_due_count+
+   ' · re-attestation request ready '+v.source_reattest_request_ready_count+
+   ' · source invalid '+v.invalid_count:
+   'Select and refresh the same original campaign.';
+  const list=$('dd715FinanceCases');list.replaceChildren();
+  for(const x of v?.items||[]){
+   const li=document.createElement('li');
+   li.textContent='Original ninth renewal #'+x.renewal_receipt_id_711+
+    ' · owner custody #'+(x.original_custody_evidence_receipt_id||'HOLD')+
+    ' · '+x.sla_window+' · '+x.status+
+    ' · '+x.ninth_re_attestation_readiness;
+   list.appendChild(li);
+  }
+  if(!list.childElementCount){
+   const li=document.createElement('li');
+   li.textContent='No independently source-pinned original ninth renewal available.';
+   list.appendChild(li);
+  }
+ }
  function draw714(data){
   const v=data.financial714;
   if(!$('dd714-finance'))return;
@@ -2380,6 +2407,29 @@ $('dd699Refresh').addEventListener('click',()=>void refresh());
 
 
 
+ async function refresh715(){
+  const id=Number($('dd685Campaign').value);
+  if(!id||id!==state?.queue_id||!window.DDAuth?.apiFetch)
+   throw Error('Select and refresh the original owner campaign first.');
+  const response=await window.DDAuth.apiFetch(endpoint+
+   '?audit=financial715&campaign_queue_id='+encodeURIComponent(id));
+  if(!response.ok)throw Error('Protected Build 715 original source not available. HTTP '+response.status);
+  draw715(await response.json());
+ }
+ $('dd715FinanceRefresh').addEventListener('click',async()=>{
+  try{await refresh715();}catch(e){$('dd715FinanceStatus').textContent='HOLD · '+e.message;}
+ });
+ $('dd715FinanceExport').addEventListener('click',async()=>{
+  try{
+   await refresh715();
+   const id=Number(state.queue_id),response=await window.DDAuth.apiFetch(endpoint+
+    '?export=financial715&campaign_queue_id='+encodeURIComponent(id));
+   if(!response.ok)throw Error('Protected Build 715 evidence export refused.');
+   const url=URL.createObjectURL(await response.blob()),a=document.createElement('a');
+   a.href=url;a.download='devilndove-original-custody-sla-ninth-715-'+id+'.json';
+   document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1000);
+  }catch(e){$('dd715FinanceStatus').textContent='HOLD · '+e.message;}
+ });
  async function refresh714(){
   const id=Number($('dd685Campaign').value);
   if(!id||id!==state?.queue_id||!window.DDAuth?.apiFetch)
