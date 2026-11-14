@@ -8423,7 +8423,10 @@ export function reviewOriginalExternalSlaContinuity718(a717,a716,a715,a712,curre
     ext.custody_sla_followup_attested===true,
    actual_financial_close:false});
  }
- if(nth.length>40||outside.length>40||nth.length!==owner.length)invalid++;
+ const outstandingNinth=owner.filter(x=>
+  !nth.some(row=>Number(row.original_711_renewal_receipt_id)===
+   Number(x.renewal_receipt_id_711))).length;
+ if(nth.length>40||outside.length>40||owner.length>40)invalid++;
  for(const ext of outside){
   if(!ids.has(Number(ext.original_711_renewal_receipt_id)))invalid++;
  }
@@ -8431,6 +8434,7 @@ export function reviewOriginalExternalSlaContinuity718(a717,a716,a715,a712,curre
  return {status:!complete?'HOLD_718_EXTERNAL_SLA_ORIGINAL_SIGNATURE_CONTINUITY_DRIFT':
    !a717.independent_external_verifier_configured?
     'HOLD_718_DISTINCT_OUTSIDE_VERIFIER_NOT_CONFIGURED':
+   outstandingNinth?'HOLD_718_ORIGINAL_NINTH_INDEPENDENT_SIGNATURE_PENDING':
    pendingOutside?'ORIGINAL_NINTH_RENEWAL_OUTSIDE_SLA_PENDING_HOLD_718':
    !items.length?'HOLD_718_ORIGINAL_SIGNED_NINTH_RENEWAL_REQUIRED':
    renewal72||outsideAged?'ORIGINAL_SIGNED_SOURCE_RENEWAL_AGED_OWNER_REVIEW_DUE_718':
@@ -8443,6 +8447,7 @@ export function reviewOriginalExternalSlaContinuity718(a717,a716,a715,a712,curre
   independently_signed_outside_72h_review_due:outsideAged,
   outside_sla_signed_followup_confirmation_count:confirmed,
   outside_sla_signed_unresolved_exception_count:unresolved,
+  outstanding_original_ninth_signed_source_count:outstandingNinth,
   outstanding_outside_signed_source_count:pendingOutside,
   distinct_external_verifier_configured:!!a717?.independent_external_verifier_configured,
   new_ninth_signature_generated:false,
