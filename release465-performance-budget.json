@@ -16,7 +16,7 @@
     "max_js_bytes": 600000,
     "max_css_bytes": 500000,
     "max_html_bytes": 500000,
-    "max_runtime_source_bytes": 19572000,
+    "max_runtime_source_bytes": 19588000,
     "max_runtime_source_files": 1855,
     "max_inline_data_uri_bytes": 650000
   },
@@ -33,6 +33,24 @@
     "production_mutation": false
   },
   "budget_reviews": [
+    {
+      "build": 718,
+      "date": "2026-11-14",
+      "scope": "On-demand original independent ninth signed renewal horizons, external custody SLA Ed25519 source continuity and source-bound original media closure freshness owner escalation",
+      "prior_limit_bytes": 19572000,
+      "new_limit_bytes": 19588000,
+      "delta_bytes": 16000,
+      "delta_percent": 0.08175,
+      "previous_exact_dev_measured_runtime_bytes": 19553693,
+      "estimated_build_runtime_bytes": 19572000,
+      "estimated_budget_headroom_bytes": 16000,
+      "runtime_source_file_limit_unchanged": 1855,
+      "per_file_js_css_html_limits_unchanged": true,
+      "review_reason": "Build 717 exact dev System Gate measured 19,553,693 runtime bytes / 1855 runtime files against source cap 19,572,000. Build 718 adds bounded, on-demand source review of Ed25519-verified original 716/717 signatures, 24/48/72-hour original ninth renewal and outside acknowledgement ages and 20/24/48/72-hour signed R2 owner closure escalation with protected owner audit panels. Reviewed +16,000 bytes (0.08175%) to 19,588,000 cap; mandatory actual System Gate measurement and 1855 runtime file cap and per-file JS/CSS/HTML/CSP/security limits unchanged. No new independent signature, D1 schema migration, auto outside contact, scheduled watcher, media repair, third-party physical witness, financial book close or automatic external SLA settlement.",
+      "source_history_claims": "EXACT_D1_R2_READ_ON_DEMAND",
+      "external_contact_automated": false,
+      "actual_financial_books_closed": false
+    },
     {
       "build": 717,
       "date": "2026-11-13",

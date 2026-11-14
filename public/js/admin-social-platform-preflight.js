@@ -1623,6 +1623,37 @@ select699();
 
 
 
+ function draw718(data){
+  if(!$('dd718-finance'))return;
+  const v=data.financial718||null;
+  $('dd718FinanceStatus').textContent=v?.campaign_queue_id?
+   v.status+' · independent outside contact and actual bookkeeping closure HOLD':
+   'HOLD · Exact original financial source not verified.';
+  $('dd718FinanceStats').textContent=v?.campaign_queue_id?
+   'Signed ninth renewal due 24h '+v.original_ninth_signed_24h_review_due+
+   ' · 48h '+v.original_ninth_signed_48h_review_due+
+   ' · 72h '+v.original_ninth_signed_72h_review_due+
+   ' · absent ninth signatures '+v.outstanding_original_ninth_signed_source_count+
+   ' · awaiting outside signed source '+v.outstanding_outside_signed_source_count+
+   ' · separately verified outside acknowledgments '+v.outside_sla_signed_followup_confirmation_count+
+   ' · invalid '+v.invalid_count:
+   'Same original campaign and current Master source required.';
+  const list=$('dd718FinanceCases');list.replaceChildren();
+  for(const x of v?.items||[]){
+   const li=document.createElement('li');
+   li.textContent='Original renewal #'+x.original_711_renewal_receipt_id+
+    ' · independently signed ninth #'+x.original_716_signed_ninth_receipt_id+
+    ' · original outside #'+(x.original_717_signed_outside_receipt_id||'HOLD')+
+    ' · ninth age '+(x.ninth_signature_age_hours??'invalid')+'h'+
+    ' · '+x.ninth_renewal_horizon+' · '+x.status;
+   list.appendChild(li);
+  }
+  if(!list.childElementCount){
+   const li=document.createElement('li');
+   li.textContent='No verified independent ninth signatures yet; HOLD, not an invented receipt.';
+   list.appendChild(li);
+  }
+ }
  let audit717=null;
  function draw717(data){
   if(!$('dd717-finance'))return;
@@ -2477,6 +2508,30 @@ $('dd699Refresh').addEventListener('click',()=>void refresh());
 
 
 
+ async function refresh718(){
+  const id=Number($('dd685Campaign').value);
+  if(!id||id!==state?.queue_id||!window.DDAuth?.apiFetch)
+   throw Error('Select and refresh the same original owner financial campaign.');
+  const response=await window.DDAuth.apiFetch(endpoint+
+   '?audit=financial718&campaign_queue_id='+encodeURIComponent(id));
+  if(!response.ok)throw Error('Protected Build 718 original signed source unavailable. HTTP '+response.status);
+  draw718(await response.json());
+ }
+ $('dd718FinanceRefresh').addEventListener('click',async()=>{
+  try{await refresh718();}
+  catch(e){$('dd718FinanceStatus').textContent='HOLD · '+e.message;}
+ });
+ $('dd718FinanceExport').addEventListener('click',async()=>{
+  try{
+   await refresh718();
+   const id=Number(state.queue_id),response=await window.DDAuth.apiFetch(endpoint+
+    '?export=financial718&campaign_queue_id='+encodeURIComponent(id));
+   if(!response.ok)throw Error('Protected Build 718 original signed audit export denied.');
+   const url=URL.createObjectURL(await response.blob()),a=document.createElement('a');
+   a.href=url;a.download='devilndove-original-independent-ninth-sla-718-'+id+'.json';
+   document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1000);
+  }catch(e){$('dd718FinanceStatus').textContent='HOLD · '+e.message;}
+ });
  async function refresh717(){
   const id=Number($('dd685Campaign').value);
   if(!id||id!==state?.queue_id||!window.DDAuth?.apiFetch)
