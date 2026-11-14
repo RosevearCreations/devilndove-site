@@ -8208,6 +8208,221 @@ export async function assessIndependentNinthIntake716(a715,a712,current,signerId
   receipts,independent_external_sla_closure_verified:false,
   financial_books_closed:false,automatic_escalation:false,background_watcher:false};
 }
+/* Build 717: original 716 signatures are reverified through finance716 each
+ * time. External SLA evidence must use a distinct independently controlled key. */
+export function claimExternalCustodySla717(c){
+ return {v:1,purpose:'devilndove_external_custody_sla_confirmation_717',
+  queue_id:c.queue_id,
+  original_706_ninth_review_receipt_id:c.original_706_ninth_review_receipt_id,
+  original_711_renewal_receipt_id:c.original_711_renewal_receipt_id,
+  original_712_owner_custody_receipt_id:c.original_712_owner_custody_receipt_id,
+  original_716_independent_ninth_receipt_id:c.original_716_independent_ninth_receipt_id,
+  original_710_provenance_sha256:c.original_710_provenance_sha256,
+  original_711_renewal_sha256:c.original_711_renewal_sha256,
+  source_revision:c.source_revision,fingerprint_sha256:c.fingerprint_sha256,
+  external_verifier_id:c.external_verifier_id,
+  disposition:c.disposition,nonce:c.nonce,issued_at:c.issued_at};
+}
+export async function assessExternalCustodySla717(a716,a715,a712,current,
+ verifierId,verifierKey,ninthId,ninthKey,rawRows=[],now=Date.now()){
+ const old=Array.isArray(a716?.receipts)?a716.receipts:[],
+  owner=Array.isArray(a715?.items)?a715.items:[],
+  original=Array.isArray(a712?.items)?a712.items:[],
+  rows=Array.isArray(rawRows)?rawRows:[],
+  valid=a716?.history_complete===true&&a716.invalid_count===0&&
+   a715?.history_complete===true&&a712?.history_complete===true&&
+   current?.master_fresh===true&&current?.history_complete===true&&
+   Array.isArray(current?.open_cases)&&current.open_cases.length===0&&
+   current.queue_id===a716.campaign_queue_id&&
+   a715.campaign_queue_id===current.queue_id&&a712.campaign_queue_id===current.queue_id,
+  independent=!!verifierId&&!!verifierKey&&!!ninthId&&!!ninthKey&&
+   verifierId!==ninthId&&verifierKey!==ninthKey&&
+   verifierKey.length>=40&&ninthKey.length>=40;
+ let invalid=0,verified=0,prevId=Infinity,prevAt=Infinity,continuity=0;
+ const seen=new Set(),receipts=[];
+ for(const rec of old){
+  const id=Number(rec.original_711_renewal_receipt_id),
+   owned=owner.find(x=>Number(x.renewal_receipt_id_711)===id),
+   src=original.find(x=>Number(x.renewal_receipt_id_711)===id);
+  if(!rec.independent_signature_verified||
+   !Number.isSafeInteger(Number(rec.receipt_id))||
+   Number(rec.receipt_id)<=Number(rec.original_712_owner_custody_receipt_id)||
+   !owned?.owner_followup_evidence_verified||!src||
+   owned.original_custody_evidence_receipt_id!==rec.original_712_owner_custody_receipt_id||
+   owned.original_ninth_receipt_id!==src.review_706_receipt_id||seen.has(id))
+   invalid++;
+  else continuity++;
+  seen.add(id);
+ }
+ seen.clear();
+ for(const row of rows.slice(0,40)){
+  const d=safeJson(row.response_json,{}),c=d.claim||{},
+   canonical=claimExternalCustodySla717(c),
+   shape=Object.keys(c).length===Object.keys(canonical).length&&
+    Object.keys(c).every(k=>Object.hasOwn(canonical,k))&&
+    Object.keys(canonical).every(k=>c[k]===canonical[k]),
+   rid=Number(c.original_711_renewal_receipt_id),
+   signerReceipt=old.find(x=>Number(x.original_711_renewal_receipt_id)===rid&&
+    Number(x.receipt_id)===Number(c.original_716_independent_ninth_receipt_id)),
+   owned=owner.find(x=>Number(x.renewal_receipt_id_711)===rid),
+   src=original.find(x=>Number(x.renewal_receipt_id_711)===rid),
+   id=Number(row.social_post_attempt_id),at=time716(row.attempted_at),
+   issued=time716(c.issued_at);
+  const gate=valid&&independent&&!invalid&&!!signerReceipt&&
+   signerReceipt.independent_signature_verified===true&&!!owned&&!!src&&
+   owned.owner_followup_evidence_verified===true&&
+   c.queue_id===current.queue_id&&
+   c.original_706_ninth_review_receipt_id===src.review_706_receipt_id&&
+   c.original_712_owner_custody_receipt_id===owned.original_custody_evidence_receipt_id&&
+   c.original_710_provenance_sha256===src.provenance_710_digest_sha256&&
+   c.original_711_renewal_sha256===src.renewal_manifest_sha256_711&&
+   c.source_revision===current.source_revision&&
+   c.fingerprint_sha256===current.fingerprint_sha256&&
+   c.external_verifier_id===verifierId&&c.v===1&&
+   c.purpose===canonical.purpose&&shape&&nonce684(c.nonce)&&
+   ['confirm_independent_manual_custody_sla_followup',
+    'independent_custody_sla_exception_unresolved'].includes(c.disposition)&&
+   Number.isSafeInteger(id)&&id>Number(signerReceipt.receipt_id)&&
+   id<prevId&&!seen.has(rid)&&
+   row.attempt_status==='independent_external_custody_sla_ack_717'&&
+   Number.isFinite(issued)&&Number.isFinite(at)&&
+   issued<=at&&at-issued<=86400000&&at<=now+300000&&
+   at<=prevAt&&issued>=time716(src.original_711_renewal_recorded_at)&&
+   d.owner_reviewed_original_source===true&&
+   Number.isSafeInteger(Number(d.owner_user_id))&&Number(d.owner_user_id)>0&&
+   d.financial_books_closed===false&&d.provider_posting_closed===false&&
+   d.auto_escalation_sent===false;
+  const ok=!!gate&&await verify684(verifierKey,canonical,d.signature);
+  if(ok)verified++;else invalid++;
+  seen.add(rid);prevId=id;prevAt=Number.isFinite(at)?at:-Infinity;
+  receipts.push({receipt_id:id,original_711_renewal_receipt_id:rid,
+   original_716_ninth_receipt_id:Number(c.original_716_independent_ninth_receipt_id||0),
+   independent_external_signature_verified:!!ok,
+   custody_sla_followup_attested:!!ok&&c.disposition==='confirm_independent_manual_custody_sla_followup',
+   status:!ok?'HOLD_717_OUTSIDE_SLA_SIGNATURE_OR_SOURCE_INVALID':
+    c.disposition==='confirm_independent_manual_custody_sla_followup'?
+    'SIGNED_OUTSIDE_CUSTODY_SLA_FOLLOWUP_CONFIRMED_BOOKS_HOLD_717':
+    'SIGNED_OUTSIDE_CUSTODY_SLA_EXCEPTION_UNRESOLVED_BOOKS_HOLD_717',
+   books_closed:false,provider_posting_closed:false});
+ }
+ if(rows.length>40||old.length>40)invalid++;
+ return {status:!valid||invalid?'HOLD_717_ORIGINAL_SIGNED_SOURCE_CONTINUITY_OR_EXTERNAL_SLA_INVALID':
+   !independent?'HOLD_717_DISTINCT_EXTERNAL_SLA_VERIFIER_NOT_CONFIGURED':
+   verified?'ORIGINAL_EXTERNAL_SIGNED_CUSTODY_SLA_EVIDENCE_READBACK_BOOKS_HOLD_717':
+   'HOLD_717_EXTERNAL_SLA_SIGNED_SOURCE_REQUIRED',
+  campaign_queue_id:valid?current.queue_id:null,history_complete:!!valid&&invalid===0,
+  independent_external_verifier_configured:!!independent,
+  original_ninth_signature_continuity_count:continuity,
+  original_ninth_signatures_checked:old.length,
+  signed_external_receipt_verified_count:verified,invalid_count:invalid,
+  original_owner_followups_due:a715?.original_owner_followup_due_count||0,
+  receipts,independently_attested_sla_followup_count:receipts.filter(x=>x.custody_sla_followup_attested).length,
+  actual_bookkeeping_closed:false,provider_posting_closed:false,
+  automatic_external_contact:false,continuous_monitoring:false};
+}
+async function finance717(db,env,id){
+ const n=Number(id);
+ if(!Number.isSafeInteger(n)||n<1)
+  return assessExternalCustodySla717(null,null,null,null,'','','','',[]);
+ const [a716,a715,a712,current,ninth]=await Promise.all([
+  finance716(db,env,n),finance715(db,env,n),finance712(db,env,n),
+  financial685(db,env,n),finance706(db,env,n)]);
+ const outside=rows(await db.prepare(
+  "SELECT social_post_attempt_id,attempt_status,response_json,attempted_at FROM social_post_attempts WHERE social_post_queue_id=? AND platform_key='finance_external_sla_intake_717' ORDER BY social_post_attempt_id DESC LIMIT 41").bind(n).all());
+ const id717=normalizeText(env?.FINANCIAL_CUSTODY_SLA_EXTERNAL_VERIFIER_ID_717),
+  key717=normalizeText(env?.FINANCIAL_CUSTODY_SLA_EXTERNAL_PUBLIC_KEY_717),
+  ninthKey=normalizeText(env?.FINANCIAL_CONTINUITY_REVIEWER_PUBLIC_KEY_706);
+ const audit=await assessExternalCustodySla717(a716,a715,a712,current,
+  id717,key717,ninth.ninth_signer_id,ninthKey,outside);
+ const templates=audit.history_complete&&audit.independent_external_verifier_configured?
+  (a716.receipts||[]).filter(x=>x.independent_signature_verified&&
+   !audit.receipts.some(y=>y.original_711_renewal_receipt_id===x.original_711_renewal_receipt_id))
+   .slice(0,40).flatMap(x=>{
+    const original=a712.items?.find(z=>z.renewal_receipt_id_711===x.original_711_renewal_receipt_id);
+    if(!original)return [];
+    return [claimExternalCustodySla717({
+     queue_id:n,original_706_ninth_review_receipt_id:original.review_706_receipt_id,
+     original_711_renewal_receipt_id:x.original_711_renewal_receipt_id,
+     original_712_owner_custody_receipt_id:x.original_712_owner_custody_receipt_id,
+     original_716_independent_ninth_receipt_id:x.receipt_id,
+     original_710_provenance_sha256:original.provenance_710_digest_sha256,
+     original_711_renewal_sha256:original.renewal_manifest_sha256_711,
+     source_revision:current.source_revision,fingerprint_sha256:current.fingerprint_sha256,
+     external_verifier_id:id717,disposition:'independent_custody_sla_exception_unresolved',
+     nonce:crypto.randomUUID(),issued_at:new Date().toISOString()
+    })];
+   }):[];
+ return {...audit,unsigned_external_sla_claim_templates:templates,
+  owner_controls_no_external_private_key:true};
+}
+async function intakeExternalCustodySla717(db,env,user,p){
+ const n=Number(p.social_post_queue_id),
+  [a716,a715,a712,current,prior,ninth]=await Promise.all([
+   finance716(db,env,n),finance715(db,env,n),finance712(db,env,n),
+   financial685(db,env,n),finance717(db,env,n),finance706(db,env,n)]);
+ let envelope;
+ try{
+  if(typeof p.signed_evidence_json!=='string'||p.signed_evidence_json.length>4096)
+   throw Error('Independent signed external SLA response missing.');
+  envelope=JSON.parse(p.signed_evidence_json);
+ }catch{throw Error('Invalid original external signed SLA JSON. HOLD.')}
+ const c=envelope?.claim||{},renewal=Number(c.original_711_renewal_receipt_id),
+  source=a712.items?.find(x=>x.renewal_receipt_id_711===renewal),
+  owner=a715.items?.find(x=>x.renewal_receipt_id_711===renewal),
+  ninthReceipt=a716.receipts?.find(x=>x.original_711_renewal_receipt_id===renewal&&
+   x.receipt_id===Number(c.original_716_independent_ninth_receipt_id)&&
+   x.independent_signature_verified),
+  canonical=claimExternalCustodySla717(c),
+  shape=Object.keys(c).length===Object.keys(canonical).length&&
+   Object.keys(c).every(k=>Object.hasOwn(canonical,k))&&
+   Object.keys(canonical).every(k=>c[k]===canonical[k]),
+  signerId=normalizeText(env?.FINANCIAL_CUSTODY_SLA_EXTERNAL_VERIFIER_ID_717),
+  signerKey=normalizeText(env?.FINANCIAL_CUSTODY_SLA_EXTERNAL_PUBLIC_KEY_717),
+  ninthKey=normalizeText(env?.FINANCIAL_CONTINUITY_REVIEWER_PUBLIC_KEY_706);
+ if(!Number.isSafeInteger(n)||n<1||!current.master_fresh||
+  !current.history_complete||current.open_cases?.length||
+  !a716.history_complete||!a715.history_complete||!a712.history_complete||
+  !prior.history_complete||prior.invalid_count||!ninth.history_complete||
+  !prior.independent_external_verifier_configured||
+  !source||!owner?.owner_followup_evidence_verified||!ninthReceipt||
+  prior.receipts.some(x=>x.original_711_renewal_receipt_id===renewal)||
+  p.owner_reviewed_original_source!==true||
+  p.expected_source_revision!==current.source_revision||
+  p.expected_fingerprint_sha256!==current.fingerprint_sha256||
+  signerId===ninth.ninth_signer_id||signerKey===ninthKey||
+  c.queue_id!==n||c.original_706_ninth_review_receipt_id!==source.review_706_receipt_id||
+  c.original_712_owner_custody_receipt_id!==owner.original_custody_evidence_receipt_id||
+  c.original_710_provenance_sha256!==source.provenance_710_digest_sha256||
+  c.original_711_renewal_sha256!==source.renewal_manifest_sha256_711||
+  c.source_revision!==current.source_revision||
+  c.fingerprint_sha256!==current.fingerprint_sha256||
+  c.external_verifier_id!==signerId||c.v!==1||c.purpose!==canonical.purpose||
+  !shape||!nonce684(c.nonce)||!fresh684(c.issued_at,86400000)||
+  !['confirm_independent_manual_custody_sla_followup',
+   'independent_custody_sla_exception_unresolved'].includes(c.disposition))
+  throw Error('Original ninth signer continuity, independent outside authority or custody SLA evidence missing. HOLD.');
+ if(!await verify684(signerKey,canonical,envelope.signature))
+  throw Error('Independent external SLA Ed25519 signature invalid or not from enrolled outside signer. HOLD.');
+ const fresh=await financial685(db,env,n);
+ if(!fresh.master_fresh||!fresh.history_complete||fresh.open_cases?.length||
+  fresh.source_revision!==current.source_revision||
+  fresh.fingerprint_sha256!==current.fingerprint_sha256)
+  throw Error('Original Master source changed during independent SLA confirmation. HOLD.');
+ const data={claim:canonical,signature:envelope.signature,
+  owner_user_id:user.user_id,owner_reviewed_original_source:true,
+  financial_books_closed:false,provider_posting_closed:false,auto_escalation_sent:false};
+ const receipt=await append684(db,user,n,'finance_external_sla_intake_717',
+  'independent_external_custody_sla_ack_717',
+  'finance717-external-'+n+'-'+renewal,data);
+ const after=await finance717(db,env,n);
+ if(!after.history_complete||!after.receipts.some(x=>
+  x.receipt_id===receipt&&x.independent_external_signature_verified))
+  throw Error('Independent external SLA signed D1 source readback invalid. HOLD.');
+ return {status:'INDEPENDENT_EXTERNAL_CUSTODY_SLA_SOURCE_SIGNED_BOOKS_HOLD_717',
+  receipt_id:receipt,independent_external_signature_verified:true,
+  actual_bookkeeping_closed:false,provider_posting_closed:false};
+}
+
 async function finance716(db,env,id){
  const n=Number(id);
  if(!Number.isSafeInteger(n)||n<1)
@@ -8395,6 +8610,19 @@ const db=getDb(context.env);
 if (!db) return jsonResponse({ ok:false,error:'Database binding is not configured.'},500);
 try{
 const params=new URL(context.request.url).searchParams;
+if(params.get('audit')==='financial717'||params.get('export')==='financial717'){
+ const n=Number(params.get('campaign_queue_id'));
+ if(!Number.isSafeInteger(n)||n<1)
+  return jsonResponse({ok:false,error:'Exact protected original campaign required.'},
+   400,{'Cache-Control':'no-store'});
+ const report=await finance717(db,context.env,n),exporting=params.get('export')==='financial717';
+ return new Response(JSON.stringify({financial717:report,actual_financial_close:false,
+  no_automated_external_escalation:true},null,exporting?2:0),
+ {status:200,headers:{'Content-Type':'application/json; charset=utf-8',
+  'Cache-Control':'private, no-store','X-Content-Type-Options':'nosniff',
+  ...(exporting?{'Content-Disposition':
+  'attachment; filename="devilndove-external-custody-sla-717-'+n+'.json"'}:{})}});
+}
 if(params.get('audit')==='financial716'||params.get('export')==='financial716'){
  const n=Number(params.get('campaign_queue_id'));
  if(!Number.isSafeInteger(n)||n<1)
@@ -8827,6 +9055,7 @@ else if (action==='owner_custody_followup_outcome_reconciliation_711') result=aw
 else if (action==='owner_ninth_provenance_renewal_audit_711') result=await ownerNinthRenewal711(db,context.env,adminUser,payload);
 else if (action==='owner_custody_followup_evidence_712') result=await ownerCustodyEvidence712(db,context.env,adminUser,payload);
 else if (action==='independent_ninth_source_intake_716') result=await intakeIndependentNinth716(db,context.env,adminUser,payload);
+else if (action==='independent_external_custody_sla_intake_717') result=await intakeExternalCustodySla717(db,context.env,adminUser,payload);
 else if (action==='expense_attestation_678') result=await expenseAttestation678(db,context.env,adminUser,payload,recordApiAttempt);
 else if (action==='owner_marketing_signoff_678') result=await ownerSignoff678(db,adminUser,payload,recordApiAttempt);
 else throw new Error(`Unsupported social queue action: ${action}`);
