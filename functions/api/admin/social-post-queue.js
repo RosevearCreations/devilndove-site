@@ -8178,7 +8178,7 @@ export async function assessIndependentNinthIntake716(a715,a712,current,signerId
    c.independent_reviewer_id===signerId&&c.purpose===canonical.purpose&&c.v===1&&
    allowDisposition&&shape&&nonce684(c.nonce)&&
    Number.isFinite(at)&&Number.isFinite(issued)&&
-   at>=issued&&at-issued<=600000&&at<=now+300000&&issued<=now+300000&&
+   at>=issued&&at-issued<=86400000&&at<=now+300000&&issued<=now+300000&&
    at>=time716(original.original_711_renewal_recorded_at)&&
    data.owner_reviewed_original_source===true&&
    Number.isSafeInteger(Number(data.owner_user_id))&&Number(data.owner_user_id)>0&&
@@ -8216,8 +8216,30 @@ async function finance716(db,env,id){
   current=await financial685(db,env,n),ninth=await finance706(db,env,n);
  const source=rows(await db.prepare(
   "SELECT social_post_attempt_id,attempt_status,response_json,attempted_at FROM social_post_attempts WHERE social_post_queue_id=? AND platform_key='finance_ninth_signed_intake_716' ORDER BY social_post_attempt_id DESC LIMIT 41").bind(n).all());
- return assessIndependentNinthIntake716(a715,a712,current,ninth.ninth_signer_id,
+ const audit=await assessIndependentNinthIntake716(a715,a712,current,ninth.ninth_signer_id,
   normalizeText(env?.FINANCIAL_CONTINUITY_REVIEWER_PUBLIC_KEY_706),source);
+ const unsigned_requests=audit.history_complete?(a715.items||[]).filter(item=>
+  item.owner_followup_evidence_verified===true&&
+  item.ninth_re_attestation_readiness?.startsWith('READY_TO_REQUEST')&&
+  !audit.receipts.some(x=>x.original_711_renewal_receipt_id===item.renewal_receipt_id_711))
+  .slice(0,40).flatMap(item=>{
+   const original=(a712.items||[]).find(x=>
+    x.renewal_receipt_id_711===item.renewal_receipt_id_711);
+   if(!original||!item.original_custody_evidence_receipt_id)return [];
+   return [claimIndependentNinth716({
+    queue_id:n,original_706_review_receipt_id:original.review_706_receipt_id,
+    original_711_renewal_receipt_id:item.renewal_receipt_id_711,
+    original_712_owner_custody_receipt_id:item.original_custody_evidence_receipt_id,
+    original_710_provenance_sha256:original.provenance_710_digest_sha256,
+    original_711_renewal_sha256:original.renewal_manifest_sha256_711,
+    source_revision:current.source_revision,fingerprint_sha256:current.fingerprint_sha256,
+    independent_reviewer_id:ninth.ninth_signer_id,
+    disposition:'reconfirm_original_ninth_source_under_hold',
+    nonce:crypto.randomUUID(),issued_at:new Date().toISOString()
+   })];
+  }):[];
+ return {...audit,unsigned_reviewer_claim_templates:unsigned_requests,
+  template_is_unsigned:true,no_private_signing_key_held:true};
 }
 async function intakeIndependentNinth716(db,env,user,p){
  const n=Number(p.social_post_queue_id),current=await financial685(db,env,n),
@@ -8258,7 +8280,7 @@ async function intakeIndependentNinth716(db,env,user,p){
   c.purpose!==canonical.purpose||c.v!==1||!shape||
   !['reconfirm_original_ninth_source_under_hold',
     'independent_custody_exception_requires_followup'].includes(c.disposition)||
-  !nonce684(c.nonce)||!fresh684(c.issued_at,600000)||
+  !nonce684(c.nonce)||!fresh684(c.issued_at,86400000)||
   existing.receipts.some(x=>x.original_711_renewal_receipt_id===renewalId))
   throw Error('Original owner SLA, source signer, fresh independent evidence or one-time claim mismatch. HOLD.');
  const publicKey=normalizeText(env?.FINANCIAL_CONTINUITY_REVIEWER_PUBLIC_KEY_706);
