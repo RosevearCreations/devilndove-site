@@ -7918,7 +7918,7 @@ export async function assessFinance712(current,base706,prior711,renewalRows=[],f
   horizon_due_count:items.filter(x=>x.renewal_horizon_712?.due&&!x.custody_followup_evidence_recorded_712).length,
   evidence_recorded_count:items.filter(x=>x.custody_followup_evidence_recorded_712).length,
   invalid_count:invalid,evidence_receipts:receipts.slice(0,40),
-  independent_original_ninth_signature_rechecked:true,
+  independent_original_ninth_signature_rechecked:complete,
   new_independent_signature_generated:false,
   independent_reviewer_response_confirmed:false,
   continuous_drift_watcher_enabled:false,bookkeeping_closed:false,financial_certified:false,
