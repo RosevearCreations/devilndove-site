@@ -360,6 +360,28 @@
  <p id="dd706RetentionResult" role="status" aria-live="polite">No owner financial retention receipt; actual accounting closure HOLD.</p>
 </section>
 
+<section class="card" id="dd716-finance" aria-labelledby="dd716FinanceTitle">
+ <p class="eyebrow">Build 716 · Original custody SLA and independent ninth signed evidence intake</p>
+ <h2 id="dd716FinanceTitle">Reconcile owner custody escalation and verify a separately signed ninth-reviewer response</h2>
+ <p>Owner-triggered source audit of original 706/710/711/712/713/714/715 D1 evidence, independent ninth Ed25519 public-key verification and append-only signed intake. An unsigned request is not a signature; a verified signer response does not establish external SLA closure or closed accounting books. The signer signs outside Devil n Dove with a separately controlled private key.</p>
+ <button id="dd716FinanceRefresh" class="btn secondary" type="button">Recheck original custody and signed evidence</button>
+ <button id="dd716FinanceExport" class="btn secondary" type="button">Export protected source audit</button>
+ <p id="dd716FinanceStatus" role="status" aria-live="polite">HOLD · Original ninth source and signed intake not rechecked.</p>
+ <p id="dd716FinanceStats" class="small">Select the exact owner campaign and refresh protected source.</p>
+ <ol class="clean" id="dd716FinanceCases"><li>No new original ninth signed source admitted.</li></ol>
+ <h3>Independent ninth-source signing handoff</h3>
+ <p class="small">Download a fresh unsigned request for the independently enrolled ninth reviewer. The reviewer signs the exact claim with their own private Ed25519 key and returns a JSON object containing <code>claim</code> and <code>signature</code>. We never ask for or store their private key. Requests expire after 24 hours.</p>
+ <label>Original owner custody and ninth renewal
+  <select class="input" id="dd716UnsignedClaimSelect"><option value="">Recheck eligible original source first</option></select>
+ </label>
+ <button id="dd716ClaimDownload" class="btn secondary" type="button">Download unsigned signing request</button>
+ <label>Paste the independently signed JSON evidence response
+  <textarea id="dd716SignedEnvelope" class="input" rows="5" maxlength="4096" placeholder='{"claim":{"v":1,"purpose":"devilndove_independent_ninth_source_reattest_716", "...":"..."},"signature":"base64-Ed25519"}'></textarea>
+ </label>
+ <label><input id="dd716OwnerAck" type="checkbox"> We reviewed the original source and understand this only admits a separately verified ninth-source signature, not outside SLA closure or actual bookkeeping completion.</label>
+ <button id="dd716SignedSubmit" class="btn secondary" type="button">Verify and retain independent ninth signed source</button>
+ <p id="dd716IntakeResult" role="status" aria-live="polite">HOLD · No new original signed receipt admitted.</p>
+</section>
 <section class="card" id="dd715-finance" aria-labelledby="dd715FinanceTitle">
  <p class="eyebrow">Build 715 · Custody SLA and ninth source re-attestation readiness</p>
  <h2 id="dd715FinanceTitle">Verify original owner follow-up and independently signed source readiness</h2>

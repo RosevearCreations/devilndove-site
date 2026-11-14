@@ -1623,6 +1623,41 @@ select699();
 
 
 
+ let audit716=null;
+ function draw716(data){
+  if(!$('dd716-finance'))return;
+  const v=data.financial716||null;audit716=v;
+  $('dd716FinanceStatus').textContent=v?.campaign_queue_id?
+   v.status+' · external custody SLA and actual books HOLD':
+   'HOLD · Original signer and custody source incomplete.';
+  $('dd716FinanceStats').textContent=v?.campaign_queue_id?
+   'Original owner follow-ups due '+v.original_custody_sla_due_count+
+   ' · owner evidence '+v.original_owner_evidence_count+
+   ' · signer requests ready '+v.source_reattest_request_ready_count+
+   ' · newly signed verified '+v.signed_evidence_verified_count+
+   ' · invalid '+v.invalid_count:
+   'Select the exact original campaign and recheck.';
+  const list=$('dd716FinanceCases'),sel=$('dd716UnsignedClaimSelect');
+  list.replaceChildren();sel.replaceChildren(
+   new Option('Select unsigned independent reviewer claim',''));
+  for(const x of v?.receipts||[]){
+   const li=document.createElement('li');
+   li.textContent='Original 711 renewal #'+x.original_711_renewal_receipt_id+
+    ' · independently signed receipt #'+x.receipt_id+
+    ' · '+x.status;
+   list.appendChild(li);
+  }
+  for(const x of v?.unsigned_reviewer_claim_templates||[]){
+   sel.add(new Option('Original renewal #'+x.original_711_renewal_receipt_id+
+    ' · original custody #'+x.original_712_owner_custody_receipt_id,
+    String(x.original_711_renewal_receipt_id)));
+  }
+  if(!list.childElementCount){
+   const li=document.createElement('li');
+   li.textContent='No new independently signed ninth source received; original evidence HOLD.';
+   list.appendChild(li);
+  }
+ }
  function draw715(data){
   if(!$('dd715-finance'))return;
   const v=data.financial715||null;
@@ -2407,6 +2442,66 @@ $('dd699Refresh').addEventListener('click',()=>void refresh());
 
 
 
+ async function refresh716(){
+  const id=Number($('dd685Campaign').value);
+  if(!id||id!==state?.queue_id||!window.DDAuth?.apiFetch)
+   throw Error('Select and refresh the same original owner financial campaign.');
+  const response=await window.DDAuth.apiFetch(endpoint+
+   '?audit=financial716&campaign_queue_id='+encodeURIComponent(id));
+  if(!response.ok)throw Error('Original source signed audit unavailable. HTTP '+response.status);
+  draw716(await response.json());
+ }
+ $('dd716FinanceRefresh').addEventListener('click',async()=>{
+  try{await refresh716();}
+  catch(e){$('dd716FinanceStatus').textContent='HOLD · '+e.message;}
+ });
+ $('dd716FinanceExport').addEventListener('click',async()=>{
+  try{
+   await refresh716();const id=Number(state.queue_id);
+   const response=await window.DDAuth.apiFetch(endpoint+
+    '?export=financial716&campaign_queue_id='+encodeURIComponent(id));
+   if(!response.ok)throw Error('Original signed custody export denied.');
+   const url=URL.createObjectURL(await response.blob()),a=document.createElement('a');
+   a.href=url;a.download='devilndove-independent-ninth-716-'+id+'.json';
+   document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1000);
+  }catch(e){$('dd716FinanceStatus').textContent='HOLD · '+e.message;}
+ });
+ $('dd716ClaimDownload').addEventListener('click',()=>{
+  const selected=Number($('dd716UnsignedClaimSelect').value),
+   claim=audit716?.unsigned_reviewer_claim_templates?.find(x=>
+    x.original_711_renewal_receipt_id===selected);
+  if(!claim){
+   $('dd716IntakeResult').textContent='HOLD · Recheck and select an eligible unsigned request.';
+   return;
+  }
+  const file=new Blob([JSON.stringify({claim,signature:null},null,2)],{
+   type:'application/json'}),url=URL.createObjectURL(file),a=document.createElement('a');
+  a.href=url;a.download='devilndove-UNSIGNED-ninth-request-716-'+selected+'.json';
+  document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1000);
+  $('dd716IntakeResult').textContent='Unsigned request downloaded. HOLD until independently signed outside Devil n Dove and verified here.';
+ });
+ $('dd716SignedSubmit').addEventListener('click',async()=>{
+  try{
+   if(!$('dd716OwnerAck').checked)throw Error('Original owner source acknowledgment required.');
+   const envelope=$('dd716SignedEnvelope').value.trim(),id=Number(state?.queue_id);
+   if(!id||envelope.length<100||envelope.length>4096)
+    throw Error('A selected original campaign and signed JSON evidence are required.');
+   const candidate=JSON.parse(envelope);
+   if(!candidate.claim||typeof candidate.signature!=='string')
+    throw Error('Independent reviewer must return signed claim and signature; unsigned template is not proof.');
+   const r=await api({action:'independent_ninth_source_intake_716',
+    social_post_queue_id:id,signed_evidence_json:envelope,
+    owner_reviewed_original_source:true,
+    expected_source_revision:state.source_revision,
+    expected_fingerprint_sha256:state.fingerprint_sha256},id);
+   if(!r.result?.independent_signature_verified)
+    throw Error('No independently verified signature admitted. HOLD.');
+   $('dd716IntakeResult').textContent='Original ninth signer VERIFIED · D1 receipt #'+
+    r.result.receipt_id+' · external SLA and financial books still HOLD.';
+   $('dd716SignedEnvelope').value='';$('dd716OwnerAck').checked=false;
+   await refresh();await refresh716();
+  }catch(e){$('dd716IntakeResult').textContent='HOLD · '+e.message;}
+ });
  async function refresh715(){
   const id=Number($('dd685Campaign').value);
   if(!id||id!==state?.queue_id||!window.DDAuth?.apiFetch)
