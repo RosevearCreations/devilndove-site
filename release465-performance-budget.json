@@ -16,7 +16,7 @@
     "max_js_bytes": 600000,
     "max_css_bytes": 500000,
     "max_html_bytes": 500000,
-    "max_runtime_source_bytes": 19507000,
+    "max_runtime_source_bytes": 19542000,
     "max_runtime_source_files": 1855,
     "max_inline_data_uri_bytes": 650000
   },
@@ -33,6 +33,25 @@
     "production_mutation": false
   },
   "budget_reviews": [
+    {
+      "build": 716,
+      "date": "2026-11-13",
+      "scope": "Original 709/710 signed-media recurrence outcome source reconciliation, custody SLA owner escalation continuity, separately signed independent ninth Ed25519 source evidence intake and append-only D1 readback",
+      "prior_limit_bytes": 19507000,
+      "new_limit_bytes": 19542000,
+      "delta_bytes": 35000,
+      "delta_percent": 0.17942,
+      "previous_exact_dev_measured_runtime_bytes": 19500165,
+      "estimated_new_runtime_bytes": 19527000,
+      "expected_budget_headroom_bytes": 15000,
+      "runtime_source_file_limit_unchanged": 1855,
+      "per_file_js_css_html_limits_unchanged": true,
+      "review_reason": "Actual Build 715 exact dev System Gate measured 19,500,165 runtime bytes / 1,855 runtime files against cap 19,507,000. Bounded +35,000 byte (0.1794%) allowance covers reviewed Build 716 original D1/R2 triage, external Ed25519 signature verification, append-only anti-replay D1 audit/export and owner request/response forms, with estimated circa 15k headroom. Mandatory exact-source System Gate validates measured reality; per-file JS/CSS/HTML/inline media, runtime file count, authentication, CSP, privacy, D1 schema and release controls are unchanged. No private signing key, generated signature by owner, new external SLA completion, financial close, continuous watcher, automatic escalation or media publication.",
+      "d1_migration": "NONE_CODE_ONLY",
+      "independent_signed_source": "ONLY_IF_LIVE_SIGNATURE_CRYPTO_VERIFIED",
+      "external_sla_outcome": "HOLD_WITHOUT_EXTERNAL_SOURCE",
+      "financial_books_closed": false
+    },
     {
       "build": 715,
       "date": "2026-11-13",
