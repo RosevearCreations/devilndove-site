@@ -16,7 +16,7 @@
     "max_js_bytes": 600000,
     "max_css_bytes": 500000,
     "max_html_bytes": 500000,
-    "max_runtime_source_bytes": 19598000,
+    "max_runtime_source_bytes": 19613000,
     "max_runtime_source_files": 1855,
     "max_inline_data_uri_bytes": 650000
   },
@@ -33,6 +33,28 @@
     "production_mutation": false
   },
   "budget_reviews": [
+    {
+      "build": 722,
+      "date": "2026-11-15",
+      "scope": "Read-only independent issuer Ed25519 credential receipt verification, historical owner ledger drift/replay recheck, seven-app source-only trust contract, Admin UI and five-layer plus six-tier security roadmap",
+      "prior_limit_bytes": 19598000,
+      "new_limit_bytes": 19613000,
+      "delta_bytes": 15000,
+      "delta_percent": 0.07654,
+      "prior_build_exact_source_bytes": 19596246,
+      "measured_feature_runtime_bytes": 19610716,
+      "measured_feature_runtime_files": 1855,
+      "measured_feature_overage_bytes": 12716,
+      "remaining_measured_headroom_bytes": 2284,
+      "runtime_source_file_limit_unchanged": 1855,
+      "per_file_js_css_html_limits_unchanged": true,
+      "review_reason": "Feature System Gate #43682540579 measured 19,610,716 bytes and 1,855 runtime source files, 12,716 bytes above Build 721 cap 19,598,000. The reviewed change introduces cryptographic issuer attestation verified on demand, standalone non-mutating D1 original ledger drift checks, strict seven-app source-only route validation and protected UI. Explicit bounded +15,000 bytes (0.07654%) brings the source cap to 19,613,000 with just 2,284 measured bytes headroom. The same source budget check remains mandatory and fail closed. Individual JS 600,000B, CSS/HTML/inline limits, 1,855 file cap, no cross-app network, original-host T5 owner authority, independent signed custody and exact-sha Cloudflare release gates unchanged. No new runtime files, D1/R2 migration, token rotation, provider write, physical receiver ON, real transport, or book closure.",
+      "token_rotated": false,
+      "provider_origin_currently_verified": false,
+      "actual_financial_books_closed": false,
+      "independent_issuer_signature_created": false,
+      "cross_app_receiver_activated": false
+    },
     {
       "build": 721,
       "date": "2026-11-15",
