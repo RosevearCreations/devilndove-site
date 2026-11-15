@@ -73,6 +73,11 @@ jobs:
           node --check public/js/admin-mobile-product-augment.js
           node --check public/js/admin-social-platform-preflight.js
           node scripts/build707_ninth_field_media_drift_custody_contract.mjs
+      - name: Build 720 provider binding drift, signed custody HOLD and owner approval regression
+        run: |
+          node --check functions/api/admin/production-variable-audit-406.js
+          node --check public/js/admin-production-variable-audit-v406.js
+          node scripts/build720_provider_binding_drift_custody_approval_contract.mjs
       - name: Build 719 exact-SHA production evidence, independent SLA and signed media HOLD regression
         run: |
           node --check scripts/build719_production_evidence_reconciliation.mjs
