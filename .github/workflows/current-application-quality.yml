@@ -73,6 +73,12 @@ jobs:
           node --check public/js/admin-mobile-product-augment.js
           node --check public/js/admin-social-platform-preflight.js
           node scripts/build707_ninth_field_media_drift_custody_contract.mjs
+      - name: Build 721 independent issuer lifecycle, original custody source and owner review ledger negative regression
+        run: |
+          node --check functions/api/admin/production-variable-audit-406.js
+          node --check public/js/admin-production-variable-audit-v406.js
+          node --check functions/api/admin/social-post-queue.js
+          node scripts/build721_credential_custody_owner_ledger_contract.mjs
       - name: Build 720 provider binding drift, signed custody HOLD and owner approval regression
         run: |
           node --check functions/api/admin/production-variable-audit-406.js
