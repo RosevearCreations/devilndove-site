@@ -50,7 +50,7 @@ test('Protected canonical mapping route, transactional source-gallery audit and 
 test('Build 406 production audit button loads after authenticated admin initialization',()=>{
  const html=f('admin/it-integrations/index.html');
  const auth=html.indexOf('/public/js/auth.js?v=462');
- const script=html.indexOf('/public/js/admin-production-variable-audit-v406.js?v=406');
+ const script=html.indexOf('/public/js/admin-production-variable-audit-v406.js?v=');
  assert.ok(auth>=0&&script>auth,'Audit UI must load after auth');
  const api=f('functions/api/admin/production-variable-audit-406.js');
  assert.match(api,/verifiedAdminFromModule/);

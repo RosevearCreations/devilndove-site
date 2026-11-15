@@ -16,7 +16,7 @@
     "max_js_bytes": 600000,
     "max_css_bytes": 500000,
     "max_html_bytes": 500000,
-    "max_runtime_source_bytes": 19588000,
+    "max_runtime_source_bytes": 19598000,
     "max_runtime_source_files": 1855,
     "max_inline_data_uri_bytes": 650000
   },
@@ -33,6 +33,27 @@
     "production_mutation": false
   },
   "budget_reviews": [
+    {
+      "build": 721,
+      "date": "2026-11-15",
+      "scope": "Original Build 718 separately signed ninth/outside custody source-gated explicit Admin D1 ledger review and on-demand issuer credential lifecycle UNKNOWN diagnostics with seven-app sanitized governance handoff",
+      "prior_limit_bytes": 19588000,
+      "new_limit_bytes": 19598000,
+      "delta_bytes": 10000,
+      "delta_percent": 0.05105,
+      "previous_exact_dev_measured_runtime_bytes": 19578891,
+      "measured_feature_candidate_runtime_bytes": 19596246,
+      "measured_feature_candidate_runtime_files": 1855,
+      "measured_feature_candidate_source_budget_excess_bytes": 8246,
+      "remaining_measured_headroom_bytes": 1754,
+      "runtime_source_file_limit_unchanged": 1855,
+      "per_file_js_css_html_limits_unchanged": true,
+      "review_reason": "Build 720 exact-dev System Gate measured 19,578,891 bytes / 1,855 files (source cap 19,588,000). Build 721 exact feature System Gate measured 19,596,246 bytes / 1,855 files; overage 8,246 bytes while new credential lifecycle/source-pinned owner review/immutable D1 ledger and UI prove actual functionality. Explicitly review bounded +10,000-byte (~0.05105%) total runtime source allowance to 19,598,000, leaving 1,754 measured bytes headroom. The mandatory budget measurement remains fail closed, individual JS 600,000-byte, HTML/CSS, 1,855 file-count, CSP/authorization, original signed Ed25519, original Master/D1 source gates, Cloudflare branch release gates remain unchanged. No new D1 schema, token rotation, external contact, independent signature, phone witness, live receiver ON or financial book close.",
+      "actual_financial_books_closed": false,
+      "credential_rotation_performed": false,
+      "source_custody_independent_signature_generated": false,
+      "cross_app_connection_automatically_enabled": false
+    },
     {
       "build": 718,
       "date": "2026-11-14",
