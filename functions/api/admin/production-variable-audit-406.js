@@ -1,7 +1,7 @@
 // Build 406: read-only Cloudflare Production configuration presence only; never echo secrets.
 import {getDb,jsonResponse} from '../_lib/adminAudit.js';
 import {finance718,financial685} from './social-post-queue.js';
-import {sourceVerifiedOwnerReview721} from './_lib/projectFinanceEvidence.js';
+import {sourceVerifiedOwnerReview721,verifyIndependentRotationReceipt722,reconcileOwnerReviewDrift722,reviewSevenAppHandoff722} from './_lib/projectFinanceEvidence.js';
 import {verifiedAdminFromModule} from '../_lib/verifiedAdmin398.mjs';
 const checks=Object.freeze([
  ['core','SESSION_SECRET','required'],
@@ -160,6 +160,34 @@ export async function onRequestPost(c){
  if(!admin)return jsonResponse({ok:false,error:'Active verified Administrator required.'},401,{'Cache-Control':'no-store'});
  if(!db)return jsonResponse({ok:false,error:'D1 not configured.'},503,{'Cache-Control':'no-store'});
  let p={};try{p=await c.request.json()}catch{}
+
+ if(p.action==='verify_independent_credential_rotation_722'){
+  let envelope=null;
+  try{
+   if(typeof p.signed_receipt_json!=='string'||p.signed_receipt_json.length>3000)
+    throw Error('Bounded independent signed issuer claim required.');
+   envelope=JSON.parse(p.signed_receipt_json);
+  }catch{return jsonResponse({ok:false,build:722,status:'HOLD_INVALID_OR_MISSING_ISSUER_RECEIPT',
+   provider_execution:false,external_issuer_contact:false,credential_rotated:false},
+   400,{'Cache-Control':'private, no-store'})}
+  const env=c.env||{};
+  const issuerId=String(env.CREDENTIAL_ROTATION_ISSUER_ID_722||'').trim(),
+   issuerKey=String(env.CREDENTIAL_ROTATION_ISSUER_PUBLIC_KEY_722||'').trim(),
+   issuerProvider=String(env.CREDENTIAL_ROTATION_ISSUER_PROVIDER_722||'').trim();
+  const distinct=!!issuerId&&!!issuerKey&&!!issuerProvider&&
+   issuerId!==String(env.FINANCIAL_CONTINUITY_REVIEWER_ID_706||'').trim()&&
+   issuerId!==String(env.FINANCIAL_CUSTODY_SLA_EXTERNAL_VERIFIER_ID_717||'').trim()&&
+   issuerKey!==String(env.FINANCIAL_CONTINUITY_REVIEWER_PUBLIC_KEY_706||'').trim()&&
+   issuerKey!==String(env.FINANCIAL_CUSTODY_SLA_EXTERNAL_PUBLIC_KEY_717||'').trim();
+  const result=await verifyIndependentRotationReceipt722(envelope,{
+   issuer_id:issuerId,public_key:issuerKey,provider:issuerProvider,
+   distinct_external_issuer_enrolled:distinct});
+  return jsonResponse({ok:result.independent_issuer_signature_verified,...result,
+   receipt_persisted:false,credential_rotation_triggered:false,
+   financial_books_closed:false,cross_app_connected:false},
+   result.independent_issuer_signature_verified?200:409,
+   {'Cache-Control':'private, no-store'});
+ }
  const n=Number(p.campaign_queue_id),renewal=Number(p.original_711_renewal_receipt_id),
   note=String(p.review_note||'').trim();
  if(p.action!=='owner_original_source_review_721'||
@@ -213,8 +241,9 @@ export async function onRequestGet(c){
  const review720=String(new URL(c.request.url).searchParams.get('review')||'')==='720';
  const requestUrl=new URL(c.request.url);
  const review721=requestUrl.searchParams.get('review')==='721';
+ const review722=requestUrl.searchParams.get('review')==='722';
  let ledger721=null;
- if(review721){
+ if(review721||review722){
   const n=Number(requestUrl.searchParams.get('campaign_queue_id'));
   ledger721=await readOwnerReviewLedger721(getDb(env),env,n);
  }
@@ -226,5 +255,19 @@ export async function onRequestGet(c){
   rows,bindings,
   ...(review720?{review720:reviewProviderBindingDrift720(env)}:{}),
   ...(review721?{review721:ledger721,lifecycle721:lifecycleEvidence721(env)}:{}),
+  ...(review722?{review722:{
+   ledger:reconcileOwnerReviewDrift722(ledger721),
+   issuer_public_key_enrolled:present(env.CREDENTIAL_ROTATION_ISSUER_PUBLIC_KEY_722)&&
+    present(env.CREDENTIAL_ROTATION_ISSUER_ID_722)&&
+    present(env.CREDENTIAL_ROTATION_ISSUER_PROVIDER_722),
+   credential_issuer_receipt_currently_verified:false,
+   independent_issuer_proof_not_persisted:true,
+   handoff:reviewSevenAppHandoff722(null,null),
+   security_control_layers:['T1_IDENTITY','T2_TRANSPORT','T3_AUTHORIZATION',
+    'T4_DATA_REPLAY_AUDIT','T5_PRIVILEGED_RECOVERY'],
+   operational_access_tiers:['T0_PUBLIC','T1_USER','T2_TENANT',
+    'T3_COMPANY_OPERATOR','T4_SIGNED_THREE_MASTER','T5_PHYSICAL_RECEIVER'],
+   cross_app_connected:false,financial_books_closed:false
+  }}:{}),
   documentation:'/docs/operations/RELEASE_467_BUILD_406_PRODUCTION_CONFIGURATION_AUDIT.md'},200,{'Cache-Control':'no-store'});
 }
