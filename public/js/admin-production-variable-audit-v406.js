@@ -196,3 +196,53 @@ button.addEventListener('click',async()=>{
   finally{verify.disabled=false}
  });
 })();
+
+// Build 723: manually triggered canonical route/role source and unmeasured
+// acceptance-denominator inspection. Does not grant access or score unknowns.
+(()=>{
+ 'use strict';
+ const button=document.getElementById('dd723Inspect'),
+  status=document.getElementById('dd723Status'),
+  result=document.getElementById('dd723Result');
+ if(!button||!status||!result||!window.DDAuth?.apiFetch)return;
+ button.addEventListener('click',async()=>{
+  if(button.disabled)return;button.disabled=true;
+  status.textContent='Inspecting current verified Admin source route declarations…';
+  try{
+   const res=await window.DDAuth.apiFetch(
+    '/api/admin/production-variable-audit-406?review=723',
+    {method:'GET',cache:'no-store'});
+   const data=await res.json().catch(()=>null);
+   if(!res.ok||!data?.ok||!data.review723?.inventory||
+    data.review723.completion?.build!==723)throw Error('Protected registry unavailable');
+   const v=data.review723,inv=v.inventory,baseline=v.completion;
+   result.textContent=[
+    'Source: '+inv.source,
+    'Declared routes/prefix entries (not audited endpoints): '+inv.catalogued_declaration_count,
+    'Named inventory groups: '+inv.route_catalog.length,
+    ...inv.route_catalog.map(g=>'  '+g.group+' / '+g.module_key+
+      ': '+g.declared_entries+' declarations (actual endpoint verification UNKNOWN)'),
+    'Access tiers: '+inv.tiers.join(' · '),
+    'Five control layers: '+inv.layers.join(' · '),
+    'Shared-service contracts: '+inv.shared_service_contracts.length,
+    'Source examples:',
+    ...inv.route_examples.map(r=>'  '+r.path+' : '+r.classification+
+      ' / '+(r.source_module_key||'NO MODULE MAPPING')),
+    'Proposed acceptance checks: '+baseline.proposed_check_count+
+      ' across '+baseline.scope_count+' proposed module scopes × '+baseline.axis_count+' axes',
+    ...baseline.axes.map(a=>a.axis+' — '+a.verification_status+
+      ' / approved denominator NONE / verified percent UNKNOWN'),
+    'Verified app completion: UNKNOWN',
+    'Verified +10 percentage-point gain: NO',
+    'Three-Master live transport: '+inv.signed_three_master_transport,
+    'T5 original receiver: '+inv.original_host_t5_witness,
+    'Real cross-app connection: NO',
+    'No new privilege, provider call, finance close or approval recorded.'
+   ].join('\n');
+   status.textContent='Source-only inventory inspected. Owner-approved denominators and original passing evidence remain UNMEASURED.';
+  }catch(_){
+   result.textContent='HOLD — Could not verify original source inventory.';
+   status.textContent='HOLD — No baseline was approved or inferred.';
+  }finally{button.disabled=false;}
+ });
+})();
