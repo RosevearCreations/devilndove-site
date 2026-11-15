@@ -179,3 +179,45 @@ export function reviewOriginalExternalSlaContinuity718(a717,a716,a715,a712,curre
   independent_outside_contact_sent:false,
   actual_bookkeeping_closed:false,continuous_background_monitoring:false};
 }
+
+/* Build 721 — derive source-bound owner REVIEW eligibility from original
+ * Build 718's independently reverified ninth and outside Ed25519 records.
+ * A D1 owner note is NOT an outside signature or financial book approval. */
+export function sourceVerifiedOwnerReview721(original,current){
+ const n=Number(original?.campaign_queue_id),items=Array.isArray(original?.items)?original.items:[],
+  sane=Number.isSafeInteger(n)&&n>0&&original?.history_complete===true&&
+   Number(original?.invalid_count)===0&&current?.queue_id===n&&
+   current?.master_fresh===true&&current?.history_complete===true&&
+   Array.isArray(current.open_cases)&&current.open_cases.length===0&&
+   typeof current.source_revision==='string'&&current.source_revision.length>0&&
+   typeof current.fingerprint_sha256==='string'&&/^[a-f0-9]{64}$/i.test(current.fingerprint_sha256)&&
+   Number(original.outstanding_original_ninth_signed_source_count)===0&&
+   Number(original.outstanding_outside_signed_source_count)===0&&
+   Number(original.outside_sla_signed_unresolved_exception_count)===0&&
+   original.distinct_external_verifier_configured===true;
+ const approved=[];
+ const seen=new Set();
+ for(const row of items.slice(0,40)){
+  const renewal=Number(row.original_711_renewal_receipt_id),
+   ninth=Number(row.original_716_signed_ninth_receipt_id),
+   external=Number(row.original_717_signed_outside_receipt_id),
+   ninthAge=row.ninth_signature_age_hours,outsideAge=row.external_signed_source_age_hours;
+  const verified=sane&&Number.isSafeInteger(renewal)&&renewal>0&&
+   Number.isSafeInteger(ninth)&&ninth>0&&Number.isSafeInteger(external)&&external>ninth&&
+   !seen.has(renewal)&&row.external_followup_independently_signed===true&&
+   row.independent_external_sla_followup_attested===true&&
+   row.actual_financial_close===false&&
+   Number.isSafeInteger(ninthAge)&&ninthAge>=0&&ninthAge<72&&
+   Number.isSafeInteger(outsideAge)&&outsideAge>=0&&outsideAge<72;
+  seen.add(renewal);
+  if(verified)approved.push({renewal_receipt_id:renewal,
+   ninth_signed_receipt_id:ninth,outside_signed_receipt_id:external});
+ }
+ const ready=!!sane&&items.length>0&&items.length<=40&&approved.length===items.length;
+ return {build:721,ready,queue_id:ready?n:null,
+  status:ready?'SOURCE_VERIFIED_OWNER_REVIEW_ELIGIBLE_BOOKS_HOLD_721':
+   'HOLD_ORIGINAL_INDEPENDENT_SIGNER_SOURCE_OR_FRESHNESS_721',
+  eligible_items:ready?approved:[],owner_approval_recorded_by_this_read:false,
+  external_signature_generated:false,external_contact_performed:false,
+  financial_books_closed:false,provider_execution:false};
+}
