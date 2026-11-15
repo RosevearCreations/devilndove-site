@@ -55,3 +55,89 @@ button.addEventListener('click',async()=>{
   finally{button.disabled=false;}
  });
 })();
+
+// Build 721 — explicit Admin source recheck and durable owner-review record.
+// Neither a checkbox nor a prior signed receipt authorizes financial closure.
+(()=>{
+ 'use strict';
+ const $=id=>document.getElementById(id),load=$('dd721Load'),
+  record=$('dd721Record'),select=$('dd721Renewal'),status=$('dd721Status'),
+  result=$('dd721Result'),campaign=$('dd721Campaign'),confirm=$('dd721Confirm'),
+  note=$('dd721Note');
+ if(!load||!record||!select||!status||!result||!campaign||!confirm||!note||
+  !window.DDAuth?.apiFetch)return;
+ let snapshot=null;
+ const reset=()=>{
+  snapshot=null;record.disabled=true;select.disabled=true;select.replaceChildren();
+  const opt=document.createElement('option');opt.textContent='No eligible source';opt.value='';
+  select.appendChild(opt);
+ };
+ async function reload(){
+  reset();status.textContent='Rechecking original signed D1 receipts and issuer credential-name metadata…';
+  const id=Number(campaign.value);
+  if(!Number.isSafeInteger(id)||id<1)throw Error('Valid original campaign queue ID required');
+  const res=await window.DDAuth.apiFetch('/api/admin/production-variable-audit-406?review=721&campaign_queue_id='+encodeURIComponent(id),{method:'GET',cache:'no-store'});
+  const data=await res.json().catch(()=>null);
+  if(!res.ok||!data?.ok||data.review721?.build!==721)throw Error('Protected original source unavailable');
+  const source=data.review721,credentials=data.lifecycle721;
+  result.textContent=[
+   'Credential source: '+credentials.evidence_source,
+   ...credentials.provider_states.map(p=>p.provider+' / '+p.configuration+
+    ' / rotation '+p.issuer_rotation_receipt+' / age '+p.credential_age_status+
+    ' / next '+p.action),
+   'Independent custody source: '+source.status,
+   'Original evidence current: '+(source.ready?'YES':'NO — HOLD'),
+   'Original owner review receipt count: '+source.receipts.length,
+   'Current verified owner review receipts: '+source.receipts.filter(x=>x.verified_current).length,
+   'Actual financial books closed: NO'
+  ].join('\n');
+  if(source.ready&&source.eligible_items?.length){
+   for(const item of source.eligible_items){
+    const option=document.createElement('option');
+    option.value=String(item.renewal_receipt_id);
+    option.textContent='Renewal #'+item.renewal_receipt_id+
+     ' · ninth #'+item.ninth_signed_receipt_id+
+     ' · outside #'+item.outside_signed_receipt_id;
+    select.appendChild(option);
+   }
+   select.disabled=false;snapshot={source,queue_id:id};
+   record.disabled=false;
+   status.textContent='Original signed evidence currently eligible for explicit Admin review. External custody and books closure remain separate.';
+  }else status.textContent='HOLD — Original independent signed source incomplete, expired, mismatched or not verified.';
+ }
+ load.addEventListener('click',async()=>{
+  if(load.disabled)return;load.disabled=true;
+  try{await reload()}catch(e){reset();status.textContent='HOLD — '+e.message;}
+  finally{load.disabled=false;}
+ });
+ record.addEventListener('click',async()=>{
+  if(record.disabled||!snapshot)return;
+  const id=Number(select.value),
+   source=snapshot.source.eligible_items.find(x=>x.renewal_receipt_id===id);
+  const reviewed=confirm.checked,reviewNote=note.value.trim();
+  if(!source||!reviewed||reviewNote.length<25||reviewNote.length>400){
+   status.textContent='HOLD — choose a verified source, explicitly review and supply a 25–400 character note.';
+   return;
+  }
+  record.disabled=true;
+  try{
+   const response=await window.DDAuth.apiFetch('/api/admin/production-variable-audit-406',
+    {method:'POST',headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({action:'owner_original_source_review_721',
+      campaign_queue_id:snapshot.queue_id,
+      original_711_renewal_receipt_id:id,
+      original_716_signed_ninth_receipt_id:source.ninth_signed_receipt_id,
+      original_717_signed_outside_receipt_id:source.outside_signed_receipt_id,
+      expected_source_revision:snapshot.source.source_revision,
+      expected_fingerprint_sha256:snapshot.source.fingerprint_sha256,
+      owner_review_checked:true,review_note:reviewNote})});
+   const data=await response.json().catch(()=>null);
+   if(!response.ok||!data?.ok)throw Error(data?.error||'Original review not saved; HOLD');
+   confirm.checked=false;note.value='';
+   await reload();
+   status.textContent='Verified source-bound Admin review receipt #'+data.receipt_id+
+    ' recorded. Financial books remain HOLD.';
+  }catch(_){reset();status.textContent='HOLD — Review rejected or source drifted. Refresh original evidence; no approval claimed.';}
+  finally{record.disabled=!snapshot;}
+ });
+})();
