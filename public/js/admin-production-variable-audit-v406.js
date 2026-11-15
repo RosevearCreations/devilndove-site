@@ -141,3 +141,58 @@ button.addEventListener('click',async()=>{
   finally{record.disabled=!snapshot;}
  });
 })();
+
+// Build 722 — user-clicked independent issuer claim verification (no secrets persisted)
+// and read-only current owner ledger drift/five-layer trust boundaries.
+(()=>{
+ 'use strict';
+ const $=id=>document.getElementById(id),check=$('dd722Audit'),verify=$('dd722VerifyIssuer'),
+  status=$('dd722AuditStatus'),result=$('dd722AuditResult'),
+  input=$('dd722SignedIssuerReceipt'),issuerStatus=$('dd722IssuerStatus'),
+  campaign=$('dd721Campaign');
+ if(!check||!verify||!status||!result||!input||!issuerStatus||
+  !window.DDAuth?.apiFetch)return;
+ check.addEventListener('click',async()=>{
+  if(check.disabled)return;check.disabled=true;
+  status.textContent='Rechecking original signed ledger and current Cloudflare signer enrollment…';
+  try{
+   const id=Number(campaign?.value||0);
+   const res=await window.DDAuth.apiFetch('/api/admin/production-variable-audit-406?review=722&campaign_queue_id='+encodeURIComponent(Number.isSafeInteger(id)&&id>0?id:0),{method:'GET',cache:'no-store'});
+   const data=await res.json().catch(()=>null);
+   if(!res.ok||!data?.ok||!data.review722)throw Error('Protected original source unavailable');
+   const r=data.review722,l=r.ledger;
+   result.textContent=[
+    'Credential issuer enrolled: '+(r.issuer_public_key_enrolled?'NAME PRESENT; provenance not independently confirmed':'NO — HOLD'),
+    'Original owner ledger: '+l.status,
+    'Current source-bound reviews: '+l.current_review_count,
+    'Stale or drifted reviews: '+l.stale_review_count,
+    'Duplicate reviews: '+l.duplicate_review_count,
+    'Invalid review rows: '+l.invalid_review_count,
+    'Seven-app handoff: '+r.handoff.status,
+    'Runtime cross-app connected: NO',
+    'Security controls: '+r.security_control_layers.join(', '),
+    'Operational access: '+r.operational_access_tiers.join(', '),
+    'Financial books closed by this audit: NO'
+   ].join('\n');
+   status.textContent='Snapshot read only. No receiver activated or approval recorded.';
+  }catch(_){result.textContent='HOLD — No original source accepted.';status.textContent='HOLD — protected source review unavailable.'}
+  finally{check.disabled=false}
+ });
+ verify.addEventListener('click',async()=>{
+  if(verify.disabled)return;verify.disabled=true;
+  const body=input.value.trim();
+  input.value=''; // do not retain external signed evidence or accidental secrets in the DOM
+  if(!body||body.length>3000){issuerStatus.textContent='HOLD — Bounded signed issuer evidence required.';verify.disabled=false;return}
+  try{
+   const res=await window.DDAuth.apiFetch('/api/admin/production-variable-audit-406',
+    {method:'POST',headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({action:'verify_independent_credential_rotation_722',signed_receipt_json:body})});
+   const data=await res.json().catch(()=>null);
+   if(!res.ok||!data?.independent_issuer_signature_verified)
+    throw Error('External issuer proof missing, expired or cryptographically invalid.');
+   issuerStatus.textContent='Ed25519 enrolled issuer signature VERIFIED for '+data.provider+
+    ', event '+data.rotation_event_id+'. Deployed credential live validity NOT VERIFIED; books and connectivity HOLD.';
+  }catch(_){issuerStatus.textContent='HOLD — Independent issuer proof not established. No credential was rotated.'}
+  finally{verify.disabled=false}
+ });
+})();
