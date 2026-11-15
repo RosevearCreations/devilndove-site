@@ -94,6 +94,31 @@ export function reviewProviderBindingDrift720(env={}){
   approval_recorded:false,automatic_financial_close:false};
 }
 
+/* Build 721 — issuer-origin credential lifecycle must be independently verified.
+ * Cloudflare presence cannot establish rotation time, current validity or issuer ACK.
+ * Provider-specific proof stays manual until actual issuer-origin evidence exists. */
+export function lifecycleEvidence721(env={}){
+ const snapshot=reviewProviderBindingDrift720(env);
+ return {build:721,evidence_source:'CLOUDFLARE_VARIABLE_NAME_PRESENCE_ONLY',
+  provider_states:snapshot.providers.map(p=>({
+   provider:p.provider,configuration:p.status,
+   issuer_rotation_receipt:'NOT_VERIFIED',issuer_rotation_at:null,
+   credential_expires_at:null,credential_age_status:'UNKNOWN_NO_ISSUER_RECORD',
+   action:p.status==='NOT_CONFIGURED_OPTIONAL'?'NO_ACTION_UNTIL_ENABLED':
+    p.status==='INCOMPLETE_REVIEW_HOLD'?'COMPLETE_ONLY_AUTHORIZED_PROVIDER_CONFIG':
+    'VERIFY_ISSUER_RECEIPT_AND_EXPIRY_OUTSIDE_APP',
+   credential_rotation_performed:false
+  })),canonical_ci_secrets_already_reported:[
+    'CF_ACCESS_CLIENT_ID','CF_ACCESS_CLIENT_SECRET',
+    'CLOUDFLARE_API_TOKEN','CLOUDFLARE_API_TOKEN_EDIT'],
+  duplicated_ci_secret_requested:false,
+  issuer_account_access_performed:false,
+  credential_values_exposed:0,automatic_rotation:false,
+  external_custody_signatures_issued:false,
+  independent_source_binding:'HOLD_UNTIL_ORIGINAL_SIGNED_718_RECHECK',
+  cross_app_connected:false};
+}
+
 /* Build 721: real D1 owner-review receipts, only after original live Build 718
  * Ed25519 ninth + distinct outside SLA readback and current Master source.
  * An Admin review is never independent owner identity, financial book close,
@@ -200,6 +225,6 @@ export async function onRequestGet(c){
   etsy_callback_matches_production:uri==='https://devilndove.com/api/social/oauth/etsy/callback',
   rows,bindings,
   ...(review720?{review720:reviewProviderBindingDrift720(env)}:{}),
-  ...(review721?{review721:ledger721}:{}),
+  ...(review721?{review721:ledger721,lifecycle721:lifecycleEvidence721(env)}:{}),
   documentation:'/docs/operations/RELEASE_467_BUILD_406_PRODUCTION_CONFIGURATION_AUDIT.md'},200,{'Cache-Control':'no-store'});
 }
