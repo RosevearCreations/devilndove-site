@@ -16,7 +16,7 @@
     "max_js_bytes": 600000,
     "max_css_bytes": 500000,
     "max_html_bytes": 500000,
-    "max_runtime_source_bytes": 19613000,
+    "max_runtime_source_bytes": 19626000,
     "max_runtime_source_files": 1855,
     "max_inline_data_uri_bytes": 650000
   },
@@ -33,6 +33,28 @@
     "production_mutation": false
   },
   "budget_reviews": [
+    {
+      "build": 723,
+      "date": "2026-11-15",
+      "scope": "Canonical six-tier role inventory from existing route catalog; fail-closed candidate tenant/consent/security matrix; Admin source-only dashboard and proposed 77 acceptance checks across seven axes",
+      "prior_limit_bytes": 19613000,
+      "new_limit_bytes": 19626000,
+      "delta_bytes": 13000,
+      "delta_percent": 0.06628,
+      "previous_source_measured_runtime_bytes": 19610716,
+      "measured_exact_feature_runtime_bytes": 19623468,
+      "measured_exact_feature_runtime_files": 1855,
+      "measured_overage_bytes": 10468,
+      "measured_remaining_headroom_bytes": 2532,
+      "runtime_source_file_limit_unchanged": 1855,
+      "per_file_js_css_html_limits_unchanged": true,
+      "review_reason": "Exact Build723 feature System Gate #43732351978 measured 19,623,468 bytes and 1,855 runtime files, exceeding prior 19,613,000 total cap by 10,468 bytes. New runtime code is bounded to canonical existing route inventory/source group count, fail-closed candidate tier/tenant/consent matrix and read-only protected Admin baseline UI. Explicit reviewed +13,000 bytes (0.06628%) sets cap 19,626,000, leaving 2,532 measured bytes headroom. Mandatory actual-source gate remains fail closed, 1,855 runtime file count and 600,000B JS per-file/CSS/HTML/CSP limits remain unchanged. No new D1 schema or R2 writes, no producer provider action, no physical receiver ON, cross-app transport, Master authority transfer, independent signer receipt or financial books close. Seven axes and proposed denominators are UNMEASURED, not invented progress.",
+      "verified_10pp_progress": false,
+      "owner_denominator_approved": false,
+      "cross_app_runtime_connected": false,
+      "original_receiver_activated": false,
+      "financial_books_closed": false
+    },
     {
       "build": 722,
       "date": "2026-11-15",
