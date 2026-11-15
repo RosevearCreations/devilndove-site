@@ -221,3 +221,108 @@ export function sourceVerifiedOwnerReview721(original,current){
   external_signature_generated:false,external_contact_performed:false,
   financial_books_closed:false,provider_execution:false};
 }
+
+/* Build 722: external-issuer *signature* verification; no provider API calls or
+ * claim that a currently deployed credential is valid. An enrolled authority is
+ * a separate, owner-approved external custodian, never an app or Master key. */
+const issuerProviders722=['etsy','meta','pinterest','youtube','tiktok','x','stripe','paypal','square'];
+const credentialKinds722=['api_token','client_secret','oauth_token','webhook_secret'];
+const receiptFields722=['v','purpose','provider','issuer_id','rotation_event_id',
+ 'provider_origin_ref','credential_kind','environment','audience','topology_id',
+ 'issued_at','rotated_at','expires_at','nonce'];
+const b64url722=s=>{
+ if(typeof s!=='string'||!/^[A-Za-z0-9_-]+$/.test(s))return null;
+ try{return Uint8Array.from(atob(s.replace(/-/g,'+').replace(/_/g,'/')),c=>c.charCodeAt(0))}
+ catch{return null}
+};
+export function canonicalRotationClaim722(c){
+ return Object.fromEntries(receiptFields722.map(k=>[k,c[k]]));
+}
+export async function verifyIndependentRotationReceipt722(envelope,authority={},now=Date.now()){
+ const HOLD=reason=>({build:722,status:'HOLD_'+reason,independent_issuer_signature_verified:false,
+  provider_origin_currently_verified:false,deployed_credential_verified:false,
+  provider_api_called:false,secret_exposed:false,rotation_performed:false});
+ const c=envelope?.claim,sign=envelope?.signature;
+ if(!c||typeof c!=='object'||Array.isArray(c)||Object.keys(c).length!==receiptFields722.length||
+  receiptFields722.some(k=>!Object.hasOwn(c,k)))return HOLD('CANONICAL_CLAIM_REQUIRED');
+ if(c.v!==1||c.purpose!=='devilndove_independent_issuer_credential_rotation_722'||
+  !issuerProviders722.includes(c.provider)||!credentialKinds722.includes(c.credential_kind)||
+  c.environment!=='production'||c.audience!=='devilndove'||
+  c.topology_id!=='rosevear-master-shell-seven-apps.v1'||
+  typeof c.rotation_event_id!=='string'||!/^[A-Za-z0-9_.:-]{12,120}$/.test(c.rotation_event_id)||
+  typeof c.provider_origin_ref!=='string'||!/^[A-Za-z0-9_.:-]{12,120}$/.test(c.provider_origin_ref)||
+  typeof c.nonce!=='string'||!/^[a-f0-9-]{36}$/i.test(c.nonce))
+  return HOLD('INVALID_SCOPE_OR_ORIGIN_REFERENCE');
+ if(!authority?.issuer_id||c.issuer_id!==authority.issuer_id||
+  c.provider!==authority.provider||typeof authority.public_key!=='string'||
+  !authority.distinct_external_issuer_enrolled)
+  return HOLD('INDEPENDENT_ISSUER_AUTHORITY_NOT_ENROLLED');
+ const issued=Date.parse(c.issued_at),rotated=Date.parse(c.rotated_at),expires=Date.parse(c.expires_at);
+ if(![issued,rotated,expires].every(Number.isFinite)||issued>now+300000||
+  issued<now-900000||rotated>issued||rotated<issued-2592000000||
+  expires<=now||expires<=issued||expires-issued>7776000000)
+  return HOLD('ISSUER_RECEIPT_TIME_OR_EXPIRY');
+ const sig=b64url722(sign),keyBytes=b64url722(authority.public_key);
+ if(!sig||sig.length!==64||!keyBytes||keyBytes.length!==32)return HOLD('SIGNATURE_OR_KEY_ENCODING');
+ try{
+  const key=await crypto.subtle.importKey('raw',keyBytes,{name:'Ed25519'},false,['verify']);
+  const valid=await crypto.subtle.verify({name:'Ed25519'},key,sig,
+   new TextEncoder().encode(JSON.stringify(canonicalRotationClaim722(c))));
+  if(!valid)return HOLD('SIGNATURE_INVALID');
+ }catch{return HOLD('SIGNATURE_VERIFICATION_UNAVAILABLE')}
+ return {build:722,status:'EXTERNAL_ISSUER_SIGNATURE_VERIFIED_PROVIDER_LIVE_VALIDITY_HOLD',
+  provider:c.provider,credential_kind:c.credential_kind,
+  rotation_event_id:c.rotation_event_id,issued_at:c.issued_at,expires_at:c.expires_at,
+  independent_issuer_signature_verified:true,
+  provider_origin_currently_verified:false,deployed_credential_verified:false,
+  provider_api_called:false,secret_exposed:false,rotation_performed:false};
+}
+/* Owner D1 review entries are historical. Re-check against the current
+ * independently signed Build 718 source; duplicate/stale events must HOLD. */
+export function reconcileOwnerReviewDrift722(ledger,now=Date.now()){
+ const entries=Array.isArray(ledger?.receipts)?ledger.receipts:[],
+  eligible=new Set((Array.isArray(ledger?.eligible_items)?ledger.eligible_items:[])
+   .map(x=>Number(x.renewal_receipt_id)));
+ const seen=new Set();let current=0,stale=0,replayed=0,invalid=0;
+ for(const row of entries.slice(0,40)){
+  const id=Number(row.receipt_id),renewal=Number(row.renewal_receipt_id);
+  const when=Date.parse(String(row.recorded_at||'').replace(
+   /^([0-9]{4}-[0-9]{2}-[0-9]{2}) ([0-9]{2}:[0-9]{2}:[0-9]{2})$/,'$1T$2Z'));
+  if(!Number.isSafeInteger(id)||id<1||!Number.isSafeInteger(renewal)||renewal<1||
+   !Number.isFinite(when)||when>now+300000){invalid++;continue}
+  if(seen.has(renewal)){replayed++;continue}seen.add(renewal);
+  if(row.verified_current===true&&eligible.has(renewal)&&now-when<259200000&&
+   now>=when)current++;else stale++;
+ }
+ const clean=ledger?.ready===true&&entries.length<=40&&replayed===0&&invalid===0&&stale===0;
+ return {build:722,status:!ledger?.ready?'HOLD_INDEPENDENT_ORIGINAL_SOURCE':
+  replayed||invalid?'HOLD_LEDGER_DUPLICATE_OR_INVALID':
+  stale?'HOLD_OWNER_REVIEW_OR_SOURCE_DRIFT':
+  !entries.length?'HOLD_NO_OWNER_REVIEW_RECEIPT':
+  clean?'OWNER_REVIEW_LEDGER_CURRENT_BOOKS_HOLD':'HOLD_LEDGER_EVIDENCE',
+  current_review_count:current,stale_review_count:stale,duplicate_review_count:replayed,
+  invalid_review_count:invalid,owner_financial_close_allowed:false,
+  record_mutated:false,cross_app_connection_enabled:false};
+}
+/* The authenticated cross-app envelope transport is not enrolled yet.
+ * Validate a proposed route without ever upgrading source metadata to CONNECTED. */
+export function reviewSevenAppHandoff722(handoff,controllerMainSha){
+ const order=['ai-data-platform','rosevear-ai-hub','rosevear-comms-hub',
+  'icamp','yw','devilndove','rosiedazzlers'];
+ const sha=x=>typeof x==='string'&&/^[a-f0-9]{40}$/i.test(x);
+ const good=handoff?.topology_id==='rosevear-master-shell-seven-apps.v1'&&
+  handoff?.source_app==='devilndove'&&handoff?.previous_hop==='yw'&&
+  handoff?.next_hop==='rosiedazzlers'&&handoff?.authority_transfer===false&&
+  handoff?.payload_class==='PUBLIC_SOURCE_METADATA_ONLY'&&
+  handoff?.tenant_data_included===false&&handoff?.private_credentials_included===false&&
+  sha(handoff?.source_main_sha)&&sha(controllerMainSha)&&
+  handoff?.controller_main_sha===controllerMainSha&&
+  /^[A-Za-z0-9_.:-]{16,96}$/.test(String(handoff?.correlation_id||''));
+ return {build:722,topology_id:'rosevear-master-shell-seven-apps.v1',
+  application_order:order,source_metadata_valid:!!good,
+  status:good?'ROUTE_METADATA_VALID_SIGNED_TRANSPORT_HOLD':
+   'HOLD_INVALID_SEVEN_APP_ROUTING_OR_AUTHORITY',
+  signed_transport_attested:false,receiver_activated:false,
+  cross_app_connected:false,owner_signoff_received:false,
+  data_transfer_performed:false,tenant_data_copied:false};
+}
