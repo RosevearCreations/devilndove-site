@@ -2099,7 +2099,7 @@ last_checked_at:Number.isFinite(checkedMs)?new Date(checkedMs).toISOString():nul
 expires_at:validTime?new Date(Math.min(checkedMs,issuedMs)+1200000).toISOString():null,
 source_match:exact};
 }
-async function financial685(db,env,id){
+export async function financial685(db,env,id){
 const v=await financial684(db,env,id),n=Number(id);
 if(!Number.isSafeInteger(n)||n<1)return{...assess685(v,null),connection:'HOLD',exceptions:[]};
 const ar=await db.prepare("SELECT social_post_attempt_id,response_json,attempted_at FROM social_post_attempts WHERE social_post_queue_id=? AND platform_key='finance_acceptance_684' ORDER BY social_post_attempt_id DESC LIMIT 1").bind(n).first();
@@ -8308,7 +8308,7 @@ export async function assessExternalCustodySla717(a716,a715,a712,current,
   actual_bookkeeping_closed:false,provider_posting_closed:false,
   automatic_external_contact:false,continuous_monitoring:false};
 }
-async function finance718(db,env,id){
+export async function finance718(db,env,id){
  const n=Number(id);
  if(!Number.isSafeInteger(n)||n<1)
   return reviewOriginalExternalSlaContinuity718(null,null,null,null,null);
