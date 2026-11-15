@@ -326,3 +326,162 @@ export function reviewSevenAppHandoff722(handoff,controllerMainSha){
   cross_app_connected:false,owner_signoff_received:false,
   data_transfer_performed:false,tenant_data_copied:false};
 }
+
+/* Build 724 — strict, offline read-only Master metadata authentication.
+ * This Admin review is NOT a network Master transport handshake or T4 grant.
+ * No private signing key is held by this application. */
+const app724='devilndove',topology724='rosevear-master-shell-seven-apps.v1';
+const masterSources724=['ai-data-platform','rosevear-ai-hub','rosevear-comms-hub'];
+const emptySha724='e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855';
+const envelopeFields724=['v','schema','topology_id','source_app','destination_app','audience',
+ 'environment','method','path','channel','issuer_id','key_id','issued_at',
+ 'expires_at','nonce','body_sha256','source_main_sha'];
+const rotationFields724=['v','schema','topology_id','source_app','destination_app',
+ 'old_issuer_id','old_key_id','new_key_id','new_public_key','rotation_event_ref',
+ 'reviewer_id','issued_at','expires_at','nonce'];
+const exact724=(v,keys)=>v&&typeof v==='object'&&!Array.isArray(v)&&
+ Object.keys(v).length===keys.length&&keys.every(k=>Object.hasOwn(v,k));
+const key724=(b)=>{if(typeof b!=='string'||!/^[a-zA-Z0-9_-]{43}$/.test(b))return null;
+ try{const bytes=Uint8Array.from(atob(b.replace(/-/g,'+').replace(/_/g,'/')+'='),x=>x.charCodeAt(0));
+ return bytes.length===32?bytes:null;}catch{return null;}};
+const sig724=(b)=>{if(typeof b!=='string'||!/^[a-zA-Z0-9_-]{86}$/.test(b))return null;
+ try{const bytes=Uint8Array.from(atob(b.replace(/-/g,'+').replace(/_/g,'/')+'=='),x=>x.charCodeAt(0));
+ return bytes.length===64?bytes:null;}catch{return null;}};
+const hold724=reason=>({build:724,status:'HOLD_'+reason,
+ signature_verified:false,local_d1_receipt_recorded:false,
+ cryptographic_transport_connected:false,service_to_service_accepted:false,
+ master_t4_authorized:false,receiver_t5_activated:false,
+ provider_write:false,financial_books_closed:false});
+const timestamp724=(issued,expires,now,maxAge=120000)=>{
+ const a=Date.parse(issued),b=Date.parse(expires);
+ return Number.isFinite(a)&&Number.isFinite(b)&&issued===new Date(a).toISOString()&&
+  expires===new Date(b).toISOString()&&a<=now+5000&&a>=now-maxAge&&
+  b>now&&b>a&&b-a<=300000;
+};
+async function edVerify724(publicKey,signature,claim){
+ const keyBytes=key724(publicKey),signatureBytes=sig724(signature);
+ if(!keyBytes||!signatureBytes)return false;
+ try{const imported=await crypto.subtle.importKey('raw',keyBytes,{name:'Ed25519'},false,['verify']);
+  return await crypto.subtle.verify({name:'Ed25519'},imported,signatureBytes,
+   new TextEncoder().encode(JSON.stringify(claim)));}
+ catch{return false;}
+}
+export const masterEnvelopeFields724=Object.freeze([...envelopeFields724]);
+export const custodyRotationFields724=Object.freeze([...rotationFields724]);
+export function canonicalMasterEnvelope724(c){
+ return Object.fromEntries(envelopeFields724.map(k=>[k,c[k]]));
+}
+export function canonicalCustodyRotation724(c){
+ return Object.fromEntries(rotationFields724.map(k=>[k,c[k]]));
+}
+export function masterTrustStatus724(env={}){
+ const has=k=>typeof env[k]==='string'&&env[k].trim().length>0;
+ const p=['DND724_MASTER_SOURCE_APP','DND724_MASTER_ISSUER_ID','DND724_MASTER_KEY_ID',
+  'DND724_MASTER_PUBLIC_KEY','DND724_MASTER_SOURCE_SHA',
+  'DND724_CUSTODY_REVIEWER_ID','DND724_CUSTODY_REVIEWER_PUBLIC_KEY'];
+ const filled=p.filter(has),missing=p.filter(k=>!has(k));
+ return {build:724,topology_id:topology724,source_contract:'rosevear.master-communications.v1',
+  source_pin_names_present:filled,source_pin_names_missing:missing,
+  configured_pin_names_count:filled.length,
+  pinned_source_is_master:masterSources724.includes(env.DND724_MASTER_SOURCE_APP),
+  independent_custody_source_originally_verified:false,
+  signed_transport_runtime_connected:false,zero_trust_service_route_enabled:false,
+  owner_original_source_handoff_only:true,d1_replay_receipt_uniqueness_enforced:false,
+  replay_admission_policy:'NO_RUNTIME_ADMISSION_UNTIL_UNIQUE_D1_KEY_AND_OWNER_SIGNED_SOURCE',
+  routing_mode:'SOURCE_METADATA_ONLY_NO_NETWORK_SEND',
+  receiver_t5:'UNKNOWN_HOLD',auth_t4:'SIGNED_SOURCE_NOT_ENROLLED',
+  master_apps:[...masterSources724],channels:['SECURITY_EVIDENCE','HEALTH_EVIDENCE'],
+  no_direct_peer_database_writes:true,no_secret_bearer_forwarding:true,
+  actual_seven_app_connected:false,owner_completion_measured:false};
+}
+export async function verifyMasterEnvelope724(envelope,pin={},now=Date.now()){
+ const c=envelope?.claim;
+ if(!exact724(c,envelopeFields724))return hold724('CANONICAL_ENVELOPE_REQUIRED');
+ if(c.v!==1||c.schema!=='rosevear.dnd.master.readonly-envelope.v1'||
+  c.topology_id!==topology724||!masterSources724.includes(c.source_app)||
+  c.destination_app!==app724||c.audience!=='devilndove:health-security:source-only'||
+  c.environment!=='TEST'||c.method!=='GET'||
+  !['/api/integration/v1/health','/api/integration/v1/capabilities'].includes(c.path)||
+  !['SECURITY_EVIDENCE','HEALTH_EVIDENCE'].includes(c.channel)||
+  c.body_sha256!==emptySha724||!timestamp724(c.issued_at,c.expires_at,now)||
+  !/^[a-f0-9]{40}$/.test(c.source_main_sha||'')||
+  !/^[a-f0-9]{32}$/.test(c.nonce||'')||
+  !/^[A-Za-z0-9._:-]{8,100}$/.test(c.issuer_id||'')||
+  !/^[A-Za-z0-9._:-]{6,100}$/.test(c.key_id||''))
+  return hold724('SOURCE_AUDIENCE_OR_FRESHNESS');
+ if(pin.revoked===true||pin.owner_independent_signer_enrolled!==true||
+  c.source_app!==pin.source_app||c.issuer_id!==pin.issuer_id||
+  c.key_id!==pin.key_id||c.source_main_sha!==pin.source_main_sha||
+  !key724(pin.public_key))
+  return hold724('SOURCE_ISSUER_OR_REVOCATION_NOT_PROVEN');
+ if(!await edVerify724(pin.public_key,envelope.signature,canonicalMasterEnvelope724(c)))
+  return hold724('ED25519_SIGNATURE_INVALID');
+ return {...hold724('DURABLE_REPLAY_AND_MASTER_HANDSHAKE_NOT_ADMITTED'),
+  signature_verified:true,source_app:c.source_app,key_id:c.key_id,
+  nonce:c.nonce,source_main_sha:c.source_main_sha,
+  metadata_only:true,private_key_exported:false,
+  provider_live_operation:false};
+}
+export async function verifyKeyCustodyRotation724(rotation,pin={},now=Date.now()){
+ const c=rotation?.claim;
+ if(!exact724(c,rotationFields724))return hold724('CANONICAL_ROTATION_REQUIRED');
+ if(c.v!==1||c.schema!=='rosevear.dnd.master.key-rotation.v1'||
+  c.topology_id!==topology724||!masterSources724.includes(c.source_app)||
+  c.destination_app!==app724||!timestamp724(c.issued_at,c.expires_at,now)||
+  !/^[a-f0-9]{32}$/.test(c.nonce||'')||
+  !/^[A-Za-z0-9._:-]{12,120}$/.test(c.rotation_event_ref||'')||
+  !/^[A-Za-z0-9._:-]{6,100}$/.test(c.new_key_id||''))
+  return hold724('INVALID_ROTATION_METADATA_OR_AGE');
+ if(pin.revoked===true||pin.owner_independent_signer_enrolled!==true||
+  pin.independent_reviewer_enrolled!==true||c.source_app!==pin.source_app||
+  c.old_issuer_id!==pin.issuer_id||c.old_key_id!==pin.key_id||
+  c.reviewer_id!==pin.reviewer_id||c.reviewer_id===c.old_issuer_id||
+  c.new_key_id===c.old_key_id||!key724(c.new_public_key)||
+  !key724(pin.public_key)||!key724(pin.reviewer_public_key)||
+  c.new_public_key===pin.public_key||
+  pin.public_key===pin.reviewer_public_key)
+  return hold724('INDEPENDENT_REVIEWER_OR_OLD_NEW_KEY_SEPARATION');
+ const canonical=canonicalCustodyRotation724(c);
+ const [oldValid,reviewValid]=await Promise.all([
+  edVerify724(pin.public_key,rotation.old_signature,canonical),
+  edVerify724(pin.reviewer_public_key,rotation.reviewer_signature,canonical)]);
+ if(!oldValid||!reviewValid)return hold724('DUAL_INDEPENDENT_SIGNATURE_INVALID');
+ return {...hold724('ROTATION_SIGNED_BUT_NOT_ENROLLED_OR_REPLAY_ADMITTED'),
+  signature_verified:true,dual_independent_signatures_verified:true,
+  rotation_event_ref:c.rotation_event_ref,source_app:c.source_app,
+  old_key_id:c.old_key_id,new_key_id:c.new_key_id,
+  new_key_automatically_enrolled:false,private_key_received:false};
+}
+/* Local D1 admin review receipt uses the preexisting audit table. Its
+ * NOT EXISTS guard handles a sequential replay but there is NO unique D1
+ * constraint. The resulting receipt NEVER grants runtime transport. */
+export async function recordMasterReplayReview724(db,actor,verified,rotation){
+ const deny=reason=>({...hold724(reason),receipt_id:null,
+  durable_review_receipt:false,db_unique_replay_constraint:false});
+ if(!db||!actor||!Number.isSafeInteger(actor.user_id)||actor.user_id<1||
+  verified?.signature_verified!==true||rotation?.dual_independent_signatures_verified!==true||
+  verified.source_app!==rotation.source_app||verified.key_id!==rotation.old_key_id)
+  return deny('ORIGINAL_SOURCE_CUSTODY_OR_D1_REQUIRED');
+ const basis=[verified.source_app,verified.key_id,verified.nonce,rotation.rotation_event_ref].join(':');
+ let digest;
+ try{const bytes=new Uint8Array(await crypto.subtle.digest('SHA-256',new TextEncoder().encode(basis)));
+ digest=Array.from(bytes,x=>x.toString(16).padStart(2,'0')).join('');}
+ catch{return deny('DIGEST_UNAVAILABLE')}
+ try{
+  const detail=JSON.stringify({build:724,source:verified.source_app,
+   key_id:verified.key_id,old_rotation_key_id:rotation.old_key_id,
+   new_rotation_key_id:rotation.new_key_id,rotation_event_ref:rotation.rotation_event_ref,
+   receipt_scope:'ADMIN_SOURCE_REVIEW_ONLY',runtime_handshake:false,
+   independent_transport_ack:false,receiver_enabled:false});
+  const receipt=await db.prepare("INSERT INTO admin_action_audit(actor_user_id,action_type,target_type,target_key,request_method,request_path,details_json,created_at) SELECT ?,'dnd_master_source_review_724','signed_source_nonce',?,'POST','/api/admin/production-variable-audit-406',?,CURRENT_TIMESTAMP WHERE NOT EXISTS (SELECT 1 FROM admin_action_audit WHERE action_type='dnd_master_source_review_724' AND target_type='signed_source_nonce' AND target_key=?)")
+   .bind(actor.user_id,digest,detail,digest).run();
+  if(!receipt?.success||Number(receipt.meta?.changes)!==1)return deny('REPLAY_OR_ORIGINAL_D1_WRITE_FAILED');
+  const count=await db.prepare("SELECT COUNT(*) AS n, MIN(admin_action_audit_id) AS first_id FROM admin_action_audit WHERE action_type='dnd_master_source_review_724' AND target_type='signed_source_nonce' AND target_key=?")
+   .bind(digest).first();
+  if(Number(count?.n)!==1||!Number.isSafeInteger(Number(count?.first_id))||Number(count.first_id)<1)
+   return deny('D1_REPLAY_RECEIPT_READBACK_AMBIGUOUS');
+  return {...hold724('D1_REPLAY_REVIEW_ONLY_TRANSPORT_NOT_CONNECTED'),
+   durable_review_receipt:true,receipt_id:Number(count.first_id),
+   db_unique_replay_constraint:false,review_recorded_not_network_sent:true};
+ }catch{return deny('D1_LEDGER_SCHEMA_OR_READBACK_UNAVAILABLE')}
+}
