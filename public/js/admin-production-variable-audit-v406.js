@@ -246,3 +246,47 @@ button.addEventListener('click',async()=>{
   }finally{button.disabled=false;}
  });
 })();
+
+// Build 724 owner-clicked source-only three-Master readiness. No transmit action.
+(()=>{
+ 'use strict';
+ const button=document.getElementById('dd724Inspect'),
+  status=document.getElementById('dd724Status'),
+  result=document.getElementById('dd724Result');
+ if(!button||!status||!result||!window.DDAuth?.apiFetch)return;
+ button.addEventListener('click',async()=>{
+  if(button.disabled)return;button.disabled=true;
+  status.textContent='Inspecting only current original source-key names; no connection attempted…';
+  try{
+   const response=await window.DDAuth.apiFetch(
+    '/api/admin/production-variable-audit-406?review=724',
+    {method:'GET',cache:'no-store'});
+   const data=await response.json().catch(()=>null);
+   if(!response.ok||!data?.ok||data.review724?.trust?.build!==724)
+    throw Error('Protected source unavailable');
+   const r=data.review724,t=r.trust;
+   result.textContent=[
+    'Source contract: '+t.source_contract,
+    'Allowed Master source identities: '+t.master_apps.join(' · '),
+    'Allowed metadata-only channels: '+t.channels.join(' · '),
+    'Configured nonsecret signer/custody key NAMES: '+t.source_pin_names_present.join(', '),
+    'Missing key names: '+t.source_pin_names_missing.join(', '),
+    'Pinned source is recognized Master: '+(t.pinned_source_is_master?'YES':'NO'),
+    'Independent original source signer evidence verified: NO',
+    'Independent custody reviewer origin verified: NO',
+    'Durable local Admin review receipt is NOT a unique replay transport admission',
+    'Unique replay constraint verified: NO',
+    'Transport opened: NO',
+    'T4 Master governance granted: NO',
+    'T5 receiver activated: NO',
+    'Cross-app runtime connected: NO',
+    'Vercel apps deployed by this inspection: NO',
+    'Handoff: source-only evidence, current live ACK still required'
+   ].join('\n');
+   status.textContent='SOURCE INSPECTED — Original Master connection remains HOLD/NOT VERIFIED. No other app was modified.';
+  }catch(_){
+   result.textContent='HOLD — Protected Master trust source unavailable.';
+   status.textContent='HOLD — No source state or live connection inferred.';
+  }finally{button.disabled=false}
+ });
+})();

@@ -2,6 +2,7 @@
 import {getDb,jsonResponse} from '../_lib/adminAudit.js';
 import {finance718,financial685} from './social-post-queue.js';
 import {sourceVerifiedOwnerReview721,verifyIndependentRotationReceipt722,reconcileOwnerReviewDrift722,reviewSevenAppHandoff722} from './_lib/projectFinanceEvidence.js';
+import {masterTrustStatus724,verifyMasterEnvelope724,verifyKeyCustodyRotation724,recordMasterReplayReview724} from './_lib/projectFinanceEvidence.js';
 import {verifiedAdminFromModule} from '../_lib/verifiedAdmin398.mjs';
 import {sixTierSecurityInventory723,sevenAxisCompletionBaseline723,assessTierCandidate723} from '../_lib/appModuleRoutes.js';
 const checks=Object.freeze([
@@ -162,6 +163,42 @@ export async function onRequestPost(c){
  if(!db)return jsonResponse({ok:false,error:'D1 not configured.'},503,{'Cache-Control':'no-store'});
  let p={};try{p=await c.request.json()}catch{}
 
+
+ if(p.action==='review_signed_master_source_724'){
+  const e=c.env||{};
+  const marker=String(e.DND724_ORIGINAL_SIGNER_ENROLLMENT_RECEIPT_ID||'');
+  const reviewerMarker=String(e.DND724_ORIGINAL_CUSTODY_REVIEWER_RECEIPT_ID||'');
+  const pin={source_app:String(e.DND724_MASTER_SOURCE_APP||''),
+   issuer_id:String(e.DND724_MASTER_ISSUER_ID||''),
+   key_id:String(e.DND724_MASTER_KEY_ID||''),
+   source_main_sha:String(e.DND724_MASTER_SOURCE_SHA||''),
+   public_key:String(e.DND724_MASTER_PUBLIC_KEY||''),
+   reviewer_id:String(e.DND724_CUSTODY_REVIEWER_ID||''),
+   reviewer_public_key:String(e.DND724_CUSTODY_REVIEWER_PUBLIC_KEY||''),
+   revoked:String(e.DND724_MASTER_REVOKED||'').toLowerCase()==='true',
+   owner_independent_signer_enrolled:/^[A-Za-z0-9._:-]{12,120}$/.test(marker),
+   independent_reviewer_enrolled:/^[A-Za-z0-9._:-]{12,120}$/.test(reviewerMarker)};
+  if(p.original_admin_review_confirmed!==true||
+   !p.master_envelope||!p.custody_rotation||JSON.stringify(p).length>6500)
+   return jsonResponse({ok:false,build:724,
+    status:'HOLD_EXPLICIT_SIGNED_SOURCE_REVIEW_REQUIRED',
+    runtime_connected:false,receiver_activated:false},400,{'Cache-Control':'private, no-store'});
+  const [source,rotation]=await Promise.all([
+   verifyMasterEnvelope724(p.master_envelope,pin),
+   verifyKeyCustodyRotation724(p.custody_rotation,pin)]);
+  if(source.signature_verified!==true||rotation.dual_independent_signatures_verified!==true||
+   source.source_app!==rotation.source_app||source.key_id!==rotation.old_key_id)
+   return jsonResponse({ok:false,build:724,status:'HOLD_INDEPENDENT_SOURCE_OR_CUSTODY_SIGNER',
+    source_signature_verified:source.signature_verified===true,
+    rotation_dual_signature_verified:rotation.dual_independent_signatures_verified===true,
+    replay_receipt_recorded:false,master_connected:false,owner_authority_transferred:false},
+    409,{'Cache-Control':'private, no-store'});
+  const review=await recordMasterReplayReview724(db,admin,source,rotation);
+  return jsonResponse({ok:review.durable_review_receipt===true,...review,
+   response_proves_live_master_transport:false,transport_connected:false,
+   original_key_enrollment_performed:false,owner_t5_approved:false},
+   review.durable_review_receipt===true?200:409,{'Cache-Control':'private, no-store'});
+ }
  if(p.action==='verify_independent_credential_rotation_722'){
   let envelope=null;
   try{
@@ -244,6 +281,7 @@ export async function onRequestGet(c){
  const review721=requestUrl.searchParams.get('review')==='721';
  const review722=requestUrl.searchParams.get('review')==='722';
  const review723=requestUrl.searchParams.get('review')==='723';
+ const review724=requestUrl.searchParams.get('review')==='724';
  let ledger721=null;
  if(review721||review722){
   const n=Number(requestUrl.searchParams.get('campaign_queue_id'));
@@ -282,6 +320,20 @@ export async function onRequestGet(c){
    source_proof_scope:'CANONICAL_ROUTE_DECLARATIONS_NOT_FULL_ENDPOINT_AUDIT',
    seven_app_runtime_connected:false,original_t5_ceremony_authorized:false,
    finance_books_closed:false,owner_10pp_gain_verified:false
+  }}:{}),
+  ...(review724?{review724:{
+   trust:masterTrustStatus724(env),
+   original_issuer_enrollment_receipt_name_present:present(env.DND724_ORIGINAL_SIGNER_ENROLLMENT_RECEIPT_ID),
+   original_custody_reviewer_receipt_name_present:present(env.DND724_ORIGINAL_CUSTODY_REVIEWER_RECEIPT_ID),
+   required_independent_source_origin_verified:false,
+   unique_d1_replay_constraint_verified:false,
+   source_only_signed_envelope_accepted_into_live_transport:false,
+   master_connected:false,master_theme_changed:false,
+   shell_iCamp_or_YW_modified:false,
+   external_vercel_deploy_triggered:false,
+   receiver_activated:false,
+   owner_completion_percentage_advanced_verified:false,
+   handoff_only:true
   }}:{}),
   documentation:'/docs/operations/RELEASE_467_BUILD_406_PRODUCTION_CONFIGURATION_AUDIT.md'},200,{'Cache-Control':'no-store'});
 }
