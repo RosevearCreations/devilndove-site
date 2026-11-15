@@ -1,0 +1,45 @@
+{
+  "schema": "rosevear.master-communications.v1",
+  "topologyId": "rosevear-master-shell-seven-apps.v1",
+  "appId": "devilndove",
+  "connectionModel": "DIRECT_MASTER_APPLICATION",
+  "masters": [
+    "ai-data-platform",
+    "rosevear-ai-hub",
+    "rosevear-comms-hub"
+  ],
+  "channels": [
+    "SECURITY_EVIDENCE",
+    "HEALTH_EVIDENCE",
+    "CORRELATION_EVENT",
+    "WORKFLOW_HANDOFF",
+    "OWNER_GATED_COMMAND"
+  ],
+  "authentication": {
+    "signedRequestsRequired": true,
+    "algorithm": "Ed25519",
+    "issuerBindingRequired": true,
+    "audienceBindingRequired": true,
+    "bodyDigestRequired": true,
+    "nonceRequired": true,
+    "replayProtectionRequired": true,
+    "maxRequestAgeSeconds": 300
+  },
+  "transport": {
+    "minimumTlsVersion": "TLSv1.2",
+    "certificateValidation": "verify-full",
+    "secretlessRouting": true,
+    "rawSecretsAllowed": false,
+    "t5Allowed": false,
+    "directPeerDatabaseWrites": false,
+    "delegatedAuthority": false,
+    "consequentialWritesRequireOwnerGate": true
+  },
+  "authorities": {
+    "validation": "ai-data-platform",
+    "communications": "rosevear-comms-hub",
+    "authorityTransfer": false
+  },
+  "runtimeConnectedNotInferred": true,
+  "state": "CONTRACT_READY"
+}
