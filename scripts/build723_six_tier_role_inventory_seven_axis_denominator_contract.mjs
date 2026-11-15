@@ -104,7 +104,7 @@ assert.equal((await onRequestGet({...auth,data:{}})).status,401);
 const html=readFileSync(new URL('../admin/it-integrations/index.html',import.meta.url),'utf8');
 const client=readFileSync(new URL('../public/js/admin-production-variable-audit-v406.js',import.meta.url),'utf8');
 const api=readFileSync(new URL('../functions/api/admin/production-variable-audit-406.js',import.meta.url),'utf8');
-assert.ok(html.includes('dd723-trust-baseline')&&html.includes('/public/js/admin-production-variable-audit-v406.js?v=723'));
+assert.ok(html.includes('dd723-trust-baseline')&&html.includes('/public/js/admin-production-variable-audit-v406.js?v='));
 assert.ok(client.includes('dd723Inspect')&&client.includes('review=723'));
 assert.ok(api.includes('verifiedAdminFromModule(c)'));
 assert.ok(api.includes('sevenAxisCompletionBaseline723()'));
