@@ -494,7 +494,7 @@ export function assessTierCandidate723(p={}){
   independent_master_permission_fabricated:false};
 }
 /* No denominator is silently approved; no unknown 0% or +10-point claim. */
-export function sevenAxisCompletionBaseline723(approved=null){
+export function sevenAxisCompletionBaseline723(){
  const axes=[...COMPLETION_AXES_723],scopes=[...MODULE_SCOPE_723];
  const proposed_checks=axes.map(axis=>({
   axis,proposed_scope_count:scopes.length,
@@ -503,37 +503,11 @@ export function sevenAxisCompletionBaseline723(approved=null){
   owner_approved_denominator:null,original_verified_numerator:null,
   verified_percent:null,target_10pp_percent:null,
   verification_status:'UNMEASURED_PENDING_OWNER_APPROVAL'}));
- const validApproval=approved&&typeof approved==='object'&&
-  approved.original_source_verified===true&&approved.explicit_owner_approval===true&&
-  /^[a-f0-9]{40}$/.test(String(approved.production_sha||''))&&
-  Array.isArray(approved.axes)&&approved.axes.length===axes.length&&
-  axes.every((axis,i)=>{
-   const a=approved.axes[i];
-   return a?.axis===axis&&Number.isSafeInteger(a.denominator)&&
-    a.denominator>=1&&a.denominator<=scopes.length&&
-    Number.isSafeInteger(a.verified_passes)&&a.verified_passes>=0&&
-    a.verified_passes<=a.denominator&&a.original_evidence_verified===true;
-  });
- if(!validApproval)return {build:723,topology_id:'rosevear-master-shell-seven-apps.v1',
+ return {build:723,topology_id:'rosevear-master-shell-seven-apps.v1',
   source:'PROPOSED_APP_ACCEPTANCE_CHECKS_NOT_OWNER_APPROVED',
   axes:proposed_checks,scope_count:scopes.length,
   axis_count:axes.length,proposed_check_count:scopes.length*axes.length,
   verified_baseline_count:null,percentage_point_gain_verified:false,
   application_completion_percent:null,original_signed_owner_approval:false,
   cross_app_connected:false,finance_closed:false};
- const measured=proposed_checks.map((entry,i)=>{
-  const a=approved.axes[i],percent=100*a.verified_passes/a.denominator;
-  return {...entry,owner_approved_denominator:a.denominator,
-   original_verified_numerator:a.verified_passes,
-   verified_percent:percent,target_10pp_percent:Math.min(100,percent+10),
-   verification_status:'SOURCE_VERIFIED_OWNER_APPROVED_BASELINE'};
- });
- return {build:723,topology_id:'rosevear-master-shell-seven-apps.v1',
-  source:'EXTERNALLY_VERIFIED_OWNER_APPROVED_BASELINE_CONTRACT',
-  axes:measured,scope_count:scopes.length,axis_count:axes.length,
-  proposed_check_count:scopes.length*axes.length,
-  verified_baseline_count:axes.length,
-  percentage_point_gain_verified:false,application_completion_percent:null,
-  original_signed_owner_approval:true,cross_app_connected:false,
-  finance_closed:false};
 }
