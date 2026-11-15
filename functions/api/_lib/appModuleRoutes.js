@@ -379,3 +379,161 @@ export function snapshotRouteOwnership() {
     socialPublicApis: SOCIAL_PUBLIC_APIS,
   });
 }
+
+/* Build 723 — canonical READ-ONLY source catalog, not blanket enforcement of
+ * historic routes. Candidate eligibility is not runtime authorization. */
+export const OPERATIONAL_TIERS_723=Object.freeze([
+ 'T0_PUBLIC','T1_SIGNED_IN','T2_TENANT','T3_COMPANY_OPERATOR',
+ 'T4_INDEPENDENT_THREE_MASTER','T5_ORIGINAL_PHYSICAL_RECEIVER']);
+export const CONTROL_LAYERS_723=Object.freeze([
+ 'identity_provenance','transport_authentication','authorization_tenant_consent',
+ 'data_audit_replay_fail_closed','privileged_operations_recovery']);
+export const COMPLETION_AXES_723=Object.freeze([
+ 'design','implementation','automated_testing','integration_verification',
+ 'security','accessibility_device_acceptance','production_owner_acceptance']);
+export const MODULE_SCOPE_723=Object.freeze([
+ 'customer_product_catalog','product_photo_video_drafts','unique_cards_mobile_gallery',
+ 'inventory_variants','cart_checkout_tax','payments_refunds','shipping_fulfillment',
+ 'social_consent_publication','finance_owner_custody','admin_roles_recovery',
+ 'seven_app_integration']);
+export function sixTierSecurityInventory723(){
+ const snapshot=snapshotRouteOwnership();
+ const named=[
+  ['storefront_admin_pages',snapshot.storefrontAdminPages,MODULE_KEYS.STOREFRONT],
+  ['creator_admin_pages',snapshot.creatorAdminPages,MODULE_KEYS.CREATORS],
+  ['social_admin_pages',snapshot.socialAdminPages,MODULE_KEYS.SOCIALS],
+  ['financial_admin_pages',snapshot.financialAdminPages,MODULE_KEYS.FINANCIALS],
+  ['it_admin_pages',snapshot.itAdminPages,MODULE_KEYS.IT_PLATFORM],
+  ['storefront_admin_api_prefixes',snapshot.storefrontAdminApis,MODULE_KEYS.STOREFRONT],
+  ['creator_admin_api_prefixes',snapshot.creatorAdminApis,MODULE_KEYS.CREATORS],
+  ['social_admin_api_prefixes',snapshot.socialAdminApis,MODULE_KEYS.SOCIALS],
+  ['financial_admin_api_prefixes',snapshot.financialAdminApis,MODULE_KEYS.FINANCIALS],
+  ['it_admin_api_prefixes',snapshot.itAdminApis,MODULE_KEYS.IT_PLATFORM],
+  ['storefront_public_pages',snapshot.storefrontPublicPages,MODULE_KEYS.STOREFRONT],
+  ['social_public_pages',snapshot.socialPublicPages,MODULE_KEYS.SOCIALS],
+  ['storefront_public_api_prefixes',snapshot.storefrontPublicApis,MODULE_KEYS.STOREFRONT],
+  ['social_public_api_prefixes',snapshot.socialPublicApis,MODULE_KEYS.SOCIALS],
+  ['etsy_operator_admin_api_prefixes',ETSY_OPERATOR_ADMIN_APIS,MODULE_KEYS.STOREFRONT]
+ ];
+ const catalog=named.map(([name,paths,module_key])=>({
+  group:name,module_key,declared_entries:paths.length,examples:paths.slice(0,3),
+  source:'functions/api/_lib/appModuleRoutes.js',
+  verified_endpoint_count:null,all_routes_runtime_tested:false}));
+ const routes=[
+  '/','/shop','/cart','/admin/products','/admin/mobile-product',
+  '/admin/social-publishing','/admin/accounting','/admin/it-platform',
+  '/api/admin/production-variable-audit-406','/api/admin/payment-provider-testing-blockers',
+  '/api/admin/product-distribution-406','/api/admin/social-post-queue',
+  '/api/admin/imaginary-privileged-route','/api/admin/app-modules',
+  '/api/admin/contracts/catalog-read'];
+ const sample_routes=routes.map(path=>{
+  const contract=sharedServiceContractForPath(path);
+  const module_key=moduleKeyForPath(path);
+  return {path,source_module_key:module_key||null,
+   shared_contract:contract?.path||null,
+   classification:contract?'SHARED_SERVICE_CONTRACT_SEPARATE_CHECK':
+    module_key?'MODULE_CATALOG_ROUTE_MATCH':
+    'UNCLASSIFIED_OR_EXEMPT_REQUIRES_INDIVIDUAL_REVIEW'};
+ });
+ return {build:723,source:'EXISTING_CANONICAL_MODULE_ROUTE_CATALOG',
+  topology_id:'rosevear-master-shell-seven-apps.v1',
+  layers:[...CONTROL_LAYERS_723],tiers:[...OPERATIONAL_TIERS_723],
+  shared_service_contracts:snapshot.sharedServiceContracts.map(c=>({
+   path:c.path,owner_module_key:c.owner_module_key,
+   consumers:[...c.consumer_module_keys],mutation:c.mutation,
+   owner_authorization_assumed:false})),
+  route_catalog:catalog,route_examples:sample_routes,
+  catalogued_declaration_count:catalog.reduce((n,g)=>n+g.declared_entries,0),
+  complete_deployed_endpoint_inventory:false,all_tiers_enforced_globally:false,
+  module_middleware_source:'functions/_middleware.js',
+  verified_admin_source:'functions/api/_lib/verifiedAdmin398.mjs',
+  original_host_t5_witness:'UNKNOWN_HOLD',
+  signed_three_master_transport:'NOT_VERIFIED',
+  authority_transfer:false,cross_app_connected:false,receiver_activated:false};
+}
+/* Fail closed pure tier/capability candidate matrix. All historic endpoints
+ * continue using their own genuine runtime middleware and original source locks;
+ * this policy NEVER grants an access token, payment, transport or receiver ON. */
+export function assessTierCandidate723(p={}){
+ const tier=String(p.tier||''),cap=String(p.capability||'');
+ const min={public_catalog_read:0,own_account_read:1,tenant_order_read:2,
+  operator_product_review:3,operator_media_draft_review:3,
+  operator_finance_evidence_review:3,master_readonly_governance:4,
+  physical_receiver_activation:5};
+ const target=Object.hasOwn(min,cap)?min[cap]:null;
+ const level=OPERATIONAL_TIERS_723.indexOf(tier);
+ const reasons=[];
+ if(target===null||level<0)reasons.push('UNKNOWN_TIER_OR_CAPABILITY');
+ else if(level<target)reasons.push('INSUFFICIENT_TIER');
+ if(target!==0&&(p.identity_verified!==true||p.account_active!==true))
+  reasons.push('ACTIVE_VERIFIED_IDENTITY_REQUIRED');
+ if(target===1&&p.self_resource_verified!==true)reasons.push('SELF_OWNERSHIP_REQUIRED');
+ if(target===2&&!(typeof p.tenant_id==='string'&&p.tenant_id.length>0&&
+  p.tenant_id===p.resource_tenant_id&&p.tenant_membership_verified===true))
+  reasons.push('TENANT_RESOURCE_AND_MEMBERSHIP_REQUIRED');
+ if(target===3){
+  if(p.admin_role_verified!==true||p.company_operator_grant!==true)
+   reasons.push('ACTIVE_COMPANY_OPERATOR_REQUIRED');
+  const module=cap==='operator_finance_evidence_review'?MODULE_KEYS.FINANCIALS:
+   cap==='operator_media_draft_review'?MODULE_KEYS.CREATORS:MODULE_KEYS.STOREFRONT;
+  if(p.module_key!==module||p.module_permission_verified!==true)
+   reasons.push('EXACT_MODULE_GRANT_REQUIRED');
+  if(p.company_id===undefined||!p.company_id||p.company_id!==p.resource_company_id)
+   reasons.push('EXACT_COMPANY_BOUNDARY_REQUIRED');
+  if(cap==='operator_media_draft_review'&&p.source_media_consent_verified!==true)
+   reasons.push('SOURCE_MEDIA_CONSENT_REQUIRED');
+ }
+ if(target===4)reasons.push('INDEPENDENT_THREE_MASTER_SIGNED_TRANSPORT_NOT_VERIFIED');
+ if(target===5)reasons.push('ORIGINAL_PHYSICAL_RECEIVER_OWNER_CEREMONY_NOT_VERIFIED');
+ const candidate=reasons.length===0;
+ return {build:723,tier,capability:cap,
+  decision:candidate?'CANDIDATE_ONLY_SEPARATE_ORIGINAL_RUNTIME_AUTH_REQUIRED':
+   'HOLD_'+reasons[0],reasons,provisional_tier_eligible:candidate,
+  runtime_access_granted:false,provider_write_performed:false,
+  financial_books_closed:false,receiver_activated:false,
+  independent_master_permission_fabricated:false};
+}
+/* No denominator is silently approved; no unknown 0% or +10-point claim. */
+export function sevenAxisCompletionBaseline723(approved=null){
+ const axes=[...COMPLETION_AXES_723],scopes=[...MODULE_SCOPE_723];
+ const proposed_checks=axes.map(axis=>({
+  axis,proposed_scope_count:scopes.length,
+  scopes:scopes.map(scope=>({scope,check_id:'DND723_'+axis+'_'+scope,
+   proposed_state:'PENDING_OWNER_DEFINITION_AND_ORIGINAL_EVIDENCE'})),
+  owner_approved_denominator:null,original_verified_numerator:null,
+  verified_percent:null,target_10pp_percent:null,
+  verification_status:'UNMEASURED_PENDING_OWNER_APPROVAL'}));
+ const validApproval=approved&&typeof approved==='object'&&
+  approved.original_source_verified===true&&approved.explicit_owner_approval===true&&
+  /^[a-f0-9]{40}$/.test(String(approved.production_sha||''))&&
+  Array.isArray(approved.axes)&&approved.axes.length===axes.length&&
+  axes.every((axis,i)=>{
+   const a=approved.axes[i];
+   return a?.axis===axis&&Number.isSafeInteger(a.denominator)&&
+    a.denominator>=1&&a.denominator<=scopes.length&&
+    Number.isSafeInteger(a.verified_passes)&&a.verified_passes>=0&&
+    a.verified_passes<=a.denominator&&a.original_evidence_verified===true;
+  });
+ if(!validApproval)return {build:723,topology_id:'rosevear-master-shell-seven-apps.v1',
+  source:'PROPOSED_APP_ACCEPTANCE_CHECKS_NOT_OWNER_APPROVED',
+  axes:proposed_checks,scope_count:scopes.length,
+  axis_count:axes.length,proposed_check_count:scopes.length*axes.length,
+  verified_baseline_count:null,percentage_point_gain_verified:false,
+  application_completion_percent:null,original_signed_owner_approval:false,
+  cross_app_connected:false,finance_closed:false};
+ const measured=proposed_checks.map((entry,i)=>{
+  const a=approved.axes[i],percent=100*a.verified_passes/a.denominator;
+  return {...entry,owner_approved_denominator:a.denominator,
+   original_verified_numerator:a.verified_passes,
+   verified_percent:percent,target_10pp_percent:Math.min(100,percent+10),
+   verification_status:'SOURCE_VERIFIED_OWNER_APPROVED_BASELINE'};
+ });
+ return {build:723,topology_id:'rosevear-master-shell-seven-apps.v1',
+  source:'EXTERNALLY_VERIFIED_OWNER_APPROVED_BASELINE_CONTRACT',
+  axes:measured,scope_count:scopes.length,axis_count:axes.length,
+  proposed_check_count:scopes.length*axes.length,
+  verified_baseline_count:axes.length,
+  percentage_point_gain_verified:false,application_completion_percent:null,
+  original_signed_owner_approval:true,cross_app_connected:false,
+  finance_closed:false};
+}
