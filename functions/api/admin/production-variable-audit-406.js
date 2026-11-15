@@ -3,6 +3,7 @@ import {getDb,jsonResponse} from '../_lib/adminAudit.js';
 import {finance718,financial685} from './social-post-queue.js';
 import {sourceVerifiedOwnerReview721,verifyIndependentRotationReceipt722,reconcileOwnerReviewDrift722,reviewSevenAppHandoff722} from './_lib/projectFinanceEvidence.js';
 import {verifiedAdminFromModule} from '../_lib/verifiedAdmin398.mjs';
+import {sixTierSecurityInventory723,sevenAxisCompletionBaseline723,assessTierCandidate723} from '../_lib/appModuleRoutes.js';
 const checks=Object.freeze([
  ['core','SESSION_SECRET','required'],
  ['core','PRIVATE_EVIDENCE_DOWNLOAD_SECRET','feature_specific'],
@@ -242,6 +243,7 @@ export async function onRequestGet(c){
  const requestUrl=new URL(c.request.url);
  const review721=requestUrl.searchParams.get('review')==='721';
  const review722=requestUrl.searchParams.get('review')==='722';
+ const review723=requestUrl.searchParams.get('review')==='723';
  let ledger721=null;
  if(review721||review722){
   const n=Number(requestUrl.searchParams.get('campaign_queue_id'));
@@ -268,6 +270,18 @@ export async function onRequestGet(c){
    operational_access_tiers:['T0_PUBLIC','T1_USER','T2_TENANT',
     'T3_COMPANY_OPERATOR','T4_SIGNED_THREE_MASTER','T5_PHYSICAL_RECEIVER'],
    cross_app_connected:false,financial_books_closed:false
+  }}:{}),
+  ...(review723?{review723:{
+   inventory:sixTierSecurityInventory723(),
+   completion:sevenAxisCompletionBaseline723(),
+   six_tier_negative_examples:[
+    assessTierCandidate723({tier:'T0_PUBLIC',capability:'operator_finance_evidence_review'}),
+    assessTierCandidate723({tier:'T3_COMPANY_OPERATOR',capability:'physical_receiver_activation'}),
+    assessTierCandidate723({tier:'T4_INDEPENDENT_THREE_MASTER',capability:'master_readonly_governance'})
+   ],
+   source_proof_scope:'CANONICAL_ROUTE_DECLARATIONS_NOT_FULL_ENDPOINT_AUDIT',
+   seven_app_runtime_connected:false,original_t5_ceremony_authorized:false,
+   finance_books_closed:false,owner_10pp_gain_verified:false
   }}:{}),
   documentation:'/docs/operations/RELEASE_467_BUILD_406_PRODUCTION_CONFIGURATION_AUDIT.md'},200,{'Cache-Control':'no-store'});
 }
