@@ -3,6 +3,7 @@ import {getDb,jsonResponse} from '../_lib/adminAudit.js';
 import {finance718,financial685} from './social-post-queue.js';
 import {sourceVerifiedOwnerReview721,verifyIndependentRotationReceipt722,reconcileOwnerReviewDrift722,reviewSevenAppHandoff722} from './_lib/projectFinanceEvidence.js';
 import {masterTrustStatus724,verifyMasterEnvelope724,verifyKeyCustodyRotation724,recordMasterReplayReview724} from './_lib/projectFinanceEvidence.js';
+import {eventV2Readiness726,recordEventReview726,recordLocalDisposition726} from './_lib/projectFinanceEvidence.js';
 import {verifiedAdminFromModule} from '../_lib/verifiedAdmin398.mjs';
 import {sixTierSecurityInventory723,sevenAxisCompletionBaseline723,assessTierCandidate723} from '../_lib/appModuleRoutes.js';
 import {independentReleaseStatus725,negotiateIndependentSync725,assessConsentTenantCapability725} from '../_lib/appModuleRoutes.js';
@@ -165,6 +166,21 @@ export async function onRequestPost(c){
  let p={};try{p=await c.request.json()}catch{}
 
 
+ if(p.action==='review_event_v2_local_726'){
+  if(p.original_admin_review_confirmed!==true||!p.event_packet||
+   JSON.stringify(p).length>5000)
+   return jsonResponse({ok:false,build:726,status:'HOLD_EXPLICIT_SOURCE_EVENT_REVIEW_REQUIRED',
+    external_ack_verified:false,remote_dispatch:false},400,{'Cache-Control':'private, no-store'});
+  const row=await recordEventReview726(db,admin,p.event_packet);
+  return jsonResponse({ok:row.durable_local_review===true,...row},
+   row.durable_local_review===true?200:409,{'Cache-Control':'private, no-store'});
+ }
+ if(p.action==='operator_local_event_disposition_726'){
+  const out=await recordLocalDisposition726(db,admin,p.local_event_hash,
+   p.local_disposition,p.review_note);
+  return jsonResponse({ok:out.recorded===true,...out},out.recorded===true?200:409,
+   {'Cache-Control':'private, no-store'});
+ }
  if(p.action==='review_signed_master_source_724'){
   const e=c.env||{};
   const marker=String(e.DND724_ORIGINAL_SIGNER_ENROLLMENT_RECEIPT_ID||'');
@@ -284,6 +300,7 @@ export async function onRequestGet(c){
  const review723=requestUrl.searchParams.get('review')==='723';
  const review724=requestUrl.searchParams.get('review')==='724';
  const review725=requestUrl.searchParams.get('review')==='725';
+ const review726=requestUrl.searchParams.get('review')==='726';
  let ledger721=null;
  if(review721||review722){
   const n=Number(requestUrl.searchParams.get('campaign_queue_id'));
@@ -356,6 +373,16 @@ export async function onRequestGet(c){
    original_1_0_integration_endpoints_unchanged:true,
    local_product_routes_remain_available:true,
    owner_approved_completion_percentage:null
+  }}:{}),
+  ...(review726?{review726:{
+   event: eventV2Readiness726(),
+   external_peer_ack_verified:false,
+   live_operator_inbox_connected:false,
+   original_receiver_witness:'UNKNOWN_HOLD',
+   local_review_requires_admin_and_original_source:true,
+   note:'Local D1 audit reviews and dispositions are never signed remote ACK or delivered dead letters.',
+   inventory_quick_edit_enabled_in_source:true,
+   vercel_peer_deployment_triggered:false
   }}:{}),
   documentation:'/docs/operations/RELEASE_467_BUILD_406_PRODUCTION_CONFIGURATION_AUDIT.md'},200,{'Cache-Control':'no-store'});
 }
