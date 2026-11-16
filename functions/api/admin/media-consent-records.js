@@ -2,12 +2,13 @@
 // Brief description: Admin-only media consent registry for customer/job/product photos before public product or social use.
 
 import { auditAdminAction, captureRuntimeIncident, getAdminUserFromRequest, getDb, jsonResponse, normalizeText } from '../_lib/adminAudit.js';
+import {clampConsentFlags727,consentWithdrawalHandoff727} from '../_lib/dataProtection727.mjs';
 
-function json(data, status = 200) { return jsonResponse(data, status); }
+function json(data, status = 200) { return jsonResponse(data, status, {'Cache-Control':'private, no-store'}); }
 function rows(result) { return Array.isArray(result?.results) ? result.results : []; }
 function cleanStatus(value) {
   const raw = normalizeText(value).toLowerCase();
-  return ['unknown','requested','granted','revoked','blocked','not_required'].includes(raw) ? raw : 'unknown';
+  return ['unknown','requested','granted','approved','revoked','blocked','not_required'].includes(raw) ? raw : 'unknown';
 }
 function cleanScope(value) {
   const raw = normalizeText(value).toLowerCase();
@@ -76,6 +77,15 @@ export async function onRequestGet({ request, env }) {
   }
 }
 
+async function holdQueuedUse727(db,record) {
+  if(!record || !record.source_type || !record.source_id)return {queue_handoff:'HOLD_MISSING_SOURCE_LINK'};
+  const result=await db.prepare(`UPDATE social_post_queue
+    SET approved_for_public_post=0, privacy_status='consent_needed', approval_status='needs_review',
+        updated_at=CURRENT_TIMESTAMP
+    WHERE source_type=? AND source_id=? AND COALESCE(post_status,'draft') IN ('draft','ready','failed')`)
+    .bind(record.source_type,record.source_id).run();
+  return {queue_handoff:'LOCAL_QUEUE_HELD',rows_changed:Number(result?.meta?.changes||0)};
+}
 export async function onRequestPost({ request, env }) {
   const db = getDb(env);
   if (!db) return json({ ok: false, error: 'Database binding is not configured.' }, 500);
@@ -92,9 +102,13 @@ export async function onRequestPost({ request, env }) {
       const subjectLabel = normalizeText(body.subject_label) || 'Product/customer media';
       const consentStatus = cleanStatus(body.consent_status);
       const consentScope = cleanScope(body.consent_scope);
-      const publicAllowed = ['granted','not_required'].includes(consentStatus) && ['product_page','website_gallery','all_public'].includes(consentScope) ? 1 : Number(body.public_use_allowed || 0) === 1 ? 1 : 0;
-      const socialAllowed = ['granted','not_required'].includes(consentStatus) && ['social_post','all_public'].includes(consentScope) ? 1 : Number(body.social_use_allowed || 0) === 1 ? 1 : 0;
+      const flags = clampConsentFlags727(consentStatus,consentScope,
+        Number(body.public_use_allowed??1)===1,Number(body.social_use_allowed??1)===1,body.expires_at);
+      const publicAllowed=flags.public_use_allowed,socialAllowed=flags.social_use_allowed;
       const key = normalizeText(body.consent_key) || consentKey(sourceType, sourceId, mediaUrl, subjectLabel);
+      const prior=await db.prepare('SELECT consent_status FROM media_consent_records WHERE consent_key=? LIMIT 1').bind(key).first();
+      if(prior && ['revoked','blocked'].includes(String(prior.consent_status).toLowerCase()) && !['revoked','blocked'].includes(consentStatus))
+        return json({ok:false,error:'Revoked/blocked consent cannot be reactivated by upsert; obtain a new verified original consent.'},409);
       await db.prepare(`
         INSERT INTO media_consent_records (
           consent_key, subject_label, source_type, source_id, media_url, consent_status, consent_scope,
@@ -113,26 +127,46 @@ export async function onRequestPost({ request, env }) {
           reviewed_by_user_id = excluded.reviewed_by_user_id,
           expires_at = excluded.expires_at,
           updated_at = CURRENT_TIMESTAMP
+        WHERE media_consent_records.consent_status NOT IN ('revoked','blocked')
       `).bind(
         key, subjectLabel, sourceType, sourceId || null, mediaUrl || null, consentStatus, consentScope,
         publicAllowed, socialAllowed, normalizeText(body.privacy_notes) || null, Number(adminUser.user_id || 0) || null, normalizeText(body.expires_at) || null
       ).run();
-      await auditAdminAction(env, request, adminUser, { action_type: 'media_consent_save', target_type: 'media_consent_records', target_key: key, details: { source_type: sourceType, source_id: sourceId, consent_status: consentStatus, consent_scope: consentScope } }).catch(() => null);
-      return json({ ok: true, message: 'Media consent record saved.', ...(await loadRecords(db)) });
+      const handoff=['revoked','blocked'].includes(consentStatus)
+        ? await holdQueuedUse727(db,{source_type:sourceType,source_id:sourceId}):null;
+      await auditAdminAction(env, request, adminUser, {action_type:'media_consent_save_727',
+        target_type:'media_consent_records',target_key:key,
+        details:{source_type:sourceType,consent_status:consentStatus,consent_scope:consentScope,
+          personal_fields_logged:false,withdrawal_handoff:!!handoff}});
+      return json({ ok:true,message:'Media consent record saved.',...(handoff?{handoff:{...consentWithdrawalHandoff727({consent_key:key}),...handoff}}:{}), ...(await loadRecords(db)) });
     }
-    if (action === 'update_status') {
-      const id = Number(body.consent_record_id || 0);
-      if (!id) return json({ ok: false, error: 'consent_record_id is required.' }, 400);
-      const consentStatus = cleanStatus(body.consent_status);
-      const consentScope = cleanScope(body.consent_scope);
-      const publicAllowed = Number(body.public_use_allowed || 0) === 1 ? 1 : 0;
-      const socialAllowed = Number(body.social_use_allowed || 0) === 1 ? 1 : 0;
+    if (action === 'update_status' || action === 'withdraw') {
+      const id=Number(body.consent_record_id||0);
+      if(!Number.isSafeInteger(id)||id<=0)return json({ok:false,error:'consent_record_id is required.'},400);
+      const prior=await db.prepare('SELECT * FROM media_consent_records WHERE consent_record_id=? LIMIT 1').bind(id).first();
+      if(!prior)return json({ok:false,error:'Consent record not found.'},404);
+      const consentStatus=cleanStatus(action==='withdraw'?'revoked':body.consent_status);
+      const consentScope=cleanScope(action==='withdraw'?'internal_only':body.consent_scope);
+      if(['revoked','blocked'].includes(String(prior.consent_status).toLowerCase())&&!['revoked','blocked'].includes(consentStatus))
+        return json({ok:false,error:'Withdrawn consent cannot be reactivated without a new verified original consent.'},409);
+      const flags=clampConsentFlags727(consentStatus,consentScope,
+        Number(body.public_use_allowed||0)===1,Number(body.social_use_allowed||0)===1,prior.expires_at);
+      const publicAllowed=flags.public_use_allowed,socialAllowed=flags.social_use_allowed;
       await db.prepare(`
         UPDATE media_consent_records
         SET consent_status = ?, consent_scope = ?, public_use_allowed = ?, social_use_allowed = ?, privacy_notes = ?, reviewed_by_user_id = ?, updated_at = CURRENT_TIMESTAMP
         WHERE consent_record_id = ?
-      `).bind(consentStatus, consentScope, publicAllowed, socialAllowed, normalizeText(body.privacy_notes) || null, Number(adminUser.user_id || 0) || null, id).run();
-      return json({ ok: true, message: 'Media consent record updated.', ...(await loadRecords(db)) });
+      `).bind(consentStatus,consentScope,publicAllowed,socialAllowed,
+        normalizeText(body.privacy_notes)||null,Number(adminUser.user_id||0)||null,id).run();
+      const withdrawn=['revoked','blocked'].includes(consentStatus);
+      const handoff=withdrawn?await holdQueuedUse727(db,prior):null;
+      await auditAdminAction(env,request,adminUser,{action_type:withdrawn?'media_consent_withdrawal_727':'media_consent_update_727',
+        target_type:'media_consent_records',target_id:id,
+        details:{consent_status:consentStatus,public_use_allowed:!!publicAllowed,
+          social_use_allowed:!!socialAllowed,customer_data_in_receipt:false,
+          external_recall_verified:false}});
+      return json({ok:true,message:withdrawn?'Consent withdrawn locally; external recall needs operator review.':'Media consent record updated.',
+        ...(handoff?{handoff:{...consentWithdrawalHandoff727(prior),...handoff}}:{}),...(await loadRecords(db))});
     }
     return json({ ok: false, error: 'Unknown action.' }, 400);
   } catch (error) {
