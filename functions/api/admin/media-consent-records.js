@@ -2,7 +2,7 @@
 // Brief description: Admin-only media consent registry for customer/job/product photos before public product or social use.
 
 import { auditAdminAction, captureRuntimeIncident, getAdminUserFromRequest, getDb, jsonResponse, normalizeText } from '../_lib/adminAudit.js';
-import {clampConsentFlags727,consentWithdrawalHandoff727} from '../_lib/dataProtection727.mjs';
+import {clampConsentFlags727,consentWithdrawalHandoff727} from '../_lib/appModuleRoutes.js';
 
 function json(data, status = 200) { return jsonResponse(data, status, {'Cache-Control':'private, no-store'}); }
 function rows(result) { return Array.isArray(result?.results) ? result.results : []; }
