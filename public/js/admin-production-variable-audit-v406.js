@@ -333,3 +333,41 @@ button.addEventListener('click',async()=>{
   }finally{button.disabled=false}
  });
 })();
+
+// Build 726 — on-demand source-only Event V2 review; no inter-app network send.
+(()=>{
+ 'use strict';
+ const button=document.getElementById('dd726Inspect'),
+  status=document.getElementById('dd726Status'),
+  result=document.getElementById('dd726Result');
+ if(!button||!status||!result||!window.DDAuth?.apiFetch)return;
+ button.addEventListener('click',async()=>{
+  button.disabled=true;status.textContent='Inspecting local source contract…';
+  try{
+   const response=await window.DDAuth.apiFetch(
+    '/api/admin/production-variable-audit-406?review=726',
+    {method:'GET',cache:'no-store'});
+   const data=await response.json().catch(()=>null);
+   if(!response.ok||!data?.ok||data.review726?.event?.build!==726)
+    throw Error('Protected event source unavailable');
+   const e=data.review726.event;
+   result.textContent=[
+    'Envelope: '+e.schema+' / protocol '+e.protocol,
+    'Legacy 1.0 peers remain supported for existing health only',
+    'Event families: '+e.known_event_types.join(' · '),
+    'Proposed operator inbox: '+e.operator_inbox_handoff_target,
+    'Local D1 operator review evidence: '+(e.local_d1_review_receipt_supported?'SUPPORTED':'HOLD'),
+    'Conditional sequential duplicate review: '+(e.conditional_sequential_dedupe_supported?'SUPPORTED':'HOLD'),
+    'Database-enforced unique event admission: NOT VERIFIED',
+    'External ACK / delivered dead-letter: NOT VERIFIED',
+    'Signed remote event dispatch: NOT ACTIVATED',
+    'Offline peers block only dependent event capability',
+    'Unrelated local Product and inventory operations continue',
+    'Original Windows T5 receiver: '+e.original_t5_receiver
+   ].join('\n');
+   status.textContent='SOURCE INSPECTED — local operator review only; remote handoff HOLD.';
+  }catch(_){result.textContent='HOLD — Protected event source not verified.';
+   status.textContent='HOLD — No remote ACK or replay proof inferred.';}
+  finally{button.disabled=false;}
+ });
+})();
