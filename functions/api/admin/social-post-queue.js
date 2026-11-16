@@ -5,6 +5,7 @@
 
 import{ auditAdminAction,captureRuntimeIncident,getAdminUserFromRequest,getDb,jsonResponse,normalizeText } from '../_lib/adminAudit.js';
 import {claimIndependentNinth716,claimExternalCustodySla717,reviewOriginalExternalSlaContinuity718} from './_lib/projectFinanceEvidence.js';
+import {inspectOutboundText727,evaluateMediaPublication727} from '../_lib/dataProtection727.mjs';
 export {claimIndependentNinth716,claimExternalCustodySla717,reviewOriginalExternalSlaContinuity718};
 
 
@@ -1295,12 +1296,27 @@ results:selected.map(platform=>({platform,status:'blocked_caip_derivative_approv
 
 await db.prepare(`UPDATE social_post_queue SET last_publish_attempt_at=CURRENT_TIMESTAMP, updated_by_user_id=?, updated_at=CURRENT_TIMESTAMP WHERE social_post_queue_id=?`).bind(adminUser.user_id,id).run().catch(()=> null);
 
-const privacyStatus=slugKey(row.privacy_status || 'needs_review');
-const privacyApproved=Number(row.approved_for_public_post || 0)===1 || ['approved','no_private_media'].includes(privacyStatus);
-if (!privacyApproved && (row.source_type==='caip_project'|| payload.force !==true)){
+// Build 727: no force/retry bypass for consent, private captions or original privacy review.
+const privacyStatus=slugKey(row.privacy_status||'needs_review');
+const privacyApproved=Number(row.approved_for_public_post||0)===1 &&
+  ['approved','no_private_media'].includes(privacyStatus);
+const outboundText=inspectOutboundText727([row.title,row.summary,row.caption,row.notes].join(' '));
+let consentRecords=[];
+if(row.source_type&&row.source_id){
+  const consentRows=await db.prepare(`SELECT consent_record_id,source_type,source_id,media_url,
+    consent_status,consent_scope,public_use_allowed,social_use_allowed,expires_at
+    FROM media_consent_records WHERE LOWER(source_type)=? AND source_id=? ORDER BY consent_record_id DESC LIMIT 150`)
+    .bind(String(row.source_type).toLowerCase(),String(row.source_id)).all().catch(()=>({results:[]}));
+  consentRecords=rows(consentRows);
+}
+const consentGate=evaluateMediaPublication727(row,consentRecords,images);
+if(!privacyApproved||!outboundText.clear||!consentGate.allowed){
 for (const platform of selected){
-const blocked={ platform,status:'blocked_privacy_review',privacy_status:privacyStatus,notes:'Review Social Media Privacy Guard before API publishing this post.'};
-await recordApiAttempt(db,adminUser,id,platform,'blocked_privacy_review',blocked);
+const blocked={platform,status:'blocked_privacy_review_727',privacy_status:privacyStatus,
+  guard_code:!outboundText.clear?'HOLD_SENSITIVE_OUTBOUND_TEXT':(!consentGate.allowed?consentGate.code:'HOLD_PRIVACY_REVIEW'),
+  sensitive_codes:outboundText.findings,
+  notes:'Build 727 privacy/consent DLP: review and remove private details; force cannot override.'};
+await recordApiAttempt(db,adminUser,id,platform,'blocked_privacy_review_727',blocked);
 results.push(blocked);
 }
 return{ social_post_queue_id:id,attempted_platforms:selected,results };
@@ -1610,9 +1626,14 @@ const asset=await db.prepare(`SELECT ca.creative_asset_id,ca.rights_status,ma.pu
     ORDER BY f.caip_media_upload_file_id DESC LIMIT 1`).bind(Number(post.source_id),assetId).first();
 if(!asset||asset.consent_state!=='public_allowed'||asset.upload_rights!=='public_allowed'||asset.privacy_state!=='public_approved'||asset.rights_status!=='public_allowed'||asset.public_url!==url)
 throw Error('CAIP source rights, consent, public-approval state or canonical derivative URL are not independently verified. HOLD.');
+const existingApproval=await db.prepare('SELECT consent_status FROM media_consent_records WHERE consent_key=? LIMIT 1')
+    .bind(`caip672:${queueId}:${assetId}`).first();
+if(['revoked','blocked'].includes(String(existingApproval?.consent_status||'').toLowerCase()))
+  throw Error('Build 727: withdrawn CAIP derivative approval cannot be silently restored.');
 await db.prepare(`INSERT INTO media_consent_records(consent_key,subject_label,source_type,source_id,media_url,consent_status,consent_scope,public_use_allowed,social_use_allowed,privacy_notes,reviewed_by_user_id,updated_at)
     VALUES(?,?,'caip_project',?,?,'approved','all_public',1,1,?, ?,CURRENT_TIMESTAMP)
-    ON CONFLICT(consent_key) DO UPDATE SET media_url=excluded.media_url,consent_status='approved',public_use_allowed=1,social_use_allowed=1,reviewed_by_user_id=excluded.reviewed_by_user_id,updated_at=CURRENT_TIMESTAMP`).bind(`caip672:${queueId}:${assetId}`,`CAIP asset ${assetId}`,String(post.source_id),url,'Owner reviewed exact public derivative; source rights and consent checked.',adminUser.user_id).run();
+    ON CONFLICT(consent_key) DO UPDATE SET media_url=excluded.media_url,consent_status='approved',public_use_allowed=1,social_use_allowed=1,reviewed_by_user_id=excluded.reviewed_by_user_id,updated_at=CURRENT_TIMESTAMP
+    WHERE media_consent_records.consent_status NOT IN ('revoked','blocked')`).bind(`caip672:${queueId}:${assetId}`,`CAIP asset ${assetId}`,String(post.source_id),url,'Owner reviewed exact public derivative; source rights and consent checked.',adminUser.user_id).run();
 await db.prepare(`UPDATE social_post_queue SET image_urls_json=?,approval_status='needs_review',post_status='draft',updated_by_user_id=?,updated_at=CURRENT_TIMESTAMP WHERE social_post_queue_id=?`).bind(JSON.stringify([url]),adminUser.user_id,queueId).run();
 return{social_post_queue_id:queueId,creative_asset_id:assetId,public_derivative_approved:true,publication_performed:false};
 }
