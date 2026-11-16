@@ -6,7 +6,7 @@ import {masterTrustStatus724,verifyMasterEnvelope724,verifyKeyCustodyRotation724
 import {eventEnvelopeContract726,queueSourceEvent726,inspectSourceEvents726,localDeadLetterReview726,verifyPeerAckReview726,signedPeerAckReview726} from './_lib/projectFinanceEvidence.js';
 import {verifiedAdminFromModule} from '../_lib/verifiedAdmin398.mjs';
 import {sixTierSecurityInventory723,sevenAxisCompletionBaseline723,assessTierCandidate723} from '../_lib/appModuleRoutes.js';
-import {independentReleaseStatus725,negotiateIndependentSync725,assessConsentTenantCapability725,resolveKeyring728,vaultEncrypt728,vaultDecryptForRotation728,digest728,hmacScope728,retentionEligibility728,verifyLiveWithdrawalAck728,BUILD728_POLICY} from '../_lib/appModuleRoutes.js';
+import {independentReleaseStatus725,negotiateIndependentSync725,assessConsentTenantCapability725,resolveKeyring728,vaultEncrypt728,vaultDecryptForRotation728,digest728,hmacScope728,retentionEligibility728,verifyLiveWithdrawalAck728,BUILD728_POLICY,BUILD729_PEERS,peerConfig729,verifyPeerChallenge729} from '../_lib/appModuleRoutes.js';
 const checks=Object.freeze([
  ['core','SESSION_SECRET','required'],
  ['core','PRIVATE_EVIDENCE_DOWNLOAD_SECRET','feature_specific'],
@@ -334,12 +334,142 @@ async function review728(db,env){
   automatic_deletion:false,other_apps_deployed:false,existing_customer_data_reencrypted:false};
 }
 
+
+/* Build 729: original Admin-only keyring canary, signed peer challenge, on-demand custody dashboard. */
+const hold729=(code,status=409)=>({status,data:{ok:false,build:729,code,
+  live_enrollment_verified:false,external_data_removed:false}});
+async function action729(c,db,admin,p){
+ const origin=new URL(c.request.url).origin;
+ if(c.request.headers.get('Origin')!==origin&&c.request.headers.get('Sec-Fetch-Site')!=='same-origin')
+  return hold729('HOLD_SAME_ORIGIN_REQUIRED',403);
+ if(JSON.stringify(p).length>3500||p.owner_review_confirmed!==true)
+  return hold729('HOLD_BOUNDED_OWNER_APPROVAL_REQUIRED',400);
+ const env=c.env||{};
+ if(p.action==='verify_keyring_729'){
+  const ring=resolveKeyring728(env);
+  if(!ring.ready)return hold729(ring.reason);
+  try{
+   const tenant='0'.repeat(64),id=crypto.randomUUID(),key=ring.keys.get(ring.active_id);
+   const cipher=await vaultEncrypt728({canary:'build729-in-memory-only'},key,ring.active_id,
+    tenant,'security_evidence',id,1);
+   const original=await vaultDecryptForRotation728(cipher,key,tenant,'security_evidence',id);
+   if(original.canary!=='build729-in-memory-only')return hold729('HOLD_KEYRING_CANARY_FAILED');
+   return {status:200,data:{ok:true,build:729,code:'ACTIVE_KEY_AES_GCM_CANARY_VERIFIED',
+    active_key_id:ring.active_id,configured_keys:ring.keys.size,plaintext_or_key_returned:false,
+    cloudflare_secret_created_by_this_request:false,historical_records_rotated:false}};
+  }catch{return hold729('HOLD_KEYRING_CANARY_FAILED');}
+ }
+ if(p.action!=='probe_peer_729'||!BUILD729_PEERS.includes(p.target_app))
+  return hold729('HOLD_UNRECOGNIZED_PEER_ACTION',400);
+ const target=String(p.target_app),config=peerConfig729(env,target);
+ if(!config.ready)return hold729(config.reason);
+ const nonce=Array.from(crypto.getRandomValues(new Uint8Array(16)),v=>v.toString(16).padStart(2,'0')).join('');
+ const challenge={schema_id:'rosevear.dnd.peer.enrollment.challenge.v1',
+  from_app:'devilndove',to_app:target,nonce,
+  issued_at:new Date().toISOString(),expires_at:new Date(Date.now()+120000).toISOString()};
+ try{
+  const signature=await hmacScope728(config.hmac_key,JSON.stringify(challenge));
+  const response=await fetch(config.url,{method:'POST',redirect:'error',
+    headers:{'Content-Type':'application/json','X-DND-HMAC-SHA256':signature,'Cache-Control':'no-store'},
+    body:JSON.stringify(challenge),signal:AbortSignal.timeout(7000)});
+  if(response.status!==200||!String(response.headers.get('content-type')||'').includes('application/json'))
+   return hold729('HOLD_LIVE_PEER_CHALLENGE_NOT_ACKNOWLEDGED');
+  const raw=await response.text();if(raw.length>4000)return hold729('HOLD_OVERSIZED_PEER_RESPONSE');
+  const body=JSON.parse(raw);
+  const verified=await verifyPeerChallenge729(body,challenge,config.public_key);
+  if(!verified.verified)return hold729(verified.status);
+  const proof=crypto.randomUUID(),pin=await digest728('pinned-key:'+config.public_key);
+  const receipt=await digest728('enrollment:'+config.receipt);
+  const write=await db.prepare(`INSERT INTO dnd_peer_enrollment_proofs_729
+    (proof_id,peer_app,challenge_nonce,pinned_public_key_sha256,original_enrollment_receipt_sha256,
+     signed_ack_sha256,observed_live_response,signature_verified,verified_by_user_id)
+     VALUES(?,?,?,?,?,?,1,1,?)`)
+    .bind(proof,target,nonce,pin,receipt,verified.receipt_sha256,admin.user_id).run();
+  if(Number(write?.meta?.changes)!==1)return hold729('HOLD_ORIGINAL_D1_PROOF_WRITE');
+  const readback=await db.prepare('SELECT signed_ack_sha256 FROM dnd_peer_enrollment_proofs_729 WHERE proof_id=?')
+   .bind(proof).first();
+  if(readback?.signed_ack_sha256!==verified.receipt_sha256)return hold729('HOLD_ORIGINAL_D1_PROOF_READBACK');
+  return {status:200,data:{ok:true,build:729,code:'LIVE_PEER_SIGNATURE_AND_D1_PROOF_VERIFIED',
+   peer_app:target,proof_id:proof,live_enrollment_verified:true,
+   withdrawal_ack_verified_by_this_probe:false,original_t5_receiver_enabled:false,
+   cross_app_data_deleted:false,cloudflare_secrets_exposed:false}};
+ }catch{return hold729('HOLD_LIVE_PEER_OFFLINE_OR_PROOF_NOT_RECORDED');}
+}
+async function review729(db,env){
+ const base=await review728(db,env),ring=resolveKeyring728(env);
+ const all=async(sql,params=[])=>{try{if(!db)return [];const st=db.prepare(sql);
+  return (await (params.length?st.bind(...params):st).all())?.results||[];}catch{return [];}};
+ const one=async(sql,params=[])=>{try{if(!db)return null;const st=db.prepare(sql);
+  return await (params.length?st.bind(...params):st).first()||null;}catch{return null;}};
+ const proofSchema=await one("SELECT name FROM sqlite_master WHERE type='table' AND name='dnd_peer_enrollment_proofs_729'");
+ const delivery=await all(`SELECT w.target_app,
+   COUNT(*) AS queued,SUM(CASE WHEN a.event_id IS NOT NULL THEN 1 ELSE 0 END) AS acknowledged,
+   SUM(CASE WHEN a.event_id IS NULL AND w.created_at<datetime('now','-1 day') THEN 1 ELSE 0 END) AS aged_one_day,
+   SUM(CASE WHEN a.event_id IS NULL AND w.created_at<datetime('now','-7 days') THEN 1 ELSE 0 END) AS aged_seven_days
+   FROM dnd_withdrawal_outbox_728 w LEFT JOIN dnd_withdrawal_acks_728 a ON a.event_id=w.event_id
+   GROUP BY w.target_app`);
+ const peers=[];
+ for(const peer of BUILD729_PEERS){
+  const cfg=peerConfig729(env,peer);
+  const last=proofSchema?await one(`SELECT proof_id,created_at,pinned_public_key_sha256,
+     original_enrollment_receipt_sha256 FROM dnd_peer_enrollment_proofs_729
+     WHERE peer_app=? ORDER BY created_at DESC LIMIT 1`,[peer]):null;
+  const pinned=cfg.ready?await digest728('pinned-key:'+cfg.public_key):null;
+  const receipt=cfg.ready?await digest728('enrollment:'+cfg.receipt):null;
+  const age=last?Date.now()-Date.parse(String(last.created_at).replace(' ','T')+'Z'):Infinity;
+  const current=cfg.ready&&last&&last.pinned_public_key_sha256===pinned&&
+    last.original_enrollment_receipt_sha256===receipt&&age>=0&&age<=604800000;
+  const d=delivery.find(x=>x.target_app===peer)||{};
+  peers.push({peer_app:peer,configured:cfg.ready,reason:cfg.ready?null:cfg.reason,
+   state:!cfg.ready?'HOLD_PEER_CONFIGURATION':!proofSchema?'HOLD_D1_PROOF_SCHEMA':
+    current?'CURRENT_LIVE_SIGNED_CHALLENGE_PROOF':'HOLD_FRESH_LIVE_SIGNED_PROOF_REQUIRED',
+   latest_proof_id:current?last.proof_id:null,latest_proof_at:current?last.created_at:null,
+   queued:Number(d.queued||0),signed_withdrawal_acks:Number(d.acknowledged||0),
+   held:Math.max(0,Number(d.queued||0)-Number(d.acknowledged||0)),
+   aged_one_day:Number(d.aged_one_day||0),aged_seven_days:Number(d.aged_seven_days||0),
+   external_platform_recall_proven:false,physical_master_receiver_enabled:false});
+ }
+ const latestKey=ring.ready?await one(`SELECT COUNT(*) AS total, SUM(CASE WHEN v.key_id<>? THEN 1 ELSE 0 END) AS needs_rotation
+   FROM dnd_evidence_versions_728 v WHERE v.version=(SELECT MAX(v2.version)
+   FROM dnd_evidence_versions_728 v2 WHERE v2.evidence_id=v.evidence_id)`,[ring.active_id]):null;
+ const reviews=await all(`SELECT r.review_id,r.evidence_id,r.review_state,r.requested_at,r.approved_at,
+   v.legal_hold,v.retention_days,v.created_at AS evidence_created_at,
+   x.ciphertext_sha256 AS latest_sha,
+   r.source_ciphertext_sha256 FROM dnd_evidence_retention_reviews_728 r
+   JOIN dnd_evidence_vault_728 v ON v.evidence_id=r.evidence_id
+   LEFT JOIN dnd_evidence_versions_728 x ON x.evidence_id=v.evidence_id
+    AND x.version=(SELECT MAX(version) FROM dnd_evidence_versions_728 WHERE evidence_id=v.evidence_id)
+   ORDER BY r.requested_at DESC LIMIT 30`);
+ const retention=reviews.map(r=>({review_id:r.review_id,evidence_id:r.evidence_id,
+  review_state:r.review_state,requested_at:r.requested_at,approved_at:r.approved_at,
+  eligibility:retentionEligibility728({legal_hold:r.legal_hold,
+   retention_days:r.retention_days,created_at:r.evidence_created_at},
+   {source_ciphertext_sha256:r.source_ciphertext_sha256},
+   r.latest_sha?{ciphertext_sha256:r.latest_sha}:null)}));
+ return {build:729,policy:'MANUAL_OWNER_GATED_ORIGINAL_ADMIN',schema_ready:base.schema_ready&&!!proofSchema,
+  keyring:{state:ring.ready?'CONFIGURED_CANARY_REQUIRES_EXPLICIT_OPERATOR_CHECK':ring.reason,
+   configured:ring.ready,active_key_id:ring.active_id,configured_key_count:ring.keys.size,
+   current_ciphertexts:Number(latestKey?.total||0),
+   latest_ciphertexts_needing_rotation:latestKey?Number(latestKey.needs_rotation||0):null,
+   secret_values_exposed:false,keys_provisioned_by_application:false,old_keys_auto_retired:false},
+  peers,retention_reviews:retention,withdrawal_events:base.pending_events,
+  counters:{encrypted_evidence:base.encrypted_evidence_count,
+   signed_withdrawal_receipts:base.live_signed_peer_receipts,
+   vault_purge_receipts:base.supervised_purge_receipts},
+  automated_purge:false,automatic_retries:false,active_background_delivery:false,
+  production_secrets_provisioned_by_this_release:false,original_master_receivers_enabled:false};
+}
+
 export async function onRequestPost(c){
  const admin=verifiedAdminFromModule(c),db=getDb(c.env||{});
  if(!admin)return jsonResponse({ok:false,error:'Active verified Administrator required.'},401,{'Cache-Control':'no-store'});
  if(!db)return jsonResponse({ok:false,error:'D1 not configured.'},503,{'Cache-Control':'no-store'});
  let p={};try{p=await c.request.json()}catch{}
- if(String(p.action||'').endsWith('_728')){
+ if(String(p.action||'').endsWith('_729')){
+   const r=await action729(c,db,admin,p);
+   return jsonResponse(r.data,r.status,{'Cache-Control':'private, no-store'});
+  }
+  if(String(p.action||'').endsWith('_728')){
   const r=await action728(c,db,admin,p);
   return jsonResponse(r.data,r.status,{'Cache-Control':'private, no-store'});
  }
@@ -499,6 +629,7 @@ export async function onRequestGet(c){
  const review725=requestUrl.searchParams.get('review')==='725';
  const review726=requestUrl.searchParams.get('review')==='726';
  const isReview728=requestUrl.searchParams.get('review')==='728';
+ const isReview729=requestUrl.searchParams.get('review')==='729';
  let ledger721=null;
  if(review721||review722){
   const n=Number(requestUrl.searchParams.get('campaign_queue_id'));
@@ -584,5 +715,6 @@ export async function onRequestGet(c){
    quick_inventory_hst_existing_receipts:'inventory_quick_edit_receipts'
   }}:{}),
   ...(isReview728?{review728:await review728(getDb(env),env)}:{}),
+  ...(isReview729?{review729:await review729(getDb(env),env)}:{}),
   documentation:'/docs/operations/RELEASE_467_BUILD_406_PRODUCTION_CONFIGURATION_AUDIT.md'},200,{'Cache-Control':'no-store'});
 }

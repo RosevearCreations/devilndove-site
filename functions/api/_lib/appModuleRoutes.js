@@ -834,3 +834,46 @@ export async function verifyLiveWithdrawalAck728(body,event,publicKey,now=Date.n
 export const BUILD728_POLICY=Object.freeze({build:728,protocol:'1.1',legacy_1_0_health_preserved:true,
  local_source_only_default:true,no_lockstep_release:true,plaintext_to_other_apps:false,
  automated_purge:false,unconfigured_transport:'HOLD',require_distinct_retention_actors:3});
+
+
+/* Build 729: only an original live pinned Ed25519 response can prove peer possession. */
+export const BUILD729_PEERS=Object.freeze(['ai-data-platform','rosevear-ai-hub','rosevear-comms-hub']);
+export function peerConfig729(env={},app){
+ if(!BUILD729_PEERS.includes(app))return {ready:false,reason:'HOLD_UNKNOWN_PEER'};
+ const prefix='DND728_PEER_'+app.replace(/-/g,'_').toUpperCase()+'_';
+ const raw=String(env[prefix+'URL']||''),receipt=String(env[prefix+'ENROLLMENT_RECEIPT']||'');
+ try{
+  const url=new URL(raw),public_key=String(env[prefix+'PUBLIC_KEY_B64URL']||'');
+  const hmac_key=String(env[prefix+'HMAC_KEY_B64URL']||'');
+  if(url.protocol!=='https:'||url.username||url.password||url.port||url.search||url.hash||
+     !/^[a-z0-9.-]+\.[a-z]{2,}$/i.test(url.hostname)||
+     /^(localhost|127\.|10\.|192\.168\.|172\.(1[6-9]|2\d|3[01])\.|169\.254\.|0\.|.*\.local$)/i.test(url.hostname)||
+     bytes728(public_key).length!==32||bytes728(hmac_key).length!==32||
+     !/^[A-Za-z0-9._:-]{16,128}$/.test(receipt))
+   return {ready:false,reason:'HOLD_MISSING_OR_INVALID_ORIGINAL_PEER_ENROLLMENT'};
+  return {ready:true,url:url.href,public_key,hmac_key,receipt};
+ }catch{return {ready:false,reason:'HOLD_MISSING_OR_INVALID_ORIGINAL_PEER_ENROLLMENT'};}
+}
+export async function verifyPeerChallenge729(body,challenge,pinnedKey,now=Date.now()){
+ const fail={verified:false,status:'HOLD_UNVERIFIED_PEER_ENROLLMENT'};
+ const ack=body?.ack,signature=body?.signature;
+ const keys=['schema_id','peer_app','challenge_nonce','challenge_sha256','outcome','issued_at','expires_at'];
+ if(!ack||typeof signature!=='string'||!challenge||
+    Object.keys(ack).sort().join('|')!==[...keys].sort().join('|')||
+    ack.schema_id!=='rosevear.dnd.peer.enrollment.ack.v1'||
+    ack.peer_app!==challenge.to_app||ack.challenge_nonce!==challenge.nonce||
+    ack.challenge_sha256!==await digest728(JSON.stringify(challenge))||
+    ack.outcome!=='ENROLLED')return fail;
+ const issued=Date.parse(ack.issued_at),expires=Date.parse(ack.expires_at);
+ if(!Number.isFinite(issued)||!Number.isFinite(expires)||
+    issued>now+30000||now-issued>180000||expires<=now||expires-issued>180000)return fail;
+ try{
+  const pk=bytes728(pinnedKey),sig=bytes728(signature);
+  if(pk.length!==32||sig.length!==64)return fail;
+  const key=await crypto.subtle.importKey('raw',pk,{name:'Ed25519'},false,['verify']);
+  if(!await crypto.subtle.verify({name:'Ed25519'},key,sig,
+    enc728(JSON.stringify(Object.fromEntries(keys.map(k=>[k,ack[k]]))))))return fail;
+  return {verified:true,status:'LIVE_PEER_POSSESSION_VERIFIED',
+   receipt_sha256:await digest728(JSON.stringify(ack))};
+ }catch{return fail;}
+}

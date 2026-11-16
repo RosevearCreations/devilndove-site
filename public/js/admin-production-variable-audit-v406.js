@@ -374,3 +374,100 @@ button.addEventListener('click',async()=>{
   }finally{button.disabled=false}
  });
 })();
+
+
+/* Build 729 — never auto-probe a Master, rotate a key, dispatch a withdrawal or purge records. */
+document.addEventListener('DOMContentLoaded',()=>{
+ const root=document.getElementById('privacyOperations729');
+ if(!root)return;
+ const status=root.querySelector('#privacy729Status'),results=root.querySelector('#privacy729Results');
+ const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+ const safeUuid=s=>/^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(String(s||''));
+ const api=(url,opts)=>window.DDAuth?.apiFetch?window.DDAuth.apiFetch(url,opts):fetch(url,{credentials:'same-origin',...opts});
+ async function parse(response){
+  const data=await response.json().catch(()=>null);
+  if(!response.ok||!data?.ok)throw Error(String(data?.code||data?.error||'HOLD_ORIGINAL_ADMIN_DATA_UNAVAILABLE'));
+  return data;
+ }
+ function setStatus(message){status.textContent=message;}
+ function render(data){
+  const view=data.review729;if(!view)throw Error('HOLD_BUILD729_REVIEW_UNAVAILABLE');
+  const key=view.keyring||{},peers=Array.isArray(view.peers)?view.peers:[],
+    events=Array.isArray(view.withdrawal_events)?view.withdrawal_events:[],
+    reviews=Array.isArray(view.retention_reviews)?view.retention_reviews:[];
+  results.innerHTML=`
+   <div class="competitive-summary-grid">
+    <div class="metric-card"><strong>${esc(key.state||'HOLD')}</strong><span>Keyring configuration (not canary proof)</span></div>
+    <div class="metric-card"><strong>${esc(view.schema_ready?'D1 READY':'HOLD D1')}</strong><span>Original custody schema</span></div>
+    <div class="metric-card"><strong>${esc(view.counters?.encrypted_evidence??'Unknown')}</strong><span>Encrypted vault records</span></div>
+    <div class="metric-card"><strong>${esc(key.latest_ciphertexts_needing_rotation??'Unknown')}</strong><span>Current versions needing key rotation</span></div>
+   </div>
+   <p class="small">Current key ID: ${esc(key.active_key_id||'Not configured')} · Keys configured: ${esc(key.configured_key_count??0)} · Source ciphertexts: ${esc(key.current_ciphertexts??0)}. No secret, plaintext or live encryption key is displayed. A successful key canary is shown only in the result of the explicit check.</p>
+   <h3>Independent original Master enrollment &amp; consent delivery</h3>
+   <p class="small">Only an actual signed response from the configured peer plus a durable D1 receipt qualifies as a fresh live challenge proof. It does not demonstrate remote consent deletion, publication recall or receiver activation.</p>
+   <div class="admin-table-wrap"><table><thead><tr><th>Original Master</th><th>Enrollment state</th><th>Proof time</th><th>Held withdrawal events</th><th>Signed delivery ACKs</th><th>Over 24 hours</th><th>Over 7 days</th></tr></thead>
+   <tbody>${peers.map(p=>`<tr><td>${esc(p.peer_app)}</td><td>${esc(p.state)}</td><td>${esc(p.latest_proof_at||'None')}</td>
+     <td>${esc(p.held)}</td><td>${esc(p.signed_withdrawal_acks)}</td><td>${esc(p.aged_one_day)}</td><td>${esc(p.aged_seven_days)}</td></tr>`).join('')||'<tr><td colspan="7">No peer evidence.</td></tr>'}</tbody></table></div>
+   <h3>Unacknowledged / recent withdrawal evidence (bounded)</h3>
+   <div class="admin-table-wrap"><table><thead><tr><th>Event ID</th><th>Destination</th><th>Delivery evidence</th><th>Created</th></tr></thead><tbody>
+    ${events.map(e=>`<tr><td><code>${esc(e.event_id)}</code></td><td>${esc(e.target_app)}</td><td>${esc(e.delivery_state)}</td><td>${esc(e.created_at)}</td></tr>`).join('')||'<tr><td colspan="4">No source events recorded or D1 unavailable.</td></tr>'}
+   </tbody></table></div>
+   <h3>Supervised retention reviews (bounded)</h3>
+   <div class="admin-table-wrap"><table><thead><tr><th>Review ID</th><th>Vault ID</th><th>Review</th><th>Eligibility</th></tr></thead><tbody>
+    ${reviews.map(r=>`<tr><td><code>${esc(r.review_id)}</code></td><td><code>${esc(r.evidence_id)}</code></td>
+    <td>${esc(r.review_state)}</td><td>${esc(r.eligibility)}</td></tr>`).join('')||'<tr><td colspan="4">No retention reviews recorded or D1 unavailable.</td></tr>'}
+   </tbody></table></div>
+   <p class="small">Local vault purge receipts: ${esc(view.counters?.vault_purge_receipts??'Unknown')}. Automatic purge: OFF. Automatic delivery/retries: OFF. Other applications' historical D1/R2 records and third-party publication are not deleted by this workflow.</p>`;
+ }
+ async function refresh(){
+  setStatus('Reading original Admin D1 and Cloudflare configuration status…');
+  const data=await parse(await api('/api/admin/production-variable-audit-406?review=729',{method:'GET',cache:'no-store'}));
+  render(data);setStatus('Current read-only status loaded. No secret values or automatic actions.');
+ }
+ async function post(action,other={}){
+  const response=await api('/api/admin/production-variable-audit-406',{
+   method:'POST',headers:{'Content-Type':'application/json'},cache:'no-store',
+   body:JSON.stringify({action,owner_review_confirmed:true,...other})});
+  return parse(response);
+ }
+ async function handle(button,fn){
+  if(button.disabled)return;
+  button.disabled=true;
+  try{await fn();}catch(e){setStatus('HOLD — '+String(e.message||e).slice(0,150));}
+  finally{button.disabled=false;}
+ }
+ root.querySelector('#privacy729Refresh')?.addEventListener('click',e=>
+  handle(e.currentTarget,refresh));
+ root.querySelector('#privacy729Keyring')?.addEventListener('click',e=>
+  handle(e.currentTarget,async()=>{
+   setStatus('Validating active AES-256-GCM key using an in-memory canary…');
+   const out=await post('verify_keyring_729');
+   setStatus(out.code+' — in-memory proof only. No historic key rotation or Cloudflare setting change.');
+  }));
+ root.querySelector('#privacy729Probe')?.addEventListener('click',e=>
+  handle(e.currentTarget,async()=>{
+   const target=root.querySelector('#privacy729Peer')?.value;
+   if(!['ai-data-platform','rosevear-ai-hub','rosevear-comms-hub'].includes(target))throw Error('Unknown receiver');
+   if(!window.confirm('Contact the original '+target+' HTTPS endpoint and record a verified live challenge only if its pinned signature checks out?'))return;
+   setStatus('Contacting original enrolled peer; no simulated ACK accepted…');
+   const out=await post('probe_peer_729',{target_app:target});
+   setStatus(out.code+' · Immutable original receipt '+out.proof_id);
+   await refresh();
+  }));
+ root.querySelector('#privacy729Submit')?.addEventListener('click',e=>
+  handle(e.currentTarget,async()=>{
+   const action=root.querySelector('#privacy729Action')?.value;
+   const id=root.querySelector('#privacy729Id')?.value.trim();
+   if(!safeUuid(id))throw Error('Enter the exact 36-character original UUID');
+   const aliases={retention_prepare_728:'evidence_id',retention_approve_728:'review_id',
+    retention_execute_728:'review_id',dispatch_withdrawal_728:'event_id'};
+   if(!aliases[action])throw Error('Unknown owner action');
+   const destructive=action==='retention_execute_728';
+   if(!window.confirm((destructive?'PERMANENT VAULT CIPHERTEXT PURGE: ':'Owner-only verified action: ')+
+    action+' on exact '+id+'? D1 approvals, holds and live peer signatures must still pass.'))return;
+   setStatus('Submitting guarded Admin action…');
+   const out=await post(action,{[aliases[action]]:id});
+   setStatus((out.code||'ACTION_PROCESSED')+' — verified original server readback. Check status and retain the receipt ID.');
+   await refresh();
+  }));
+});

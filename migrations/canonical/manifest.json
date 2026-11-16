@@ -377,6 +377,13 @@
       "release": 467,
       "description": "Encrypted-only evidence vault with append-only ciphertext versions, immutable source-only consent withdrawal queue, live independently verified signed ACK receipts, and supervised separate-requester/approver/executor retention purge evidence.",
       "recovery": "Preserve original evidence metadata, immutable ciphertext history and purge or withdrawal receipts; hold any unverified receiver, key or schema state; use forward-only supervised remediation without copying customer data across apps or claiming a purge without D1 proof."
+    },
+    {
+      "version": 53,
+      "file": "0053_release467_peer_enrollment_live_proof.sql",
+      "release": 467,
+      "description": "Append-only durable original Admin verified live Ed25519 peer challenge receipt for each independently enrolled Master; no self-claim of external connectivity or physical receiver activation.",
+      "recovery": "Preserve immutable challenge receipts, treat absent/expired/mismatched key or out-of-band enrollment as HOLD, re-probe original live peer with current pinned identity and append only successful proof."
     }
   ]
 }
