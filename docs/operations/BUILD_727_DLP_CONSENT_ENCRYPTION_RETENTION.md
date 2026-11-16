@@ -1,0 +1,23 @@
+# Devil n Dove Build 727 — Customer/Payment/Media Data-Loss Prevention, Consent Withdrawal and Retention
+
+## Owner release scope
+Devil n Dove only. The protected Production baseline was Build 726 on `main` at `c3a270c4a723794ef0c1633ccb4bc1e8d15268ec`, with prior Cloudflare Production Pages deployment and live resource integrity checks succeeding for that SHA. The previous `dev` ref `04db99cb1682947c8be5e7ebec08ff0f085cf70b` was 9 commits behind `main` and was fast-forwarded before Build 727 source changes, avoiding any loss of Production commits.
+
+The AI Data Platform Build 408 independent-release protocol 1.1/legacy 1.0 compatibility is preserved. Build 727 **does not** require a seven-app lockstep deploy or modify the other six applications. Local code does not constitute actual external signed peer delivery.
+
+## Runtime changes
+- `functions/api/_lib/dataProtection727.mjs` defines a fail-closed consent evaluator with exact original source identity and per-URL matching; deny revoked/blocked, stale, ambiguous or absent permissions. Contact/email/payment token, card number (Luhn) and phone-pattern flags are private data-loss-prevention checks. These automated patterns are **not** a guarantee of detecting information pictured in an image or every form of personal data. Manual image/privacy review remains mandatory.
+- `functions/api/admin/media-consent-records.js`: local original Admin withdrawal (`action=withdraw` on an existing record, or status `revoked`/`blocked`) sets all public and social-use flags to zero, moves matching unpublished social posts to `consent_needed` and `needs_review`, and writes a customer-data-free original Admin audit receipt. The queue will no longer publish withdrawn source media, even with `force`. A revoked consent key cannot be silently upserted/reactivated. Response is private/no-store.
+- `functions/api/admin/social-media-privacy-guard.js`: stale/expired/revoked media flags no longer count as current consent. Saved post flags cannot be downgraded from customer/consent-required merely by omitting a request field. Approving a post requires all linked media to have valid original-scoped consent.
+- `functions/api/admin/social-post-queue.js`: immediately before any outgoing social API publication, actual source+media consent is rechecked, both Admin approval signals must be present, and outbound caption/title/notes patterns are checked. `force` never bypasses consent or DLP. Existing CAIP exact derivative check remains in place; prior revoked CAIP keys cannot silently reauthorize.
+- `encryptEvidence727` provides explicit AES-256-GCM with random IV and tenant/purpose additional-authenticated-data, only when caller supplies an independently provisioned 32-byte key. It **does not silently store** ciphertext, create a Cloudflare secret, rotate keys or encrypt existing D1/R2 records. This is a ready primitive, not completed at-rest encryption for every historical customer/payment/media row.
+- `assessRetention727` is a **decision-only** guard: legal hold, unexpired policy, missing verified archive hash and absent owner approval all HOLD. It never issues DELETE, changes records, modifies production D1/R2 or claims proof of deletion.
+- `consentWithdrawalHandoff727` accurately reports that local publication was stopped, with any **external platform recall, published-image takedown, cross-app signed acknowledgment, retention purge and customer erasure** still needing a separate original-operator workflow. A local revoke cannot retract an already published social post.
+
+## Evidence, testing and no-false-GREEN
+`scripts/build727_privacy_dlp_contract.mjs` covers sensitive outbound text, cross-source/media, revoked/expired flags, attempts to bypass using force, explicit encryption context isolation, retention HOLDs and no remote acknowledgement assertions. CI adds this test to Current Application Quality Proof. No fake test pass or cross-app receipt is permitted.
+
+**Promotion requirement:** exact-green Development gates, `main` same-tree promotion, real Production Pages Deploy success and independent live resource integrity check for that specific main SHA. Until those succeed, Production must remain **NOT VERIFIED** for Build 727.
+
+## Follow-on work that is not claimed as complete
+Existing historical D1/R2 datasets are not automatically re-encrypted. Exact-tenant source-of-truth deletion, encryption key rotation, audited retention sweeps, downstream Meta/other provider recalls and independently signed three-Master withdrawal handoffs need separate owner-reviewed execution with original runtime evidence, not simulated receipts.
