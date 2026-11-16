@@ -213,6 +213,102 @@ async function action728(c,db,admin,p){
  return await action728continued(c,db,admin,p);
  }catch{return hold728('HOLD_ORIGINAL_D1_OR_CRYPTO_ERROR');}
 }
+
+async function action728continued(c,db,admin,p){
+ const id=String(p.evidence_id||''),action=String(p.action||'');
+ if(action==='retention_prepare_728'){
+  if(!id728.test(id))return hold728('HOLD_EVIDENCE_ID');
+  const [v,latest]=await Promise.all([meta728(db,id),latest728(db,id)]);
+  const status=retentionEligibility728(v,null,latest);
+  if(status!=='ELIGIBLE_FOR_INDEPENDENT_REVIEW')return hold728(status);
+  const review=crypto.randomUUID();
+  const w=await db.prepare('INSERT INTO dnd_evidence_retention_reviews_728(review_id,evidence_id,source_ciphertext_sha256,requested_by_user_id) VALUES(?,?,?,?)')
+   .bind(review,id,latest.ciphertext_sha256,admin.user_id).run();
+  if(Number(w?.meta?.changes)!==1)return hold728('HOLD_REVIEW_WRITE');
+  return ok728('PENDING_DIFFERENT_ADMIN_APPROVAL',{review_id:review,evidence_id:id,deleted:false});
+ }
+ if(action==='retention_approve_728'||action==='retention_execute_728'){
+  const reviewId=String(p.review_id||'');
+  if(!id728.test(reviewId))return hold728('HOLD_REVIEW_ID');
+  const review=await db.prepare('SELECT * FROM dnd_evidence_retention_reviews_728 WHERE review_id=?').bind(reviewId).first();
+  if(!review||admin.user_id===Number(review.requested_by_user_id))return hold728('HOLD_DISTINCT_REQUESTER');
+  const [v,latest]=await Promise.all([meta728(db,review.evidence_id),latest728(db,review.evidence_id)]);
+  const status=retentionEligibility728(v,review,latest);
+  if(status!=='ELIGIBLE_FOR_INDEPENDENT_REVIEW')return hold728(status);
+  if(action==='retention_approve_728'){
+   if(review.review_state!=='PENDING')return hold728('HOLD_NOT_PENDING');
+   const r=await db.prepare("UPDATE dnd_evidence_retention_reviews_728 SET review_state='APPROVED',approved_by_user_id=?,approved_at=CURRENT_TIMESTAMP WHERE review_id=? AND review_state='PENDING' AND requested_by_user_id<>?")
+    .bind(admin.user_id,reviewId,admin.user_id).run();
+   if(Number(r?.meta?.changes)!==1)return hold728('HOLD_APPROVAL_CONFLICT');
+   return ok728('INDEPENDENT_APPROVAL_RECORDED',{review_id:reviewId,deleted:false});
+  }
+  if(review.review_state!=='APPROVED'||admin.user_id===Number(review.approved_by_user_id))
+   return hold728('HOLD_THIRD_DISTINCT_EXECUTOR');
+  await db.batch([
+   db.prepare(`INSERT INTO dnd_evidence_purge_receipts_728(evidence_id,review_id,deleted_ciphertext_sha256,executed_by_user_id)
+    SELECT ?,?,?,? WHERE EXISTS (SELECT 1 FROM dnd_evidence_versions_728 WHERE evidence_id=? AND ciphertext_sha256=?
+    AND version=(SELECT MAX(version) FROM dnd_evidence_versions_728 WHERE evidence_id=?))`)
+    .bind(review.evidence_id,reviewId,latest.ciphertext_sha256,admin.user_id,
+     review.evidence_id,latest.ciphertext_sha256,review.evidence_id),
+   db.prepare('DELETE FROM dnd_evidence_versions_728 WHERE evidence_id=? AND EXISTS (SELECT 1 FROM dnd_evidence_purge_receipts_728 WHERE evidence_id=?)')
+    .bind(review.evidence_id,review.evidence_id)
+  ]);
+  const [receipt,left]=await Promise.all([
+   db.prepare('SELECT * FROM dnd_evidence_purge_receipts_728 WHERE evidence_id=?').bind(review.evidence_id).first(),
+   db.prepare('SELECT COUNT(*) AS n FROM dnd_evidence_versions_728 WHERE evidence_id=?').bind(review.evidence_id).first()
+  ]);
+  if(!receipt||Number(left?.n)!==0)return hold728('HOLD_PURGE_READBACK');
+  return ok728('SUPERVISED_VAULT_CIPHERTEXT_PURGED',{evidence_id:review.evidence_id,
+   review_id:reviewId,immutable_receipt_preserved:true,
+   all_cloudflare_backups_deleted:false,source_customer_data_deleted:false});
+ }
+ if(action==='dispatch_withdrawal_728'){
+  const eventId=String(p.event_id||'');
+  if(!id728.test(eventId))return hold728('HOLD_EVENT_ID');
+  const e=await db.prepare(`SELECT w.*,m.consent_status FROM dnd_withdrawal_outbox_728 w
+   JOIN media_consent_records m ON m.consent_record_id=w.consent_record_id WHERE w.event_id=?`)
+    .bind(eventId).first();
+  if(!e||!['revoked','blocked'].includes(String(e.consent_status||'').toLowerCase()))
+   return hold728('HOLD_WITHDRAWN_SOURCE_NOT_VERIFIED');
+  if(await db.prepare('SELECT event_id FROM dnd_withdrawal_acks_728 WHERE event_id=?').bind(eventId).first())
+   return ok728('PREVIOUS_SIGNED_PEER_ACK_RECORDED',{event_id:eventId,no_resend:true});
+  const prefix='DND728_PEER_'+e.target_app.replace(/-/g,'_').toUpperCase()+'_';
+  const urlText=String(c.env[prefix+'URL']||''),pk=String(c.env[prefix+'PUBLIC_KEY_B64URL']||''),
+   secret=String(c.env[prefix+'HMAC_KEY_B64URL']||''),
+   enrolled=String(c.env[prefix+'ENROLLMENT_RECEIPT']||'');
+  if(!urlText||!pk||!secret||enrolled.length<16)return hold728('HOLD_PEER_NOT_ENROLLED');
+  const url=new URL(urlText);
+  if(url.protocol!=='https:'||url.port||url.username||url.password||url.search||url.hash||
+   /^(localhost|127\.|10\.|192\.168\.|172\.(1[6-9]|2\d|3[01])\.|169\.254\.)/i.test(url.hostname)||
+   !/^[a-z0-9.-]+\.[a-z]{2,}$/i.test(url.hostname))return hold728('HOLD_INVALID_OR_PRIVATE_PEER_URL');
+  const envelope={schema_id:'rosevear.dnd.consent.withdrawal.v1',from_app:'devilndove',
+   to_app:e.target_app,event_id:eventId,request_nonce:e.request_nonce,
+   scope_hmac_sha256:e.scope_hmac_sha256,issued_at:new Date().toISOString(),
+   expires_at:new Date(Date.now()+120000).toISOString()};
+  const signed=await hmacScope728(secret,JSON.stringify(envelope));
+  let response;
+  try{response=await fetch(url.href,{method:'POST',redirect:'error',headers:{
+   'Content-Type':'application/json','X-DND-HMAC-SHA256':signed,'Cache-Control':'no-store'},
+   body:JSON.stringify(envelope),signal:AbortSignal.timeout(7000)});}
+  catch{return hold728('HOLD_LIVE_PEER_OFFLINE');}
+  if(response.status!==200||!String(response.headers.get('Content-Type')||'').includes('application/json'))
+   return hold728('HOLD_PEER_NO_JSON_ACK');
+  const raw=await response.text();if(raw.length>4096)return hold728('HOLD_OVERSIZED_ACK');
+  let body;try{body=JSON.parse(raw);}catch{return hold728('HOLD_INVALID_ACK_JSON');}
+  const verified=await verifyLiveWithdrawalAck728(body,e,pk);
+  if(!verified.verified)return hold728('HOLD_PEER_ED25519_ACK_NOT_VERIFIED');
+  await db.prepare(`INSERT OR IGNORE INTO dnd_withdrawal_acks_728
+   (event_id,peer_app,ack_envelope_sha256,peer_signature_verified,observed_live_response,created_by_user_id)
+   VALUES(?,?,?,?,?,?)`).bind(eventId,e.target_app,verified.receipt_sha256,1,1,admin.user_id).run();
+  const ack=await db.prepare('SELECT * FROM dnd_withdrawal_acks_728 WHERE event_id=?').bind(eventId).first();
+  if(ack?.ack_envelope_sha256!==verified.receipt_sha256)return hold728('HOLD_DURABLE_ACK_MISMATCH');
+  return ok728('LIVE_SIGNED_RECEIVER_ACK_RECORDED',{event_id:eventId,peer_app:e.target_app,
+    signed_ack_verified:true,source_customer_deletion_proven:false,
+    remote_platform_recall_proven:false,original_host_receiver_enabled:false});
+ }
+ return hold728('HOLD_UNKNOWN_BUILD728_ACTION',400);
+}
+
 async function review728(db,env){
  const ring=resolveKeyring728(env),count=async sql=>{try{return (await db?.prepare(sql).first())?.n??null}catch{return null}};
  const vaults=await count('SELECT COUNT(*) AS n FROM dnd_evidence_vault_728');
