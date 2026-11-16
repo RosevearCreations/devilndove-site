@@ -508,7 +508,7 @@ const _digest726=async data=>{
 export function eventEnvelopeContract726(){
  return {build:726,schema_id:'rosevear.dnd.event.v2',
   protocol:{major:1,minor:1},backward_compatible_with:'1.0',
-  1_0_health_capabilities_unchanged:true,
+  legacy_1_0_health_capabilities_unchanged:true,
   topology_id:'rosevear-master-shell-seven-apps.v1',
   source_app:'devilndove',approved_source_event_families:[..._families726],
   approved_target_masters:[..._masters726],body_sha256:_empty726,
