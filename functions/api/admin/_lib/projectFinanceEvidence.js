@@ -485,3 +485,135 @@ export async function recordMasterReplayReview724(db,actor,verified,rotation){
    db_unique_replay_constraint:false,review_recorded_not_network_sent:true};
  }catch{return deny('D1_LEDGER_SCHEMA_OR_READBACK_UNAVAILABLE')}
 }
+
+/* Build 726: additive event-v2 source-only operator review and fail-closed
+ * local D1 evidence. Existing 1.0/1.1 peer endpoints are untouched.
+ * Local statuses are never a remote signed ACK, transport, durable queue
+ * guarantee or unique DB-enforced idempotent delivery. */
+const EVENT_FIELDS_726=Object.freeze(['v','schema','topology_id','protocol_major','protocol_minor',
+ 'event_id','event_type','source_app','destination_app','audience','company_id',
+ 'tenant_id','workspace_id','source_revision','correlation_id','idempotency_key',
+ 'payload_sha256','issued_at','expires_at','consent_scope','redacted_source_only']);
+const EVENT_TYPES_726=Object.freeze([
+ 'product.media.review_requested','inventory.stock_attention','operator.case.review_requested']);
+const HEX_726=/^[a-f0-9]{64}$/;
+const EVENT_KEY_726=/^[A-Za-z0-9][A-Za-z0-9._:-]{7,119}$/;
+export const eventEnvelopeFields726=EVENT_FIELDS_726;
+export function canonicalHandoffEvent726(c){
+ return Object.fromEntries(EVENT_FIELDS_726.map(k=>[k,c[k]]));
+}
+function eventHold726(reason){return {build:726,status:'HOLD_'+reason,
+ candidate_only:false,source_signed:false,transport_dispatched:false,
+ external_ack_verified:false,dead_letter_delivered:false,
+ unique_replay_constraint_verified:false,master_t4_authorized:false,
+ receiver_t5_activated:false,external_app_modified:false,customer_data_returned:false};}
+export function validateHandoffEvent726(packet,now=Date.now()){
+ const c=packet?.claim;
+ if(!c||typeof c!=='object'||Array.isArray(c)||
+  Object.keys(c).length!==EVENT_FIELDS_726.length||
+  EVENT_FIELDS_726.some(k=>!Object.hasOwn(c,k)))return eventHold726('EXACT_EVENT_V2_ENVELOPE_REQUIRED');
+ if(c.v!==2||c.schema!=='rosevear.event.v2'||
+  c.topology_id!=='rosevear-master-shell-seven-apps.v1'||
+  c.protocol_major!==1||c.protocol_minor!==1||
+  c.source_app!=='devilndove'||
+  c.destination_app!=='rosevear-comms-hub'||
+  c.audience!=='rosevear-comms-hub:operator-inbox:review-only'||
+  !EVENT_TYPES_726.includes(c.event_type)||
+  ![c.event_id,c.company_id,c.tenant_id,c.workspace_id,
+   c.source_revision,c.correlation_id,c.idempotency_key].every(x=>
+    typeof x==='string'&&EVENT_KEY_726.test(x))||
+  !HEX_726.test(String(c.payload_sha256||''))||
+  !['public-workshop-supply','owner-only-metadata'].includes(c.consent_scope)||
+  c.redacted_source_only!==true)return eventHold726('SOURCE_TYPE_SCOPE_OR_REDACTION');
+ const issue=Date.parse(c.issued_at),expiry=Date.parse(c.expires_at);
+ if(!Number.isFinite(issue)||!Number.isFinite(expiry)||
+  new Date(issue).toISOString()!==c.issued_at||
+  new Date(expiry).toISOString()!==c.expires_at||
+  issue>now||issue<now-300000||expiry<=now||expiry-issue>300000)
+  return eventHold726('EXPIRED_FUTURE_OR_NONCANONICAL_TIME');
+ if(packet.original_source_verified!==true||
+  packet.consent_current_verified!==true||packet.company_tenant_workspace_verified!==true)
+  return eventHold726('ORIGINAL_SOURCE_CONSENT_OR_TENANT_NOT_VERIFIED');
+ return {...eventHold726('LOCAL_REVIEW_ONLY_NOT_SIGNED_OR_DISPATCHED'),
+  candidate_only:true,event_id:c.event_id,event_type:c.event_type,
+  correlation_id:c.correlation_id,idempotency_key:c.idempotency_key,
+  destination_app:c.destination_app,local_review_eligible:true};
+}
+const digest726=async(s)=>{
+ const b=new Uint8Array(await crypto.subtle.digest('SHA-256',new TextEncoder().encode(s)));
+ return Array.from(b,x=>x.toString(16).padStart(2,'0')).join('');
+};
+/* Existing audit table has no verified unique event key. Sequential dedupe
+ * plus a single D1 readback is provable; concurrent unique admission isn't. */
+export async function recordEventReview726(db,admin,packet,now=Date.now()){
+ const result=validateHandoffEvent726(packet,now);
+ if(!result.candidate_only||!db||!Number.isSafeInteger(admin?.user_id)||admin.user_id<1)
+  return {...eventHold726('D1_ADMIN_OR_SOURCE_HOLD'),durable_local_review:false,receipt_id:null};
+ const c=packet.claim,hash=await digest726([
+  c.source_app,c.destination_app,c.event_id,c.idempotency_key,c.source_revision].join('|'));
+ const detail=JSON.stringify({build:726,source_app:c.source_app,event_type:c.event_type,
+   source_revision:c.source_revision,correlation_id:c.correlation_id,
+   idempotency_key_digest:hash,consent_scope:c.consent_scope,
+   local_state:'REVIEW_PENDING',remote_ack:false,delivery_attempted:false,
+   no_personal_payload:true});
+ try{
+  const saved=await db.prepare(
+   "INSERT INTO admin_action_audit(actor_user_id,action_type,target_type,target_key,request_method,request_path,details_json,created_at) SELECT ?,'dnd_v2_handoff_review_726','local_event_hash',?,'POST','/api/admin/production-variable-audit-406',?,CURRENT_TIMESTAMP WHERE NOT EXISTS (SELECT 1 FROM admin_action_audit WHERE action_type='dnd_v2_handoff_review_726' AND target_type='local_event_hash' AND target_key=?)"
+  ).bind(admin.user_id,hash,detail,hash).run();
+  if(!saved?.success||Number(saved.meta?.changes)!==1)
+   return {...eventHold726('LOCAL_EVENT_DUPLICATE_OR_DB_FAILURE'),
+    duplicate_or_race:true,durable_local_review:false,receipt_id:null};
+  const row=await db.prepare(
+   "SELECT COUNT(*) AS n, MIN(admin_action_audit_id) AS id FROM admin_action_audit WHERE action_type='dnd_v2_handoff_review_726' AND target_type='local_event_hash' AND target_key=?"
+  ).bind(hash).first();
+  if(Number(row?.n)!==1||!Number.isSafeInteger(Number(row?.id))||Number(row.id)<1)
+   return {...eventHold726('LOCAL_EVENT_READBACK_AMBIGUOUS'),durable_local_review:false,receipt_id:null};
+  return {...eventHold726('AWAITING_INDEPENDENT_OPERATOR_AND_SIGNED_ACK'),
+   durable_local_review:true,receipt_id:Number(row.id),local_event_hash:hash,
+   local_state:'REVIEW_PENDING',external_dispatch_started:false};
+ }catch{return {...eventHold726('ORIGINAL_D1_SCHEMA_OR_WRITE_UNAVAILABLE'),
+   durable_local_review:false,receipt_id:null};}
+}
+/* Operator may record LOCAL review disposition only. Neither state is an
+ * external ACK or dead-letter delivery. Never retry/distribute automatically. */
+export async function recordLocalDisposition726(db,admin,hash,disposition,reason){
+ if(!db||!Number.isSafeInteger(admin?.user_id)||admin.user_id<1||
+  !HEX_726.test(String(hash||''))||
+  !['ACK_REVIEWED','DEAD_LETTER_HOLD'].includes(disposition)||
+  typeof reason!=='string'||reason.trim().length<20||reason.length>400)
+  return {...eventHold726('EXPLICIT_LOCAL_OPERATOR_DISPOSITION_REQUIRED'),recorded:false};
+ try{
+  const original=await db.prepare(
+   "SELECT COUNT(*) AS n FROM admin_action_audit WHERE action_type='dnd_v2_handoff_review_726' AND target_type='local_event_hash' AND target_key=?"
+  ).bind(hash).first();
+  if(Number(original?.n)!==1)return {...eventHold726('ORIGINAL_EVENT_MISSING_OR_AMBIGUOUS'),recorded:false};
+  const meta=JSON.stringify({build:726,local_disposition:disposition,reason:reason.trim(),
+   external_ack:false,dead_letter_transmitted:false,remote_retry:false,owner_command_executed:false});
+  const state=await db.prepare(
+   "INSERT INTO admin_action_audit(actor_user_id,action_type,target_type,target_key,request_method,request_path,details_json,created_at) SELECT ?,'dnd_v2_local_disposition_726','local_event_hash',?,'POST','/api/admin/production-variable-audit-406',?,CURRENT_TIMESTAMP WHERE NOT EXISTS (SELECT 1 FROM admin_action_audit WHERE action_type='dnd_v2_local_disposition_726' AND target_type='local_event_hash' AND target_key=?)"
+  ).bind(admin.user_id,hash,meta,hash).run();
+  if(!state?.success||Number(state.meta?.changes)!==1)
+   return {...eventHold726('DUPLICATE_LOCAL_DISPOSITION_OR_DB_FAILURE'),recorded:false};
+  const readback=await db.prepare(
+   "SELECT COUNT(*) AS n FROM admin_action_audit WHERE action_type='dnd_v2_local_disposition_726' AND target_type='local_event_hash' AND target_key=?"
+  ).bind(hash).first();
+  if(Number(readback?.n)!==1)return {...eventHold726('DISPOSITION_READBACK_AMBIGUOUS'),recorded:false};
+  return {...eventHold726('LOCAL_REVIEW_RECORDED_REMOTE_ACK_STILL_HOLD'),
+   recorded:true,local_state:disposition,remote_ack:false,
+   dead_letter_delivered:false};
+ }catch{return {...eventHold726('DISPOSITION_D1_UNAVAILABLE'),recorded:false};}
+}
+export function eventV2Readiness726(){
+ return {build:726,schema:'rosevear.event.v2',protocol:'1.1',
+  compatible_existing_peer:'1.0',known_event_types:[...EVENT_TYPES_726],
+  operator_inbox_handoff_target:'rosevear-comms-hub',
+  legacy_peer_requires_1_1_for_new_event_v2:true,local_only_review_enabled:true,
+  local_d1_review_receipt_supported:true,
+  conditional_sequential_dedupe_supported:true,
+  unique_d1_event_key_verified:false,external_durable_ack_verified:false,
+  external_dead_letter_queue_verified:false,remote_event_dispatched:false,
+  live_receiver_connected:false,peer_lockstep_release_required:false,
+  unrelated_product_inventory_work_continues:true,
+  v1_peer_handlers_unchanged:true,private_customer_payload_transferred:false,
+  original_t5_receiver:'UNKNOWN_HOLD'};
+}
