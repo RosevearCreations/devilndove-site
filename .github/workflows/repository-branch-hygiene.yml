@@ -10,9 +10,10 @@ permissions:
   contents: write
   pull-requests: read
 
+# Prefer the newest dev source: cleanup is idempotent and stale checkout runs must not block current release proof.
 concurrency:
   group: repository-branch-hygiene
-  cancel-in-progress: false
+  cancel-in-progress: true
 
 jobs:
   cleanup:
