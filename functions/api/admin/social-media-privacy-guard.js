@@ -3,7 +3,7 @@
 // This keeps social posting review-first and blocks API publishing unless media privacy has been reviewed.
 
 import { auditAdminAction, captureRuntimeIncident, getAdminUserFromRequest, getDb, jsonResponse, normalizeText } from '../_lib/adminAudit.js';
-import {consentIsLive727,evaluateMediaPublication727} from '../_lib/dataProtection727.mjs';
+import {consentIsLive727,evaluateMediaPublication727} from '../_lib/appModuleRoutes.js';
 
 function rows(result) { return Array.isArray(result?.results) ? result.results : []; }
 function slugKey(value) { return normalizeText(value).toLowerCase().replace(/[^a-z0-9]+/g, '_').replace(/^_+|_+$/g, ''); }
