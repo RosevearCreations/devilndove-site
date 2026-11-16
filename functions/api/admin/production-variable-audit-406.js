@@ -3,6 +3,7 @@ import {getDb,jsonResponse} from '../_lib/adminAudit.js';
 import {finance718,financial685} from './social-post-queue.js';
 import {sourceVerifiedOwnerReview721,verifyIndependentRotationReceipt722,reconcileOwnerReviewDrift722,reviewSevenAppHandoff722} from './_lib/projectFinanceEvidence.js';
 import {masterTrustStatus724,verifyMasterEnvelope724,verifyKeyCustodyRotation724,recordMasterReplayReview724} from './_lib/projectFinanceEvidence.js';
+import {eventEnvelopeContract726,queueSourceEvent726,inspectSourceEvents726,localDeadLetterReview726,verifyPeerAckReview726,signedPeerAckReview726} from './_lib/projectFinanceEvidence.js';
 import {verifiedAdminFromModule} from '../_lib/verifiedAdmin398.mjs';
 import {sixTierSecurityInventory723,sevenAxisCompletionBaseline723,assessTierCandidate723} from '../_lib/appModuleRoutes.js';
 import {independentReleaseStatus725,negotiateIndependentSync725,assessConsentTenantCapability725} from '../_lib/appModuleRoutes.js';
@@ -165,6 +166,39 @@ export async function onRequestPost(c){
  let p={};try{p=await c.request.json()}catch{}
 
 
+
+ if(['queue_source_event_726','local_dead_letter_726','review_signed_peer_ack_726'].includes(p.action)){
+  const freshOrigin=c.request?.headers?.get('Origin');
+  if(freshOrigin&&freshOrigin!==new URL(c.request.url).origin)
+   return jsonResponse({ok:false,build:726,status:'HOLD_CROSS_ORIGIN_SOURCE_REVIEW_DENIED'},403,{'Cache-Control':'private, no-store'});
+  if(JSON.stringify(p).length>4800)
+   return jsonResponse({ok:false,build:726,status:'HOLD_OVERSIZED_OR_PRIVATE_PAYLOAD'},413,{'Cache-Control':'private, no-store'});
+  let out;
+  if(p.action==='queue_source_event_726')
+   out=await queueSourceEvent726(db,admin,p.claim);
+  else if(p.action==='local_dead_letter_726')
+   out=await localDeadLetterReview726(db,admin,p.claim);
+  else {
+   const id=String(p.claim?.event_id||'');
+   const row=/^[0-9a-f-]{36}$/.test(id)?
+    await db.prepare("SELECT event_id,target_app,source_main_sha,dedupe_sha256 FROM dnd_event_outbox_726 WHERE event_id=? LIMIT 1")
+     .bind(id).first().catch(()=>null):null;
+   const e=c.env||{};
+   const pin={source_app:String(e.DND726_ACK_SOURCE_APP||''),
+    source_main_sha:String(e.DND726_ACK_SOURCE_MAIN_SHA||''),
+    public_key:String(e.DND726_ACK_PUBLIC_KEY||''),
+    revoked:String(e.DND726_ACK_REVOKED||'').toLowerCase()==='true',
+    original_source_enrollment_verified:
+     /^[A-Za-z0-9._:-]{16,128}$/.test(String(e.DND726_ACK_ORIGINAL_ENROLLMENT_RECEIPT||''))};
+   const signature=await verifyPeerAckReview726(p.signed_peer_ack,row,pin);
+   out=await signedPeerAckReview726(db,admin,signature,p.claim);
+  }
+  const accepted=out?.durable_event_inserted===true||
+   out?.durable_local_dead_letter===true||out?.local_signed_ack_review_recorded===true;
+  return jsonResponse({ok:accepted,...out,source_app:'devilndove',
+   external_delivery:false,provider_post:false,original_t5_receiver_enabled:false},
+   accepted?200:409,{'Cache-Control':'private, no-store'});
+ }
  if(p.action==='review_signed_master_source_724'){
   const e=c.env||{};
   const marker=String(e.DND724_ORIGINAL_SIGNER_ENROLLMENT_RECEIPT_ID||'');
@@ -284,6 +318,7 @@ export async function onRequestGet(c){
  const review723=requestUrl.searchParams.get('review')==='723';
  const review724=requestUrl.searchParams.get('review')==='724';
  const review725=requestUrl.searchParams.get('review')==='725';
+ const review726=requestUrl.searchParams.get('review')==='726';
  let ledger721=null;
  if(review721||review722){
   const n=Number(requestUrl.searchParams.get('campaign_queue_id'));
@@ -356,6 +391,17 @@ export async function onRequestGet(c){
    original_1_0_integration_endpoints_unchanged:true,
    local_product_routes_remain_available:true,
    owner_approved_completion_percentage:null
+  }}:{}),
+  ...(review726?{review726:{
+   contract:eventEnvelopeContract726(),
+   inbox:await inspectSourceEvents726(getDb(env),15),
+   original_live_peer_ack_verified:false,
+   real_operator_inbox_delivery_verified:false,
+   transport_sender_enabled:false,
+   source_only_local_d1_receipts:true,
+   external_deploy_triggered:false,
+   inventory_fit_mode_source:'css/inventory-card-view-v359.css',
+   quick_inventory_hst_existing_receipts:'inventory_quick_edit_receipts'
   }}:{}),
   documentation:'/docs/operations/RELEASE_467_BUILD_406_PRODUCTION_CONFIGURATION_AUDIT.md'},200,{'Cache-Control':'no-store'});
 }
