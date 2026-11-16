@@ -27,6 +27,8 @@ let selectedCatalogItemId=0;
 let lastAmazonPackagingSourceDraft=null;
 let inventoryTableEditMode=true;
 let inventoryCardViewMode=(()=>{ try{return localStorage.getItem('dd_inventory_display_mode_v357')==='cards';}catch{return false;} })();
+// Build 726: quick edit fits each row within the viewport; classic grid remains optional.
+let inventoryQuickEditMode=(()=>{try{return localStorage.getItem('dd_inventory_quick_edit_v726')!=='table';}catch{return true;}})();
 let initialLoadStarted=false;
 let seedLoadPromise=null;
 let listLoadPromise=null;
@@ -969,8 +971,8 @@ mountEl.innerHTML=`
         </div>
 
         <div class="site-inventory-view-toolbar" style="margin-top:12px">
-          <div><strong>Inventory table editor</strong><div class="small">Edit quantity, stock unit, usage unit, usage-per-stock conversion and cost directly in the table. Cost per usage unit is calculated automatically. On desktop, scroll the table sideways so every field stays wide enough to read, or switch to Card View for compact item cards.</div></div>
-          <div class="site-inventory-view-actions"><button class="btn" type="button" id="siteInventoryCardViewButton" aria-pressed="false">Card View</button><button class="btn" type="button" id="siteInventoryTableModeButton" aria-pressed="true">Table editing: On</button></div>
+          <div><strong>Inventory table editor</strong><div class="small">Quick Edit displays all existing editable fields in each item row without horizontal scrolling, including supplier, category, location, units, cost and reorder status. Use Save row for individual changes; Full edit opens every advanced field. Classic Table and Card View remain available.</div></div>
+          <div class="site-inventory-view-actions"><button class="btn" type="button" id="siteInventoryQuickEditButton" aria-pressed="true">Quick Edit: On</button><button class="btn" type="button" id="siteInventoryCardViewButton" aria-pressed="false">Card View</button><button class="btn" type="button" id="siteInventoryTableModeButton" aria-pressed="true">Table editing: On</button></div>
         </div>
         <div class="admin-table-wrap site-inventory-table-wrap"><table class="site-inventory-admin-table"><thead><tr><th>Image / item</th><th>Category / supplier</th><th>Current location</th><th>On hand</th><th>Stock &amp; usage</th><th>Unit cost</th><th>Reorder at</th><th>Status</th><th>Actions</th></tr></thead><tbody id="siteInventoryList"><tr><td colspan="9" style="padding:8px">Loading inventory...</td></tr></tbody></table></div>
         <div class="site-inventory-pagination" id="siteInventoryPagination" aria-live="polite"><button class="btn" type="button" id="siteInventoryPreviousPage">Previous</button><span class="small" id="siteInventoryPageStatus">Page 1</span><label class="small" for="siteInventoryPageJump">Jump to page</label><input id="siteInventoryPageJump" type="number" min="1" step="1" value="1" inputmode="numeric" style="width:6rem" aria-label="Inventory page number"/><button class="btn" type="button" id="siteInventoryGoToPage">Go</button><button class="btn" type="button" id="siteInventoryNextPage">Next</button></div>
@@ -1026,13 +1028,26 @@ loadList();
 });
 const applyInventoryViewMode=()=>{
 const wrap=mountEl.querySelector('.site-inventory-table-wrap');
+const quick=inventoryQuickEditMode&&!inventoryCardViewMode;
+wrap?.classList.toggle('is-quick-edit',quick);
+const quickButton=document.getElementById('siteInventoryQuickEditButton');
+if(quickButton){quickButton.textContent=quick?'Quick Edit: On':'Quick Edit: Off';quickButton.setAttribute('aria-pressed',quick?'true':'false');}
 const button=document.getElementById('siteInventoryCardViewButton');
 wrap?.classList.toggle('is-card-view',inventoryCardViewMode);
 if(button){button.textContent=inventoryCardViewMode?'Table View':'Card View';button.setAttribute('aria-pressed',inventoryCardViewMode?'true':'false');}
 };
+document.getElementById('siteInventoryQuickEditButton')?.addEventListener('click',()=>{
+inventoryQuickEditMode=!inventoryQuickEditMode;
+if(inventoryQuickEditMode)inventoryCardViewMode=false;
+try{localStorage.setItem('dd_inventory_quick_edit_v726',inventoryQuickEditMode?'quick':'table');
+ localStorage.setItem('dd_inventory_display_mode_v357',inventoryCardViewMode?'cards':'table');}catch{}
+applyInventoryViewMode();
+});
 document.getElementById('siteInventoryCardViewButton')?.addEventListener('click',()=>{
 inventoryCardViewMode=!inventoryCardViewMode;
-try{localStorage.setItem('dd_inventory_display_mode_v357',inventoryCardViewMode?'cards':'table');}catch{}
+if(inventoryCardViewMode)inventoryQuickEditMode=false;
+try{localStorage.setItem('dd_inventory_display_mode_v357',inventoryCardViewMode?'cards':'table');
+ localStorage.setItem('dd_inventory_quick_edit_v726',inventoryQuickEditMode?'quick':'table');}catch{}
 applyInventoryViewMode();
 });
 applyInventoryViewMode();
