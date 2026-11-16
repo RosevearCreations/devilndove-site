@@ -885,7 +885,7 @@
       "reference_screen": "Inventory & Stock",
       "reason": "Inventory Ops has its own prior workflow work; inspect its live layout before authorizing any visual change.",
       "evidence": {
-        "byte_length": 12226,
+        "byte_length": 12224,
         "stylesheets": 14,
         "scripts": 36,
         "forms": 0,
@@ -915,7 +915,7 @@
       "reference_screen": "Unassigned / contextual module",
       "reason": "Not individually approved for a revamp; inspect actual signed-in UI and owner acceptance before changing.",
       "evidence": {
-        "byte_length": 65289,
+        "byte_length": 66431,
         "stylesheets": 5,
         "scripts": 42,
         "forms": 0,

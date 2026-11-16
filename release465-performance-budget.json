@@ -16,7 +16,7 @@
     "max_js_bytes": 600000,
     "max_css_bytes": 500000,
     "max_html_bytes": 500000,
-    "max_runtime_source_bytes": 19658000,
+    "max_runtime_source_bytes": 19682000,
     "max_runtime_source_files": 1855,
     "max_inline_data_uri_bytes": 650000
   },
@@ -33,6 +33,27 @@
     "production_mutation": false
   },
   "budget_reviews": [
+    {
+      "build": 726,
+      "date": "2026-11-15",
+      "scope": "One full-width all-editable Inventory Fit row plus existing receipted Quick stock/HST shortcut; source-only Version 2 DND event D1 unique outbox and terminal signed-ACK-review/DLQ; Admin local event Inbox and migration 0051 preflight",
+      "prior_limit_bytes": 19658000,
+      "new_limit_bytes": 19682000,
+      "delta_bytes": 24000,
+      "delta_percent": 0.12209,
+      "prior_build725_measured_runtime_bytes": 19655042,
+      "exact_source_file_delta_bytes": 24253,
+      "projected_feature_runtime_bytes": 19679295,
+      "projected_headroom_bytes": 2705,
+      "runtime_source_file_limit_unchanged": 1855,
+      "per_file_js_css_html_limits_unchanged": true,
+      "review_reason": "Exact GitHub original dev vs Build726 feature file-by-file UTF-8 comparison across eight changed runtime files measured net +24,253 bytes (existing JS event/ACK logic +9,924; inventory CSS +7,166; Admin review API +2,628; owner review client +2,046; Inventory JS +1,292; Admin UI +1,142; preflight 57; inventory HTML -2). Prior Build725 exact CI measured 19,655,042 bytes; projected 19,679,295, over prior 19,658,000 cap by 21,295. Narrow reviewed +24,000 total cap to 19,682,000 leaves 2,705 projected bytes headroom; actual exact CI System Gate MUST still pass before release. Historical total cap and per-file/file-count gates retained, no bypass; no new runtime file. New D1 schema 0051 is forward-only, unique and immutable, and requires independent Dev-first/Production migration proof; never claim external Master send/ACK.",
+      "measured_ci_final_candidate_pending": true,
+      "projected_not_certified": true,
+      "original_peer_ack_unverified": true,
+      "original_host_receiver_off_hold": true,
+      "vercel_other_apps_untouched": true
+    },
     {
       "build": 725,
       "date": "2026-11-15",

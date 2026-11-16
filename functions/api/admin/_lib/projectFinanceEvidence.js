@@ -485,3 +485,154 @@ export async function recordMasterReplayReview724(db,actor,verified,rotation){
    db_unique_replay_constraint:false,review_recorded_not_network_sent:true};
  }catch{return deny('D1_LEDGER_SCHEMA_OR_READBACK_UNAVAILABLE')}
 }
+
+/* Build 726 — original DND-only source events, NOT remote message sending.
+ * Canonical migration 0051 enforces atomic dedupe + immutable one terminal
+ * local review/externally signed ACK-review. Source is all non-personal metadata. */
+const _families726=new Set(['DND_HEALTH_EVIDENCE','DND_SECURITY_EVIDENCE']);
+const _masters726=new Set(['ai-data-platform','rosevear-ai-hub','rosevear-comms-hub']);
+const _empty726='e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855';
+const _sha726=v=>typeof v==='string'&&/^[a-f0-9]{64}$/.test(v);
+const _commit726=v=>typeof v==='string'&&/^[a-f0-9]{40}$/.test(v);
+const _uuid726=v=>typeof v==='string'&&/^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/.test(v);
+const _receiptFields726=['v','schema_id','topology_id','from_app','to_app',
+ 'event_id','source_main_sha','peer_main_sha','dedupe_sha256','issued_at','expires_at','nonce','outcome'];
+const _hold726=(reason)=>({build:726,status:'HOLD_'+reason,
+ durable_event_inserted:false,independent_peer_delivery_verified:false,
+ network_message_sent:false,master_connected:false,receiver_activated:false,
+ peer_database_written:false,financial_books_closed:false});
+const _digest726=async data=>{
+ const digest=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(data));
+ return Array.from(new Uint8Array(digest),c=>c.toString(16).padStart(2,'0')).join('');
+};
+export function eventEnvelopeContract726(){
+ return {build:726,schema_id:'rosevear.dnd.event.v2',
+  protocol:{major:1,minor:1},backward_compatible_with:'1.0',
+  legacy_1_0_health_capabilities_unchanged:true,
+  topology_id:'rosevear-master-shell-seven-apps.v1',
+  source_app:'devilndove',approved_source_event_families:[..._families726],
+  approved_target_masters:[..._masters726],body_sha256:_empty726,
+  private_payload_in_event:false,
+  db_schema:'0051_release467_event_outbox_dedupe_ack_deadletter.sql',
+  unique_dedupe_enforced_by_d1_migration:true,
+  terminal_dispositions:['LOCAL_DEAD_LETTER','SIGNED_ACK_REVIEW'],
+  original_ack_source_custody_verified:false,operator_inbox_local_only:true,
+  network_sender_enabled:false,automatic_retry_enabled:false,
+  live_master_ack_verified:false,connected:false,original_host_t5_enabled:false};
+}
+export function validateSourceEvent726(p){
+ const keys=['request_key','target_app','event_type','source_main_sha',
+  'tenant_scope_sha256','consent_scope_sha256','owner_review_confirmed'];
+ if(!exact724(p,keys))return _hold726('EXACT_NONPRIVATE_SOURCE_METADATA_ONLY');
+ if(!/^[A-Za-z0-9._:-]{16,80}$/.test(p.request_key||'')||
+  !_masters726.has(p.target_app)||!_families726.has(p.event_type)||
+  !_commit726(p.source_main_sha)||!_sha726(p.tenant_scope_sha256)||
+  !_sha726(p.consent_scope_sha256)||p.owner_review_confirmed!==true)
+  return _hold726('SOURCE_SCOPE_OR_EXPLICIT_OWNER_REVIEW');
+ return {build:726,valid_local_source_proposal:true,source_review_only:true,
+  original_peer_witness_verified:false,remote_ack_verified:false};
+}
+export async function queueSourceEvent726(db,admin,p){
+ const valid=validateSourceEvent726(p);
+ if(!valid.valid_local_source_proposal||!db||!Number.isSafeInteger(Number(admin?.user_id))||
+  Number(admin.user_id)<1)return _hold726('INVALID_SOURCE_OR_D1_ADMIN');
+ try{
+  const id=crypto.randomUUID();
+  const dedupe=await _digest726(JSON.stringify([p.request_key,p.target_app,p.event_type,
+    p.source_main_sha,p.tenant_scope_sha256,p.consent_scope_sha256]));
+  const result=await db.prepare("INSERT INTO dnd_event_outbox_726(event_id,dedupe_sha256,event_type,target_app,source_main_sha,tenant_scope_sha256,consent_scope_sha256,created_by_user_id) VALUES(?,?,?,?,?,?,?,?)")
+   .bind(id,dedupe,p.event_type,p.target_app,p.source_main_sha,p.tenant_scope_sha256,
+    p.consent_scope_sha256,Number(admin.user_id)).run();
+  if(result?.success!==true||Number(result.meta?.changes)!==1)
+   return _hold726('D1_EVENT_INSERT_NOT_CONFIRMED');
+  const row=await db.prepare("SELECT event_id FROM dnd_event_outbox_726 WHERE dedupe_sha256=? LIMIT 1")
+   .bind(dedupe).first();
+  if(row?.event_id!==id)return _hold726('ORIGINAL_D1_EVENT_READBACK_MISMATCH');
+  return {..._hold726('LOCAL_EVENT_HELD_NO_TRANSPORT'),durable_event_inserted:true,
+   event_id:id,local_source_review:true,db_unique_dedupe_constraint:true,
+   source_main_sha:p.source_main_sha};
+ }catch{
+  return _hold726('D1_DUPLICATE_OR_SCHEMA_UNAVAILABLE_REVIEW_BEFORE_RETRY');
+ }
+}
+export async function inspectSourceEvents726(db,limit=15){
+ if(!db)return {..._hold726('D1_UNAVAILABLE'),events:[]};
+ try{
+  const q=await db.prepare("SELECT e.event_id,e.event_type,e.target_app,e.source_main_sha,e.created_at,d.decision,d.disposition_id,d.created_at AS disposition_at FROM dnd_event_outbox_726 e LEFT JOIN dnd_event_dispositions_726 d ON d.event_id=e.event_id ORDER BY e.created_at DESC,e.event_id DESC LIMIT ?").bind(Math.min(20,Math.max(1,Number(limit)||15))).all();
+  return {build:726,source:'ORIGINAL_DND_D1_LOCAL_SOURCE_ONLY',events:(q?.results||[]).map(x=>({
+   event_id:x.event_id,event_type:x.event_type,target_app:x.target_app,
+   source_main_sha:x.source_main_sha,created_at:x.created_at,
+   local_disposition:x.decision||'HELD_UNSENT',
+   disposition_id:x.disposition_id||null,disposition_at:x.disposition_at||null,
+   real_peer_ack_verified:false,network_delivery_verified:false
+  })),cross_app_connected:false,external_peer_writes:false};
+ }catch{return {..._hold726('D1_SCHEMA_OR_READBACK_UNAVAILABLE'),events:[]}}
+}
+export async function localDeadLetterReview726(db,admin,p){
+ if(!db||!Number.isSafeInteger(Number(admin?.user_id))||Number(admin.user_id)<1||
+  !_uuid726(p?.event_id)||p.owner_review_confirmed!==true||
+  typeof p.note!=='string'||p.note.trim().length<24||p.note.trim().length>400)
+  return _hold726('ORIGINAL_ADMIN_DEAD_LETTER_REVIEW_REQUIRED');
+ try{
+  const evidence=await _digest726(JSON.stringify(['LOCAL_DEAD_LETTER',p.event_id,p.note.trim()]));
+  const insert=await db.prepare("INSERT INTO dnd_event_dispositions_726(event_id,decision,evidence_sha256,original_peer_signature_valid,note,created_by_user_id) VALUES(?,'LOCAL_DEAD_LETTER',?,0,?,?)")
+   .bind(p.event_id,evidence,p.note.trim(),Number(admin.user_id)).run();
+  if(insert?.success!==true||Number(insert.meta?.changes)!==1)
+   return _hold726('D1_DEAD_LETTER_WRITE_NOT_CONFIRMED');
+  const row=await db.prepare("SELECT disposition_id,decision FROM dnd_event_dispositions_726 WHERE event_id=?")
+   .bind(p.event_id).first();
+  if(row?.decision!=='LOCAL_DEAD_LETTER'||Number(row?.disposition_id)<1)
+   return _hold726('D1_DEAD_LETTER_READBACK_MISMATCH');
+  return {..._hold726('LOCAL_DEAD_LETTER_ONLY_NO_REMOTE_DELIVERY'),
+   durable_local_dead_letter:true,disposition_id:Number(row.disposition_id),
+   event_id:p.event_id,remediation_requires_original_owner_gate:true};
+ }catch{return _hold726('D1_TERMINAL_DISPOSITION_DUPLICATE_OR_SCHEMA_UNAVAILABLE')}
+}
+export const peerAckCanonicalFields726=Object.freeze([..._receiptFields726]);
+export function canonicalPeerAck726(c){
+ return Object.fromEntries(_receiptFields726.map(k=>[k,c[k]]));
+}
+export async function verifyPeerAckReview726(envelope,event,pin,now=Date.now()){
+ const c=envelope?.claim;
+ if(!exact724(c,_receiptFields726)||!event||c.v!==2||
+  c.schema_id!=='rosevear.dnd.event.ack.v2'||
+  c.topology_id!=='rosevear-master-shell-seven-apps.v1'||
+  !_masters726.has(c.from_app)||c.to_app!=='devilndove'||c.outcome!=='ACK'||
+  c.event_id!==event.event_id||c.from_app!==event.target_app||
+  c.source_main_sha!==event.source_main_sha||!_commit726(c.peer_main_sha)||
+  c.dedupe_sha256!==event.dedupe_sha256||!_uuid726(c.event_id)||
+  !/^[a-f0-9]{32}$/.test(c.nonce||'')||
+  !timestamp724(c.issued_at,c.expires_at,now,120000))
+  return {..._hold726('WRONG_EVENT_AUDIENCE_OR_FRESHNESS'),signature_verified:false};
+ if(pin?.source_app!==c.from_app||pin?.revoked===true||
+  pin?.peer_main_sha!==c.peer_main_sha||
+  pin?.original_source_enrollment_verified!==true||
+  !key724(pin?.public_key))
+  return {..._hold726('SOURCE_KEY_OR_INDEPENDENT_ENROLLMENT_MISSING'),signature_verified:false};
+ const passed=await edVerify724(pin.public_key,envelope.signature,canonicalPeerAck726(c));
+ return {..._hold726(passed?'SIGNED_RECEIPT_CANDIDATE_ONLY_ORIGINAL_PEER_DELIVERY_NOT_PROVEN':
+   'PEER_ED25519_ACK_SIGNATURE_INVALID'),signature_verified:passed,
+  original_source_enrollment_claimed:passed,
+  original_peer_delivery_verified:false,source_app:passed?c.from_app:null,
+  event_id:passed?c.event_id:null,receipt_sha256:passed?await _digest726(JSON.stringify(c)):null};
+}
+export async function signedPeerAckReview726(db,admin,proof,p){
+ if(!db||!Number.isSafeInteger(Number(admin?.user_id))||Number(admin.user_id)<1||
+  proof?.signature_verified!==true||!_uuid726(proof.event_id)||
+  !_sha726(proof.receipt_sha256)||p?.owner_review_confirmed!==true||
+  typeof p.note!=='string'||p.note.trim().length<24||p.note.trim().length>400)
+  return _hold726('ORIGINAL_SIGNED_PEER_ACK_ADMIN_REVIEW_REQUIRED');
+ try{
+  const result=await db.prepare("INSERT INTO dnd_event_dispositions_726(event_id,decision,evidence_sha256,original_peer_signature_valid,note,created_by_user_id) VALUES(?,'SIGNED_ACK_REVIEW',?,1,?,?)")
+   .bind(proof.event_id,proof.receipt_sha256,p.note.trim(),Number(admin.user_id)).run();
+  if(result?.success!==true||Number(result.meta?.changes)!==1)
+   return _hold726('SIGNED_ACK_D1_WRITE_NOT_CONFIRMED');
+  const row=await db.prepare("SELECT disposition_id,decision FROM dnd_event_dispositions_726 WHERE event_id=?")
+   .bind(proof.event_id).first();
+  if(row?.decision!=='SIGNED_ACK_REVIEW'||Number(row?.disposition_id)<1)
+   return _hold726('SIGNED_ACK_READBACK_MISMATCH');
+  return {..._hold726('SIGNED_ACK_REVIEW_RECORDED_REAL_PEER_ACK_NOT_PROVEN'),
+   local_signed_ack_review_recorded:true,disposition_id:Number(row.disposition_id),
+   event_id:proof.event_id};
+ }catch{return _hold726('D1_ACK_DISPOSITION_DUPLICATE_OR_SCHEMA_UNAVAILABLE')}
+}
