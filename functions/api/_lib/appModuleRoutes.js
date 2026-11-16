@@ -748,3 +748,89 @@ export const BUILD727_DATA_PROTECTION=Object.freeze({
   encrypt_requires_provisioned_secret:true,automatic_deletion_enabled:false,
   external_consent_withdrawal_delivery_enabled:false,unconfigured_treated_as_green:false
 });
+
+/* Build 728. Encryption keys are Cloudflare secrets, never response or D1 values. */
+const hex728=bytes=>Array.from(bytes,b=>b.toString(16).padStart(2,'0')).join('');
+const enc728=value=>new TextEncoder().encode(String(value));
+export const digest728=async value=>hex728(new Uint8Array(await crypto.subtle.digest('SHA-256',typeof value==='string'?enc728(value):value)));
+export const b64url728=bytes=>btoa(Array.from(bytes,b=>String.fromCharCode(b)).join('')).replace(/\+/g,'-').replace(/\//g,'_').replace(/=/g,'');
+export function bytes728(value){
+ if(typeof value!=='string'||!/^[A-Za-z0-9_-]+={0,2}$/.test(value)||value.length>8192)throw Error('HOLD_INVALID_BASE64URL');
+ const norm=value.replace(/-/g,'+').replace(/_/g,'/');
+ return Uint8Array.from(atob(norm+'='.repeat((4-norm.length%4)%4)),c=>c.charCodeAt(0));
+}
+export function resolveKeyring728(env={}){
+ const activeId=String(env.DND728_ACTIVE_KEY_ID||'');
+ const olderId=String(env.DND728_PREVIOUS_KEY_ID||'');
+ const good=/^[a-zA-Z0-9_-]{6,64}$/;
+ const keys=new Map();
+ for(const [id,value] of [[activeId,env.DND728_ACTIVE_KEY_B64URL],[olderId,env.DND728_PREVIOUS_KEY_B64URL]]){
+  if(!id&&!value)continue;
+  if(!good.test(id)||typeof value!=='string')return {ready:false,reason:'HOLD_INVALID_KEYRING',keys:new Map(),active_id:null};
+  try {const k=bytes728(value);if(k.length!==32||keys.has(id))throw Error();keys.set(id,k);}
+  catch {return {ready:false,reason:'HOLD_INVALID_KEYRING',keys:new Map(),active_id:null};}
+ }
+ return {ready:good.test(activeId)&&keys.has(activeId),reason:keys.has(activeId)?'READY':'HOLD_NO_ACTIVE_ENCRYPTION_KEY',
+  active_id:keys.has(activeId)?activeId:null,keys};
+}
+const aad728=(id,tenant,purpose,version,kid)=>enc728(['dnd','728',id,tenant,purpose,version,kid].join(':'));
+export async function vaultEncrypt728(payload,key,kid,tenant,purpose,id,version=1){
+ if(!(key instanceof Uint8Array)||key.length!==32||!/^[-a-zA-Z0-9]{6,64}$/.test(kid)||
+  !/^[a-f0-9]{64}$/.test(tenant)||!['consent_withdrawal','security_evidence','retention_review'].includes(purpose)||
+  !/^[0-9a-f-]{36}$/.test(id)||!Number.isSafeInteger(version)||version<1)throw Error('HOLD_ENCRYPTION_SCOPE');
+ const plain=JSON.stringify(payload);
+ if(!payload||typeof payload!=='object'||Array.isArray(payload)||plain.length>4096||plain.length<2)
+  throw Error('HOLD_PLAINTEXT_SIZE');
+ const iv=crypto.getRandomValues(new Uint8Array(12));
+ const wk=await crypto.subtle.importKey('raw',key,'AES-GCM',false,['encrypt']);
+ const encrypted=new Uint8Array(await crypto.subtle.encrypt({name:'AES-GCM',iv,additionalData:aad728(id,tenant,purpose,version,kid)},wk,enc728(plain)));
+ return {key_id:kid,version,iv_b64url:b64url728(iv),ciphertext_b64url:b64url728(encrypted),
+  ciphertext_sha256:await digest728(encrypted),plaintext_returned:false};
+}
+export async function vaultDecryptForRotation728(record,key,tenant,purpose,id){
+ if(!(key instanceof Uint8Array)||key.length!==32||!record||!/^\d+$/.test(String(record.version)))throw Error('HOLD_ROTATION_KEY');
+ const bytes=bytes728(record.ciphertext_b64url),iv=bytes728(record.iv_b64url);
+ if(iv.length!==12||!((await digest728(bytes))===record.ciphertext_sha256))throw Error('HOLD_CIPHERTEXT_INTEGRITY');
+ const wk=await crypto.subtle.importKey('raw',key,'AES-GCM',false,['decrypt']);
+ const plain=await crypto.subtle.decrypt({name:'AES-GCM',iv,additionalData:aad728(id,tenant,purpose,Number(record.version),record.key_id)},wk,bytes);
+ return JSON.parse(new TextDecoder().decode(plain));
+}
+export async function hmacScope728(keyBase64,value){
+ const key=bytes728(keyBase64);if(key.length!==32)throw Error('HOLD_WITHDRAWAL_HMAC_KEY');
+ const wk=await crypto.subtle.importKey('raw',key,{name:'HMAC',hash:'SHA-256'},false,['sign']);
+ return hex728(new Uint8Array(await crypto.subtle.sign('HMAC',wk,enc728(value))));
+}
+export function retentionEligibility728(v,review=null,latest=null,now=Date.now()){
+ if(!v||!latest)return 'HOLD_EVIDENCE_MISSING';
+ if(Number(v.legal_hold)!==0)return 'HOLD_LEGAL_HOLD';
+ const created=Date.parse(v.created_at+'Z'),days=Number(v.retention_days);
+ if(!Number.isFinite(created)||!Number.isSafeInteger(days)||days<1||days>3650||created+days*86400000>now)
+  return 'HOLD_RETENTION_NOT_ELAPSED';
+ if(review&&(review.source_ciphertext_sha256!==latest.ciphertext_sha256))
+  return 'HOLD_CIPHER_VERSION_DRIFT';
+ return 'ELIGIBLE_FOR_INDEPENDENT_REVIEW';
+}
+export async function verifyLiveWithdrawalAck728(body,event,publicKey,now=Date.now()){
+ const a=body?.ack,s=body?.signature;
+ const fail={verified:false,status:'HOLD_UNVERIFIED_SIGNED_PEER_ACK'};
+ if(!a||typeof s!=='string'||!event)return fail;
+ const keys=['schema_id','event_id','target_app','request_nonce','scope_hmac_sha256','outcome','issued_at','expires_at'];
+ if(Object.keys(a).sort().join('|')!==[...keys].sort().join('|')||
+  a.schema_id!=='rosevear.dnd.consent.withdrawal.ack.v1'||
+  a.event_id!==event.event_id||a.target_app!==event.target_app||
+  a.request_nonce!==event.request_nonce||a.scope_hmac_sha256!==event.scope_hmac_sha256||
+  a.outcome!=='RECEIVED')return fail;
+ const issued=Date.parse(a.issued_at),expiry=Date.parse(a.expires_at);
+ if(!Number.isFinite(issued)||!Number.isFinite(expiry)||issued>now+30000||now-issued>300000||expiry<=now||expiry-issued>300000)return fail;
+ try{
+  const pk=bytes728(publicKey),sig=bytes728(s);
+  if(pk.length!==32||sig.length!==64)return fail;
+  const wk=await crypto.subtle.importKey('raw',pk,{name:'Ed25519'},false,['verify']);
+  if(!await crypto.subtle.verify({name:'Ed25519'},wk,sig,enc728(JSON.stringify(Object.fromEntries(keys.map(k=>[k,a[k]]))))))return fail;
+  return {verified:true,status:'LIVE_SIGNED_RECEIPT_VERIFIED',receipt_sha256:await digest728(JSON.stringify(a)),
+   original_data_deleted:false,original_host_receiver_activated:false};
+ }catch{return fail;}
+}
+export const BUILD728_POLICY=Object.freeze({build:728,protocol:'1.1',legacy_1_0_health_preserved:true,
+ local_source_only_default:true,no_lockstep_release:true,plaintext_to_other_apps:false,
+ automated_purge:false,unconfigured_transport:'HOLD',require_distinct_retention_actors:3});
