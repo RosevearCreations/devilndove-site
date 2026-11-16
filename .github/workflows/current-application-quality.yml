@@ -73,6 +73,13 @@ jobs:
           node --check public/js/admin-mobile-product-augment.js
           node --check public/js/admin-social-platform-preflight.js
           node scripts/build707_ninth_field_media_drift_custody_contract.mjs
+      - name: Build 726 Event V2 local operator ACK/DLQ HOLD and responsive inventory Quick Edit regression
+        run: |
+          node --check functions/api/admin/_lib/projectFinanceEvidence.js
+          node --check functions/api/admin/production-variable-audit-406.js
+          node --check public/js/admin-production-variable-audit-v406.js
+          node --check public/js/admin-site-item-inventory.js
+          node scripts/build726_event_v2_inventory_quickedit_contract.mjs
       - name: Build 725 independent 1.1 legacy 1.0 protocol consent tenant delegation and original Admin route denial regression
         run: |
           node --check functions/api/_lib/appModuleRoutes.js
