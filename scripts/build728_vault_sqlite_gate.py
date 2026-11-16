@@ -39,7 +39,11 @@ db.execute("""INSERT INTO dnd_evidence_retention_reviews_728
  VALUES(?,?,?,1)""",(review,eid,"d"*64))
 denial(lambda:db.execute("""UPDATE dnd_evidence_retention_reviews_728
  SET review_state='APPROVED',approved_by_user_id=1,approved_at=CURRENT_TIMESTAMP"""),"self approval")
+denial(lambda:denial(lambda:db.execute("""INSERT INTO dnd_evidence_purge_receipts_728(evidence_id,review_id,deleted_ciphertext_sha256,executed_by_user_id)
+ VALUES(?,?,?,1)""",(eid,review,"d"*64)),"requester cannot execute purge")
 denial(lambda:db.execute("""INSERT INTO dnd_evidence_purge_receipts_728(evidence_id,review_id,deleted_ciphertext_sha256,executed_by_user_id)
+ VALUES(?,?,?,2)""",(eid,review,"d"*64)),"approver cannot execute purge")
+db.execute("""INSERT INTO dnd_evidence_purge_receipts_728(evidence_id,review_id,deleted_ciphertext_sha256,executed_by_user_id)
  VALUES(?,?,?,3)""",(eid,review,"d"*64)),"not approved")
 db.execute("""UPDATE dnd_evidence_retention_reviews_728
  SET review_state='APPROVED',approved_by_user_id=2,approved_at=CURRENT_TIMESTAMP""")
@@ -64,6 +68,9 @@ denial(lambda:db.execute("UPDATE dnd_withdrawal_outbox_728 SET target_app='rosev
 denial(lambda:db.execute("""INSERT INTO dnd_withdrawal_acks_728
  (event_id,peer_app,ack_envelope_sha256,peer_signature_verified,observed_live_response,created_by_user_id)
  VALUES(?,'ai-data-platform',?,0,1,1)""",(outbox,"e"*64)),"unsigned ACK denied")
+denial(lambda:db.execute("""INSERT INTO dnd_withdrawal_acks_728
+ (event_id,peer_app,ack_envelope_sha256,peer_signature_verified,observed_live_response,created_by_user_id)
+ VALUES(?,'rosevear-ai-hub',?,1,1,1)""",(outbox,"e"*64)),"ACK receiver identity mismatch")
 db.execute("""INSERT INTO dnd_withdrawal_acks_728
  (event_id,peer_app,ack_envelope_sha256,peer_signature_verified,observed_live_response,created_by_user_id)
  VALUES(?,'ai-data-platform',?,1,1,1)""",(outbox,"e"*64))
