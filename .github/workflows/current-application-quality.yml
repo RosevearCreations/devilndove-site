@@ -73,6 +73,13 @@ jobs:
           node --check public/js/admin-mobile-product-augment.js
           node --check public/js/admin-social-platform-preflight.js
           node scripts/build707_ninth_field_media_drift_custody_contract.mjs
+      - name: Build 728 D1 encrypted evidence vault, key rotation, live signed withdrawal ACK and supervised retention negatives
+        run: |
+          node --check functions/api/_lib/appModuleRoutes.js
+          node --check functions/api/admin/media-consent-records.js
+          node --check functions/api/admin/production-variable-audit-406.js
+          python scripts/build728_vault_sqlite_gate.py
+          node scripts/build728_evidence_vault_delivery_retention_contract.mjs
       - name: Build 727 customer payment media DLP, source consent withdrawal, AES-GCM and retention HOLD negative regression
         run: |
           node --check functions/api/_lib/appModuleRoutes.js
