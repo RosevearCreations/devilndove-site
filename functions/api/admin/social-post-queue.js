@@ -1,7 +1,7 @@
 
 import{ auditAdminAction,captureRuntimeIncident,getAdminUserFromRequest,getDb,jsonResponse,normalizeText } from '../_lib/adminAudit.js';
 import {claimIndependentNinth716,claimExternalCustodySla717,reviewOriginalExternalSlaContinuity718} from './_lib/projectFinanceEvidence.js';
-import {inspectOutboundText727,evaluateMediaPublication727} from '../_lib/dataProtection727.mjs';
+import {inspectOutboundText727,evaluateMediaPublication727} from '../_lib/appModuleRoutes.js';
 export {claimIndependentNinth716,claimExternalCustodySla717,reviewOriginalExternalSlaContinuity718};
 
 
