@@ -312,7 +312,20 @@ async function action728continued(c,db,admin,p){
 async function review728(db,env){
  const ring=resolveKeyring728(env),count=async sql=>{try{return (await db?.prepare(sql).first())?.n??null}catch{return null}};
  const vaults=await count('SELECT COUNT(*) AS n FROM dnd_evidence_vault_728');
+ const view=async sql=>{try{return (await db?.prepare(sql).all())?.results||[]}catch{return []}};
+ const pending_events=await view(`SELECT w.event_id,w.target_app,w.created_at,
+    CASE WHEN a.event_id IS NULL THEN 'HELD_NOT_DELIVERED' ELSE 'LIVE_SIGNED_ACK' END AS delivery_state
+    FROM dnd_withdrawal_outbox_728 w LEFT JOIN dnd_withdrawal_acks_728 a ON a.event_id=w.event_id
+    ORDER BY w.created_at DESC LIMIT 30`);
+ const vault_versions=await view(`SELECT v.evidence_id,v.purpose,v.retention_days,v.legal_hold,
+    x.key_id,x.version,x.created_at AS encrypted_at,
+    CASE WHEN p.evidence_id IS NULL THEN 'ENCRYPTED_RETAINED' ELSE 'PURGED_D1' END AS storage_state
+    FROM dnd_evidence_vault_728 v LEFT JOIN dnd_evidence_versions_728 x ON x.evidence_id=v.evidence_id
+    AND x.version=(SELECT MAX(version) FROM dnd_evidence_versions_728 WHERE evidence_id=v.evidence_id)
+    LEFT JOIN dnd_evidence_purge_receipts_728 p ON p.evidence_id=v.evidence_id
+    ORDER BY v.created_at DESC LIMIT 20`);
  return {policy:BUILD728_POLICY,schema_ready:vaults!==null,active_key_present:ring.ready,
+  pending_events,vault_versions,
   active_key_id:ring.active_id,encrypted_evidence_count:vaults,
   ciphertext_versions:await count('SELECT COUNT(*) AS n FROM dnd_evidence_versions_728'),
   held_withdrawals:await count('SELECT COUNT(*) AS n FROM dnd_withdrawal_outbox_728'),
