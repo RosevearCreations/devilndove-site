@@ -5,7 +5,7 @@ import {webcrypto} from 'node:crypto';
 import {inspectOutboundText727,inspectOutboundEnvelope727,clampConsentFlags727,
   consentIsLive727,evaluateMediaPublication727,assessRetention727,
   consentWithdrawalHandoff727,encryptEvidence727,BUILD727_DATA_PROTECTION}
-  from '../functions/api/_lib/dataProtection727.mjs';
+  from '../functions/api/_lib/appModuleRoutes.js';
 if(!globalThis.crypto)globalThis.crypto=webcrypto;
 const now=Date.UTC(2026,10,16,16,0,0);
 assert.equal(BUILD727_DATA_PROTECTION.external_consent_withdrawal_delivery_enabled,false);
