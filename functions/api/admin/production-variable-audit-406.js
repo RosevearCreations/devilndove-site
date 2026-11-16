@@ -397,8 +397,10 @@ async function action729(c,db,admin,p){
 }
 async function review729(db,env){
  const base=await review728(db,env),ring=resolveKeyring728(env);
- const all=async(sql,params=[])=>{try{return (await db?.prepare(sql).bind(...params).all())?.results||[];}catch{return [];}};
- const one=async(sql,params=[])=>{try{return await db?.prepare(sql).bind(...params).first()||null;}catch{return null;}};
+ const all=async(sql,params=[])=>{try{if(!db)return [];const st=db.prepare(sql);
+  return (await (params.length?st.bind(...params):st).all())?.results||[];}catch{return [];}};
+ const one=async(sql,params=[])=>{try{if(!db)return null;const st=db.prepare(sql);
+  return await (params.length?st.bind(...params):st).first()||null;}catch{return null;}};
  const proofSchema=await one("SELECT name FROM sqlite_master WHERE type='table' AND name='dnd_peer_enrollment_proofs_729'");
  const delivery=await all(`SELECT w.target_app,
    COUNT(*) AS queued,SUM(CASE WHEN a.event_id IS NOT NULL THEN 1 ELSE 0 END) AS acknowledged,
