@@ -72,7 +72,7 @@ assert.equal(result.status,200);
 assert.equal(out.review728.policy.build,728);
 assert.equal(out.review728.schema_ready,false);
 assert.equal(out.review728.active_key_present,false);
-assert.equal(out.review728.verified_live_acks,null);
+assert.equal(out.review728.live_signed_peer_receipts,null);
 assert.ok(!JSON.stringify(out).includes('do-not-echo-build728'));
 assert.equal((await onRequestGet({...ctx,data:{}})).status,401);
 const posted=await onRequestPost({...ctx,request:new Request(ctx.request.url,{method:'POST',
