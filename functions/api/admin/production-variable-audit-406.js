@@ -6,7 +6,7 @@ import {masterTrustStatus724,verifyMasterEnvelope724,verifyKeyCustodyRotation724
 import {eventEnvelopeContract726,queueSourceEvent726,inspectSourceEvents726,localDeadLetterReview726,verifyPeerAckReview726,signedPeerAckReview726} from './_lib/projectFinanceEvidence.js';
 import {verifiedAdminFromModule} from '../_lib/verifiedAdmin398.mjs';
 import {sixTierSecurityInventory723,sevenAxisCompletionBaseline723,assessTierCandidate723} from '../_lib/appModuleRoutes.js';
-import {independentReleaseStatus725,negotiateIndependentSync725,assessConsentTenantCapability725} from '../_lib/appModuleRoutes.js';
+import {independentReleaseStatus725,negotiateIndependentSync725,assessConsentTenantCapability725,resolveKeyring728,vaultEncrypt728,vaultDecryptForRotation728,digest728,hmacScope728,retentionEligibility728,verifyLiveWithdrawalAck728,BUILD728_POLICY} from '../_lib/appModuleRoutes.js';
 const checks=Object.freeze([
  ['core','SESSION_SECRET','required'],
  ['core','PRIVATE_EVIDENCE_DOWNLOAD_SECRET','feature_specific'],
@@ -159,11 +159,190 @@ export async function readOwnerReviewLedger721(db,env,n){
   receipts,owner_review_recorded_current:receipts.some(x=>x.verified_current),
   financial_books_closed:false,independent_external_response_generated:false};
 }
+
+const id728=/^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+const hold728=(code,status=409)=>({status,data:{ok:false,build:728,code,remote_delivery_verified:false}});
+const ok728=(code,value={})=>({status:200,data:{ok:true,build:728,code,...value}});
+const latest728=(db,id)=>db.prepare('SELECT * FROM dnd_evidence_versions_728 WHERE evidence_id=? ORDER BY version DESC LIMIT 1').bind(id).first();
+const meta728=(db,id)=>db.prepare('SELECT * FROM dnd_evidence_vault_728 WHERE evidence_id=? LIMIT 1').bind(id).first();
+async function action728(c,db,admin,p){
+ if(c.request.headers.get('Origin')!==new URL(c.request.url).origin&&
+   c.request.headers.get('Sec-Fetch-Site')!=='same-origin')
+  return hold728('HOLD_SAME_ORIGIN_REQUIRED',403);
+ if(JSON.stringify(p).length>10000)return hold728('HOLD_OVERSIZED_REQUEST',413);
+ if(p.owner_review_confirmed!==true)return hold728('HOLD_OWNER_REVIEW_REQUIRED',400);
+ const ring=resolveKeyring728(c.env||{}),id=String(p.evidence_id||'');
+ try{
+ if(p.action==='vault_store_728'){
+  const tenant=String(p.tenant_scope_sha256||''),purpose=String(p.purpose||''),
+    days=Number(p.retention_days),nonce=String(p.request_key||'');
+  if(!ring.ready)return hold728(ring.reason);
+  if(!/^[a-f0-9]{64}$/.test(tenant)||!['security_evidence','retention_review','consent_withdrawal'].includes(purpose)||
+     !Number.isInteger(days)||days<1||days>3650||nonce.length<16||nonce.length>80)
+   return hold728('HOLD_VAULT_SCOPE');
+  const evidenceId=crypto.randomUUID(),cipher=await vaultEncrypt728(p.evidence_payload,
+   ring.keys.get(ring.active_id),ring.active_id,tenant,purpose,evidenceId,1);
+  await db.batch([
+   db.prepare('INSERT INTO dnd_evidence_vault_728(evidence_id,tenant_scope_sha256,purpose,retention_days,legal_hold,request_key_sha256,created_by_user_id) VALUES(?,?,?,?,?,?,?)')
+    .bind(evidenceId,tenant,purpose,days,p.legal_hold===true?1:0,await digest728(nonce),admin.user_id),
+   db.prepare('INSERT INTO dnd_evidence_versions_728(evidence_id,version,key_id,iv_b64url,ciphertext_b64url,ciphertext_sha256,created_by_user_id) VALUES(?,?,?,?,?,?,?)')
+    .bind(evidenceId,1,cipher.key_id,cipher.iv_b64url,cipher.ciphertext_b64url,cipher.ciphertext_sha256,admin.user_id)
+  ]);
+  if((await latest728(db,evidenceId))?.ciphertext_sha256!==cipher.ciphertext_sha256)
+   return hold728('HOLD_D1_ENCRYPTION_READBACK');
+  return ok728('ENCRYPTED_EVIDENCE_STORED',{evidence_id:evidenceId,key_id:cipher.key_id,
+   ciphertext_sha256:cipher.ciphertext_sha256,plaintext_returned:false,existing_records_reencrypted:false});
+ }
+ if(p.action==='vault_rotate_728'){
+  if(!id728.test(id)||!ring.ready)return hold728('HOLD_ACTIVE_KEY_OR_ID');
+  const [v,old]=await Promise.all([meta728(db,id),latest728(db,id)]);
+  if(!v||!old)return hold728('HOLD_VAULT_SOURCE_MISSING');
+  if(old.key_id===ring.active_id)return ok728('ALREADY_ACTIVE_KEY',{evidence_id:id,version:old.version});
+  if(!ring.keys.has(old.key_id)||old.version>=999)return hold728('HOLD_PREVIOUS_KEY_REQUIRED');
+  const original=await vaultDecryptForRotation728(old,ring.keys.get(old.key_id),v.tenant_scope_sha256,v.purpose,id);
+  const cipher=await vaultEncrypt728(original,ring.keys.get(ring.active_id),ring.active_id,
+    v.tenant_scope_sha256,v.purpose,id,Number(old.version)+1);
+  const result=await db.prepare('INSERT INTO dnd_evidence_versions_728(evidence_id,version,key_id,iv_b64url,ciphertext_b64url,ciphertext_sha256,previous_version_sha256,created_by_user_id) SELECT ?,?,?,?,?,?,?,? WHERE (SELECT MAX(version) FROM dnd_evidence_versions_728 WHERE evidence_id=?)=?')
+   .bind(id,cipher.version,cipher.key_id,cipher.iv_b64url,cipher.ciphertext_b64url,
+     cipher.ciphertext_sha256,old.ciphertext_sha256,admin.user_id,id,old.version).run();
+  if(Number(result?.meta?.changes)!==1||(await latest728(db,id))?.ciphertext_sha256!==cipher.ciphertext_sha256)
+   return hold728('HOLD_ROTATION_RACE_OR_READBACK');
+  return ok728('ENCRYPTED_VERSION_ROTATED',{evidence_id:id,version:cipher.version,key_id:cipher.key_id,
+   original_ciphertext_retained:true,old_key_retirement_not_automatic:true,plaintext_returned:false});
+ }
+ return await action728continued(c,db,admin,p);
+ }catch{return hold728('HOLD_ORIGINAL_D1_OR_CRYPTO_ERROR');}
+}
+
+async function action728continued(c,db,admin,p){
+ const id=String(p.evidence_id||''),action=String(p.action||'');
+ if(action==='retention_prepare_728'){
+  if(!id728.test(id))return hold728('HOLD_EVIDENCE_ID');
+  const [v,latest]=await Promise.all([meta728(db,id),latest728(db,id)]);
+  const status=retentionEligibility728(v,null,latest);
+  if(status!=='ELIGIBLE_FOR_INDEPENDENT_REVIEW')return hold728(status);
+  const review=crypto.randomUUID();
+  const w=await db.prepare('INSERT INTO dnd_evidence_retention_reviews_728(review_id,evidence_id,source_ciphertext_sha256,requested_by_user_id) VALUES(?,?,?,?)')
+   .bind(review,id,latest.ciphertext_sha256,admin.user_id).run();
+  if(Number(w?.meta?.changes)!==1)return hold728('HOLD_REVIEW_WRITE');
+  return ok728('PENDING_DIFFERENT_ADMIN_APPROVAL',{review_id:review,evidence_id:id,deleted:false});
+ }
+ if(action==='retention_approve_728'||action==='retention_execute_728'){
+  const reviewId=String(p.review_id||'');
+  if(!id728.test(reviewId))return hold728('HOLD_REVIEW_ID');
+  const review=await db.prepare('SELECT * FROM dnd_evidence_retention_reviews_728 WHERE review_id=?').bind(reviewId).first();
+  if(!review||admin.user_id===Number(review.requested_by_user_id))return hold728('HOLD_DISTINCT_REQUESTER');
+  const [v,latest]=await Promise.all([meta728(db,review.evidence_id),latest728(db,review.evidence_id)]);
+  const status=retentionEligibility728(v,review,latest);
+  if(status!=='ELIGIBLE_FOR_INDEPENDENT_REVIEW')return hold728(status);
+  if(action==='retention_approve_728'){
+   if(review.review_state!=='PENDING')return hold728('HOLD_NOT_PENDING');
+   const r=await db.prepare("UPDATE dnd_evidence_retention_reviews_728 SET review_state='APPROVED',approved_by_user_id=?,approved_at=CURRENT_TIMESTAMP WHERE review_id=? AND review_state='PENDING' AND requested_by_user_id<>?")
+    .bind(admin.user_id,reviewId,admin.user_id).run();
+   if(Number(r?.meta?.changes)!==1)return hold728('HOLD_APPROVAL_CONFLICT');
+   return ok728('INDEPENDENT_APPROVAL_RECORDED',{review_id:reviewId,deleted:false});
+  }
+  if(review.review_state!=='APPROVED'||admin.user_id===Number(review.approved_by_user_id))
+   return hold728('HOLD_THIRD_DISTINCT_EXECUTOR');
+  await db.batch([
+   db.prepare(`INSERT INTO dnd_evidence_purge_receipts_728(evidence_id,review_id,deleted_ciphertext_sha256,executed_by_user_id)
+    SELECT ?,?,?,? WHERE EXISTS (SELECT 1 FROM dnd_evidence_versions_728 WHERE evidence_id=? AND ciphertext_sha256=?
+    AND version=(SELECT MAX(version) FROM dnd_evidence_versions_728 WHERE evidence_id=?))`)
+    .bind(review.evidence_id,reviewId,latest.ciphertext_sha256,admin.user_id,
+     review.evidence_id,latest.ciphertext_sha256,review.evidence_id),
+   db.prepare('DELETE FROM dnd_evidence_versions_728 WHERE evidence_id=? AND EXISTS (SELECT 1 FROM dnd_evidence_purge_receipts_728 WHERE evidence_id=?)')
+    .bind(review.evidence_id,review.evidence_id)
+  ]);
+  const [receipt,left]=await Promise.all([
+   db.prepare('SELECT * FROM dnd_evidence_purge_receipts_728 WHERE evidence_id=?').bind(review.evidence_id).first(),
+   db.prepare('SELECT COUNT(*) AS n FROM dnd_evidence_versions_728 WHERE evidence_id=?').bind(review.evidence_id).first()
+  ]);
+  if(!receipt||Number(left?.n)!==0)return hold728('HOLD_PURGE_READBACK');
+  return ok728('SUPERVISED_VAULT_CIPHERTEXT_PURGED',{evidence_id:review.evidence_id,
+   review_id:reviewId,immutable_receipt_preserved:true,
+   all_cloudflare_backups_deleted:false,source_customer_data_deleted:false});
+ }
+ if(action==='dispatch_withdrawal_728'){
+  const eventId=String(p.event_id||'');
+  if(!id728.test(eventId))return hold728('HOLD_EVENT_ID');
+  const e=await db.prepare(`SELECT w.*,m.consent_status FROM dnd_withdrawal_outbox_728 w
+   JOIN media_consent_records m ON m.consent_record_id=w.consent_record_id WHERE w.event_id=?`)
+    .bind(eventId).first();
+  if(!e||!['revoked','blocked'].includes(String(e.consent_status||'').toLowerCase()))
+   return hold728('HOLD_WITHDRAWN_SOURCE_NOT_VERIFIED');
+  if(await db.prepare('SELECT event_id FROM dnd_withdrawal_acks_728 WHERE event_id=?').bind(eventId).first())
+   return ok728('PREVIOUS_SIGNED_PEER_ACK_RECORDED',{event_id:eventId,no_resend:true});
+  const prefix='DND728_PEER_'+e.target_app.replace(/-/g,'_').toUpperCase()+'_';
+  const urlText=String(c.env[prefix+'URL']||''),pk=String(c.env[prefix+'PUBLIC_KEY_B64URL']||''),
+   secret=String(c.env[prefix+'HMAC_KEY_B64URL']||''),
+   enrolled=String(c.env[prefix+'ENROLLMENT_RECEIPT']||'');
+  if(!urlText||!pk||!secret||enrolled.length<16)return hold728('HOLD_PEER_NOT_ENROLLED');
+  const url=new URL(urlText);
+  if(url.protocol!=='https:'||url.port||url.username||url.password||url.search||url.hash||
+   /^(localhost|127\.|10\.|192\.168\.|172\.(1[6-9]|2\d|3[01])\.|169\.254\.)/i.test(url.hostname)||
+   !/^[a-z0-9.-]+\.[a-z]{2,}$/i.test(url.hostname))return hold728('HOLD_INVALID_OR_PRIVATE_PEER_URL');
+  const envelope={schema_id:'rosevear.dnd.consent.withdrawal.v1',from_app:'devilndove',
+   to_app:e.target_app,event_id:eventId,request_nonce:e.request_nonce,
+   scope_hmac_sha256:e.scope_hmac_sha256,issued_at:new Date().toISOString(),
+   expires_at:new Date(Date.now()+120000).toISOString()};
+  const signed=await hmacScope728(secret,JSON.stringify(envelope));
+  let response;
+  try{response=await fetch(url.href,{method:'POST',redirect:'error',headers:{
+   'Content-Type':'application/json','X-DND-HMAC-SHA256':signed,'Cache-Control':'no-store'},
+   body:JSON.stringify(envelope),signal:AbortSignal.timeout(7000)});}
+  catch{return hold728('HOLD_LIVE_PEER_OFFLINE');}
+  if(response.status!==200||!String(response.headers.get('Content-Type')||'').includes('application/json'))
+   return hold728('HOLD_PEER_NO_JSON_ACK');
+  const raw=await response.text();if(raw.length>4096)return hold728('HOLD_OVERSIZED_ACK');
+  let body;try{body=JSON.parse(raw);}catch{return hold728('HOLD_INVALID_ACK_JSON');}
+  const verified=await verifyLiveWithdrawalAck728(body,e,pk);
+  if(!verified.verified)return hold728('HOLD_PEER_ED25519_ACK_NOT_VERIFIED');
+  await db.prepare(`INSERT OR IGNORE INTO dnd_withdrawal_acks_728
+   (event_id,peer_app,ack_envelope_sha256,peer_signature_verified,observed_live_response,created_by_user_id)
+   VALUES(?,?,?,?,?,?)`).bind(eventId,e.target_app,verified.receipt_sha256,1,1,admin.user_id).run();
+  const ack=await db.prepare('SELECT * FROM dnd_withdrawal_acks_728 WHERE event_id=?').bind(eventId).first();
+  if(ack?.ack_envelope_sha256!==verified.receipt_sha256)return hold728('HOLD_DURABLE_ACK_MISMATCH');
+  return ok728('LIVE_SIGNED_RECEIVER_ACK_RECORDED',{event_id:eventId,peer_app:e.target_app,
+    signed_ack_verified:true,source_customer_deletion_proven:false,
+    remote_platform_recall_proven:false,original_host_receiver_enabled:false});
+ }
+ return hold728('HOLD_UNKNOWN_BUILD728_ACTION',400);
+}
+
+async function review728(db,env){
+ const ring=resolveKeyring728(env),count=async sql=>{try{return (await db?.prepare(sql).first())?.n??null}catch{return null}};
+ const vaults=await count('SELECT COUNT(*) AS n FROM dnd_evidence_vault_728');
+ const view=async sql=>{try{return (await db?.prepare(sql).all())?.results||[]}catch{return []}};
+ const pending_events=await view(`SELECT w.event_id,w.target_app,w.created_at,
+    CASE WHEN a.event_id IS NULL THEN 'HELD_NOT_DELIVERED' ELSE 'LIVE_SIGNED_ACK' END AS delivery_state
+    FROM dnd_withdrawal_outbox_728 w LEFT JOIN dnd_withdrawal_acks_728 a ON a.event_id=w.event_id
+    ORDER BY w.created_at DESC LIMIT 30`);
+ const vault_versions=await view(`SELECT v.evidence_id,v.purpose,v.retention_days,v.legal_hold,
+    x.key_id,x.version,x.created_at AS encrypted_at,
+    CASE WHEN p.evidence_id IS NULL THEN 'ENCRYPTED_RETAINED' ELSE 'PURGED_D1' END AS storage_state
+    FROM dnd_evidence_vault_728 v LEFT JOIN dnd_evidence_versions_728 x ON x.evidence_id=v.evidence_id
+    AND x.version=(SELECT MAX(version) FROM dnd_evidence_versions_728 WHERE evidence_id=v.evidence_id)
+    LEFT JOIN dnd_evidence_purge_receipts_728 p ON p.evidence_id=v.evidence_id
+    ORDER BY v.created_at DESC LIMIT 20`);
+ return {policy:BUILD728_POLICY,schema_ready:vaults!==null,active_key_present:ring.ready,
+  pending_events,vault_versions,
+  active_key_id:ring.active_id,encrypted_evidence_count:vaults,
+  ciphertext_versions:await count('SELECT COUNT(*) AS n FROM dnd_evidence_versions_728'),
+  held_withdrawals:await count('SELECT COUNT(*) AS n FROM dnd_withdrawal_outbox_728'),
+  live_signed_peer_receipts:await count('SELECT COUNT(*) AS n FROM dnd_withdrawal_acks_728'),
+  supervised_purge_receipts:await count('SELECT COUNT(*) AS n FROM dnd_evidence_purge_receipts_728'),
+  automatic_deletion:false,other_apps_deployed:false,existing_customer_data_reencrypted:false};
+}
+
 export async function onRequestPost(c){
  const admin=verifiedAdminFromModule(c),db=getDb(c.env||{});
  if(!admin)return jsonResponse({ok:false,error:'Active verified Administrator required.'},401,{'Cache-Control':'no-store'});
  if(!db)return jsonResponse({ok:false,error:'D1 not configured.'},503,{'Cache-Control':'no-store'});
  let p={};try{p=await c.request.json()}catch{}
+ if(String(p.action||'').endsWith('_728')){
+  const r=await action728(c,db,admin,p);
+  return jsonResponse(r.data,r.status,{'Cache-Control':'private, no-store'});
+ }
 
 
 
@@ -319,6 +498,7 @@ export async function onRequestGet(c){
  const review724=requestUrl.searchParams.get('review')==='724';
  const review725=requestUrl.searchParams.get('review')==='725';
  const review726=requestUrl.searchParams.get('review')==='726';
+ const isReview728=requestUrl.searchParams.get('review')==='728';
  let ledger721=null;
  if(review721||review722){
   const n=Number(requestUrl.searchParams.get('campaign_queue_id'));
@@ -403,5 +583,6 @@ export async function onRequestGet(c){
    inventory_fit_mode_source:'css/inventory-card-view-v359.css',
    quick_inventory_hst_existing_receipts:'inventory_quick_edit_receipts'
   }}:{}),
+  ...(isReview728?{review728:await review728(getDb(env),env)}:{}),
   documentation:'/docs/operations/RELEASE_467_BUILD_406_PRODUCTION_CONFIGURATION_AUDIT.md'},200,{'Cache-Control':'no-store'});
 }

@@ -2,7 +2,7 @@
 // Brief description: Admin-only media consent registry for customer/job/product photos before public product or social use.
 
 import { auditAdminAction, captureRuntimeIncident, getAdminUserFromRequest, getDb, jsonResponse, normalizeText } from '../_lib/adminAudit.js';
-import {clampConsentFlags727,consentWithdrawalHandoff727} from '../_lib/appModuleRoutes.js';
+import {clampConsentFlags727,consentWithdrawalHandoff727,hmacScope728} from '../_lib/appModuleRoutes.js';
 
 function json(data, status = 200) { return jsonResponse(data, status, {'Cache-Control':'private, no-store'}); }
 function rows(result) { return Array.isArray(result?.results) ? result.results : []; }
@@ -86,6 +86,29 @@ async function holdQueuedUse727(db,record) {
     .bind(record.source_type,record.source_id).run();
   return {queue_handoff:'LOCAL_QUEUE_HELD',rows_changed:Number(result?.meta?.changes||0)};
 }
+// Build 728: original D1 only. Three held Master destinations, no customer name, URL or email.
+async function enqueueWithdrawals728(db,env,admin,record){
+ const targets=['ai-data-platform','rosevear-ai-hub','rosevear-comms-hub'];
+ if(!record||!Number.isSafeInteger(Number(record.consent_record_id))||!['revoked','blocked'].includes(String(record.consent_status||'').toLowerCase()))
+  return {status:'HOLD_ORIGINAL_CONSENT_NOT_REVOKED',queued:false};
+ let digest;
+ try{digest=await hmacScope728(env.DND728_WITHDRAWAL_HMAC_KEY_B64URL,
+  ['devilndove',record.consent_record_id,record.consent_key,record.source_type,record.source_id].join(':'));}
+ catch{return {status:'HOLD_WITHDRAWAL_HMAC_SECRET_MISSING',queued:false};}
+ try{
+  const statements=targets.map(target=>db.prepare(`INSERT OR IGNORE INTO dnd_withdrawal_outbox_728
+   (event_id,consent_record_id,target_app,scope_hmac_sha256,request_nonce,created_by_user_id)
+   VALUES(?,?,?,?,?,?)`).bind(crypto.randomUUID(),Number(record.consent_record_id),
+    target,digest,Array.from(crypto.getRandomValues(new Uint8Array(16)),x=>x.toString(16).padStart(2,'0')).join(''),
+    Number(admin.user_id)));
+  await db.batch(statements);
+  const check=await db.prepare('SELECT COUNT(*) AS n FROM dnd_withdrawal_outbox_728 WHERE consent_record_id=?')
+   .bind(Number(record.consent_record_id)).first();
+  if(Number(check?.n)!==3)return {status:'HOLD_INCOMPLETE_LOCAL_OUTBOX',queued:false};
+  return {status:'LOCAL_D1_WITHDRAWAL_OUTBOX_HELD',queued:true,targets:3,
+   peer_delivery_verified:false,external_platform_recall_verified:false};
+ }catch{return {status:'HOLD_D1_SCHEMA_OR_OUTBOX_WRITE',queued:false};}
+}
 export async function onRequestPost({ request, env }) {
   const db = getDb(env);
   if (!db) return json({ ok: false, error: 'Database binding is not configured.' }, 500);
@@ -95,6 +118,14 @@ export async function onRequestPost({ request, env }) {
     await ensureSchema(db);
     const body = await request.json().catch(() => ({}));
     const action = normalizeText(body.action || 'create');
+    if(action==='enqueue_withdrawal_728'){
+      const id=Number(body.consent_record_id);
+      if(!Number.isSafeInteger(id)||id<1||body.owner_review_confirmed!==true)
+        return json({ok:false,status:'HOLD_EXPLICIT_ORIGINAL_ADMIN_REVIEW'},400);
+      const record=await db.prepare('SELECT * FROM media_consent_records WHERE consent_record_id=? LIMIT 1').bind(id).first();
+      const out=await enqueueWithdrawals728(db,env,adminUser,record);
+      return json({ok:out.queued,...out,remote_delivery:'NOT_VERIFIED'},out.queued?200:409);
+    }
     if (action === 'create') {
       const sourceType = normalizeText(body.source_type || 'general').toLowerCase().replace(/[^a-z0-9_-]+/g, '_') || 'general';
       const sourceId = normalizeText(body.source_id);
@@ -132,13 +163,15 @@ export async function onRequestPost({ request, env }) {
         key, subjectLabel, sourceType, sourceId || null, mediaUrl || null, consentStatus, consentScope,
         publicAllowed, socialAllowed, normalizeText(body.privacy_notes) || null, Number(adminUser.user_id || 0) || null, normalizeText(body.expires_at) || null
       ).run();
-      const handoff=['revoked','blocked'].includes(consentStatus)
-        ? await holdQueuedUse727(db,{source_type:sourceType,source_id:sourceId}):null;
+      const withdrawnNew=['revoked','blocked'].includes(consentStatus);
+      const handoff=withdrawnNew?await holdQueuedUse727(db,{source_type:sourceType,source_id:sourceId}):null;
+      const insertedConsent=withdrawnNew?await db.prepare('SELECT * FROM media_consent_records WHERE consent_key=? LIMIT 1').bind(key).first():null;
+      const outbox=withdrawnNew?await enqueueWithdrawals728(db,env,adminUser,insertedConsent):null;
       await auditAdminAction(env, request, adminUser, {action_type:'media_consent_save_727',
         target_type:'media_consent_records',target_key:key,
         details:{source_type:sourceType,consent_status:consentStatus,consent_scope:consentScope,
           personal_fields_logged:false,withdrawal_handoff:!!handoff}});
-      return json({ ok:true,message:'Media consent record saved.',...(handoff?{handoff:{...consentWithdrawalHandoff727({consent_key:key}),...handoff}}:{}), ...(await loadRecords(db)) });
+      return json({ ok:true,message:'Media consent record saved.',...(handoff?{handoff:{...consentWithdrawalHandoff727({consent_key:key}),...handoff},withdrawal_outbox_728:outbox}:{}), ...(await loadRecords(db)) });
     }
     if (action === 'update_status' || action === 'withdraw') {
       const id=Number(body.consent_record_id||0);
@@ -160,13 +193,15 @@ export async function onRequestPost({ request, env }) {
         normalizeText(body.privacy_notes)||null,Number(adminUser.user_id||0)||null,id).run();
       const withdrawn=['revoked','blocked'].includes(consentStatus);
       const handoff=withdrawn?await holdQueuedUse727(db,prior):null;
+      const afterWithdrawal=withdrawn?await db.prepare('SELECT * FROM media_consent_records WHERE consent_record_id=? LIMIT 1').bind(id).first():null;
+      const outbox=withdrawn?await enqueueWithdrawals728(db,env,adminUser,afterWithdrawal):null;
       await auditAdminAction(env,request,adminUser,{action_type:withdrawn?'media_consent_withdrawal_727':'media_consent_update_727',
         target_type:'media_consent_records',target_id:id,
         details:{consent_status:consentStatus,public_use_allowed:!!publicAllowed,
           social_use_allowed:!!socialAllowed,customer_data_in_receipt:false,
           external_recall_verified:false}});
       return json({ok:true,message:withdrawn?'Consent withdrawn locally; external recall needs operator review.':'Media consent record updated.',
-        ...(handoff?{handoff:{...consentWithdrawalHandoff727(prior),...handoff}}:{}),...(await loadRecords(db))});
+        ...(handoff?{handoff:{...consentWithdrawalHandoff727(prior),...handoff},withdrawal_outbox_728:outbox}:{}),...(await loadRecords(db))});
     }
     return json({ ok: false, error: 'Unknown action.' }, 400);
   } catch (error) {

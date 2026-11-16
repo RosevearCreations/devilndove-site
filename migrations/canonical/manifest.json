@@ -370,6 +370,13 @@
       "release": 467,
       "description": "Private DND source-only versioned V2 event outbox with atomic D1 unique dedupe hashes, bounded original source metadata, append-only mutually exclusive locally reviewed dead-letter or signed ACK-review receipts; no peer sender, remote delivery or T5 activation.",
       "recovery": "Retain immutable local event/outbox and disposition rows; reject ambiguous or repeated receipts, record new independent remediation evidence in a later reviewed, forward-only migration. Do not rewrite an event, grant receiver authority, publish original customer data or infer external Master delivery from a local review."
+    },
+    {
+      "version": 52,
+      "file": "0052_release467_private_evidence_vault_withdrawal_retention.sql",
+      "release": 467,
+      "description": "Encrypted-only evidence vault with append-only ciphertext versions, immutable source-only consent withdrawal queue, live independently verified signed ACK receipts, and supervised separate-requester/approver/executor retention purge evidence.",
+      "recovery": "Preserve original evidence metadata, immutable ciphertext history and purge or withdrawal receipts; hold any unverified receiver, key or schema state; use forward-only supervised remediation without copying customer data across apps or claiming a purge without D1 proof."
     }
   ]
 }

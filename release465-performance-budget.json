@@ -16,7 +16,7 @@
     "max_js_bytes": 600000,
     "max_css_bytes": 500000,
     "max_html_bytes": 500000,
-    "max_runtime_source_bytes": 19682000,
+    "max_runtime_source_bytes": 19705000,
     "max_runtime_source_files": 1855,
     "max_inline_data_uri_bytes": 650000
   },
@@ -33,6 +33,32 @@
     "production_mutation": false
   },
   "budget_reviews": [
+    {
+      "build": 728,
+      "date": "2026-11-16",
+      "scope": "New real encrypted-only D1 evidence storage with per-record AES-GCM AAD, two-key immutable rotation, three-Master HMAC withdrawal outbox and separately pinned Ed25519 live ACK, 3-distinct-admin retention and supervised D1-only ciphertext purge; no new runtime files",
+      "prior_limit_bytes": 19682000,
+      "new_limit_bytes": 19705000,
+      "delta_bytes": 23000,
+      "delta_percent": 0.11686,
+      "prior_build727_measured_runtime_bytes": 19681296,
+      "exact_build728_runtime_delta_bytes": 21342,
+      "projected_build728_runtime_bytes": 19702638,
+      "projected_headroom_bytes": 2362,
+      "exact_runtime_file_count": 1855,
+      "runtime_source_file_limit_unchanged": 1855,
+      "per_file_js_css_html_limits_unchanged": true,
+      "independently_measured_from": "GitHub original main 9db435450045f2be8959aefc73bc23797536ec86 versus dev 4cdb0a1c720ddafed22be2fa6c9494d165e67677 exact recursive tree blob sizes",
+      "changed_runtime_bytes": {
+        "functions/api/admin/production-variable-audit-406.js": 12384,
+        "functions/api/_lib/appModuleRoutes.js": 6097,
+        "functions/api/admin/media-consent-records.js": 2795,
+        "functions/api/admin/current-deployment-preflight.js": 66
+      },
+      "review_reason": "Exact original GitHub recursive tree scan confirms only 4 modified runtime files totaling +21,342 bytes and exactly 1,855 runtime files, with unchanged per-file JS 600,000-byte ceiling and zero new client/provider bundles. A narrowly reviewed +23,000 total source cap preserves 2,362 bytes headroom. The CI budget remains fail closed; Cloudflare Development-first D1 migration 0052, independent source/quality/runtime/branch proof, main deployment and independent live integrity must actually succeed. Runtime keys must be provisioned independently; no customer plaintext, automatic purge, fabricated peer ACK, physical receiver ON or cross-app deployment is claimed.",
+      "final_exact_ci_proof_pending": true,
+      "external_receiver_enrolled_by_this_commit": false
+    },
     {
       "build": 726,
       "date": "2026-11-15",
