@@ -3,6 +3,7 @@
 // This keeps social posting review-first and blocks API publishing unless media privacy has been reviewed.
 
 import { auditAdminAction, captureRuntimeIncident, getAdminUserFromRequest, getDb, jsonResponse, normalizeText } from '../_lib/adminAudit.js';
+import {consentIsLive727,evaluateMediaPublication727} from '../_lib/dataProtection727.mjs';
 
 function rows(result) { return Array.isArray(result?.results) ? result.results : []; }
 function slugKey(value) { return normalizeText(value).toLowerCase().replace(/[^a-z0-9]+/g, '_').replace(/^_+|_+$/g, ''); }
@@ -222,7 +223,7 @@ async function getPostConsentSummary(db, row = {}) {
 
   const consentRows = rows(await db.prepare(`
     SELECT consent_record_id, subject_label, source_type, source_id, media_url, consent_status, consent_scope,
-           public_use_allowed, social_use_allowed, privacy_notes, updated_at
+           public_use_allowed, social_use_allowed, expires_at, privacy_notes, updated_at
     FROM media_consent_records
     WHERE ${clauses.join(' OR ')}
     ORDER BY datetime(COALESCE(updated_at, created_at, '1970-01-01')) DESC
@@ -230,8 +231,8 @@ async function getPostConsentSummary(db, row = {}) {
   `).bind(...bindings).all().catch(() => ({ results: [] })));
 
   const matchingCount = consentRows.length;
-  const socialAllowed = consentRows.filter((record) => Number(record.social_use_allowed || 0) === 1 || String(record.consent_scope || '').toLowerCase() === 'all_public').length;
-  const publicAllowed = consentRows.filter((record) => Number(record.public_use_allowed || 0) === 1 || String(record.consent_scope || '').toLowerCase() === 'all_public').length;
+  const socialAllowed=consentRows.filter(record=>consentIsLive727(record,'social')).length;
+  const publicAllowed=consentRows.filter(record=>consentIsLive727(record,'public')).length;
   const blocked = consentRows.filter((record) => ['blocked', 'revoked'].includes(String(record.consent_status || '').toLowerCase())).length;
   const requested = consentRows.filter((record) => String(record.consent_status || '').toLowerCase() === 'requested').length;
   let status = 'not_linked';
@@ -279,16 +280,18 @@ async function updateQueuePrivacy(db, adminUser, payload = {}) {
   const status = slugKey(payload.privacy_status || 'needs_review');
   const allowed = new Set(['needs_review', 'approved', 'no_private_media', 'consent_needed', 'blocked', 'do_not_post']);
   if (!allowed.has(status)) throw new Error('Choose a valid privacy status.');
-  const customerMedia = payload.customer_media_present == null ? null : Number(payload.customer_media_present ? 1 : 0);
-  const consentRequired = payload.media_consent_required == null ? null : Number(payload.media_consent_required ? 1 : 0);
-  const approved = ['approved', 'no_private_media'].includes(status) ? 1 : 0;
-  const notes = normalizeText(payload.privacy_notes || payload.reviewer_note || '');
-  if (status === 'approved' && Number(consentRequired || 0) === 1 && Number(customerMedia || 0) === 1) {
-    const row = await db.prepare('SELECT * FROM social_post_queue WHERE social_post_queue_id = ? LIMIT 1').bind(id).first().catch(() => null);
-    const consentSummary = await getPostConsentSummary(db, row || {});
-    if (consentSummary.social_allowed_count < 1) {
-      throw new Error('Customer/private media needs a linked media consent record with social use allowed before approving this social post.');
-    }
+  const row=await db.prepare('SELECT * FROM social_post_queue WHERE social_post_queue_id=? LIMIT 1').bind(id).first();
+  if(!row)throw new Error('Social post not found.');
+  const inferred=inferPrivacyFromPost(row);
+  const customerMedia=Math.max(Number(row.customer_media_present||0),Number(inferred.customer_media_present||0),payload.customer_media_present?1:0);
+  const consentRequired=Math.max(Number(row.media_consent_required||0),Number(inferred.media_consent_required||0),payload.media_consent_required?1:0);
+  const approved=['approved','no_private_media'].includes(status)?1:0;
+  const notes=normalizeText(payload.privacy_notes||payload.reviewer_note||'');
+  if(approved===1){
+    const consentSummary=await getPostConsentSummary(db,row);
+    const gate=evaluateMediaPublication727({...row,customer_media_present:customerMedia,
+      media_consent_required:consentRequired},consentSummary.records,safeJson(row.image_urls_json,[]));
+    if(!gate.allowed)throw new Error('Build 727: approval held — '+gate.code+'. Fresh exact original consent is required.');
   }
   await db.prepare(`UPDATE social_post_queue SET
       privacy_status = ?,
