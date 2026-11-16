@@ -496,7 +496,7 @@ const _sha726=v=>typeof v==='string'&&/^[a-f0-9]{64}$/.test(v);
 const _commit726=v=>typeof v==='string'&&/^[a-f0-9]{40}$/.test(v);
 const _uuid726=v=>typeof v==='string'&&/^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/.test(v);
 const _receiptFields726=['v','schema_id','topology_id','from_app','to_app',
- 'event_id','source_main_sha','dedupe_sha256','issued_at','expires_at','nonce','outcome'];
+ 'event_id','source_main_sha','peer_main_sha','dedupe_sha256','issued_at','expires_at','nonce','outcome'];
 const _hold726=(reason)=>({build:726,status:'HOLD_'+reason,
  durable_event_inserted:false,independent_peer_delivery_verified:false,
  network_message_sent:false,master_connected:false,receiver_activated:false,
@@ -599,13 +599,13 @@ export async function verifyPeerAckReview726(envelope,event,pin,now=Date.now()){
   c.topology_id!=='rosevear-master-shell-seven-apps.v1'||
   !_masters726.has(c.from_app)||c.to_app!=='devilndove'||c.outcome!=='ACK'||
   c.event_id!==event.event_id||c.from_app!==event.target_app||
-  c.source_main_sha!==event.source_main_sha||
+  c.source_main_sha!==event.source_main_sha||!_commit726(c.peer_main_sha)||
   c.dedupe_sha256!==event.dedupe_sha256||!_uuid726(c.event_id)||
   !/^[a-f0-9]{32}$/.test(c.nonce||'')||
   !timestamp724(c.issued_at,c.expires_at,now,120000))
   return {..._hold726('WRONG_EVENT_AUDIENCE_OR_FRESHNESS'),signature_verified:false};
  if(pin?.source_app!==c.from_app||pin?.revoked===true||
-  pin?.source_main_sha!==c.source_main_sha||
+  pin?.peer_main_sha!==c.peer_main_sha||
   pin?.original_source_enrollment_verified!==true||
   !key724(pin?.public_key))
   return {..._hold726('SOURCE_KEY_OR_INDEPENDENT_ENROLLMENT_MISSING'),signature_verified:false};
