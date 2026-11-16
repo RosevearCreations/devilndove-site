@@ -73,6 +73,13 @@ jobs:
           node --check public/js/admin-mobile-product-augment.js
           node --check public/js/admin-social-platform-preflight.js
           node scripts/build707_ninth_field_media_drift_custody_contract.mjs
+      - name: Build 729 original encrypted keyring, live Ed25519 peer enrollment and retention operator negatives
+        run: |
+          node --check functions/api/_lib/appModuleRoutes.js
+          node --check functions/api/admin/production-variable-audit-406.js
+          node --check public/js/admin-production-variable-audit-v406.js
+          python scripts/build729_live_peer_sqlite_gate.py
+          node scripts/build729_live_peer_keyring_retention_contract.mjs
       - name: Build 728 D1 encrypted evidence vault, key rotation, live signed withdrawal ACK and supervised retention negatives
         run: |
           node --check functions/api/_lib/appModuleRoutes.js
