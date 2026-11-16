@@ -24,16 +24,16 @@ db.execute("""INSERT INTO dnd_evidence_vault_728
  VALUES(?,?,'security_evidence',30,0,?,1,datetime('now','-80 days'))""",(eid,"a"*64,"b"*64))
 db.execute("""INSERT INTO dnd_evidence_versions_728
  (evidence_id,version,key_id,iv_b64url,ciphertext_b64url,ciphertext_sha256,created_by_user_id)
- VALUES(?,1,'k728old','A'*16,'B'*44,?,1)""",(eid,"c"*64))
+ VALUES(?,1,'k728old',?,?,?,1)""",(eid,'A'*16,'B'*44,"c"*64))
 denial(lambda:db.execute("UPDATE dnd_evidence_vault_728 SET legal_hold=1"),"vault identity immutable")
 denial(lambda:db.execute("UPDATE dnd_evidence_versions_728 SET key_id='k728new'"),"ciphertext append-only")
 denial(lambda:db.execute("DELETE FROM dnd_evidence_versions_728"),"no unapproved ciphertext deletion")
 db.execute("""INSERT INTO dnd_evidence_versions_728
  (evidence_id,version,key_id,iv_b64url,ciphertext_b64url,ciphertext_sha256,previous_version_sha256,created_by_user_id)
- VALUES(?,2,'k728new','C'*16,'D'*44,?,?,1)""",(eid,"d"*64,"c"*64))
+ VALUES(?,2,'k728new',?,?,?,?,1)""",(eid,'C'*16,'D'*44,"d"*64,"c"*64))
 denial(lambda:db.execute("""INSERT INTO dnd_evidence_versions_728
  (evidence_id,version,key_id,iv_b64url,ciphertext_b64url,ciphertext_sha256,created_by_user_id)
- VALUES(?,2,'k728new','C'*16,'D'*44,?,1)""",(eid,"d"*64)),"duplicate version")
+ VALUES(?,2,'k728new',?,?,?,1)""",(eid,'C'*16,'D'*44,"d"*64)),"duplicate version")
 db.execute("""INSERT INTO dnd_evidence_retention_reviews_728
  (review_id,evidence_id,source_ciphertext_sha256,requested_by_user_id)
  VALUES(?,?,?,1)""",(review,eid,"d"*64))
@@ -56,10 +56,10 @@ denial(lambda:db.execute("DELETE FROM dnd_evidence_vault_728"),"original metadat
 outbox="33333333-3333-4333-8333-333333333333"
 db.execute("""INSERT INTO dnd_withdrawal_outbox_728
  (event_id,consent_record_id,target_app,scope_hmac_sha256,request_nonce,created_by_user_id)
- VALUES(?,55,'ai-data-platform',?,'f'*32,1)""",(outbox,"e"*64))
+ VALUES(?,55,'ai-data-platform',?,?,1)""",(outbox,"e"*64,'f'*32))
 denial(lambda:db.execute("""INSERT INTO dnd_withdrawal_outbox_728
  (event_id,consent_record_id,target_app,scope_hmac_sha256,request_nonce,created_by_user_id)
- VALUES('44444444-4444-4444-8444-444444444444',55,'ai-data-platform',?,'g'*32,1)""",("e"*64,)),"dedupe consent and receiver")
+ VALUES('44444444-4444-4444-8444-444444444444',55,'ai-data-platform',?,?,1)""",("e"*64,'g'*32)),"dedupe consent and receiver")
 denial(lambda:db.execute("UPDATE dnd_withdrawal_outbox_728 SET target_app='rosevear-ai-hub'"),"outbox immutable")
 denial(lambda:db.execute("""INSERT INTO dnd_withdrawal_acks_728
  (event_id,peer_app,ack_envelope_sha256,peer_signature_verified,observed_live_response,created_by_user_id)
