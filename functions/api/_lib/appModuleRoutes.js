@@ -650,3 +650,13 @@ export function independentReleaseStatus725(){
   runtime_peer_handshake_verified:false,cross_app_connected:false,
   owner_completion_percent_verified:null};
 }
+
+/* Explicit cross-app credentials are never accepted by legacy owner routes.
+ * Existing local browser/product workflows remain unchanged. */
+export function denyUnenrolledDelegatedAdmin725(request,body=null){
+ const h=request?.headers;
+ return Boolean(h?.has?.('x-rosevear-delegated-capability')||
+  h?.has?.('x-rosevear-sync-protocol')||
+  (body&&typeof body==='object'&&(Object.hasOwn(body,'delegated_capability')||
+    Object.hasOwn(body,'cross_app_authority'))));
+}
