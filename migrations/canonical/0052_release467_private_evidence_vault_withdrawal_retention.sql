@@ -50,6 +50,9 @@ CREATE TABLE IF NOT EXISTS dnd_withdrawal_acks_728 (
 );
 CREATE TRIGGER IF NOT EXISTS trg_dnd_withdrawal_outbox_no_update_728 BEFORE UPDATE ON dnd_withdrawal_outbox_728 BEGIN SELECT RAISE(ABORT,'immutable_withdrawal_event'); END;
 CREATE TRIGGER IF NOT EXISTS trg_dnd_withdrawal_outbox_no_delete_728 BEFORE DELETE ON dnd_withdrawal_outbox_728 BEGIN SELECT RAISE(ABORT,'immutable_withdrawal_event'); END;
+CREATE TRIGGER IF NOT EXISTS trg_dnd_withdrawal_ack_scope_728 BEFORE INSERT ON dnd_withdrawal_acks_728
+ WHEN NOT EXISTS (SELECT 1 FROM dnd_withdrawal_outbox_728 x WHERE x.event_id=NEW.event_id AND x.target_app=NEW.peer_app)
+ BEGIN SELECT RAISE(ABORT,'ack_receiver_must_match_original_event'); END;
 CREATE TRIGGER IF NOT EXISTS trg_dnd_withdrawal_ack_no_update_728 BEFORE UPDATE ON dnd_withdrawal_acks_728 BEGIN SELECT RAISE(ABORT,'immutable_verified_ack'); END;
 CREATE TRIGGER IF NOT EXISTS trg_dnd_withdrawal_ack_no_delete_728 BEFORE DELETE ON dnd_withdrawal_acks_728 BEGIN SELECT RAISE(ABORT,'immutable_verified_ack'); END;
 CREATE TABLE IF NOT EXISTS dnd_evidence_retention_reviews_728 (
@@ -80,7 +83,7 @@ CREATE TRIGGER IF NOT EXISTS trg_dnd_purge_receipt_validation_728 BEFORE INSERT 
 WHEN NOT EXISTS (SELECT 1 FROM dnd_evidence_retention_reviews_728 r
  WHERE r.review_id=NEW.review_id AND r.evidence_id=NEW.evidence_id AND r.review_state='APPROVED'
  AND r.source_ciphertext_sha256=NEW.deleted_ciphertext_sha256
- AND r.requested_by_user_id<>r.approved_by_user_id AND r.approved_by_user_id<>NEW.executed_by_user_id)
+ AND r.requested_by_user_id<>r.approved_by_user_id AND r.approved_by_user_id<>NEW.executed_by_user_id AND r.requested_by_user_id<>NEW.executed_by_user_id)
  OR EXISTS (SELECT 1 FROM dnd_evidence_vault_728 v WHERE v.evidence_id=NEW.evidence_id
  AND (v.legal_hold=1 OR datetime(v.created_at,'+'||v.retention_days||' days')>datetime('now')))
  BEGIN SELECT RAISE(ABORT,'supervised_purge_evidence_or_retention_failed'); END;
