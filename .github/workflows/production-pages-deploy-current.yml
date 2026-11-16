@@ -145,7 +145,8 @@ jobs:
           fi
 
           git diff --name-only "${base}" "${GITHUB_SHA}" > /tmp/production-promotion-changed-files.txt
-          if grep -Eq '^(migrations/canonical/|development-release\.json$|scripts/d1_migrate\.py$)' /tmp/production-promotion-changed-files.txt; then
+          # Build 729: the exact reviewed Development D1 recovery workflow is also a Production schema catch-up trigger.
+          if grep -Eq '^(migrations/canonical/|development-release\.json$|scripts/d1_migrate\.py$|\.github/workflows/development-d1-build729-apply\.yml$)' /tmp/production-promotion-changed-files.txt; then
             echo 'requires_d1=true' >> "${GITHUB_OUTPUT}"
             echo 'reason=canonical_schema_inputs_changed' >> "${GITHUB_OUTPUT}"
           else
