@@ -1389,7 +1389,8 @@ return `
             <td data-label="Status">${edit ? `<select class="site-inventory-row-input"data-field="is_active"><option value="1"${Number(x.is_active)!==0?'selected':''}>Active</option><option value="0"${Number(x.is_active)===0?'selected':''}>Inactive</option></select>` : (Number(x.is_active)===0?'Inactive':'Active')}<div class="small">${escapeHtml(x.usage_tracking_mode || (String(x.source_type||'').toLowerCase()==='tool'?'reusable':'exact'))} usage tracking</div></td>
             <td class="site-inventory-row-actions" data-label="Actions"><div class="site-inventory-action-buttons">
               ${edit ? `<button class="btn primary"type="button"data-save-row-id="${x.site_item_inventory_id}"data-item='${escapeHtml(JSON.stringify(x))}'>Save row</button>` : ''}
-              <button class="btn" type="button" data-load-form-id="${x.site_item_inventory_id}" data-item='${escapeHtml(JSON.stringify(x))}'>Full edit</button>
+              <button class="btn" type="button" data-dd387-edit-id="${x.site_item_inventory_id}">Quick stock + HST</button>
+               <button class="btn" type="button" data-load-form-id="${x.site_item_inventory_id}" data-item='${escapeHtml(JSON.stringify(x))}'>Full edit</button>
               <button class="btn" type="button" data-open-inventory-lots="${x.site_item_inventory_id}">Lots</button>
               <button class="btn" type="button" data-adjust-action="receive" data-id="${x.site_item_inventory_id}">Receive</button>
               <button class="btn" type="button" data-adjust-action="consume_usage" data-id="${x.site_item_inventory_id}" data-item='${escapeHtml(JSON.stringify(x))}'>Record use</button>
