@@ -1,6 +1,3 @@
-// Devil n Dove canonical application-module route catalog.
-// Historical module keys are translated only as a temporary D1 compatibility bridge.
-
 export const MODULE_KEYS = Object.freeze({
   STOREFRONT: 'storefront',
   CREATORS: 'creators',
@@ -8,26 +5,21 @@ export const MODULE_KEYS = Object.freeze({
   FINANCIALS: 'financials',
   IT_PLATFORM: 'it-platform',
 });
-
 export const LEGACY_MODULE_KEYS = Object.freeze({
   'commerce-operations': MODULE_KEYS.STOREFRONT,
   'creative-production': MODULE_KEYS.CREATORS,
   'business-administration': MODULE_KEYS.FINANCIALS,
 });
-
 export function canonicalModuleKey(value) {
   const key = String(value || '').trim().toLowerCase();
   return LEGACY_MODULE_KEYS[key] || key;
 }
-
 const CORE_EXEMPT = Object.freeze([
   '/admin/application-modules',
   '/api/admin/app-modules',
-  // Build 162: Product media is R2-only transport. It must not resolve a D1-backed
-  // application-module session before serving an image.
+// Build 162
   '/api/product-media',
 ]);
-
 export const SHARED_SERVICE_CONTRACTS = Object.freeze([
   Object.freeze({
     path: '/api/admin/contracts/catalog-read',
@@ -97,7 +89,6 @@ export const SHARED_SERVICE_CONTRACTS = Object.freeze([
     mutation: false,
   }),
 ]);
-
 const STOREFRONT_ADMIN_PAGES = Object.freeze([
   '/admin/storefront-acceptance',
   '/admin/physical-stock',
@@ -126,7 +117,6 @@ const STOREFRONT_ADMIN_PAGES = Object.freeze([
   '/admin/marketplace-mapping',
   '/admin/public-display-order',
 ]);
-
 const CREATOR_ADMIN_PAGES = Object.freeze([
   '/admin/project-work-orders',
   '/admin/workshop-production',
@@ -143,17 +133,14 @@ const CREATOR_ADMIN_PAGES = Object.freeze([
   '/admin/image-manifest',
   '/admin/stage-photo-moderation',
 ]);
-
 const SOCIAL_ADMIN_PAGES = Object.freeze([
   '/admin/social-publishing',
   '/admin/content-publications',
 ]);
-
 const FINANCIAL_ADMIN_PAGES = Object.freeze([
   '/admin/commission-finance',
   '/admin/accounting',
 ]);
-
 const IT_ADMIN_PAGES = Object.freeze([
   '/admin/module-acceptance',
   '/admin/it-platform',
@@ -175,12 +162,7 @@ const IT_ADMIN_PAGES = Object.freeze([
   '/admin/startup-readiness',
   '/admin/users',
 ]);
-
-// Build 398.1: these restricted Etsy operator endpoints previously fell through to
-// Application Core, leaving context.data.ddModuleAccess absent. Assign the same
-// Storefront module that owns Product Browser and marketplace drafts.
-// Central middleware must verify a real active session and enabled module;
- // endpoints still require an explicit verified Admin role.
+// Build 398
 const ETSY_OPERATOR_ADMIN_APIS = Object.freeze([
   '/api/admin/etsy-operator-product-choices',
   '/api/admin/etsy-product-syndication',
@@ -218,7 +200,6 @@ const ETSY_OPERATOR_ADMIN_APIS = Object.freeze([
   '/api/admin/production-variable-audit-406',
   '/api/admin/product-channel-intent',
 ]);
-
 const STOREFRONT_ADMIN_APIS = Object.freeze([
   '/api/admin/storefront-acceptance-660',
   '/api/admin/physical-stock-658',
@@ -245,7 +226,6 @@ const STOREFRONT_ADMIN_APIS = Object.freeze([
   '/api/admin/contracts/catalog-',
   '/api/admin/contracts/inventory-',
 ]);
-
 const CREATOR_ADMIN_APIS = Object.freeze([
   '/api/admin/project-work-orders',
   '/api/admin/workshop-production-657',
@@ -262,19 +242,16 @@ const CREATOR_ADMIN_APIS = Object.freeze([
   '/api/admin/contracts/packaging-',
   '/api/admin/contracts/content-',
 ]);
-
 const SOCIAL_ADMIN_APIS = Object.freeze([
   '/api/admin/social',
   '/api/admin/content-publication',
 ]);
-
 const FINANCIAL_ADMIN_APIS = Object.freeze([
   '/api/admin/commission-finance-661',
   '/api/admin/accounting',
   '/api/admin/payment',
   '/api/payment-providers',
 ]);
-
 const IT_ADMIN_APIS = Object.freeze([
   '/api/admin/module-acceptance-656',
   '/api/admin/infrastructure-readiness',
@@ -286,7 +263,6 @@ const IT_ADMIN_APIS = Object.freeze([
   '/api/admin/readiness',
   '/api/admin/release',
 ]);
-
 const STOREFRONT_PUBLIC_PAGES = Object.freeze([
   '/',
   '/shop',
@@ -297,12 +273,10 @@ const STOREFRONT_PUBLIC_PAGES = Object.freeze([
   '/custom-request',
   '/members',
 ]);
-
 const SOCIAL_PUBLIC_PAGES = Object.freeze([
   '/socials',
   '/workshop-journal',
 ]);
-
 const STOREFRONT_PUBLIC_APIS = Object.freeze([
   '/api/member',
   '/api/cart',
@@ -312,17 +286,14 @@ const STOREFRONT_PUBLIC_APIS = Object.freeze([
   '/api/custom-request',
   '/api/home-carousel',
 ]);
-
 const SOCIAL_PUBLIC_APIS = Object.freeze([
   '/api/social',
 ]);
-
 function cleanPath(pathname) {
   const raw = String(pathname || '/').split(/[?#]/, 1)[0] || '/';
   if (raw === '/') return '/';
   return `/${raw.replace(/^\/+|\/+$/g, '')}`;
 }
-
 function matches(path, prefix) {
   if (path === prefix || path.startsWith(`${prefix}/`)) return true;
   if (prefix.startsWith('/api/')) {
@@ -330,21 +301,17 @@ function matches(path, prefix) {
   }
   return false;
 }
-
 function matchesAny(path, prefixes) {
   return prefixes.some((prefix) => matches(path, prefix));
 }
-
 export function sharedServiceContractForPath(pathname) {
   const path = cleanPath(pathname);
   return SHARED_SERVICE_CONTRACTS.find((contract) => path === contract.path || path.startsWith(`${contract.path}/`)) || null;
 }
-
 export function moduleKeyForPath(pathname) {
   const path = cleanPath(pathname);
   if (matchesAny(path, CORE_EXEMPT)) return null;
   if (sharedServiceContractForPath(path)) return null;
-
   if (matchesAny(path, IT_ADMIN_PAGES) || matchesAny(path, IT_ADMIN_APIS)) return MODULE_KEYS.IT_PLATFORM;
   if (matchesAny(path, FINANCIAL_ADMIN_PAGES) || matchesAny(path, FINANCIAL_ADMIN_APIS)) return MODULE_KEYS.FINANCIALS;
   if (matchesAny(path, SOCIAL_ADMIN_PAGES) || matchesAny(path, SOCIAL_ADMIN_APIS)) return MODULE_KEYS.SOCIALS;
@@ -353,11 +320,8 @@ export function moduleKeyForPath(pathname) {
   if (matchesAny(path, STOREFRONT_ADMIN_PAGES) || matchesAny(path, STOREFRONT_ADMIN_APIS)) return MODULE_KEYS.STOREFRONT;
   if (matchesAny(path, SOCIAL_PUBLIC_PAGES) || matchesAny(path, SOCIAL_PUBLIC_APIS)) return MODULE_KEYS.SOCIALS;
   if (matchesAny(path, STOREFRONT_PUBLIC_PAGES) || matchesAny(path, STOREFRONT_PUBLIC_APIS)) return MODULE_KEYS.STOREFRONT;
-
-  // Unclassified admin surfaces remain Application Core until deliberately assigned.
   return null;
 }
-
 export function snapshotRouteOwnership() {
   return Object.freeze({
     release: 447,
@@ -379,7 +343,6 @@ export function snapshotRouteOwnership() {
     socialPublicApis: SOCIAL_PUBLIC_APIS,
   });
 }
-
 /* Build 723 — canonical READ-ONLY source catalog, not blanket enforcement of
  * historic routes. Candidate eligibility is not runtime authorization. */
 export const OPERATIONAL_TIERS_723=Object.freeze([
@@ -511,7 +474,6 @@ export function sevenAxisCompletionBaseline723(){
   application_completion_percent:null,original_signed_owner_approval:false,
   cross_app_connected:false,finance_closed:false};
 }
-
 /* Build 725: additive protocol 1.1 source-only policy; legacy 1.0 endpoints
  * remain unchanged. Pure candidates NEVER replace real application session,
  * D1/R2 source ownership or a witnessed cross-app signed transport. */
@@ -557,7 +519,6 @@ export function negotiateIndependentSync725(peer,capability){
   peer.topology_id!==INDEPENDENT_SYNC_725.topology_id)
   return {...result,compatibility:'HOLD_UNKNOWN_PEER_OR_TOPOLOGY'};
  if(minor<c.peer_minor)return {...result,compatibility:'HOLD_CAPABILITY_REQUIRES_PROTOCOL_1_1'};
- // Higher minor is additive within major 1. A breaking change must use major 2.
  return {...result,compatibility:minor===0?'LEGACY_1_0_CONTRACT_COMPATIBLE':
    'PROTOCOL_1_1_ADDITIVE_COMPATIBLE',
   usable_for_capability:true};
@@ -650,7 +611,6 @@ export function independentReleaseStatus725(){
   runtime_peer_handshake_verified:false,cross_app_connected:false,
   owner_completion_percent_verified:null};
 }
-
 /* Explicit cross-app credentials are never accepted by legacy owner routes.
  * Existing local browser/product workflows remain unchanged. */
 export function denyUnenrolledDelegatedAdmin725(request,body=null){
@@ -660,9 +620,7 @@ export function denyUnenrolledDelegatedAdmin725(request,body=null){
   (body&&typeof body==='object'&&(Object.hasOwn(body,'delegated_capability')||
     Object.hasOwn(body,'cross_app_authority'))));
 }
-
 // Devil n Dove Build 727 — original-app DLP, consent and encrypted evidence primitives.
-// No cross-app sender, automatic deletion, external recall or cryptographic key is enabled by this file.
 const text = (v) => String(v ?? '').trim();
 const scope = (v) => text(v).toLowerCase();
 const SHA256 = /^[a-f0-9]{64}$/i;
@@ -767,8 +725,6 @@ export function consentWithdrawalHandoff727(record){
     remote_peer_delivery:'NOT_SENT',deletion_execution:'NOT_PERFORMED',
     original_host_receiver_activation:false};
 }
-// AES-256-GCM only when an independently provisioned 32-byte key is supplied.
-// Ciphertext is never written to any database automatically; caller must provide protected storage.
 export async function encryptEvidence727(payload,keyBase64,context){
   const keyText=text(keyBase64);
   if(!keyText||!context||!text(context.tenant_id)||!text(context.purpose))
