@@ -1,7 +1,3 @@
-// File: /functions/api/admin/social-post-queue.js
-// Brief description: Admin-only social posting queue for job/process photos and summaries.
-// This is review-first. It prepares platform-ready captions and records manual/API posting status,
-// but does not auto-post until official OAuth/API keys are configured and approved for each platform.
 
 import{ auditAdminAction,captureRuntimeIncident,getAdminUserFromRequest,getDb,jsonResponse,normalizeText } from '../_lib/adminAudit.js';
 import {claimIndependentNinth716,claimExternalCustodySla717,reviewOriginalExternalSlaContinuity718} from './_lib/projectFinanceEvidence.js';
@@ -73,7 +69,6 @@ return{status:'independent_expense_verified',receipt_reference:ref,roi_certified
 async function reconciledCampaign(db,id){
 const post=await db.prepare('SELECT utm_campaign FROM social_post_queue WHERE social_post_queue_id=?').bind(id).first();
 if(!post?.utm_campaign)throw Error('Named campaign not found.');
-// Include every same-named queue item, not just the selected post; do not truncate expense scan.
 const attempts=rows(await db.prepare(`SELECT a.social_post_attempt_id,a.social_post_queue_id,a.platform_key,a.attempt_status,a.external_post_id,a.response_json
     FROM social_post_attempts a JOIN social_post_queue q ON q.social_post_queue_id=a.social_post_queue_id
     WHERE q.utm_campaign=? AND a.attempt_status IN
@@ -1274,13 +1269,11 @@ const images=safeJson(row.image_urls_json,[]).map(safeUrl).filter(Boolean);
 const readiness=getPlatformReadiness(context.env);
 const results=[];
 // Build 673: a successful provider acknowledgement belongs to its channel.
-// Force and partial-channel retries cannot publish that channel a second time.
 const priorSuccess=rows(await db.prepare(`SELECT DISTINCT platform_key FROM social_post_attempts
     WHERE social_post_queue_id=? AND attempt_status IN ('api_posted','receipt_verified','posted_manual')`).bind(id).all().catch(()=>({results:[]})));
 const alreadyPublished=new Set(priorSuccess.map(item=>item.platform_key));
 
 // Build 672: a tagged CAIP original is not a public derivative. Never let
-// force=true bypass the per-URL, per-project owner approval for this source.
 if (row.source_type==='caip_project'){
 const approved=images.length > 0 && await Promise.all(images.map(async (url)=>{
 const receipt=await db.prepare(`SELECT consent_record_id FROM media_consent_records
@@ -1409,7 +1402,6 @@ return{ social_post_queue_id:id,attempted_platforms:selected,results };
 }
 
 // Build 673: receipts are provider acknowledgements until a separate read-only
-// provider lookup independently confirms the same published ID.
 async function receipts673(db){
 const records=rows(await db.prepare(`SELECT a.social_post_attempt_id,a.social_post_queue_id,a.platform_key,
     a.attempt_status,a.external_post_id,a.external_post_url,a.attempted_at,a.notes,q.title
@@ -1441,7 +1433,6 @@ await db.prepare(`UPDATE social_post_queue SET utm_campaign=?,scheduled_at=?,sch
 return{social_post_queue_id:id,campaign_name:campaign,scheduled_at:date,approval_reset:true,publication_performed:false};
 }
 // Build 675: provider metrics are accepted only from a fresh, authenticated
-// read-only lookup of a previously acknowledged publication ID.
 async function verifyEngagement675(context,db,adminUser,payload){
 const queueId=Number(payload.social_post_queue_id),platform=slugKey(payload.platform_key||'');
 if(!Number.isSafeInteger(queueId)||queueId<1||!['facebook','x'].includes(platform))
@@ -1484,7 +1475,6 @@ provider_id:item.external_post_id,metrics:evidence.metrics,observed_at:evidence.
 return{snapshots,roi_status:'UNAVAILABLE_NO_VERIFIED_ATTRIBUTED_REVENUE_AND_SPEND',financial_claims:false};
 }
 // Build 676: order settlement and campaign attribution are separate evidence
-// axes. The current order schema has no authoritative UTM/session foreign key.
 async function recordFinancialEvidence676(db,adminUser,payload){
 const id=Number(payload.social_post_queue_id),kind=slugKey(payload.kind||'');
 const post=await db.prepare('SELECT utm_campaign FROM social_post_queue WHERE social_post_queue_id=?').bind(id).first();
@@ -1594,7 +1584,6 @@ await recordApiAttempt(db,adminUser,id,platform,'recovery_requested',{notes:'Own
 return publishQueuedPost(context,db,adminUser,{social_post_queue_id:id,platform_keys:[platform],force:false});
 }
 
-// Read-only account identity check. A configured token alone is not a verified account.
 async function verifyAccounts672(env){
 const checks=[
 ['facebook',envText(env,'FACEBOOK_PAGE_ID','META_PAGE_ID'),envText(env,'FACEBOOK_PAGE_ACCESS_TOKEN','META_PAGE_ACCESS_TOKEN'),id=>`https://graph.facebook.com/${envText(env,'META_GRAPH_API_VERSION')||'v22.0'}/${encodeURIComponent(id)}?fields=id,name`],
@@ -2095,7 +2084,6 @@ connection:'HOLD_INDEPENDENT_CONTINUOUS_RUNTIME_TELEMETRY',publication_performed
 
 
 // Build 685 — read-only receipt aging, signed Master revalidation and owner-controlled recovery.
-// No background receiver calls, unverified CONNECTED flag, private keys, or financial certification.
 export function assess685(v,evidence,now=Date.now()){
 const c=evidence?.claim||{},checked=evidence?.checked_at;
 const checkedMs=typeof checked==='string'?Date.parse(checked):NaN;
@@ -2204,7 +2192,6 @@ connection:'HOLD_INDEPENDENT_CONTINUOUS_RUNTIME_TELEMETRY',publication_performed
 }
 
 // Build 686: read-only, server-clock receipt alerts and prioritized owner recovery.
-// This is a triage projection, NOT a signed receipt or a CONNECTED/financial certification.
 export function prioritizeFinance686(v,now=Date.now()){
 const status=String(v?.status||'HOLD_UNAVAILABLE');
 const drift=status==='HOLD_SOURCE_RECEIPT_DRIFT'||status==='HOLD_SIGNATURE_REVALIDATION';
@@ -2231,7 +2218,6 @@ master_accepted_now:!!v?.master_fresh,connection:'HOLD_INDEPENDENT_CONTINUOUS_RU
 profitability_certified:false,automated_master_polling:false};
 }
 async function globalFinanceQueue686(db,now=Date.now()){
-// One bounded append-only scan. Other campaigns' Master freshness is never inferred.
 const recent=rows(await db.prepare(`SELECT a.social_post_attempt_id,a.social_post_queue_id,
 a.attempt_status,a.response_json,a.attempted_at,q.utm_campaign
 FROM social_post_attempts a JOIN social_post_queue q
@@ -2262,8 +2248,6 @@ connection:'HOLD_INDEPENDENT_CONTINUOUS_RUNTIME_TELEMETRY',automated_escalation:
 }
 
 // Build 687: bounded, read-only owner SLA and historical financial receipt analytics.
-// The two-hour target is advisory, not an enforceable SLA. Historical D1 entries are
-// NOT independently reverified current Master acceptance; only financial685 can do that.
 export function assessFinance687(current,incidentRows,acceptanceRows,now=Date.now(),targetMinutes=120){
 const minutes=(value)=>{const t=Date.parse(value||'');return Number.isFinite(t)&&t<=now+300000?
 Math.max(0,Math.floor((now-t)/60000)):null;};
@@ -2351,8 +2335,6 @@ return assessFinance687(current,incidents,receipts);
 }
 
 // Build 688 — owner-triggered SLA breach escalation, historical Master renewal chain,
-// and independent-evidence-gated owner signoff. All historical entries are audit
-// observations, never proof of a currently accepted Master receiver or connectivity.
 export function assessFinance688(current,sla,rawReceipts,rawReviews,now=Date.now()){
 const selected=Number.isSafeInteger(Number(current?.queue_id))&&Number(current.queue_id)>0;
 const receipts=Array.isArray(rawReceipts)?rawReceipts:[],reviews=Array.isArray(rawReviews)?rawReviews:[];
@@ -2485,7 +2467,6 @@ financial_certified:false,publication_performed:false};
 }
 
 // Build 689: replay the owner audit ledger without replaying external financial actions.
-// A historical D1 signature cannot establish current Master acceptance; only the
 // current exact-source Build 685/688 independently verified receiver proof can do that.
 export function assessFinance689(current,report,reviewRows,auditRows,now=Date.now()){
 const selected=Number.isSafeInteger(Number(current?.queue_id))&&Number(current.queue_id)>0;
@@ -2651,7 +2632,6 @@ financial_certified:false,external_replay_performed:false};
 }
 
 // Build 690 — bounded sampled renewal continuity, replay exception owner disposition,
-// and independently reverified owner audit closure reconciliation. No external replay.
 export function assessFinance690(current,replay,ownerRows,receiptRows,now=Date.now()){
 const n=Number(current?.queue_id),selected=Number.isSafeInteger(n)&&n>0;
 const rows690=Array.isArray(ownerRows)?ownerRows:[],receipts=Array.isArray(receiptRows)?receiptRows:[];
@@ -2833,7 +2813,6 @@ connection:'HOLD_INDEPENDENT_CONTINUOUS_RUNTIME_TELEMETRY'};
 }
 
 // Build 691: GET-only server-clock exception aging and bounded Master renewal gap
-// inspection. Owner actions are append-only acknowledgments, NOT evidence repair.
 export function assessFinance691(current,prior,ownerRows,now=Date.now()){
 const selected=Number.isSafeInteger(Number(current?.queue_id))&&Number(current.queue_id)>0;
 const rows691=Array.isArray(ownerRows)?ownerRows:[],
@@ -3028,7 +3007,6 @@ connection:'HOLD_INDEPENDENT_CONTINUOUS_RUNTIME_TELEMETRY'};
 }
 
 // Build 692 — owner SLA follow-up, historical Master receipt provenance and
-// closure audit continuity. A historical source pin is NOT signature revalidation.
 export function assessFinance692(current,prior,ownerRows,now=Date.now()){
 const selected=Number.isSafeInteger(Number(current?.queue_id))&&Number(current.queue_id)>0;
 const rows692=Array.isArray(ownerRows)?ownerRows:[],
@@ -3229,7 +3207,6 @@ connection:'HOLD_INDEPENDENT_CONTINUOUS_RUNTIME_TELEMETRY'};
 }
 
 // Build 693: bounded owner SLA follow-up aging, source-pinned provenance
-// exception recheck and append-only owner acceptance history. No external replay.
 export function assessFinance693(current,prior,ownerRows,now=Date.now()){
 const selected=Number.isSafeInteger(Number(current?.queue_id))&&Number(current.queue_id)>0;
 const rows693=Array.isArray(ownerRows)?ownerRows:[],bounded=!!prior?.history_complete&&rows693.length<=60;
@@ -3457,7 +3434,6 @@ connection:'HOLD_INDEPENDENT_CONTINUOUS_RUNTIME_TELEMETRY'};
 }
 
 // Build 694 — durable exact-source owner resolution ledger. A recorded decision
-// does NOT repair a live incident, reverify historical signatures or certify finance.
 export function assessFinance694(current,prior,ownerRows,now=Date.now()){
 const n=Number(current?.queue_id),selected=Number.isSafeInteger(n)&&n>0;
 const rows694=Array.isArray(ownerRows)?ownerRows:[],
@@ -3690,7 +3666,6 @@ connection:'HOLD_INDEPENDENT_CONTINUOUS_RUNTIME_TELEMETRY'};
 
 
 // Build 695 — source-pinned resolution aging, unverified independent correction
-// evidence intake, and fresh Master closure revalidation. No automatic repair.
 export function assessFinance695(current,prior,ownerRows,now=Date.now()){
 const n=Number(current?.queue_id),selected=Number.isSafeInteger(n)&&n>0;
 const sourcePairs=prior?.provenance?.pairs||[],rows695=Array.isArray(ownerRows)?ownerRows:[],
@@ -3883,8 +3858,6 @@ connection:'HOLD_INDEPENDENT_CONTINUOUS_RUNTIME_TELEMETRY'};
 
 
 // Build 696: independent Ed25519 custodian *attestation* verification. The
-// signature proves who signed the exact intake, NOT that a mismatched source
-// has been repaired. Owner escalation and Master continuity remain separate.
 export function claim696(c){
 return{v:1,purpose:'devilndove_finance_correction_attestation_696',source:'devilndove',
 queue_id:c.queue_id,reference_receipt_id:c.reference_receipt_id,
