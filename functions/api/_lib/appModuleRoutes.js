@@ -511,3 +511,152 @@ export function sevenAxisCompletionBaseline723(){
   application_completion_percent:null,original_signed_owner_approval:false,
   cross_app_connected:false,finance_closed:false};
 }
+
+/* Build 725: additive protocol 1.1 source-only policy; legacy 1.0 endpoints
+ * remain unchanged. Pure candidates NEVER replace real application session,
+ * D1/R2 source ownership or a witnessed cross-app signed transport. */
+export const INDEPENDENT_SYNC_725=Object.freeze({
+ topology_id:'rosevear-master-shell-seven-apps.v1',
+ local:{major:1,minor:1},compatible_legacy:{major:1,minor:0},
+ independent_additive_release:true,lockstep_release_required:false,
+ raw_secrets_synchronized:false,direct_peer_database_sync:false
+});
+const CAPS_725=Object.freeze({
+ 'health.read':{min:0,peer_minor:0,local_only:false,personal:false,write:false},
+ 'capabilities.read':{min:0,peer_minor:0,local_only:false,personal:false,write:false},
+ 'storefront.product.read':{min:0,peer_minor:1,local_only:false,personal:false,write:false},
+ 'storefront.product.private_read':{min:2,peer_minor:1,local_only:false,personal:true,write:false},
+ 'storefront.inventory.read':{min:3,peer_minor:1,local_only:false,personal:false,write:false},
+ 'media.draft.read':{min:3,peer_minor:1,local_only:false,personal:true,write:false},
+ 'media.draft.review':{min:3,peer_minor:1,local_only:true,personal:true,write:true},
+ 'storefront.product.publish':{min:3,peer_minor:1,local_only:true,personal:false,write:true}
+});
+const id725=x=>typeof x==='string'&&/^[A-Za-z0-9][A-Za-z0-9._:-]{0,99}$/.test(x);
+const allowedPeer725=new Set(['ai-data-platform','rosevear-ai-hub','rosevear-comms-hub','icamp','yw','rosiedazzlers']);
+const localTier725=tier=>OPERATIONAL_TIERS_723.indexOf(tier);
+const iso725=x=>typeof x==='string'&&Number.isFinite(Date.parse(x))&&new Date(Date.parse(x)).toISOString()===x;
+const policyHold725=(code,peer)=>({build:725,status:'HOLD_'+code,
+ candidate_only:false,protocol:peer||null,cross_app_capability_accepted:false,
+ local_operations_blocked:false,shared_authority_created:false,
+ private_data_returned:false,provider_write:false,media_published:false,
+ receiver_activated:false,financial_books_closed:false});
+export function negotiateIndependentSync725(peer,capability){
+ const c=CAPS_725[capability];
+ const major=peer?.protocol?.major,minor=peer?.protocol?.minor;
+ const result={build:725,local_protocol:'1.1',peer_protocol:
+  Number.isInteger(major)&&Number.isInteger(minor)?major+'.'+minor:null,
+  compatibility:'HOLD_MISSING_OR_UNKNOWN_PEER_VERSION',
+  usable_for_capability:false,local_operations_continue:true,
+  lockstep_release_required:false,peer_runtime_connected:false,
+  authority_transfer:false};
+ if(!c)return {...result,compatibility:'HOLD_UNKNOWN_CAPABILITY'};
+ if(!peer?.available)return {...result,compatibility:'HOLD_PEER_UNAVAILABLE'};
+ if(!Number.isInteger(major)||!Number.isInteger(minor)||major!==1||minor<0)
+  return {...result,compatibility:'HOLD_INCOMPATIBLE_MAJOR_OR_VERSION'};
+ if(!id725(peer.app_id)||!allowedPeer725.has(peer.app_id)||
+  peer.topology_id!==INDEPENDENT_SYNC_725.topology_id)
+  return {...result,compatibility:'HOLD_UNKNOWN_PEER_OR_TOPOLOGY'};
+ if(minor<c.peer_minor)return {...result,compatibility:'HOLD_CAPABILITY_REQUIRES_PROTOCOL_1_1'};
+ // Higher minor is additive within major 1. A breaking change must use major 2.
+ return {...result,compatibility:minor===0?'LEGACY_1_0_CONTRACT_COMPATIBLE':
+   'PROTOCOL_1_1_ADDITIVE_COMPATIBLE',
+  usable_for_capability:true};
+}
+/* Candidate policy consumes source-verified evidence from the original owner;
+ * it is NOT itself a public authority-enrollment endpoint or a signed ACK. */
+export function assessConsentTenantCapability725(input={},now=Date.now()){
+ const cap=String(input.capability||''),c=CAPS_725[cap];
+ const mode=input.mode,peer=mode==='CROSS_APP'?
+  negotiateIndependentSync725(input.peer,cap):null;
+ const deny=code=>policyHold725(code,peer);
+ if(!c||!['LOCAL','CROSS_APP'].includes(mode))return deny('UNKNOWN_CAPABILITY_OR_MODE');
+ if(mode==='CROSS_APP'){
+  if(!peer?.usable_for_capability)return deny('PEER_UNAVAILABLE_OR_INCOMPATIBLE');
+  if(c.local_only||c.write)return deny('CROSS_APP_WRITE_OR_LOCAL_ONLY_CAPABILITY');
+ }
+ const tier=localTier725(input.actor?.tier);
+ if(tier<0||tier<c.min||tier>=4)return deny('INVALID_OR_ELEVATED_ACTOR_TIER');
+ if(c.min>0&&(input.actor?.identity_verified!==true||input.actor?.account_active!==true))
+  return deny('ACTIVE_SOURCE_IDENTITY_REQUIRED');
+ if(!id725(input.company_id)||!id725(input.actor?.company_id)||
+  input.company_id!==input.actor.company_id||
+  !id725(input.resource?.company_id)||
+  input.resource.company_id!==input.company_id)
+  return deny('COMPANY_BOUNDARY');
+ if(!id725(input.tenant_id)||!id725(input.workspace_id)||
+  input.actor?.tenant_id!==input.tenant_id||input.actor?.workspace_id!==input.workspace_id||
+  input.resource?.tenant_id!==input.tenant_id||
+  input.resource?.workspace_id!==input.workspace_id)
+  return deny('TENANT_OR_WORKSPACE_ISOLATION');
+ if(input.resource?.source_verified!==true||!id725(input.resource?.resource_id)||
+   !id725(input.resource?.source_revision))
+  return deny('ORIGINAL_RESOURCE_OWNERSHIP_UNVERIFIED');
+ if(c.min>=3&&(input.actor?.company_operator_grant!==true||
+   input.actor?.module_permission_verified!==true||
+   input.actor?.module_key!==(cap.startsWith('media.')?'creators':'storefront')))
+  return deny('EXACT_COMPANY_MODULE_GRANT');
+ if(c.write&&input.original_owner_write_authorization!==true)
+  return deny('ORIGINAL_OWNER_WRITE_AUTHORIZATION_REQUIRED');
+ if(c.personal){
+  const consent=input.consent,issued=Date.parse(consent?.issued_at),expires=Date.parse(consent?.expires_at);
+  if(consent?.original_source_verified!==true||!id725(consent?.consent_id)||
+   consent?.withdrawn===true||consent?.revoked===true||
+   consent?.subject_id!==input.resource?.subject_id||
+   consent?.company_id!==input.company_id||consent?.tenant_id!==input.tenant_id||
+   consent?.workspace_id!==input.workspace_id||
+   consent?.purpose!==(cap.startsWith('media.')?'maker_media_review':'private_storefront_read')||
+   !Array.isArray(consent?.capabilities)||!consent.capabilities.includes(cap)||
+   consent.capabilities.some(v=>!Object.hasOwn(CAPS_725,v))||
+   !iso725(consent.issued_at)||!iso725(consent.expires_at)||
+   !Number.isFinite(issued)||issued>now||expires<=now||expires-issued>86400000)
+   return deny('ORIGINAL_PURPOSE_PINNED_CONSENT_MISSING_WITHDRAWN_OR_EXPIRED');
+ }
+ if(mode==='CROSS_APP'){
+  const d=input.delegation;
+  const issued=Date.parse(d?.issued_at),expires=Date.parse(d?.expires_at);
+  if(d?.original_source_verified!==true||d?.revoked===true||
+   !id725(d?.grant_id)||d.capability!==cap||
+   d.audience!==input.peer.app_id||d.source_app!=='devilndove'||
+   d.company_id!==input.company_id||d.tenant_id!==input.tenant_id||
+   d.workspace_id!==input.workspace_id||
+   d.consent_id!==(c.personal?input.consent?.consent_id:null)||
+   d.parent_grant_id!==null||d.subdelegation_allowed!==false||
+   d.authority_transfer!==false||d.t5_allowed!==false||
+   d.owner_gated_write_allowed!==false||
+   !iso725(d.issued_at)||!iso725(d.expires_at)||
+   !Number.isFinite(issued)||issued>now||expires<=now||expires-issued>86400000)
+   return deny('DELEGATION_SCOPE_REVOCATION_OR_EXPIRY');
+ }
+ return {build:725,status:'CANDIDATE_SOURCE_SCOPE_MATCH_RUNTIME_AUTH_REQUIRED',
+  candidate_only:true,protocol:peer,source_scoped_capability:cap,
+  cross_app_capability_accepted:false,local_operations_blocked:false,
+  shared_authority_created:false,private_data_returned:false,
+  provider_write:false,media_published:false,receiver_activated:false,
+  financial_books_closed:false};
+}
+export function independentReleaseStatus725(){
+ return {build:725,topology_id:INDEPENDENT_SYNC_725.topology_id,
+  local_protocol:'1.1',backward_compatible_with:'1.0',
+  lockstep_release_required:false,local_additive_release_allowed:true,
+  old_peer_readonly_health_capability_supported:true,
+  new_delegated_capabilities_require_1_1:true,
+  consent_tenant_and_workspace_fail_closed:true,
+  personal_data_needs_original_purpose_consent:true,
+  delegated_capability_max_hours:24,subdelegation_allowed:false,
+  t5_delegable:false,authority_transfer:false,
+  raw_secret_synchronization:false,peer_database_sync:false,
+  unavailable_peer_blocks_only_dependent_capability:true,
+  old_protocol_1_0_routes_unchanged:true,
+  runtime_peer_handshake_verified:false,cross_app_connected:false,
+  owner_completion_percent_verified:null};
+}
+
+/* Explicit cross-app credentials are never accepted by legacy owner routes.
+ * Existing local browser/product workflows remain unchanged. */
+export function denyUnenrolledDelegatedAdmin725(request,body=null){
+ const h=request?.headers;
+ return Boolean(h?.has?.('x-rosevear-delegated-capability')||
+  h?.has?.('x-rosevear-sync-protocol')||
+  (body&&typeof body==='object'&&(Object.hasOwn(body,'delegated_capability')||
+    Object.hasOwn(body,'cross_app_authority'))));
+}

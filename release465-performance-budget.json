@@ -16,7 +16,7 @@
     "max_js_bytes": 600000,
     "max_css_bytes": 500000,
     "max_html_bytes": 500000,
-    "max_runtime_source_bytes": 19643000,
+    "max_runtime_source_bytes": 19658000,
     "max_runtime_source_files": 1855,
     "max_inline_data_uri_bytes": 650000
   },
@@ -33,6 +33,27 @@
     "production_mutation": false
   },
   "budget_reviews": [
+    {
+      "build": 725,
+      "date": "2026-11-15",
+      "scope": "Protocol 1.1 additive local-release compatibility to 1.0 peers; source-pinned Product/media/tenant/workspace/purpose consent, expiry and delegated capability candidates; original Admin Product/media route fail-closed header guards and owner status review",
+      "prior_limit_bytes": 19643000,
+      "new_limit_bytes": 19658000,
+      "delta_bytes": 15000,
+      "delta_percent": 0.07636,
+      "prior_build_724_measured_runtime_bytes": 19640613,
+      "measured_exact_feature_runtime_bytes": 19655042,
+      "measured_runtime_files": 1855,
+      "measured_overage_bytes": 12042,
+      "remaining_measured_headroom_bytes": 2958,
+      "runtime_source_file_limit_unchanged": 1855,
+      "per_file_js_css_html_limits_unchanged": true,
+      "review_reason": "Exact Build725 feature System Gate #43793823204 measured 19,655,042 runtime bytes/1,855 files, 12,042 bytes over Build724 19,643,000-byte total. Reviewed changes: pure bounded independent sync protocol 1.1/1.0 and tenant/consent/delegation negative policy in existing appModuleRoutes.js, two original Admin Product/media explicit delegated-header guards, and read-only owner compatibility panel. Narrow +15,000 (0.07636%) adjusts total to 19,658,000, leaving 2,958 measured bytes headroom. Mandatory original fail-closed source budget, 1,855 runtime file max, per-file JS 600,000, CSS/HTML/CSP, owner session, zero D1 migration, signed Master hold, zero Vercel-app deployments and exact Cloudflare Production proof unchanged. No blanket prior contract rewrite or peer DB sync.",
+      "no_vercel_deploy_triggered": true,
+      "independent_live_peer_ack_verified": false,
+      "customer_consent_broadcast_to_peers": false,
+      "owner_t5_receiver_activated": false
+    },
     {
       "build": 724,
       "date": "2026-11-15",

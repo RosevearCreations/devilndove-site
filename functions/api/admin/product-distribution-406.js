@@ -1,6 +1,7 @@
 // Build 406 — checked canonical media mapping and distribution policy for existing source Products.
 import {getDb,jsonResponse} from '../_lib/adminAudit.js';
 import {verifiedAdminFromModule} from '../_lib/verifiedAdmin398.mjs';
+import {denyUnenrolledDelegatedAdmin725} from '../_lib/appModuleRoutes.js';
 import {readCanonicalDistributionGallery} from '../_lib/canonicalDistributionGallery436.mjs';
 import {outboundChannel,productIdValid,ownerKeyValid,imageSelectionValid,allowedImage,
  reviewedSourceSignature,reviewEvidence,auditJSON} from '../_lib/productDistribution406.mjs';
@@ -33,6 +34,7 @@ async function source(db,productId,channel){
 }
 export async function onRequestGet(c){
  const g=gate(c);if(g.error)return g.error;
+ if(denyUnenrolledDelegatedAdmin725(c.request))return reply({error:'Unenrolled cross-app delegation denied; original local Admin authorization only.',cross_app_connected:false},403);
  const url=new URL(c.request.url),id=url.searchParams.get('product_id'),channel=url.searchParams.get('channel');
  if(!productIdValid(id)||!outboundChannel(channel))return reply({error:'Saved Product and supported destination required.'},400);
  try{const data=await source(g.db,Number(id),channel);
@@ -50,6 +52,7 @@ export async function onRequestGet(c){
 export async function onRequestPost(c){
  const g=gate(c);if(g.error)return g.error;
  let body;try{body=await c.request.json()}catch{return reply({error:'JSON required.'},400)}
+ if(denyUnenrolledDelegatedAdmin725(c.request,body))return reply({error:'Delegated authority is not enrolled for local Product or media approval.',cross_app_connected:false},403);
  const channel=body?.channel,id=body?.product_id,ids=body?.image_ids;
  if(!outboundChannel(channel)||!productIdValid(id)||!imageSelectionValid(ids)||!ownerKeyValid(body?.request_key)||
  body.owner_verified_destinations!==true||body.us_shipping_disabled!==true||
