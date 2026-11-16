@@ -73,6 +73,14 @@ jobs:
           node --check public/js/admin-mobile-product-augment.js
           node --check public/js/admin-social-platform-preflight.js
           node scripts/build707_ninth_field_media_drift_custody_contract.mjs
+      - name: Build 725 independent 1.1 legacy 1.0 protocol consent tenant delegation and original Admin route denial regression
+        run: |
+          node --check functions/api/_lib/appModuleRoutes.js
+          node --check functions/api/admin/production-variable-audit-406.js
+          node --check functions/api/admin/mobile-create-product.js
+          node --check functions/api/admin/product-distribution-406.js
+          node --check public/js/admin-production-variable-audit-v406.js
+          node scripts/build725_protocol11_consent_tenant_delegation_contract.mjs
       - name: Build 724 independent three-Master Ed25519 custody, replay review and secretless transport HOLD negative regression
         run: |
           node --check functions/api/admin/_lib/projectFinanceEvidence.js

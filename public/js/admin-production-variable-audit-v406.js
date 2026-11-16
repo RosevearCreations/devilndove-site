@@ -290,3 +290,46 @@ button.addEventListener('click',async()=>{
   }finally{button.disabled=false}
  });
 })();
+
+// Build 725 — original authenticated Admin, read-only protocol 1.1 status.
+(()=>{
+ 'use strict';
+ const button=document.getElementById('dd725Inspect'),
+  status=document.getElementById('dd725Status'),
+  result=document.getElementById('dd725Result');
+ if(!button||!status||!result||!window.DDAuth?.apiFetch)return;
+ button.addEventListener('click',async()=>{
+  if(button.disabled)return;button.disabled=true;
+  status.textContent='Checking only deployed local protocol policy…';
+  try{
+   const response=await window.DDAuth.apiFetch(
+    '/api/admin/production-variable-audit-406?review=725',
+    {method:'GET',cache:'no-store'});
+   const data=await response.json().catch(()=>null);
+   if(!response.ok||!data?.ok||data.review725?.compatibility?.build!==725)
+    throw Error('Protected protocol source unavailable');
+   const r=data.review725,c=r.compatibility;
+   result.textContent=[
+    'Devil n Dove local protocol: '+c.local_protocol,
+    'Backward-compatible established peer: '+c.backward_compatible_with,
+    'Lockstep release required: '+(c.lockstep_release_required?'YES':'NO'),
+    'Original 1.0 source health: '+r.legacy_peer_1_0.compatibility,
+    'New private media on 1.0: '+r.legacy_peer_new_capability.compatibility,
+    'Held peer: '+r.unavailable_peer.compatibility,
+    'Local product workflow blocked by held peer: NO',
+    'Company/tenant/workspace mismatch: '+r.cross_tenant_negative.status,
+    'Source purpose-bound consent and expiry: fail closed',
+    'Delegation lifetime maximum: '+c.delegated_capability_max_hours+'h; no subdelegation',
+    'Live Master signed handshake: NOT VERIFIED',
+    'Physical original-host receiver T5: NOT AUTHORIZED',
+    'Peer D1/R2 synchronization: NO',
+    'Vercel deployment triggered: NO',
+    'Original Build 723 measurable improvement: UNMEASURED'
+   ].join('\n');
+   status.textContent='SOURCE-ONLY PROTOCOL REVIEW COMPLETE — local releases independent; live integration HOLD.';
+  }catch(_){
+   result.textContent='HOLD — Original compatibility source unavailable.';
+   status.textContent='HOLD — No live peer or consent evidence inferred.';
+  }finally{button.disabled=false}
+ });
+})();
