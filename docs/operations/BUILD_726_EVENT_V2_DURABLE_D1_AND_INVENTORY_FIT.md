@@ -46,6 +46,11 @@ Optional read-only public verification pins if genuinely enrolled by original ex
 - Operator Inbox hook shows only DND original local source data and is **not** a remote operator inbox feed.
 - The owner-requested ≥10 percentage-point app improvement remains an evidence-gated goal; 77 proposed Build723 checks still need original approved denominators.
 
+## Provenance repair and measured budget before feature acceptance
+Canonical migration 0051 was added to the live `functions/api/admin/current-deployment-preflight.js` source inventory, whose current truth gate compares every manifest filename with the deployed preflight's expected native/proof migration list. The previous source-gate failed because this explicit map still stopped at 0050; the gate itself stays **unchanged and fail closed**. Only the forward schema list is extended.
+
+The actual previous Build725 System Gate source measured **19,655,042 bytes**. An exact feature-versus-dev GitHub UTF-8 byte comparison of the eight changed runtime files measured a net **+24,253 bytes** (9,924 D1 event helper, 7,166 responsive Inventory CSS, 2,628 Admin API, 2,046 Admin UI JS, 1,292 Inventory JS, 1,142 Admin page, 57 preflight, -2 Inventory page), giving projected **19,679,295 bytes**. Prior cap **19,658,000** would fail by **21,295**. Narrow reviewed cap adjustment **+24,000** to **19,682,000** leaves projected **2,705 bytes** of headroom. The feature's *actual exact-SHA System Gate* must still independently PASS; this is a source-byte estimate, **not** a claim of completed CI. File count 1,855, individual JS 600,000, CSS/HTML, CSP, D1 migration authority and no peer transport remain strict.
+
 ## Acceptance and next build
 - `python scripts/build726_event_ledger_sqlite_gate.py` checks migration 0051's true SQLite unique and FK constraints, mutually exclusive terminal ACK/DLQ, append-only protection, invalid event families / target peers / claimed independent outside source.
 - `node scripts/build726_event_inbox_inventory_fit_contract.mjs` checks protocol 1.1/legacy 1.0, exact signed ACK metadata, wrong issuer/key/audience/SHA/expiry/nonce and unsupported payload, Admin no-store auth, **all nine original Inventory data cells**, default Fit mode, old Card/Wide modes, existing Quick HST receipt path and no live sender.
