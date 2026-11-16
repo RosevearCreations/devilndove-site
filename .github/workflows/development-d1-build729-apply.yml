@@ -1,0 +1,89 @@
+name: Development Build 729 D1 Ordered Apply and Proof
+on:
+  push:
+    branches: [dev]
+    paths:
+      - '.github/workflows/development-d1-build729-apply.yml'
+permissions:
+  contents: read
+concurrency:
+  group: dnd-build729-development-d1-ordered
+  cancel-in-progress: false
+jobs:
+  development-only:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      CLOUDFLARE_ACCOUNT_ID: c0d5bc25df16ae5b7d47c985c4b7b787
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v7
+        with:
+          node-version: '24'
+      - uses: actions/setup-python@v7
+        with:
+          python-version: '3.12'
+      - name: Refuse Production or unreviewed canonical schema
+        run: |
+          set -euo pipefail
+          test "${GITHUB_REF_NAME}" = "dev"
+          grep -q '^database_name = "devilndove-dev"$' wrangler.toml
+          grep -q '^database_id = "dbc1615b-dcbe-4951-973b-b47c99c73bfa"$' wrangler.toml
+          ! grep -q 'f34a741b-0000-45b0-9a96-6be08754d563' wrangler.toml
+          python - <<'PY'
+          import json
+          m=json.load(open('migrations/canonical/manifest.json'))
+          assert len(m['migrations'])==53
+          assert m['migrations'][-1]['file']=='0053_release467_peer_enrollment_live_proof.sql'
+          print('Build729 Development-only D1 authority: PASS')
+          PY
+      - name: Snapshot original Development D1 business rows and 0052 prerequisite
+        run: |
+          set -euo pipefail
+          npx --yes wrangler@4.128.0 d1 execute devilndove-dev --remote --config wrangler.toml --json --command "SELECT (SELECT COUNT(*) FROM users) AS users, (SELECT COUNT(*) FROM products) AS products, (SELECT COUNT(*) FROM d1_migrations WHERE name='0052_release467_private_evidence_vault_withdrawal_retention.sql') AS v52, (SELECT COUNT(*) FROM d1_migrations WHERE name='0053_release467_peer_enrollment_live_proof.sql') AS v53;" > /tmp/build729-dev-before.json
+          python - <<'PY'
+          import json
+          raw=json.load(open('/tmp/build729-dev-before.json'))
+          rows=[]
+          def walk(x):
+              if isinstance(x,dict):
+                  if all(k in x for k in ('users','products','v52','v53')): rows.append(x)
+                  for v in x.values(): walk(v)
+              elif isinstance(x,list):
+                  for v in x: walk(v)
+          walk(raw); assert len(rows)==1,raw
+          x=rows[0]
+          assert int(x['v52'])==1,'Build728 Dev D1 missing, refuse Build729'
+          assert int(x['v53']) in (0,1),x
+          json.dump({k:int(x[k]) for k in ('users','products','v52','v53')},open('/tmp/build729-dev-before-counts.json','w'))
+          print('Development preapply preserved business snapshot and v52 proof: PASS')
+          PY
+      - name: Apply and independently verify canonical original Development D1 0053
+        run: |
+          set -euo pipefail
+          python scripts/d1_migrate.py --target development --apply --source-sha "${GITHUB_SHA}"
+          python scripts/d1_migrate.py --target development --source-sha "${GITHUB_SHA}"
+      - name: Independently read back new Development D1 proof, foreign keys and business row preservation
+        run: |
+          set -euo pipefail
+          npx --yes wrangler@4.128.0 d1 execute devilndove-dev --remote --config wrangler.toml --json --command "SELECT (SELECT COUNT(*) FROM users) AS users, (SELECT COUNT(*) FROM products) AS products, (SELECT COUNT(*) FROM d1_migrations WHERE name='0053_release467_peer_enrollment_live_proof.sql') AS v53, (SELECT COUNT(*) FROM app_schema_migration_proofs WHERE migration_name='0053_release467_peer_enrollment_live_proof.sql' AND environment='development') AS proof53, (SELECT COUNT(*) FROM sqlite_master WHERE type='table' AND name='dnd_peer_enrollment_proofs_729') AS peer_ledger;" > /tmp/build729-dev-after.json
+          python - <<'PY'
+          import json
+          before=json.load(open('/tmp/build729-dev-before-counts.json'))
+          raw=json.load(open('/tmp/build729-dev-after.json')); rows=[]
+          def walk(x):
+              if isinstance(x,dict):
+                  if all(k in x for k in ('users','products','v53','proof53','peer_ledger')): rows.append(x)
+                  for v in x.values(): walk(v)
+              elif isinstance(x,list):
+                  for v in x: walk(v)
+          walk(raw); assert len(rows)==1,raw
+          x=rows[0]
+          assert int(x['users'])==before['users'],(before,x)
+          assert int(x['products'])==before['products'],(before,x)
+          assert int(x['v53'])==int(x['proof53'])==int(x['peer_ledger'])==1,x
+          print('Development D1 original 0053 applied, immutably proven and business rows preserved: PASS')
+          PY
