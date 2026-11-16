@@ -92,7 +92,7 @@ for(const name of ['siteInventoryFitViewButton','siteInventoryCardViewButton',
  'data-amazon-fill-id','data-inventory-row','data-field="on_hand_quantity"',
  'data-field="reorder_level"'])assert.ok(js.includes(name),'Inventory edit not lost '+name);
 assert.ok(js.includes('chooseInventoryViewMode'));
-assert.ok(css.includes('Build 726: fit-to-screen'));
+assert.ok(css.includes('Build 726: all editable Inventory'));
 assert.ok(css.includes('is-fit-view'));
 assert.ok(css.includes('overflow-x:hidden'));
 for(let i=1;i<=9;i++)assert.ok(css.includes('td:nth-child('+i+')'),
