@@ -16,7 +16,7 @@
     "max_js_bytes": 600000,
     "max_css_bytes": 500000,
     "max_html_bytes": 500000,
-    "max_runtime_source_bytes": 19705000,
+    "max_runtime_source_bytes": 19727000,
     "max_runtime_source_files": 1855,
     "max_inline_data_uri_bytes": 650000
   },
@@ -33,6 +33,29 @@
     "production_mutation": false
   },
   "budget_reviews": [
+    {
+      "build": 729,
+      "date": "2026-11-16",
+      "scope": "Original Admin cryptographic keyring canary, verified Ed25519 live peer challenge and immutable D1 witness, responsive on-demand operations dashboard for source withdrawal delivery ageing, current-version rotation and independently supervised retention.",
+      "prior_limit_bytes": 19705000,
+      "new_limit_bytes": 19727000,
+      "delta_bytes": 22000,
+      "delta_percent": 0.11165,
+      "prior_build728_projected_runtime_bytes": 19702638,
+      "exact_build729_runtime_delta_bytes": 22010,
+      "projected_build729_runtime_bytes": 19724648,
+      "projected_headroom_bytes": 2352,
+      "changed_runtime_bytes": {
+        "functions/api/_lib/appModuleRoutes.js": 2656,
+        "functions/api/admin/production-variable-audit-406.js": 9243,
+        "public/js/admin-production-variable-audit-v406.js": 7501,
+        "admin/it-integrations/index.html": 2610
+      },
+      "runtime_source_file_limit_unchanged": 1855,
+      "per_file_limit_unchanged": true,
+      "review_reason": "Measured four original production versus Development file byte deltas on GitHub; no new runtime source files, only on-demand authenticated protected UI and local D1 receipt. Narrow 22,000-byte source cap adjustment (<0.112%) maintains individual JS/HTML/CSS, source-count, D1 first, exact Development checks, independent Production deploy and live integrity proof gates. Cloudflare secrets and other Master receivers cannot be activated or witnessed by source code alone; false peer statuses remain HOLD.",
+      "original_external_peer_verified": false
+    },
     {
       "build": 728,
       "date": "2026-11-16",
