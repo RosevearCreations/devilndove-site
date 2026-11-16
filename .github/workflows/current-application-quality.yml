@@ -73,6 +73,13 @@ jobs:
           node --check public/js/admin-mobile-product-augment.js
           node --check public/js/admin-social-platform-preflight.js
           node scripts/build707_ninth_field_media_drift_custody_contract.mjs
+      - name: Build 727 customer payment media DLP, source consent withdrawal, AES-GCM and retention HOLD negative regression
+        run: |
+          node --check functions/api/_lib/appModuleRoutes.js
+          node --check functions/api/admin/media-consent-records.js
+          node --check functions/api/admin/social-media-privacy-guard.js
+          node --check functions/api/admin/social-post-queue.js
+          node scripts/build727_privacy_dlp_contract.mjs
       - name: Build 726 durable unique D1 event outbox, ACK review, dead-letter and responsive Inventory Fit regression
         run: |
           node --check functions/api/admin/_lib/projectFinanceEvidence.js

@@ -1,15 +1,9 @@
-// File: /functions/api/admin/social-post-queue.js
-// Brief description: Admin-only social posting queue for job/process photos and summaries.
-// This is review-first. It prepares platform-ready captions and records manual/API posting status,
-// but does not auto-post until official OAuth/API keys are configured and approved for each platform.
-
 import{ auditAdminAction,captureRuntimeIncident,getAdminUserFromRequest,getDb,jsonResponse,normalizeText } from '../_lib/adminAudit.js';
 import {claimIndependentNinth716,claimExternalCustodySla717,reviewOriginalExternalSlaContinuity718} from './_lib/projectFinanceEvidence.js';
+import {inspectOutboundText727,evaluateMediaPublication727} from '../_lib/appModuleRoutes.js';
 export {claimIndependentNinth716,claimExternalCustodySla717,reviewOriginalExternalSlaContinuity718};
-
-
 const finance678=(()=>{
-// Build 678 — independent, signed marketing-expense attestation and owner-gated ROI.
+// Build 678
 const rows=r=> Array.isArray(r?.results) ? r.results :[];
 const parse=s=>{ try{ return JSON.parse(s || '{}');} catch{ return{};} };
 const clean=(v,n=120)=> String(v ?? '').trim().slice(0,n);
@@ -72,7 +66,6 @@ return{status:'independent_expense_verified',receipt_reference:ref,roi_certified
 async function reconciledCampaign(db,id){
 const post=await db.prepare('SELECT utm_campaign FROM social_post_queue WHERE social_post_queue_id=?').bind(id).first();
 if(!post?.utm_campaign)throw Error('Named campaign not found.');
-// Include every same-named queue item, not just the selected post; do not truncate expense scan.
 const attempts=rows(await db.prepare(`SELECT a.social_post_attempt_id,a.social_post_queue_id,a.platform_key,a.attempt_status,a.external_post_id,a.response_json
     FROM social_post_attempts a JOIN social_post_queue q ON q.social_post_queue_id=a.social_post_queue_id
     WHERE q.utm_campaign=? AND a.attempt_status IN
@@ -149,13 +142,11 @@ async function financialSummary678(db,id){
 if(!positiveId(id))return{status:'HOLD_SELECT_CAMPAIGN',roi_certified:false};
 return reconciledCampaign(db,Number(id));
 }
-
 return{campaignReturn678,expenseAttestation678,ownerSignoff678,financialSummary678};
 })();
 const{campaignReturn678,expenseAttestation678,ownerSignoff678,financialSummary678}=finance678;
-
 const finance679=(()=>{
-// Build 679: verified per-order cost allocations, tax-excluded net contribution and read-only Master evidence.
+// Build 679
 const list=r=>Array.isArray(r?.results)?r.results:[];
 const unpack=s=>{try{return JSON.parse(s||'{}')}catch{return{}}};
 const str=(s,n=120)=>String(s??'').trim().slice(0,n);
@@ -313,11 +304,9 @@ const saved=await db.prepare(`SELECT social_post_attempt_id FROM social_post_att
 if(!saved)throw Error('Owner acceptance could not be persisted; HOLD.');
 return{status:'owner_signed_source_net_contribution',master_handoff:v.master_handoff,publication_performed:false};
 }
-
 return{netContribution679,verifyCost679,campaignNet679,ownerNetSignoff679};
 })();
 const{netContribution679,verifyCost679,campaignNet679,ownerNetSignoff679}=finance679;
-
 export{ campaignReturn678,netContribution679 };
 const PLATFORM_DEFINITIONS=[
 {
@@ -375,7 +364,6 @@ required_scopes:'pins:write,boards:read',
 notes:'Manual-ready now. Useful for finished products and workshop inspiration boards once OAuth is configured.'
 }
 ];
-
 const CAPTION_TEMPLATES=[
 {
 template_key:'making_story',
@@ -438,7 +426,6 @@ call_to_action:'Condition, story, and availability details are listed here:',
 notes:'Use for sourced vintage/collectible/antiquity items.'
 }
 ];
-
 function rows(result){ return Array.isArray(result?.results) ? result.results :[];}
 function safeJson(value,fallback){ try{ return JSON.parse(value || '');} catch{ return fallback;} }
 function slugKey(value){ return normalizeText(value).toLowerCase().replace(/[^a-z0-9]+/g,'_').replace(/^_+|_+$/g,'');}
@@ -486,7 +473,6 @@ if (linkUrl) parts.push(`More: ${linkUrl}`);
 if (hashtags) parts.push(hashtags);
 return trimTo(parts.filter(Boolean).join('\n\n'),2200);
 }
-
 function envText(env,...names){
 for (const name of names){
 const value=normalizeText(env?.[name]);
@@ -603,7 +589,6 @@ hash |=0;
 }
 return Math.abs(hash).toString(36);
 }
-
 async function templateByKey(db,key){
 const clean=slugKey(key || '');
 if (!clean) return null;
@@ -646,7 +631,6 @@ return url.toString();
 return clean;
 }
 }
-
 function normalizeCaptionOverrides(payload={},platforms=[]){
 const source=typeof payload.platform_captions==='object'&& payload.platform_captions ? payload.platform_captions :{};
 const aliases={ facebook:'facebook_caption',instagram:'instagram_caption',tiktok:'tiktok_caption',x:'x_caption',youtube:'youtube_caption',pinterest:'pinterest_caption'};
@@ -829,7 +813,6 @@ await ensureColumn(db,'social_post_queue','media_consent_required','media_consen
 await ensureColumn(db,'social_post_queue','customer_media_present','customer_media_present INTEGER DEFAULT 0');
 await ensureColumn(db,'social_post_queue','approved_for_public_post','approved_for_public_post INTEGER DEFAULT 0');
 await db.prepare(`CREATE INDEX IF NOT EXISTS idx_social_post_queue_duplicate ON social_post_queue(duplicate_signature, do_not_repost)`).run().catch(()=> null);
-
 for (const platform of PLATFORM_DEFINITIONS){
 await db.prepare(`INSERT INTO social_platform_connections (
       platform_key, display_name, connection_status, api_ready, requires_oauth, required_scopes, notes, updated_at
@@ -850,7 +833,7 @@ platform.notes
 }
 }
 async function summarize(db,env={}){
-// Build 197: dashboard reads do not run a large DDL/seed pass. The deployment migration owns schema changes.
+// Build 197
 const summary=await db.prepare(`SELECT
     COUNT(*) AS total,
     SUM(CASE WHEN post_status IN ('draft','ready') THEN 1 ELSE 0 END) AS open_count,
@@ -966,7 +949,6 @@ const existingDuplicate=await db.prepare(`SELECT social_post_queue_id, title, po
 const doNotRepost=existingDuplicate ? 1 :0;
 const socialPostKey=buildQueueKey(`${sourceType}|${sourceId}|${title}|${summary}`);
 const mergedNotes=[notes,existingDuplicate ? `Possible duplicate of social queue #${existingDuplicate.social_post_queue_id}; review before reposting.`:''].filter(Boolean).join(' | ');
-
 const insert=await db.prepare(`INSERT INTO social_post_queue (
     social_post_key, source_type, source_id, title, summary, caption, hashtags,
     target_platforms_json, image_urls_json, video_url, link_url, approval_status,
@@ -1006,7 +988,6 @@ utmCampaign || null,
 utmUrl || null
 ).run();
 const socialPostQueueId=Number(insert?.meta?.last_row_id || 0);
-
 for (const platform of platforms){
 await db.prepare(`INSERT INTO social_post_attempts (
       social_post_queue_id, platform_key, attempt_status, attempted_by_user_id, notes, attempted_at
@@ -1017,7 +998,6 @@ adminUser.user_id,
 doNotRepost ? 'Prepared but flagged as possible duplicate; review before publishing.':'Prepared for manual publishing/copy-paste.'
 ).run().catch(()=> null);
 }
-
 return{ social_post_queue_id:socialPostQueueId,social_post_key:socialPostKey,duplicate_warning:!!existingDuplicate,media_warnings:mediaWarnings };
 }
 async function updateStatus(db,adminUser,payload={}){
@@ -1076,7 +1056,6 @@ target_platforms:['facebook','instagram','tiktok','x'],
 notes:`Generated from ${imageUrls.length} recent media asset(s). Review and edit before posting.`
 });
 }
-
 async function publishToFacebook(env,row,images){
 const pageId=envText(env,'FACEBOOK_PAGE_ID','META_PAGE_ID');
 const token=envText(env,'FACEBOOK_PAGE_ACCESS_TOKEN','META_PAGE_ACCESS_TOKEN');
@@ -1184,8 +1163,6 @@ details.notes || null
 ).run().catch(()=> null);
 });
 }
-
-
 async function saveCaptionTemplate(db,payload={}){
 const templateKey=slugKey(payload.template_key || payload.caption_template_key || payload.display_name || '');
 const displayName=trimTo(payload.display_name || templateKey.replace(/_/g,' '),120);
@@ -1199,7 +1176,6 @@ const contentPillar=slugKey(payload.content_pillar || 'workshop_update');
 const callToAction=trimTo(payload.call_to_action || '',280);
 const notes=trimTo(payload.notes || '',1200);
 const isActive=payload.is_active===false || String(payload.is_active || '').toLowerCase()==='0'? 0 :1;
-
 await db.prepare(`INSERT INTO social_caption_templates (
     template_key, display_name, content_pillar, default_platforms_json, default_hashtags,
     body_template, call_to_action, is_active, notes, created_at, updated_at
@@ -1217,17 +1193,14 @@ await db.prepare(`INSERT INTO social_caption_templates (
 templateKey,displayName,contentPillar,JSON.stringify(platforms),hashtags,
 bodyTemplate,callToAction || null,isActive,notes || null
 ).run();
-
 return{ template_key:templateKey,display_name:displayName,is_active:isActive };
 }
-
 async function archiveCaptionTemplate(db,payload={}){
 const templateKey=slugKey(payload.template_key || payload.caption_template_key || '');
 if (!templateKey) throw new Error('Template key is required.');
 await db.prepare(`UPDATE social_caption_templates SET is_active=0, updated_at=CURRENT_TIMESTAMP WHERE template_key = ?`).bind(templateKey).run();
 return{ template_key:templateKey,archived:true };
 }
-
 async function previewCaptionTemplate(db,payload={}){
 const template=await templateByKey(db,payload.caption_template_key || payload.template_key || '');
 if (!template) throw new Error('Choose a valid caption template.');
@@ -1244,7 +1217,6 @@ hashtags
 });
 return{ template_key:template.template_key,display_name:template.display_name,platforms,hashtags,utm_url:utmUrl,caption };
 }
-
 async function dryRunQueuedPost(context,db,adminUser,payload={}){
 const id=Number(payload.social_post_queue_id || 0);
 if (!id) throw new Error('A social_post_queue_id is required.');
@@ -1272,14 +1244,11 @@ const selected=normalizePlatforms(payload.platform_keys || payload.platforms || 
 const images=safeJson(row.image_urls_json,[]).map(safeUrl).filter(Boolean);
 const readiness=getPlatformReadiness(context.env);
 const results=[];
-// Build 673: a successful provider acknowledgement belongs to its channel.
-// Force and partial-channel retries cannot publish that channel a second time.
+// Build 673
 const priorSuccess=rows(await db.prepare(`SELECT DISTINCT platform_key FROM social_post_attempts
     WHERE social_post_queue_id=? AND attempt_status IN ('api_posted','receipt_verified','posted_manual')`).bind(id).all().catch(()=>({results:[]})));
 const alreadyPublished=new Set(priorSuccess.map(item=>item.platform_key));
-
-// Build 672: a tagged CAIP original is not a public derivative. Never let
-// force=true bypass the per-URL, per-project owner approval for this source.
+// Build 672
 if (row.source_type==='caip_project'){
 const approved=images.length > 0 && await Promise.all(images.map(async (url)=>{
 const receipt=await db.prepare(`SELECT consent_record_id FROM media_consent_records
@@ -1292,20 +1261,32 @@ return !!receipt;
 if (!approved) return{social_post_queue_id:id,attempted_platforms:selected,
 results:selected.map(platform=>({platform,status:'blocked_caip_derivative_approval',notes:'Exact public derivative and owner consent receipt required; force cannot override.'}))};
 }
-
 await db.prepare(`UPDATE social_post_queue SET last_publish_attempt_at=CURRENT_TIMESTAMP, updated_by_user_id=?, updated_at=CURRENT_TIMESTAMP WHERE social_post_queue_id=?`).bind(adminUser.user_id,id).run().catch(()=> null);
-
-const privacyStatus=slugKey(row.privacy_status || 'needs_review');
-const privacyApproved=Number(row.approved_for_public_post || 0)===1 || ['approved','no_private_media'].includes(privacyStatus);
-if (!privacyApproved && (row.source_type==='caip_project'|| payload.force !==true)){
+// Build 727: no force/retry bypass for consent, private captions or original privacy review.
+const privacyStatus=slugKey(row.privacy_status||'needs_review');
+const privacyApproved=Number(row.approved_for_public_post||0)===1 &&
+  ['approved','no_private_media'].includes(privacyStatus);
+const outboundText=inspectOutboundText727([row.title,row.summary,row.caption,row.notes].join(' '));
+let consentRecords=[];
+if(row.source_type&&row.source_id){
+  const consentRows=await db.prepare(`SELECT consent_record_id,source_type,source_id,media_url,
+    consent_status,consent_scope,public_use_allowed,social_use_allowed,expires_at
+    FROM media_consent_records WHERE LOWER(source_type)=? AND source_id=? ORDER BY consent_record_id DESC LIMIT 150`)
+    .bind(String(row.source_type).toLowerCase(),String(row.source_id)).all().catch(()=>({results:[]}));
+  consentRecords=rows(consentRows);
+}
+const consentGate=evaluateMediaPublication727(row,consentRecords,images);
+if(!privacyApproved||!outboundText.clear||!consentGate.allowed){
 for (const platform of selected){
-const blocked={ platform,status:'blocked_privacy_review',privacy_status:privacyStatus,notes:'Review Social Media Privacy Guard before API publishing this post.'};
-await recordApiAttempt(db,adminUser,id,platform,'blocked_privacy_review',blocked);
+const blocked={platform,status:'blocked_privacy_review_727',privacy_status:privacyStatus,
+  guard_code:!outboundText.clear?'HOLD_SENSITIVE_OUTBOUND_TEXT':(!consentGate.allowed?consentGate.code:'HOLD_PRIVACY_REVIEW'),
+  sensitive_codes:outboundText.findings,
+  notes:'Build 727 privacy/consent DLP: review and remove private details; force cannot override.'};
+await recordApiAttempt(db,adminUser,id,platform,'blocked_privacy_review_727',blocked);
 results.push(blocked);
 }
 return{ social_post_queue_id:id,attempted_platforms:selected,results };
 }
-
 if (Number(row.do_not_repost || 0)===1 && payload.force !==true){
 for (const platform of selected){
 const blocked={ platform,status:'blocked_duplicate_suspected',notes:'Possible duplicate/repost detected. Clear the duplicate warning or force publish only after review.'};
@@ -1314,7 +1295,6 @@ results.push(blocked);
 }
 return{ social_post_queue_id:id,attempted_platforms:selected,results };
 }
-
 if (isScheduledInFuture(row.scheduled_at) && payload.force !==true){
 for (const platform of selected){
 const blocked={ platform,status:'blocked_scheduled',scheduled_at:row.scheduled_at,notes:'This post is scheduled for the future. Use dry run/preview now or wait until it is due.'};
@@ -1323,7 +1303,6 @@ results.push(blocked);
 }
 return{ social_post_queue_id:id,attempted_platforms:selected,results };
 }
-
 const verified672=row.source_type==='caip_project'? await verifyAccounts672(context.env) :[];
 for (const platform of selected){
 if (alreadyPublished.has(platform)){
@@ -1391,9 +1370,7 @@ await db.prepare(`UPDATE social_post_queue
     WHERE social_post_queue_id = ?`).bind(terminal,terminal,adminUser.user_id,id).run().catch(()=> null);
 return{ social_post_queue_id:id,attempted_platforms:selected,results };
 }
-
-// Build 673: receipts are provider acknowledgements until a separate read-only
-// provider lookup independently confirms the same published ID.
+// Build 673
 async function receipts673(db){
 const records=rows(await db.prepare(`SELECT a.social_post_attempt_id,a.social_post_queue_id,a.platform_key,
     a.attempt_status,a.external_post_id,a.external_post_url,a.attempted_at,a.notes,q.title
@@ -1411,7 +1388,7 @@ on_hold:channels.filter(x=>['blocked_account_unverified','recovery_requested'].i
 manually_recorded:channels.filter(x=>x.attempt_status==='posted_manual').length
 },interpretation:'Latest recorded channel outcome, not a provider-wide reach or engagement measurement.'};
 }
-// Build 674: campaign planning only; approval is reset and no provider is called.
+// Build 674
 async function scheduleCampaign674(db,adminUser,payload){
 const id=Number(payload.social_post_queue_id);
 const campaign=trimTo(payload.campaign_name||'',60).trim();
@@ -1424,8 +1401,7 @@ await db.prepare(`UPDATE social_post_queue SET utm_campaign=?,scheduled_at=?,sch
     WHERE social_post_queue_id=?`).bind(campaign,date,trimTo(payload.schedule_timezone||'UTC',64),adminUser.user_id,id).run();
 return{social_post_queue_id:id,campaign_name:campaign,scheduled_at:date,approval_reset:true,publication_performed:false};
 }
-// Build 675: provider metrics are accepted only from a fresh, authenticated
-// read-only lookup of a previously acknowledged publication ID.
+// Build 675
 async function verifyEngagement675(context,db,adminUser,payload){
 const queueId=Number(payload.social_post_queue_id),platform=slugKey(payload.platform_key||'');
 if(!Number.isSafeInteger(queueId)||queueId<1||!['facebook','x'].includes(platform))
@@ -1467,8 +1443,7 @@ snapshots.push({social_post_queue_id:item.social_post_queue_id,platform:item.pla
 provider_id:item.external_post_id,metrics:evidence.metrics,observed_at:evidence.observed_at});}
 return{snapshots,roi_status:'UNAVAILABLE_NO_VERIFIED_ATTRIBUTED_REVENUE_AND_SPEND',financial_claims:false};
 }
-// Build 676: order settlement and campaign attribution are separate evidence
-// axes. The current order schema has no authoritative UTM/session foreign key.
+// Build 676
 async function recordFinancialEvidence676(db,adminUser,payload){
 const id=Number(payload.social_post_queue_id),kind=slugKey(payload.kind||'');
 const post=await db.prepare('SELECT utm_campaign FROM social_post_queue WHERE social_post_queue_id=?').bind(id).first();
@@ -1577,8 +1552,6 @@ if(queue?.approval_status!=='approved')throw Error('Queue no longer has publicat
 await recordApiAttempt(db,adminUser,id,platform,'recovery_requested',{notes:'Owner attested manual duplicate check before one-channel retry.'});
 return publishQueuedPost(context,db,adminUser,{social_post_queue_id:id,platform_keys:[platform],force:false});
 }
-
-// Read-only account identity check. A configured token alone is not a verified account.
 async function verifyAccounts672(env){
 const checks=[
 ['facebook',envText(env,'FACEBOOK_PAGE_ID','META_PAGE_ID'),envText(env,'FACEBOOK_PAGE_ACCESS_TOKEN','META_PAGE_ACCESS_TOKEN'),id=>`https://graph.facebook.com/${envText(env,'META_GRAPH_API_VERSION')||'v22.0'}/${encodeURIComponent(id)}?fields=id,name`],
@@ -1595,7 +1568,6 @@ return{platform,verified,status:verified?'account_verified':'account_unverified'
 }catch{return{platform,verified:false,status:'verification_unavailable'};}
 })).then(rows=>[...rows,{platform:'tiktok',verified:false,status:'manual_only'},{platform:'youtube',verified:false,status:'manual_only'}]);
 }
-
 async function approveCaipDerivative672(db,adminUser,payload){
 const queueId=Number(payload.social_post_queue_id),assetId=Number(payload.creative_asset_id);
 const url=String(payload.public_url||'').trim();
@@ -1610,15 +1582,18 @@ const asset=await db.prepare(`SELECT ca.creative_asset_id,ca.rights_status,ma.pu
     ORDER BY f.caip_media_upload_file_id DESC LIMIT 1`).bind(Number(post.source_id),assetId).first();
 if(!asset||asset.consent_state!=='public_allowed'||asset.upload_rights!=='public_allowed'||asset.privacy_state!=='public_approved'||asset.rights_status!=='public_allowed'||asset.public_url!==url)
 throw Error('CAIP source rights, consent, public-approval state or canonical derivative URL are not independently verified. HOLD.');
+const existingApproval=await db.prepare('SELECT consent_status FROM media_consent_records WHERE consent_key=? LIMIT 1')
+    .bind(`caip672:${queueId}:${assetId}`).first();
+if(['revoked','blocked'].includes(String(existingApproval?.consent_status||'').toLowerCase()))
+  throw Error('Build 727: withdrawn CAIP derivative approval cannot be silently restored.');
 await db.prepare(`INSERT INTO media_consent_records(consent_key,subject_label,source_type,source_id,media_url,consent_status,consent_scope,public_use_allowed,social_use_allowed,privacy_notes,reviewed_by_user_id,updated_at)
     VALUES(?,?,'caip_project',?,?,'approved','all_public',1,1,?, ?,CURRENT_TIMESTAMP)
-    ON CONFLICT(consent_key) DO UPDATE SET media_url=excluded.media_url,consent_status='approved',public_use_allowed=1,social_use_allowed=1,reviewed_by_user_id=excluded.reviewed_by_user_id,updated_at=CURRENT_TIMESTAMP`).bind(`caip672:${queueId}:${assetId}`,`CAIP asset ${assetId}`,String(post.source_id),url,'Owner reviewed exact public derivative; source rights and consent checked.',adminUser.user_id).run();
+    ON CONFLICT(consent_key) DO UPDATE SET media_url=excluded.media_url,consent_status='approved',public_use_allowed=1,social_use_allowed=1,reviewed_by_user_id=excluded.reviewed_by_user_id,updated_at=CURRENT_TIMESTAMP
+    WHERE media_consent_records.consent_status NOT IN ('revoked','blocked')`).bind(`caip672:${queueId}:${assetId}`,`CAIP asset ${assetId}`,String(post.source_id),url,'Owner reviewed exact public derivative; source rights and consent checked.',adminUser.user_id).run();
 await db.prepare(`UPDATE social_post_queue SET image_urls_json=?,approval_status='needs_review',post_status='draft',updated_by_user_id=?,updated_at=CURRENT_TIMESTAMP WHERE social_post_queue_id=?`).bind(JSON.stringify([url]),adminUser.user_id,queueId).run();
 return{social_post_queue_id:queueId,creative_asset_id:assetId,public_derivative_approved:true,publication_performed:false};
 }
-
-
-// Build 680: evidence age, independently signed Master receipt and owner exceptions (read-only by default).
+// Build 680
 async function finance680(db,env,id){
 const source=await campaignNet679(db,id);
 if(!source?.campaign)return{status:'HOLD_SELECT_CAMPAIGN',ack:'HOLD',exceptions:[]};
@@ -1703,8 +1678,6 @@ ORDER BY social_post_attempt_id DESC LIMIT 1`).bind(ref,id,status).first();
 if(!saved)throw Error('Owner exception evidence was not durably saved. HOLD.');
 return{status,exception_reference:ref,profitability_certified:false,publication_performed:false};
 }
-
-
 const parseUtc681=x=>{const v=String(x??'');return Date.parse(/^\d{4}-\d\d-\d\d \d\d:\d\d:\d\d$/.test(v)?v.replace(' ','T')+'Z':v);};
 export function exceptionSla681(e,now=Date.now()){
 const opened=parseUtc681(e.opened_at),ack=parseUtc681(e.ack_at),closed=parseUtc681(e.resolved_at);
@@ -1716,7 +1689,6 @@ now>opened+72*3600000&&!Number.isFinite(ack)?'ACK_AND_RESOLUTION_OVERDUE':
 now>opened+72*3600000?'RESOLUTION_OVERDUE':
 !Number.isFinite(ack)&&now>opened+24*3600000?'ACK_OVERDUE':Number.isFinite(ack)?'ACKNOWLEDGED_OPEN':'AWAITING_ACK'};
 }
-
 async function finance681(db,env,id){
 const source=await campaignNet679(db,id);
 if(!source?.campaign)return{status:'HOLD_SELECT_CAMPAIGN',exceptions:[],master_receipts:[],owner_history:[]};
@@ -1779,10 +1751,7 @@ const saved=await db.prepare(`SELECT social_post_attempt_id FROM social_post_att
 if(!saved)throw Error('Owner acceptance history was not durably saved. HOLD.');
 return{status:'owner_exception_acknowledged_681',connection:'HOLD',publication_performed:false};
 }
-
-
-
-// Build 683: signed financial provenance; Master CONNECTED remains HOLD.
+// Build 683
 export function financialClaim683(kind,x){
 if(kind==='source')return{version:1,source:'devilndove',campaign:x.campaign,queue_id:x.queue_id,
 source_revision:x.source_revision,fingerprint_sha256:x.fingerprint_sha256,signer_id:x.signer_id,nonce:x.nonce,issued_at:x.issued_at};
@@ -1904,9 +1873,7 @@ if(!saved)throw Error('Durable owner discrepancy closure record missing. HOLD.')
 return{status:'owner_discrepancy_evidence_closed_683',receipt_id:saved.social_post_attempt_id,
 master_accepted:false,connection:'HOLD',publication_performed:false};
 }
-
-
-// Build 684: only externally controlled signing keys and a pinned, authenticated receiver are trusted.
+// Build 684
 export function claim684(kind,c){
 if(kind==='enrollment')return{v:1,purpose:'devilndove_finance_signer_runtime_684',source:'devilndove',
 queue_id:c.queue_id,campaign:c.campaign,source_revision:c.source_revision,fingerprint_sha256:c.fingerprint_sha256,
@@ -1969,8 +1936,7 @@ c.master_revision!==identity.master_revision||typeof c.receiver_receipt_id!=='st
 throw Error('Independent Master acceptance signature, nonce, receipt or freshness mismatch. HOLD.');
 return{claim:claim684('acceptance',c),signature:evidence.signature,checked_at:new Date().toISOString()};
 }
-
-// Build 684: append-only D1 receipts; no browser-supplied CONNECTED or Master acceptance claim.
+// Build 684
 async function append684(db,user,id,platform,status,nonce,data){
 const result=await db.prepare("INSERT INTO social_post_attempts (social_post_queue_id,platform_key,attempt_status,external_post_id,response_json,attempted_by_user_id,notes) SELECT ?,?,?,?,?,?,? WHERE NOT EXISTS (SELECT 1 FROM social_post_attempts WHERE platform_key=? AND external_post_id=?)")
 .bind(id,platform,status,nonce,JSON.stringify(data),user.user_id,['finance_owner_review_695','finance_owner_review_696'].includes(platform)?'Protected original owner review; source repair and certification HOLD.':'Exact external signed financial evidence; independent runtime telemetry separate.',platform,nonce).run();
@@ -2071,10 +2037,7 @@ master_accepted:true,profitability_certified:false});
 return{status:'owner_finance_continuity_closed_684',receipt_id,master_accepted:true,
 connection:'HOLD_INDEPENDENT_CONTINUOUS_RUNTIME_TELEMETRY',publication_performed:false};
 }
-
-
-// Build 685 — read-only receipt aging, signed Master revalidation and owner-controlled recovery.
-// No background receiver calls, unverified CONNECTED flag, private keys, or financial certification.
+// Build 685
 export function assess685(v,evidence,now=Date.now()){
 const c=evidence?.claim||{},checked=evidence?.checked_at;
 const checkedMs=typeof checked==='string'?Date.parse(checked):NaN;
@@ -2181,9 +2144,7 @@ return{status,receipt_id,case_id:payload.case_id,issue_code:payload.issue_code,
 master_accepted:status==='owner_exception_evidence_closed_685'&&readback.master_fresh,
 connection:'HOLD_INDEPENDENT_CONTINUOUS_RUNTIME_TELEMETRY',publication_performed:false};
 }
-
-// Build 686: read-only, server-clock receipt alerts and prioritized owner recovery.
-// This is a triage projection, NOT a signed receipt or a CONNECTED/financial certification.
+// Build 686
 export function prioritizeFinance686(v,now=Date.now()){
 const status=String(v?.status||'HOLD_UNAVAILABLE');
 const drift=status==='HOLD_SOURCE_RECEIPT_DRIFT'||status==='HOLD_SIGNATURE_REVALIDATION';
@@ -2210,7 +2171,6 @@ master_accepted_now:!!v?.master_fresh,connection:'HOLD_INDEPENDENT_CONTINUOUS_RU
 profitability_certified:false,automated_master_polling:false};
 }
 async function globalFinanceQueue686(db,now=Date.now()){
-// One bounded append-only scan. Other campaigns' Master freshness is never inferred.
 const recent=rows(await db.prepare(`SELECT a.social_post_attempt_id,a.social_post_queue_id,
 a.attempt_status,a.response_json,a.attempted_at,q.utm_campaign
 FROM social_post_attempts a JOIN social_post_queue q
@@ -2239,10 +2199,7 @@ status:recent.length<=120?'OWNER_RECOVERY_REVIEW_ONLY':'HOLD_GLOBAL_HISTORY_INCO
 total_visible_open:open.length,cases:open.slice(0,30),
 connection:'HOLD_INDEPENDENT_CONTINUOUS_RUNTIME_TELEMETRY',automated_escalation:false};
 }
-
-// Build 687: bounded, read-only owner SLA and historical financial receipt analytics.
-// The two-hour target is advisory, not an enforceable SLA. Historical D1 entries are
-// NOT independently reverified current Master acceptance; only financial685 can do that.
+// Build 687
 export function assessFinance687(current,incidentRows,acceptanceRows,now=Date.now(),targetMinutes=120){
 const minutes=(value)=>{const t=Date.parse(value||'');return Number.isFinite(t)&&t<=now+300000?
 Math.max(0,Math.floor((now-t)/60000)):null;};
@@ -2328,10 +2285,7 @@ const incidents=rows(await db.prepare("SELECT social_post_attempt_id,attempt_sta
 const receipts=rows(await db.prepare("SELECT social_post_attempt_id,response_json,attempted_at FROM social_post_attempts WHERE social_post_queue_id=? AND platform_key='finance_acceptance_684' ORDER BY social_post_attempt_id DESC LIMIT 81").bind(n).all());
 return assessFinance687(current,incidents,receipts);
 }
-
-// Build 688 — owner-triggered SLA breach escalation, historical Master renewal chain,
-// and independent-evidence-gated owner signoff. All historical entries are audit
-// observations, never proof of a currently accepted Master receiver or connectivity.
+// Build 688
 export function assessFinance688(current,sla,rawReceipts,rawReviews,now=Date.now()){
 const selected=Number.isSafeInteger(Number(current?.queue_id))&&Number(current.queue_id)>0;
 const receipts=Array.isArray(rawReceipts)?rawReceipts:[],reviews=Array.isArray(rawReviews)?rawReviews:[];
@@ -2462,10 +2416,8 @@ master_accepted_now:later.master_accepted_now,
 connection:'HOLD_INDEPENDENT_CONTINUOUS_RUNTIME_TELEMETRY',
 financial_certified:false,publication_performed:false};
 }
-
-// Build 689: replay the owner audit ledger without replaying external financial actions.
-// A historical D1 signature cannot establish current Master acceptance; only the
-// current exact-source Build 685/688 independently verified receiver proof can do that.
+// Build 689
+// Build 685
 export function assessFinance689(current,report,reviewRows,auditRows,now=Date.now()){
 const selected=Number.isSafeInteger(Number(current?.queue_id))&&Number(current.queue_id)>0;
 const reviews=Array.isArray(reviewRows)?reviewRows:[],audits=Array.isArray(auditRows)?auditRows:[];
@@ -2628,9 +2580,7 @@ master_accepted_now:refreshed.master_accepted_now,
 connection:'HOLD_INDEPENDENT_CONTINUOUS_RUNTIME_TELEMETRY',
 financial_certified:false,external_replay_performed:false};
 }
-
-// Build 690 — bounded sampled renewal continuity, replay exception owner disposition,
-// and independently reverified owner audit closure reconciliation. No external replay.
+// Build 690
 export function assessFinance690(current,replay,ownerRows,receiptRows,now=Date.now()){
 const n=Number(current?.queue_id),selected=Number.isSafeInteger(n)&&n>0;
 const rows690=Array.isArray(ownerRows)?ownerRows:[],receipts=Array.isArray(receiptRows)?receiptRows:[];
@@ -2810,9 +2760,7 @@ master_accepted_now:after.master_accepted_now,
 exception_evidence_repaired:false,financial_certified:false,
 connection:'HOLD_INDEPENDENT_CONTINUOUS_RUNTIME_TELEMETRY'};
 }
-
-// Build 691: GET-only server-clock exception aging and bounded Master renewal gap
-// inspection. Owner actions are append-only acknowledgments, NOT evidence repair.
+// Build 691
 export function assessFinance691(current,prior,ownerRows,now=Date.now()){
 const selected=Number.isSafeInteger(Number(current?.queue_id))&&Number(current.queue_id)>0;
 const rows691=Array.isArray(ownerRows)?ownerRows:[],
@@ -3005,9 +2953,7 @@ master_accepted_now:after.master_accepted_now,
 external_replay_performed:false,financial_certified:false,
 connection:'HOLD_INDEPENDENT_CONTINUOUS_RUNTIME_TELEMETRY'};
 }
-
-// Build 692 — owner SLA follow-up, historical Master receipt provenance and
-// closure audit continuity. A historical source pin is NOT signature revalidation.
+// Build 692
 export function assessFinance692(current,prior,ownerRows,now=Date.now()){
 const selected=Number.isSafeInteger(Number(current?.queue_id))&&Number(current.queue_id)>0;
 const rows692=Array.isArray(ownerRows)?ownerRows:[],
@@ -3206,9 +3152,7 @@ master_accepted_now:after.master_accepted_now,
 external_master_replay_performed:false,financial_certified:false,
 connection:'HOLD_INDEPENDENT_CONTINUOUS_RUNTIME_TELEMETRY'};
 }
-
-// Build 693: bounded owner SLA follow-up aging, source-pinned provenance
-// exception recheck and append-only owner acceptance history. No external replay.
+// Build 693
 export function assessFinance693(current,prior,ownerRows,now=Date.now()){
 const selected=Number.isSafeInteger(Number(current?.queue_id))&&Number(current.queue_id)>0;
 const rows693=Array.isArray(ownerRows)?ownerRows:[],bounded=!!prior?.history_complete&&rows693.length<=60;
@@ -3434,9 +3378,7 @@ master_accepted_now:after.master_accepted_now,
 historical_signatures_reverified:false,financial_certified:false,
 connection:'HOLD_INDEPENDENT_CONTINUOUS_RUNTIME_TELEMETRY'};
 }
-
-// Build 694 — durable exact-source owner resolution ledger. A recorded decision
-// does NOT repair a live incident, reverify historical signatures or certify finance.
+// Build 694
 export function assessFinance694(current,prior,ownerRows,now=Date.now()){
 const n=Number(current?.queue_id),selected=Number.isSafeInteger(n)&&n>0;
 const rows694=Array.isArray(ownerRows)?ownerRows:[],
@@ -3666,10 +3608,7 @@ master_accepted_now:after.master_accepted_now,
 external_remediation_proven:false,financial_certified:false,
 connection:'HOLD_INDEPENDENT_CONTINUOUS_RUNTIME_TELEMETRY'};
 }
-
-
-// Build 695 — source-pinned resolution aging, unverified independent correction
-// evidence intake, and fresh Master closure revalidation. No automatic repair.
+// Build 695
 export function assessFinance695(current,prior,ownerRows,now=Date.now()){
 const n=Number(current?.queue_id),selected=Number.isSafeInteger(n)&&n>0;
 const sourcePairs=prior?.provenance?.pairs||[],rows695=Array.isArray(ownerRows)?ownerRows:[],
@@ -3859,11 +3798,7 @@ return{status,receipt_id,original_source_repair_verified:false,
 master_accepted_now:after.master_accepted_now,financial_certified:false,
 connection:'HOLD_INDEPENDENT_CONTINUOUS_RUNTIME_TELEMETRY'};
 }
-
-
-// Build 696: independent Ed25519 custodian *attestation* verification. The
-// signature proves who signed the exact intake, NOT that a mismatched source
-// has been repaired. Owner escalation and Master continuity remain separate.
+// Build 696
 export function claim696(c){
 return{v:1,purpose:'devilndove_finance_correction_attestation_696',source:'devilndove',
 queue_id:c.queue_id,reference_receipt_id:c.reference_receipt_id,
@@ -4105,11 +4040,7 @@ return{status,receipt_id,external_source_repair_verified:false,
 financial_certified:false,master_accepted_now:after.master_accepted_now,
 connection:'HOLD_INDEPENDENT_CONTINUOUS_RUNTIME_TELEMETRY'};
 }
-
-
-// Build 697 — independent second-party reconciliation of authenticated evidence,
-// owner SLA escalation resolution review, and fresh Master attestation continuity.
-// Independent signature attests evidence correlation only; actual source repair is HOLD.
+// Build 697
 export function claim697(c){
 return{v:1,purpose:'devilndove_finance_independent_reconciliation_697',source:'devilndove',
 queue_id:c.queue_id,older_receipt_id:c.older_receipt_id,
@@ -4354,10 +4285,6 @@ return{status,receipt_id,original_source_repair_verified:false,
 financial_certified:false,master_accepted_now:after.master_accepted_now,
 connection:'HOLD_INDEPENDENT_CONTINUOUS_RUNTIME_TELEMETRY'};
 }
-
-
-// SQLite CURRENT_TIMESTAMP is UTC without a T/Z suffix. Normalize it to an
-// explicit UTC timestamp before comparing, rather than interpreting local time.
 export function utcAttemptTime698(t,now=Date.now()){
 if(typeof t!=='string')return null;
 const iso=/^\d{4}-\d\d-\d\dT\d\d:\d\d:\d\d(?:\.\d{3})?Z$/.test(t)?t:
@@ -4366,10 +4293,7 @@ if(!iso)return null;
 const ms=Date.parse(iso);
 return Number.isFinite(ms)&&ms<=now+300000?ms:null;
 }
-
-// Build 698 — post-reconciliation original source-repair proof *intake*, source
-// escalation recovery receipts and Master renewal drift detection. External
-// evidence metadata is never a verified repair or a replacement Master signature.
+// Build 698
 export function assessFinance698(current,prior,ownerRows,now=Date.now()){
 const n=Number(current?.queue_id),selected=Number.isSafeInteger(n)&&n>0,
 rows698=Array.isArray(ownerRows)?ownerRows:[],bounded=!!prior?.history_complete&&rows698.length<=60;
@@ -4559,13 +4483,7 @@ return{status,receipt_id,original_source_repaired:false,financial_certified:fals
 master_drift_detected:after.master.drift_detected,
 connection:'HOLD_INDEPENDENT_CONTINUOUS_RUNTIME_TELEMETRY'};
 }
-
-
-
-// Build 700: owner-triggered ONLY, isolated source-of-record HTTPS GET.
-// The external endpoint contract is signed by a fourth independent custodian.
-// This verifies a fresh original SOURCE READBACK snapshot, not financial
-// certification, bookkeeping correction or a live CONNECTED transition.
+// Build 700
 export function claim700(x){
 return{v:1,purpose:'devilndove_finance_live_original_source_readback_700',
 source:'devilndove',queue_id:x.queue_id,
@@ -4767,8 +4685,6 @@ signer_id:signerId,nonce,observed_at:signed?.observed_at});
 if(JSON.stringify(signed)!==JSON.stringify(expected)||!fresh684(signed?.observed_at,300000)||
 !await verify684(publicKey,expected,signature))
 throw Error('Independent live source response signature, nonce, time, digest or source mismatch. HOLD.');
-// Recheck original source before append; never translate a document receipt
-// into a source closure, bookkeeping acceptance, or CONNECTED status.
 const currentAgain=await financial685(db,env,n);
 if(currentAgain.source_revision!==current.source_revision||
 currentAgain.fingerprint_sha256!==current.fingerprint_sha256)
@@ -4789,10 +4705,7 @@ receipt_id:receiptId,source_of_record_https_readback:true,
 original_source_repaired:false,financial_certified:false,
 connection:'HOLD_INDEPENDENT_CONTINUOUS_RUNTIME_TELEMETRY'};
 }
-
-
-// Build 701: a distinct fifth signer verifies bookkeeping EVIDENCE against
-// one fresh original source receipt. This is NOT original book closure.
+// Build 701
 export function claim701(x){
  return {v:1,purpose:'devilndove_independent_bookkeeping_evidence_review_701',
  source:'devilndove',queue_id:x.queue_id,
@@ -4951,11 +4864,7 @@ async function ownerBookkeepingReview701(db,env,user,p){
    original_source_repaired:false,bookkeeping_closed:false,
    financial_certified:false,connection:'HOLD_INDEPENDENT_CONTINUOUS_RUNTIME_TELEMETRY'};
 }
-
-
-// Build 702: a sixth independent signer may attest a bookkeeping closure
-// DECISION only. A signed recommendation is never a ledger POST, source repair,
-// actual accounting close, financial certification, or CONNECTED assertion.
+// Build 702
 export function claim702(x){
  return {v:1,purpose:'devilndove_independent_bookkeeping_closure_decision_702',
  source:'devilndove',queue_id:x.queue_id,
@@ -5156,11 +5065,7 @@ async function ownerBookkeepingDecision702(db,env,user,p){
    original_source_repaired:false,bookkeeping_closed:false,financial_certified:false,
    connection:'HOLD_INDEPENDENT_CONTINUOUS_RUNTIME_TELEMETRY'};
 }
-
-
-// Build 703: a seventh independently enrolled public signer attests only a
-// proposed external POSTING DOCUMENT, not independently fetched provider bytes.
-// Owner acceptance is a source-pinned audit decision, not a ledger mutation.
+// Build 703
 export function claim703(x){
  return {v:1,purpose:'devilndove_independent_external_bookkeeping_posting_document_703',
  source:'devilndove',queue_id:x.queue_id,
@@ -5440,11 +5345,7 @@ async function ownerFinancialClosure703(db,env,user,p){
    actual_external_posting_verified:false,bookkeeping_closed:false,financial_certified:false,
    connection:'HOLD_INDEPENDENT_CONTINUOUS_RUNTIME_TELEMETRY'};
 }
-
-
-// Build 704: a live, pinned, directly queried HTTPS posting SOURCE with an
-// eighth independent Ed25519 verifier. Even its signature does NOT certify
-// accounting close, audited profit, bank settlement or continuous connection.
+// Build 704
 export function claim704(x){
  return {v:1,purpose:'devilndove_live_bookkeeping_posting_source_readback_704',
   source:'devilndove',queue_id:x.queue_id,
@@ -5758,8 +5659,6 @@ async function ownerFinancialReadiness704(db,env,user,p){
   receipt_id:receiptId,actual_bookkeeping_close:false,financial_certified:false,
   connection:'HOLD_INDEPENDENT_CONTINUOUS_RUNTIME_TELEMETRY'};
 }
-
-
 export function eligibleRenewal705(current,original,now=Date.now()){
  const at=utcAttemptTime698(original?.financial_readiness_recorded_at,now),
    observed=utcAttemptTime698(original?.source_observed_at,now);
@@ -5773,9 +5672,9 @@ export function eligibleRenewal705(current,original,now=Date.now()){
   current?.master_fresh===true&&current?.history_complete===true&&
   Array.isArray(current.open_cases)&&current.open_cases.length===0;
 }
-// Build 705 deliberately reuses the independently enrolled eighth signer and
-// canonical Build 704 readback claim. The second challenge MUST be unique,
-// later, and independently fetched. No cached Build 704 signed response counts.
+// Build 705
+// Build 704
+// Build 704
 export async function assessFinance705(current,prior,renewalRows,ownerRows,signer={},now=Date.now()){
  const id=Number(current?.queue_id),selected=Number.isSafeInteger(id)&&id>0,
    renewed=Array.isArray(renewalRows)?renewalRows:[],
@@ -6073,11 +5972,8 @@ async function ownerFinancialEvidenceReview705(db,env,user,p){
    'OWNER_EVIDENCE_REVIEW_RECOMMENDATION_BOOKS_STILL_HOLD',
   receipt_id:receiptId,bookkeeping_closed:false,financial_certified:false};
 }
-
-
-// Build 706: a NINTH independent public-key reviewer evaluates the exact
-// original two live source receipt chain + original owner Build 705 decision.
-// Its signature is exception evidence, NOT an external ledger close.
+// Build 706
+// Build 705
 export function claim706(x){
  return {v:1,purpose:'devilndove_independent_bookkeeping_continuity_exception_review_706',
   source:'devilndove',queue_id:x.queue_id,
@@ -6434,10 +6330,7 @@ async function ownerEvidenceRetention706(db,env,user,p){
   bookkeeping_closed:false,financial_certified:false,
   connection:'HOLD_INDEPENDENT_CONTINUOUS_RUNTIME_TELEMETRY'};
 }
-
-// Build 699: a distinct independent witness can attest the exact external
-// repair-document SHA-256 and original receipt chain. The source-ledger
-// mismatch is NOT repaired merely because a document signature is valid.
+// Build 699
 export function claim699(x){
 return{v:1,purpose:'devilndove_independent_source_repair_document_witness_699',
 source:'devilndove',queue_id:x.queue_id,
@@ -6628,8 +6521,7 @@ return{status:'EXTERNAL_REPAIR_DOCUMENT_AUTHENTICATED_SOURCE_READBACK_HOLD',rece
 independent_document_signature_verified:true,original_source_repaired:false,
 financial_certified:false,connection:'HOLD_INDEPENDENT_CONTINUOUS_RUNTIME_TELEMETRY'};
 }
-
-// Build 682 — source-only financial export and owner discrepancy audit.
+// Build 682
 async function finance682(db,env,id){
 const n=Number(id);
 if(!Number.isSafeInteger(n)||n<1)return{status:'HOLD_SELECT_CAMPAIGN',cases:[],reviews:[],master_accepted:false};
@@ -6693,12 +6585,7 @@ const saved=await db.prepare(`SELECT social_post_attempt_id FROM social_post_att
 if(!saved)throw Error('Owner audit decision was not durably saved. HOLD.');
 return{status,receipt_id:saved.social_post_attempt_id,master_accepted:false,publication_performed:false};
 }
-
-
-// Build 707 — independently signed ninth-reviewer field adoption and owner
-// financial custody audit. Owner field acceptance is an explicit *reported*
-// off-platform review of the original signed packet, NOT a new signature,
-// a verified physical device, a bank receipt, or a financial close.
+// Build 707
 export function assessFinance707(current,prior,fieldRows=[],custodyRows=[],now=Date.now()){
  const n=Number(current?.queue_id),
   valid=Number.isSafeInteger(n)&&n>0&&current.master_fresh===true&&
@@ -6877,11 +6764,7 @@ async function originalFinancialCustodyAudit707(db,env,user,p){
  return {status:'OWNER_SOURCE_BOUND_CUSTODY_AUDIT_BOOKS_HOLD',receipt_id:receiptId,
   manifest_sha256:source.retention_manifest_sha256,bookkeeping_closed:false};
 }
-
-
-// Build 708: renewal attests rechecking the original signed ninth reviewer
-// and retained custody chain. It never asserts a new ninth signature, external
-// bookkeeping posting, physical device witness or continuous monitoring.
+// Build 708
 export function custodyRenewalManifest708(x){
  return {v:1,purpose:'devilndove_manual_source_bound_financial_custody_renewal_708',
   source:'devilndove',queue_id:x.queue_id,
@@ -7105,11 +6988,7 @@ async function ownerCustodyRenewal708(db,env,user,p){
  return {status:'SOURCE_BOUND_FINANCIAL_CUSTODY_RENEWAL_DIGEST_VERIFIED_BOOKS_HOLD',
   receipt_id:receiptId,renewal_manifest_sha256,bookkeeping_closed:false,financial_certified:false};
 }
-
-
-// Build 709: renewal aging and independent-*source* exception escalation.
-// "Independent" means existing independently signed ninth-reviewer evidence
-// is rechecked, NOT a fresh ninth sign-off, external complaint, or book close.
+// Build 709
 export function renewalAge709(original,now=Date.now()){
  const at=Date.parse(String(original?.custody_708_verified?
    original.custody_708_recorded_at:original?.continuity_708_recorded_at||''));
@@ -7253,10 +7132,8 @@ async function ownerCustodyExceptionEscalation709(db,env,user,p){
   automatic_external_escalation_sent:false,bookkeeping_closed:false,
   new_independent_signature_generated:false};
 }
-
-
-// Build 710: original independent-signer *provenance* only. Rechecking
-// an existing Build 706 Ed25519 verifier is NOT a new external signature.
+// Build 710
+// Build 706
 export function custodyEscalationFollowupAge710(row,now=Date.now()){
  const at=Date.parse(String(row?.attempted_at||''));
  if(!Number.isFinite(at)||at>now+300000)return {
@@ -7313,8 +7190,6 @@ export async function assessFinance710(current,base706,prior709,escalationRows=[
     Number(x.custody_exception_escalation_receipt_id_709)),
    d=safeJson(row?.response_json,{}),
    age=custodyEscalationFollowupAge710(row,now);
-  // Independently link original ledger rows, never infer a 709 receipt date
-  // from an owner-supplied 710 note.
   if(!row||row.attempt_status!=='owner_financial_custody_exception_escalation_709'||
    d.original_708_continuity_receipt_id!==x.continuity_708_receipt_id||
    d.original_ninth_review_receipt_id!==x.review_706_receipt_id||
@@ -7535,10 +7410,7 @@ async function ownerNinthProvenanceAudit710(db,env,user,p){
   receipt_id:receipt,provenance_manifest_sha256,bookkeeping_closed:false,
   new_independent_signature_obtained:false};
 }
-
-
-// Build 711: reconcile original owner follow-up outcomes; this is not proof
-// that an outside reviewer was contacted or a financial institution posted.
+// Build 711
 export function originalProvenanceAge711(x,now=Date.now()){
  const at=Date.parse(String(x?.provenance_710_recorded_at||''));
  if(!Number.isFinite(at)||at>now+300000)
@@ -7788,10 +7660,7 @@ async function ownerNinthRenewal711(db,env,user,p){
   receipt_id:receipt,renewal_manifest_sha256,bookkeeping_closed:false,
   new_independent_signature_generated:false};
 }
-
-
-// Build 712 independently re-reads durable Build 711 renewal ledger rows and
-// computes 24/48/72 hour horizons; there is no continuous runtime watcher.
+// Build 712
 export function originalNinthRenewalAge712(row,now=Date.now()){
  const at=Date.parse(String(row?.attempted_at||''));
  if(!Number.isFinite(at)||at>now+300000)
@@ -7936,7 +7805,6 @@ async function finance712(db,env,id){
  const followups=rows(await db.prepare("SELECT social_post_attempt_id,attempt_status,response_json,attempted_at FROM social_post_attempts WHERE social_post_queue_id=? AND platform_key='finance_custody_evidence_712' ORDER BY social_post_attempt_id DESC LIMIT 61").bind(n).all());
  return assessFinance712(current,base,prior,renewals,followups);
 }
-
 /* Build 713 re-reads the original 706 independent Ed25519 ninth authority and
  * persisted 711/712 D1 source rows through finance712; never signs anew. */
 export function assessFinance713(prior,base706,now=Date.now()){
@@ -8318,7 +8186,6 @@ export async function finance718(db,env,id){
  ]);
  return reviewOriginalExternalSlaContinuity718(a717,a716,a715,a712,current);
 }
-
 async function finance717(db,env,id){
  const n=Number(id);
  if(!Number.isSafeInteger(n)||n<1)
@@ -8421,7 +8288,6 @@ async function intakeExternalCustodySla717(db,env,user,p){
   receipt_id:receipt,independent_external_signature_verified:true,
   actual_bookkeeping_closed:false,provider_posting_closed:false};
 }
-
 async function finance716(db,env,id){
  const n=Number(id);
  if(!Number.isSafeInteger(n)||n<1)
@@ -8521,7 +8387,6 @@ async function intakeIndependentNinth716(db,env,user,p){
   receipt_id:receipt,independent_signature_verified:true,
   external_sla_closed:false,financial_books_closed:false,automatic_escalation:false};
 }
-
 async function finance715(db,env,id){
  const n=Number(id);
  if(!Number.isSafeInteger(n)||n<1)return assessOriginalCustodySla715(null,null,null,null);
@@ -8529,7 +8394,6 @@ async function finance715(db,env,id){
   a712=await finance712(db,env,n),ninth=await finance706(db,env,n);
  return assessOriginalCustodySla715(a714,a713,a712,ninth);
 }
-
 async function finance714(db,env,id){
  const n=Number(id);
  if(!Number.isSafeInteger(n)||n<1)return reviewOriginalCustodyDrift714(null,null,null);
@@ -8537,14 +8401,12 @@ async function finance714(db,env,id){
   ninth=await finance706(db,env,n);
  return reviewOriginalCustodyDrift714(a713,a712,ninth);
 }
-
 async function finance713(db,env,id){
  const n=Number(id);
  if(!Number.isSafeInteger(n)||n<1)return assessFinance713(null,null);
  const prior=await finance712(db,env,n),base=await finance706(db,env,n);
  return assessFinance713(prior,base);
 }
-
 async function ownerCustodyEvidence712(db,env,user,p){
  const n=Number(p.social_post_queue_id),current=await financial685(db,env,n),
   base=await finance706(db,env,n),report=await finance712(db,env,n),
@@ -8601,7 +8463,6 @@ async function ownerCustodyEvidence712(db,env,user,p){
   receipt_id:receipt,independent_reviewer_response_confirmed:false,
   bookkeeping_closed:false,new_independent_signature_generated:false};
 }
-
 export async function onRequestGet(context){
 const adminUser=await getAdminUserFromRequest(context.request,context.env);
 if (!adminUser) return jsonResponse({ ok:false,error:'Admin access required.'},401);
@@ -8991,17 +8852,14 @@ related_user_id:adminUser.user_id
 return jsonResponse({ ok:true,degraded:true,backend_warning:error?.message || 'Social queue is temporarily unavailable. Refresh after the database migration completes.',summary:{ total:0,open_count:0,needs_review_count:0,posted_count:0,scheduled_count:0,due_count:0,duplicate_warning_count:0 },queue:[],platforms:[],attempts:[],templates:[],calendar:[],utm_rollups:[],mode:'review_first_api_when_configured'},200,{ 'Cache-Control':'no-store'});
 }
 }
-
 export async function onRequestPost(context){
 const adminUser=await getAdminUserFromRequest(context.request,context.env);
 if (!adminUser) return jsonResponse({ ok:false,error:'Admin access required.'},401);
 const db=getDb(context.env);
 if (!db) return jsonResponse({ ok:false,error:'Database binding is not configured.'},500);
-
 let payload={};
 try{ payload=await context.request.json();} catch{ payload={};}
 const action=slugKey(payload.action || 'create');
-
 try{
 await ensureSchema(db);
 let result={};
@@ -9073,7 +8931,6 @@ else if (action==='independent_external_custody_sla_intake_717') result=await in
 else if (action==='expense_attestation_678') result=await expenseAttestation678(db,context.env,adminUser,payload,recordApiAttempt);
 else if (action==='owner_marketing_signoff_678') result=await ownerSignoff678(db,adminUser,payload,recordApiAttempt);
 else throw new Error(`Unsupported social queue action: ${action}`);
-
 await auditAdminAction(context.env,context.request,adminUser,{
 action_type:`social_queue_${action}`,
 target_type:'social_post_queue',
@@ -9081,7 +8938,6 @@ target_id:result.social_post_queue_id || payload.social_post_queue_id || null,
 target_key:result.social_post_key || null,
 details:{ action,platforms:payload.target_platforms || payload.platforms || null }
 });
-
 const data=await summarize(db,context.env);
 return jsonResponse({ ok:true,message:'Social queue updated.',result,...data,queue:data.queue.map(normalizeQueueRow),mode:'review_first_api_when_configured'},200,{ 'Cache-Control':'no-store'});
 } catch (error){
