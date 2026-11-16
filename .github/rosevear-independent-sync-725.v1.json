@@ -1,0 +1,90 @@
+{
+  "schema": "rosevear.dnd.independent-release-sync.v1",
+  "build": 725,
+  "topologyId": "rosevear-master-shell-seven-apps.v1",
+  "appId": "devilndove",
+  "connectionModel": "DIRECT_MASTER_APPLICATION",
+  "controller": "ai-data-platform",
+  "communicationsAuthority": "rosevear-comms-hub",
+  "authorityTransfer": false,
+  "protocol": {
+    "major": 1,
+    "minor": 1,
+    "compatiblePeerMajors": [
+      1
+    ],
+    "backwardCompatibleWith": "1.0",
+    "minimumPeerMajor": 1,
+    "lockstepReleaseRequired": false,
+    "independentAdditiveReleases": true,
+    "breakingChangesRequireMajorBump": true
+  },
+  "localServices": {
+    "unrelatedLocalOperationsContinue": true,
+    "peerUnavailableBlocksOnlyDependentCapability": true,
+    "legacyHealthEndpoint1_0Unchanged": true,
+    "providerWriteNotAuthorized": true
+  },
+  "capabilities": {
+    "legacyPeer1_0": [
+      "health.read",
+      "capabilities.read"
+    ],
+    "additivePeer1_1": [
+      "storefront.product.read",
+      "storefront.product.private_read",
+      "storefront.inventory.read",
+      "media.draft.read",
+      "media.draft.review",
+      "storefront.product.publish"
+    ],
+    "unknownCapabilityDenied": true,
+    "remoteWriteCapabilityEnabled": false
+  },
+  "privacy": {
+    "exactCompanyTenantWorkspaceResourceRequired": true,
+    "personalDataPurposeBoundConsentRequired": true,
+    "withdrawalAndRevocationFailClosed": true,
+    "consentExpiryFailClosed": true,
+    "sourceOwnedMediaReviewRequired": true,
+    "rawSecretsShared": false,
+    "privateCustomerRecordsInHandoff": false
+  },
+  "delegation": {
+    "exactSourceAudienceCapabilityCompanyTenantWorkspaceAndConsent": true,
+    "maxLifetimeHours": 24,
+    "noSubdelegation": true,
+    "revocationFailClosed": true,
+    "t5Delegable": false,
+    "consequentialWritesOwnerGated": true,
+    "runtimeDelegationEnabled": false
+  },
+  "transport": {
+    "signedSourceEnvelopesRequired": true,
+    "issuerAuthorityCannotTransfer": true,
+    "directPeerD1OrR2Writes": false,
+    "noAutomaticMasterHandshake": true,
+    "signedLiveAckVerified": false
+  },
+  "releaseCoordination": {
+    "vercelBlockedApps": [
+      "ai-data-platform",
+      "yw",
+      "icamp"
+    ],
+    "vercelDeploymentTriggeredByThisBuild": false,
+    "independentCloudflareRelease": true,
+    "peerSyncPolicy": "SCHEMA_COMPATIBILITY_AND_SANITIZED_HANDOFF_ONLY",
+    "originalHostReceiverActivated": false,
+    "operationalConnectivityVerified": false
+  },
+  "handoffOrder": [
+    "ai-data-platform",
+    "rosevear-ai-hub",
+    "rosevear-comms-hub",
+    "icamp",
+    "yw",
+    "devilndove",
+    "rosiedazzlers"
+  ]
+}
