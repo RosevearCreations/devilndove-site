@@ -185,7 +185,7 @@ export async function onRequestPost(c){
      .bind(id).first().catch(()=>null):null;
    const e=c.env||{};
    const pin={source_app:String(e.DND726_ACK_SOURCE_APP||''),
-    source_main_sha:String(e.DND726_ACK_SOURCE_MAIN_SHA||''),
+    peer_main_sha:String(e.DND726_ACK_PEER_MAIN_SHA||''),
     public_key:String(e.DND726_ACK_PUBLIC_KEY||''),
     revoked:String(e.DND726_ACK_REVOKED||'').toLowerCase()==='true',
     original_source_enrollment_verified:
