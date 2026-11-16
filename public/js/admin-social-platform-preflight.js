@@ -1,5 +1,4 @@
-
-// Build 684: browser prepares public claims only; all verification stays server-side.
+// Build 684
 (()=>{'use strict';const $=id=>document.getElementById(id);let state=null;
 async function call(payload,id){
 if(!window.DDAuth?.apiFetch)throw Error('Authenticated Admin required.');
@@ -67,9 +66,7 @@ resolution_note:$('dd684Note').value.trim()});$('dd684CloseReviewed').checked=fa
 }catch(x){$('dd684Result').textContent='HOLD · '+x.message}});
 });
 })();
-
-
-// Build 683: private signer/Master intake UI.
+// Build 683
 (()=>{'use strict';const $=id=>document.getElementById(id);let latest=null;
 async function api(payload,id){
 if(!window.DDAuth?.apiFetch)throw Error('Authenticated Admin session required.');
@@ -146,8 +143,7 @@ $('dd683ClosureReviewed').checked=false;
 }catch(x){$('dd683Result').textContent='HOLD · '+x.message}});
 });
 })();
-
-// Build 682 source-owned financial export & owner discrepancy audit.
+// Build 682
 (()=>{'use strict';const $=id=>document.getElementById(id);let pin='';
 async function api(payload,query=''){
 if(!window.DDAuth?.apiFetch)throw Error('Authenticated Admin session required');
@@ -199,8 +195,7 @@ $('dd682Reviewed').checked=false;await refresh();
 }catch(e){$('dd682Result').textContent='HOLD · '+e.message}
 });
 });})();
-
-// Build 680 — owner-supervised profitability exceptions and freshness review.
+// Build 680
 (()=>{'use strict';const $=id=>document.getElementById(id);
 async function call(payload,id){
 if(!window.DDAuth?.apiFetch)throw Error('Admin login required');
@@ -242,7 +237,6 @@ $('dd681Result').textContent=(d.result?.status||'Recorded')+' · Financial certi
 $('dd681OwnerReview').checked=false;await load();
 }catch(e){$('dd681Result').textContent='HOLD · '+e.message;}
 });
-
 $('dd680Exception').addEventListener('submit',async e=>{
 e.preventDefault();$('dd680Result').textContent='Recording owner decision…';
 try{const d=await call({action:'owner_profit_exception_680',social_post_queue_id:Number($('dd680Campaign').value),
@@ -255,8 +249,7 @@ $('dd680Owner').checked=false;await load();
 }catch(e){$('dd680Result').textContent='HOLD · '+e.message;}
 });
 });})();
-
-// Build 679 — independently signed order costs and source-level net contribution.
+// Build 679
 (()=>{
 'use strict';
 const $=id=>document.getElementById(id);
@@ -320,8 +313,7 @@ catch(error){$('dd679SignoffStatus').textContent='HOLD · '+error.message;}
 });
 });
 })();
-
-// Build 678 — exact signed expenses, read-only campaign reconciliation, explicit owner signoff.
+// Build 678
 (()=>{
 'use strict';
 const $=id=> document.getElementById(id);
@@ -387,8 +379,7 @@ catch(error){$('dd678SignoffResult').textContent='HOLD · '+error.message;}
 });
 });
 })();
-
-// Build 676 — owner-attested campaign costs, verified settlement and attribution HOLD.
+// Build 676
 (()=>{
 'use strict';
 const $=id=>document.getElementById(id);
@@ -421,7 +412,7 @@ catch(error){$('dd676Result').textContent='HOLD · '+error.message;}
 });void load();
 });
 })();
-// Build 675 — independently sourced engagement snapshots and evidence-labelled attribution.
+// Build 675
 (()=>{
 'use strict';
 const $=id=>document.getElementById(id);
@@ -448,7 +439,7 @@ const result=data.result||{};$('dd675Result').textContent=result.verified?'Verif
 void load();
 });
 })();
-// Build 674 — owner campaign calendar and source-grounded cross-channel command centre.
+// Build 674
 (()=>{
 'use strict';
 const $=id=>document.getElementById(id),add=(row,values)=>{for(const v of values){const c=document.createElement('td');c.textContent=String(v??'—');row.append(c);}};
@@ -471,7 +462,7 @@ try{await request({action:'campaign_schedule_674',social_post_queue_id:id,campai
 void load();
 });
 })();
-// Build 673 — per-channel receipt status, independently checked evidence and one-channel recovery.
+// Build 673
 (()=>{
 'use strict';
 const el=id=>document.getElementById(id);
@@ -529,7 +520,7 @@ finally{button.disabled=false;}
 }
 document.addEventListener('DOMContentLoaded',()=>{if(!el('dd673-receipts'))return;el('dd673Refresh')?.addEventListener('click',load);void load();});
 })();
-// Build 672 — read-only account identity and exact public derivative owner approval.
+// Build 672
 (()=>{
 'use strict';
 const byId=id=> document.getElementById(id);
@@ -594,7 +585,7 @@ finally{ button.disabled=false;}
 void load();
 });
 })();
-// Build 211 — browser-only social post preview and platform media preflight.
+// Build 211
 (()=>{
 'use strict';
 const $=(id)=> document.getElementById(id);
@@ -634,9 +625,7 @@ function esc(v){return String(v??'').replace(/&/g,'&amp;').replace(/</g,'&lt;').
     $('socialPreflightClear')?.addEventListener('click',()=>{['socialPreflightCaption','socialPreflightLink','socialPreflightImage'].forEach(id=>{if($(id))$(id).value='';});if($('socialPreflightResults'))$('socialPreflightResults').innerHTML='<p class="small">Preflight cleared. Nothing was saved or published.</p>';if($('socialPreflightPreview'))$('socialPreflightPreview').hidden=true;});
 });
 })();
-
-// Build 685: owner-only Master freshness, external recheck and reviewed incident decisions.
-// Local expiry countdown is client-only; no background network polling, auto closure or private keys.
+// Build 685
 (()=>{'use strict';
 const $=id=>document.getElementById(id);
 let state=null;
@@ -1293,7 +1282,6 @@ render('dd695Master',v?.master_closure?.items,x=>
 ' · '+(x.revalidated_for_current_master?'OWNER REVALIDATION RECORDED':x.eligible_for_master_revalidation?'REVALIDATION REQUIRED':'SOURCE/MASTER HOLD'));
 chooseSources695();
 }
-
 let audit696=null;
 function chooseSources696(){
 const el=$('dd696Source');if(!el)return;
@@ -1388,7 +1376,6 @@ render('dd696Master',v?.master_closure?.items,x=>
 ' · continuity '+(x.current_master_continuity_recorded?'RECORDED':'SOURCE/MASTER HOLD'));
 chooseSources696();
 }
-
 let audit697=null;
 function chooseSources697(){
 const select=$('dd697Source');if(!select)return;
@@ -1481,7 +1468,6 @@ render('dd697Master',v?.master?.items,x=>
 ' · no new external signature inferred');
 chooseSources697();
 }
-
 let audit698=null;
 function chooseSources698(){
 const el=$('dd698Source');if(!el)return;
@@ -1551,7 +1537,6 @@ render('dd698Master',v?.master?.items,x=>
 ' · no new independent signature inferred');
 chooseSources698();
 }
-
 let audit699=null;
 function select699(){
 const el=$('dd699Source');if(!el)return;
@@ -1614,15 +1599,6 @@ list.appendChild(li);
 if(!list.childElementCount){const li=document.createElement('li');li.textContent='No exact original source repair intake in complete bounded history.';list.appendChild(li);}
 select699();
 }
-
-
-
-
-
-
-
-
-
  function draw718(data){
   if(!$('dd718-finance'))return;
   const v=data.financial718||null;
@@ -1994,7 +1970,6 @@ select699();
    li.textContent='No original signed ninth reviewer and 707 custody chain eligible for renewal.';
    list.appendChild(li);}
  }
-
  let audit707=null;
  function draw707(data){
   if(!$('dd707-finance'))return;
@@ -2035,7 +2010,6 @@ select699();
    list.appendChild(li);
   }
  }
-
 let audit706=null;
 function draw706(data){
  if(!$('dd706-finance'))return;
@@ -2112,7 +2086,6 @@ function claimFor706(){
   independent_reviewer_id:signer,nonce,issued_at:issued,
   decision:'independent_continuity_exception_review_not_financial_closure'};
 }
-
 let audit705=null;
 function draw705(data){
  if(!$('dd705-finance'))return;
@@ -2155,7 +2128,6 @@ function draw705(data){
    list.appendChild(li);
  }
 }
-
 let audit704=null;
 function draw704(data){
  if(!$('dd704-finance'))return;
@@ -2202,7 +2174,6 @@ function draw704(data){
   list.appendChild(li);
  }
 }
-
 let audit703=null;
 function draw703(data){
  if(!$('dd703-finance'))return;
@@ -2268,7 +2239,6 @@ function claimFor703(){
    independent_posting_verifier_id:signer,nonce,issued_at:issued,
    decision:'external_bookkeeping_posting_document_intake_not_live_posting_proof'};
 }
-
 let audit702=null;
 function draw702(data){
  if(!$('dd702-finance'))return;
@@ -2330,7 +2300,6 @@ function claimFor702(){
    independent_closure_signer_id:signer,
    remaining_exception_count:remaining,decision,nonce,issued_at:issued};
 }
-
 let audit701=null;
 function draw701(d){
  if(!$('dd701-finance'))return;
@@ -2379,7 +2348,6 @@ function claimFor701(){
    nonce,issued_at:issued,
    decision:'independent_bookkeeping_evidence_review_not_accounting_close'};
 }
-
 let audit700=null;
 function select700(){
 const el=$('dd700FinanceSource');if(!el)return;
@@ -2484,11 +2452,8 @@ $('dd685Campaign').addEventListener('change',()=>void refresh());
 $('dd685Refresh').addEventListener('click',()=>void refresh());
 $('dd686Refresh').addEventListener('click',()=>void refresh());
 $('dd687Refresh').addEventListener('click',()=>void refresh());
-
 $('dd688Refresh').addEventListener('click',()=>void refresh());
-
 $('dd689Refresh').addEventListener('click',()=>void refresh());
-
 $('dd690Refresh').addEventListener('click',()=>void refresh());
 $('dd691Refresh').addEventListener('click',()=>void refresh());
 $('dd692Refresh').addEventListener('click',()=>void refresh());
@@ -2499,15 +2464,6 @@ $('dd696Refresh').addEventListener('click',()=>void refresh());
 $('dd697Refresh').addEventListener('click',()=>void refresh());
 $('dd698Refresh').addEventListener('click',()=>void refresh());
 $('dd699Refresh').addEventListener('click',()=>void refresh());
-
-
-
-
-
-
-
-
-
  async function refresh718(){
   const id=Number($('dd685Campaign').value);
   if(!id||id!==state?.queue_id||!window.DDAuth?.apiFetch)
@@ -2987,7 +2943,6 @@ $('dd699Refresh').addEventListener('click',()=>void refresh());
    $('dd708CustodyResult').textContent='Protected source-bound continuity and custody renewal export prepared. Books HOLD.';
   }catch(error){$('dd708CustodyResult').textContent='HOLD · '+error.message;}
  });
-
  $('dd707FinanceRefresh').addEventListener('click',()=>void refresh());
  $('dd707FieldForm').addEventListener('submit',async event=>{
   event.preventDefault();const button=$('dd707FieldSubmit');button.disabled=true;
@@ -3052,7 +3007,6 @@ $('dd699Refresh').addEventListener('click',()=>void refresh());
    $('dd707CustodyResult').textContent='Source-bound field and custody readback exported. Financial books HOLD.';
   }catch(error){$('dd707CustodyResult').textContent='HOLD · '+error.message;}
  });
-
  $('dd706FinanceRefresh').addEventListener('click',()=>void refresh());
 $('dd706ReviewPrepare').addEventListener('click',()=>{
  try{
@@ -3145,7 +3099,6 @@ $('dd706FinanceExport').addEventListener('click',async()=>{
   $('dd706RetentionResult').textContent='Protected ninth-signed review and original SHA-256 retention manifest exported; actual bookkeeping closure remains HOLD.';
  }catch(error){$('dd706RetentionResult').textContent='HOLD · '+error.message;}
 });
-
 $('dd705FinanceRefresh').addEventListener('click',()=>void refresh());
 $('dd705FinanceRenewForm').addEventListener('submit',async event=>{
  event.preventDefault();const button=$('dd705FinanceRenewSubmit');button.disabled=true;
@@ -3207,7 +3160,6 @@ $('dd705FinanceExport').addEventListener('click',async()=>{
    $('dd705FinanceOwnerResult').textContent='Source-bound signed posting continuity and owner evidence exported. Actual books remain HOLD.';
  }catch(error){$('dd705FinanceOwnerResult').textContent='HOLD · '+error.message;}
 });
-
 $('dd704FinanceRefresh').addEventListener('click',()=>void refresh());
 $('dd704FinanceLiveForm').addEventListener('submit',async event=>{
  event.preventDefault();const button=$('dd704FinanceLiveSubmit');button.disabled=true;
@@ -3270,7 +3222,6 @@ $('dd704FinanceExport').addEventListener('click',async()=>{
    $('dd704FinanceOwnerResult').textContent='Protected signed source snapshot ledger exported. Actual books remain HOLD.';
  }catch(error){$('dd704FinanceOwnerResult').textContent='HOLD · '+error.message;}
 });
-
 $('dd703FinanceRefresh').addEventListener('click',()=>void refresh());
 $('dd703FinancePrepare').addEventListener('click',()=>{
  try{
@@ -3346,7 +3297,6 @@ $('dd703FinanceExport').addEventListener('click',async()=>{
    $('dd703FinanceOwnerResult').textContent='Protected ledger exported; actual external posting and bookkeeping close remain HOLD.';
  }catch(error){$('dd703FinanceOwnerResult').textContent='HOLD · '+error.message;}
 });
-
 $('dd702FinanceRefresh').addEventListener('click',()=>void refresh());
 $('dd702FinancePrepare').addEventListener('click',()=>{
  try{
@@ -3394,7 +3344,6 @@ $('dd702FinanceExport').addEventListener('click',async()=>{
    $('dd702FinanceResult').textContent='Signed decision ledger exported. Actual ledger close/POST remains HOLD.';
  }catch(error){$('dd702FinanceResult').textContent='HOLD · '+error.message;}
 });
-
 $('dd701Refresh').addEventListener('click',()=>void refresh());
 $('dd701Prepare').addEventListener('click',()=>{
  try{$('dd701Claim').value=JSON.stringify(claimFor701());
@@ -3438,7 +3387,6 @@ $('dd701Export').addEventListener('click',async()=>{
    $('dd701Result').textContent='Protected review exported · no accounting close or CONNECTED assertion.';
  }catch(error){$('dd701Result').textContent='HOLD · '+error.message;}
 });
-
 $('dd700FinanceRefresh').addEventListener('click',()=>void refresh());
 $('dd700FinanceForm').addEventListener('submit',async event=>{
 event.preventDefault();
@@ -3482,7 +3430,6 @@ document.body.appendChild(link);link.click();link.remove();setTimeout(()=>URL.re
 $('dd700FinanceResult').textContent='Protected live-source evidence exported. Original financial close still HOLD.';
 }catch(error){$('dd700FinanceResult').textContent='HOLD · '+error.message;}
 });
-
 $('dd699Prepare').addEventListener('click',()=>{
 try{
 $('dd699Claim').value=JSON.stringify(claimFor699());
@@ -3528,7 +3475,6 @@ document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjec
 $('dd699Result').textContent='Protected original signed document evidence exported. Live source repair remains HOLD.';
 }catch(error){$('dd699Result').textContent='HOLD · '+error.message;}
 });
-
 $('dd698Decision').addEventListener('change',chooseSources698);
 chooseSources698();
 $('dd698Form').addEventListener('submit',async event=>{
@@ -3581,7 +3527,6 @@ document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjec
 $('dd698Result').textContent='Protected source-bound review exported; original source repair unverified.';
 }catch(e){$('dd698Result').textContent='HOLD · '+e.message;}
 });
-
 $('dd697Decision').addEventListener('change',chooseSources697);
 chooseSources697();
 $('dd697Prepare').addEventListener('click',()=>{
@@ -3640,7 +3585,6 @@ document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjec
 $('dd697Result').textContent='Protected source-bound evidence exported. Independent source repair remains HOLD.';
 }catch(e){$('dd697Result').textContent='HOLD · '+e.message;}
 });
-
 $('dd696Decision').addEventListener('change',chooseSources696);
 chooseSources696();
 $('dd696Prepare').addEventListener('click',()=>{
@@ -3696,7 +3640,6 @@ document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjec
 $('dd696Result').textContent='Protected bounded original evidence exported; source repair not inferred.';
 }catch(err){$('dd696Result').textContent='HOLD · '+err.message;}
 });
-
 $('dd695Decision').addEventListener('change',chooseSources695);
 chooseSources695();
 $('dd695Form').addEventListener('submit',async e=>{
@@ -3741,7 +3684,6 @@ document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjec
 $('dd695Result').textContent='Protected evidence exported; independent correction still unverified.';
 }catch(err){$('dd695Result').textContent='HOLD · '+err.message;}
 });
-
 $('dd694Decision').addEventListener('change',chooseSources694);
 $('dd694Form').addEventListener('submit',async event=>{
 event.preventDefault();const btn=$('dd694Submit');btn.disabled=true;
@@ -3783,7 +3725,6 @@ document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjec
 $('dd694Result').textContent='Protected bounded owner resolution ledger exported with source HOLD controls.';
 }catch(e){$('dd694Result').textContent='HOLD · '+e.message;}
 });
-
 $('dd693Decision').addEventListener('change',chooseSources693);
 $('dd693Form').addEventListener('submit',async e=>{
 e.preventDefault();const button=$('dd693Submit');button.disabled=true;
@@ -3832,7 +3773,6 @@ document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjec
 $('dd693Result').textContent='Protected bounded owner audit history exported with all unresolved HOLD evidence.';
 }catch(error){$('dd693Result').textContent='HOLD · '+error.message;}
 });
-
 $('dd692Decision').addEventListener('change',chooseSources692);
 $('dd692Form').addEventListener('submit',async event=>{
 event.preventDefault();const btn=$('dd692Submit');btn.disabled=true;
@@ -3876,7 +3816,6 @@ document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjec
 $('dd692Result').textContent='Protected financial owner review exported, with all evidence HOLD gates visible.';
 }catch(error){$('dd692Result').textContent='HOLD · '+error.message;}
 });
-
 $('dd691Decision').addEventListener('change',chooseSources691);
 $('dd691Form').addEventListener('submit',async event=>{
 event.preventDefault();const btn=$('dd691Submit');btn.disabled=true;
@@ -3915,7 +3854,6 @@ document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjec
 $('dd691Result').textContent='Protected owner continuity report exported with unresolved HOLD evidence.';
 }catch(e){$('dd691Result').textContent='HOLD · '+e.message;}
 });
-
 $('dd690Decision').addEventListener('change',chooseCases690);
 $('dd690Form').addEventListener('submit',async e=>{
 e.preventDefault();
@@ -3958,7 +3896,6 @@ document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjec
 $('dd690Result').textContent='Protected sampled continuity report exported; unresolved HOLD evidence retained.';
 }catch(e){$('dd690Result').textContent='HOLD · '+e.message;}
 });
-
 $('dd689Decision').addEventListener('change',chooseAudit689);
 $('dd689AuditForm').addEventListener('submit',async e=>{
 e.preventDefault();
@@ -3998,7 +3935,6 @@ document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjec
 $('dd689Result').textContent='Owner audit report exported with all unresolved HOLD gates shown.';
 }catch(error){$('dd689Result').textContent='HOLD · '+error.message;}
 });
-
 $('dd688Decision').addEventListener('change',chooseCases688);
 $('dd688OwnerReview').addEventListener('submit',async e=>{
 e.preventDefault();
@@ -4037,7 +3973,6 @@ document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjec
 $('dd688Result').textContent='Protected owner evidence report prepared. Historical status does not certify Master acceptance.';
 }catch(error){$('dd688Result').textContent='HOLD · '+error.message;}
 });
-
 $('dd687Review').addEventListener('click',()=>{
 $('dd685Recovery').scrollIntoView({behavior:'smooth',block:'start'});
 $('dd685Note').focus({preventScroll:true});
@@ -4054,7 +3989,6 @@ $('dd685Reviewed').checked=false;
 $('dd686Result').textContent='Owner drift incident saved in append-only evidence. Independent Master acceptance remains HOLD.';
 }catch(e){$('dd686Result').textContent='HOLD · '+e.message;}
 });
-
 $('dd685Revalidate').addEventListener('click',async()=>{
 try{
 if(!$('dd685RecheckReviewed').checked)throw Error('Owner must confirm the independent Master recheck.');
