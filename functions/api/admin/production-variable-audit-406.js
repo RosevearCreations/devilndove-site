@@ -5,6 +5,7 @@ import {sourceVerifiedOwnerReview721,verifyIndependentRotationReceipt722,reconci
 import {masterTrustStatus724,verifyMasterEnvelope724,verifyKeyCustodyRotation724,recordMasterReplayReview724} from './_lib/projectFinanceEvidence.js';
 import {verifiedAdminFromModule} from '../_lib/verifiedAdmin398.mjs';
 import {sixTierSecurityInventory723,sevenAxisCompletionBaseline723,assessTierCandidate723} from '../_lib/appModuleRoutes.js';
+import {independentReleaseStatus725,negotiateIndependentSync725,assessConsentTenantCapability725} from '../_lib/appModuleRoutes.js';
 const checks=Object.freeze([
  ['core','SESSION_SECRET','required'],
  ['core','PRIVATE_EVIDENCE_DOWNLOAD_SECRET','feature_specific'],
@@ -282,6 +283,7 @@ export async function onRequestGet(c){
  const review722=requestUrl.searchParams.get('review')==='722';
  const review723=requestUrl.searchParams.get('review')==='723';
  const review724=requestUrl.searchParams.get('review')==='724';
+ const review725=requestUrl.searchParams.get('review')==='725';
  let ledger721=null;
  if(review721||review722){
   const n=Number(requestUrl.searchParams.get('campaign_queue_id'));
@@ -334,6 +336,26 @@ export async function onRequestGet(c){
    receiver_activated:false,
    owner_completion_percentage_advanced_verified:false,
    handoff_only:true
+  }}:{}),
+  ...(review725?{review725:{
+   compatibility:independentReleaseStatus725(),
+   legacy_peer_1_0:negotiateIndependentSync725({protocol:{major:1,minor:0},available:true,
+    app_id:'ai-data-platform',topology_id:'rosevear-master-shell-seven-apps.v1'},'health.read'),
+   legacy_peer_new_capability:negotiateIndependentSync725({protocol:{major:1,minor:0},available:true,
+    app_id:'ai-data-platform',topology_id:'rosevear-master-shell-seven-apps.v1'},'media.draft.read'),
+   unavailable_peer:negotiateIndependentSync725({available:false},'health.read'),
+   cross_tenant_negative:assessConsentTenantCapability725({
+    mode:'LOCAL',capability:'storefront.product.read',
+    actor:{tier:'T0_PUBLIC',company_id:'devilndove',tenant_id:'tenant-a',workspace_id:'workshop-a'},
+    company_id:'devilndove',tenant_id:'tenant-a',workspace_id:'workshop-a',
+    resource:{company_id:'devilndove',tenant_id:'tenant-b',workspace_id:'workshop-a',
+      resource_id:'sample-product',source_revision:'sample-revision',source_verified:true}}),
+   real_peer_handshake_verified:false,durable_cross_app_replay_verified:false,
+   original_t5_receiver_authorized:false,
+   vercel_blocked_peer_deployed_by_this_application:false,
+   original_1_0_integration_endpoints_unchanged:true,
+   local_product_routes_remain_available:true,
+   owner_approved_completion_percentage:null
   }}:{}),
   documentation:'/docs/operations/RELEASE_467_BUILD_406_PRODUCTION_CONFIGURATION_AUDIT.md'},200,{'Cache-Control':'no-store'});
 }
