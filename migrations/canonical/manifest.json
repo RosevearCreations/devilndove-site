@@ -363,6 +363,13 @@
       "release": 467,
       "description": "Private append-only manual owner trial checklist receipts for six actual Maker journeys, bound to canonical project, process, QA, media, design or commission evidence; accepts only explicitly attested source-backed checkpoints.",
       "recovery": "Stop new Build 456 attestations if defects appear, preserve the original owner trial and source history, append a later HOLD/superseding review and correct schema only with a forward migration. Never infer external acceptance or alter maker, customer, stock or publication authorities."
+    },
+    {
+      "version": 51,
+      "file": "0051_release467_event_outbox_dedupe_ack_deadletter.sql",
+      "release": 467,
+      "description": "Private DND source-only versioned V2 event outbox with atomic D1 unique dedupe hashes, bounded original source metadata, append-only mutually exclusive locally reviewed dead-letter or signed ACK-review receipts; no peer sender, remote delivery or T5 activation.",
+      "recovery": "Retain immutable local event/outbox and disposition rows; reject ambiguous or repeated receipts, record new independent remediation evidence in a later reviewed, forward-only migration. Do not rewrite an event, grant receiver authority, publish original customer data or infer external Master delivery from a local review."
     }
   ]
 }

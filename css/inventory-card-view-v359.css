@@ -35,3 +35,119 @@
 @media(max-width:1200px){.inventory-operations-page .site-inventory-table-wrap.is-card-view tbody{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media(max-width:760px){.inventory-operations-page .site-inventory-view-actions{width:100%}.inventory-operations-page .site-inventory-view-actions .btn{flex:1 1 150px}.inventory-operations-page .site-inventory-table-wrap.is-card-view tbody{grid-template-columns:1fr}}
 @media(max-width:460px){.inventory-operations-page .site-inventory-table-wrap.is-card-view .site-inventory-action-buttons{grid-template-columns:1fr}}
+
+/* Build 726: all editable Inventory cells on the visible width of one item.
+   Opt-in class with default Fit view, no horizontal clipped table or hidden
+   source data. Original data-field and data-inventory-row bindings unchanged. */
+.inventory-operations-page .site-inventory-table-wrap.is-fit-view{
+ overflow-x:hidden!important;overflow-y:visible!important;max-width:100%;
+ border:0;background:transparent;
+}
+.inventory-operations-page .site-inventory-table-wrap.is-fit-view .site-inventory-admin-table{
+ display:block!important;min-width:0!important;width:100%!important;max-width:100%;
+ table-layout:auto!important;border:0;background:transparent;
+}
+.inventory-operations-page .site-inventory-table-wrap.is-fit-view .site-inventory-admin-table>thead{display:none}
+.inventory-operations-page .site-inventory-table-wrap.is-fit-view .site-inventory-admin-table>tbody{
+ display:grid;width:100%;min-width:0;grid-template-columns:minmax(0,1fr);
+ gap:12px;
+}
+.inventory-operations-page .site-inventory-table-wrap.is-fit-view tr[data-inventory-row]{
+ display:grid;grid-template-columns:minmax(175px,1.05fr) minmax(265px,1.45fr) minmax(170px,1fr);
+ grid-template-areas:"identity category location"
+                     "identity category stock"
+                     "units units cost"
+                     "reorder status actions";
+ gap:8px 12px;align-items:start;width:100%;min-width:0;max-width:100%;
+ padding:14px;border:1px solid #475575;border-radius:16px;
+ background:#101b30;box-sizing:border-box;box-shadow:0 8px 22px #0003;
+}
+.inventory-operations-page .site-inventory-table-wrap.is-fit-view tr[data-inventory-row] > td{
+ display:block!important;position:static!important;right:auto!important;
+ float:none!important;min-width:0!important;width:100%!important;max-width:100%!important;
+ white-space:normal!important;overflow:visible!important;
+ padding:8px 10px;box-sizing:border-box;vertical-align:top;
+ border:1px solid #34445d;border-radius:10px;background:#142039!important;
+ box-shadow:none!important;
+}
+.inventory-operations-page .site-inventory-table-wrap.is-fit-view tr[data-inventory-row] > td:nth-child(1){grid-area:identity}
+.inventory-operations-page .site-inventory-table-wrap.is-fit-view tr[data-inventory-row] > td:nth-child(2){grid-area:category}
+.inventory-operations-page .site-inventory-table-wrap.is-fit-view tr[data-inventory-row] > td:nth-child(3){grid-area:location}
+.inventory-operations-page .site-inventory-table-wrap.is-fit-view tr[data-inventory-row] > td:nth-child(4){grid-area:stock}
+.inventory-operations-page .site-inventory-table-wrap.is-fit-view tr[data-inventory-row] > td:nth-child(5){grid-area:units}
+.inventory-operations-page .site-inventory-table-wrap.is-fit-view tr[data-inventory-row] > td:nth-child(6){grid-area:cost}
+.inventory-operations-page .site-inventory-table-wrap.is-fit-view tr[data-inventory-row] > td:nth-child(7){grid-area:reorder}
+.inventory-operations-page .site-inventory-table-wrap.is-fit-view tr[data-inventory-row] > td:nth-child(8){grid-area:status}
+.inventory-operations-page .site-inventory-table-wrap.is-fit-view tr[data-inventory-row] > td:nth-child(9){grid-area:actions}
+.inventory-operations-page .site-inventory-table-wrap.is-fit-view tr[data-inventory-row] > td[data-label]::before{
+ content:attr(data-label);display:block;margin-bottom:5px;
+ color:#f5d5a5;font-size:.72rem;line-height:1.35;font-weight:750;
+ text-transform:uppercase;letter-spacing:.025em;
+}
+.inventory-operations-page .site-inventory-table-wrap.is-fit-view .site-inventory-grid-identity{
+ display:grid;grid-template-columns:54px minmax(0,1fr);
+ align-items:start;gap:9px;min-width:0;
+}
+.inventory-operations-page .site-inventory-table-wrap.is-fit-view .site-inventory-grid-identity>div{min-width:0}
+.inventory-operations-page .site-inventory-table-wrap.is-fit-view .site-inventory-list-thumb{width:54px;height:60px;max-width:54px}
+.inventory-operations-page .site-inventory-table-wrap.is-fit-view .site-inventory-list-thumb img{width:54px;height:60px;object-fit:contain}
+.inventory-operations-page .site-inventory-table-wrap.is-fit-view label{display:grid;gap:3px;min-width:0;max-width:100%;margin:0 0 7px}
+.inventory-operations-page .site-inventory-table-wrap.is-fit-view input,
+.inventory-operations-page .site-inventory-table-wrap.is-fit-view select,
+.inventory-operations-page .site-inventory-table-wrap.is-fit-view textarea{
+ box-sizing:border-box;display:block;width:100%!important;min-width:0!important;max-width:100%!important;
+ min-height:37px;padding:7px 9px;font-size:.86rem;
+}
+.inventory-operations-page .site-inventory-table-wrap.is-fit-view .small,
+.inventory-operations-page .site-inventory-table-wrap.is-fit-view a,
+.inventory-operations-page .site-inventory-table-wrap.is-fit-view strong{
+ min-width:0;overflow-wrap:anywhere;
+}
+.inventory-operations-page .site-inventory-table-wrap.is-fit-view .site-inventory-inline-units{
+ display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;min-width:0;
+}
+.inventory-operations-page .site-inventory-table-wrap.is-fit-view .site-inventory-inline-units>label[style]{
+ grid-column:auto!important;
+}
+.inventory-operations-page .site-inventory-table-wrap.is-fit-view .dd-multistation-checklist{
+ max-height:92px;overflow-y:auto;min-width:0;
+}
+.inventory-operations-page .site-inventory-table-wrap.is-fit-view .site-inventory-action-buttons{
+ display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px;min-width:0;
+}
+.inventory-operations-page .site-inventory-table-wrap.is-fit-view .site-inventory-action-buttons .btn{
+ width:100%;min-width:0;min-height:36px;padding:6px 7px;
+ font-size:.81rem;line-height:1.2;white-space:normal;
+}
+.inventory-operations-page .site-inventory-table-wrap.is-fit-view tr[data-inventory-row] [data-save-row-id]{
+ grid-column:1/-1;min-height:42px;
+}
+.inventory-operations-page .site-inventory-table-wrap.is-fit-view .site-inventory-admin-table>tbody>tr:not([data-inventory-row]){
+ display:block;width:100%;min-width:0;
+}
+.inventory-operations-page .site-inventory-table-wrap.is-fit-view .site-inventory-admin-table>tbody>tr:not([data-inventory-row]) td{
+ display:block;max-width:100%;box-sizing:border-box;
+}
+@media(max-width:1050px){
+ .inventory-operations-page .site-inventory-table-wrap.is-fit-view tr[data-inventory-row]{
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  grid-template-areas:"identity category" "location category"
+   "stock units" "cost reorder" "status actions";
+ }
+}
+@media(max-width:660px){
+ .inventory-operations-page .site-inventory-table-wrap.is-fit-view tr[data-inventory-row]{
+  grid-template-columns:minmax(0,1fr);
+  grid-template-areas:"identity" "stock" "units" "cost" "category" "location" "reorder" "status" "actions";
+  gap:7px;padding:9px;
+ }
+ .inventory-operations-page .site-inventory-table-wrap.is-fit-view .site-inventory-inline-units{
+  grid-template-columns:repeat(2,minmax(0,1fr));
+ }
+ .inventory-operations-page .site-inventory-table-wrap.is-fit-view .site-inventory-inline-units>label[style]{
+  grid-column:1/-1!important;
+ }
+}
+@media(prefers-reduced-motion:reduce){
+ .inventory-operations-page .site-inventory-table-wrap.is-fit-view tr[data-inventory-row]{transition:none}
+}

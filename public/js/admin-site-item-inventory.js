@@ -26,7 +26,13 @@ let editingSiteInventoryId=0;
 let selectedCatalogItemId=0;
 let lastAmazonPackagingSourceDraft=null;
 let inventoryTableEditMode=true;
-let inventoryCardViewMode=(()=>{ try{return localStorage.getItem('dd_inventory_display_mode_v357')==='cards';}catch{return false;} })();
+let inventoryDisplayMode=(()=>{try{
+ const selected=localStorage.getItem('dd_inventory_display_mode_v726');
+ if(['fit','table','cards'].includes(selected))return selected;
+ return localStorage.getItem('dd_inventory_display_mode_v357')==='cards'?'cards':'fit';
+ }catch{return 'fit';}})();
+let inventoryCardViewMode=inventoryDisplayMode==='cards';
+let inventoryFitViewMode=inventoryDisplayMode==='fit';
 let initialLoadStarted=false;
 let seedLoadPromise=null;
 let listLoadPromise=null;
@@ -969,8 +975,8 @@ mountEl.innerHTML=`
         </div>
 
         <div class="site-inventory-view-toolbar" style="margin-top:12px">
-          <div><strong>Inventory table editor</strong><div class="small">Edit quantity, stock unit, usage unit, usage-per-stock conversion and cost directly in the table. Cost per usage unit is calculated automatically. On desktop, scroll the table sideways so every field stays wide enough to read, or switch to Card View for compact item cards.</div></div>
-          <div class="site-inventory-view-actions"><button class="btn" type="button" id="siteInventoryCardViewButton" aria-pressed="false">Card View</button><button class="btn" type="button" id="siteInventoryTableModeButton" aria-pressed="true">Table editing: On</button></div>
+          <div><strong>Inventory table editor</strong><div class="small">Fit to screen keeps every editable field and Save row in each item's full-width grid without horizontal scrolling. Wide Table is optional; Card View remains available. Changes are saved only after pressing Save row. The existing guided Quick Edit handles deliberate stock-count/HST corrections.</div></div>
+          <div class="site-inventory-view-actions"><button class="btn" type="button" id="siteInventoryFitViewButton" aria-pressed="true">Fit to screen</button><button class="btn" type="button" id="siteInventoryCardViewButton" aria-pressed="false">Card View</button><button class="btn" type="button" id="siteInventoryWideViewButton" aria-pressed="false">Wide Table</button><button class="btn" type="button" id="siteInventoryTableModeButton" aria-pressed="true">Table editing: On</button></div>
         </div>
         <div class="admin-table-wrap site-inventory-table-wrap"><table class="site-inventory-admin-table"><thead><tr><th>Image / item</th><th>Category / supplier</th><th>Current location</th><th>On hand</th><th>Stock &amp; usage</th><th>Unit cost</th><th>Reorder at</th><th>Status</th><th>Actions</th></tr></thead><tbody id="siteInventoryList"><tr><td colspan="9" style="padding:8px">Loading inventory...</td></tr></tbody></table></div>
         <div class="site-inventory-pagination" id="siteInventoryPagination" aria-live="polite"><button class="btn" type="button" id="siteInventoryPreviousPage">Previous</button><span class="small" id="siteInventoryPageStatus">Page 1</span><label class="small" for="siteInventoryPageJump">Jump to page</label><input id="siteInventoryPageJump" type="number" min="1" step="1" value="1" inputmode="numeric" style="width:6rem" aria-label="Inventory page number"/><button class="btn" type="button" id="siteInventoryGoToPage">Go</button><button class="btn" type="button" id="siteInventoryNextPage">Next</button></div>
@@ -1025,16 +1031,31 @@ if (button){ button.textContent=`Table editing: ${inventoryTableEditMode ? 'On' 
 loadList();
 });
 const applyInventoryViewMode=()=>{
-const wrap=mountEl.querySelector('.site-inventory-table-wrap');
-const button=document.getElementById('siteInventoryCardViewButton');
-wrap?.classList.toggle('is-card-view',inventoryCardViewMode);
-if(button){button.textContent=inventoryCardViewMode?'Table View':'Card View';button.setAttribute('aria-pressed',inventoryCardViewMode?'true':'false');}
+ const wrap=mountEl.querySelector('.site-inventory-table-wrap');
+ const card=document.getElementById('siteInventoryCardViewButton');
+ const fit=document.getElementById('siteInventoryFitViewButton');
+ const wide=document.getElementById('siteInventoryWideViewButton');
+ inventoryCardViewMode=inventoryDisplayMode==='cards';
+ inventoryFitViewMode=inventoryDisplayMode==='fit';
+ wrap?.classList.toggle('is-card-view',inventoryCardViewMode);
+ wrap?.classList.toggle('is-fit-view',inventoryFitViewMode);
+ for(const [button,active] of [[card,inventoryCardViewMode],[fit,inventoryFitViewMode],
+ [wide,inventoryDisplayMode==='table']]){
+  if(button){button.setAttribute('aria-pressed',active?'true':'false');
+   button.classList.toggle('primary',active);}
+ }
 };
-document.getElementById('siteInventoryCardViewButton')?.addEventListener('click',()=>{
-inventoryCardViewMode=!inventoryCardViewMode;
-try{localStorage.setItem('dd_inventory_display_mode_v357',inventoryCardViewMode?'cards':'table');}catch{}
-applyInventoryViewMode();
-});
+const chooseInventoryViewMode=mode=>{
+ inventoryDisplayMode=mode;
+ try{localStorage.setItem('dd_inventory_display_mode_v726',mode);}catch{}
+ applyInventoryViewMode();
+};
+document.getElementById('siteInventoryFitViewButton')?.addEventListener('click',
+ ()=>chooseInventoryViewMode('fit'));
+document.getElementById('siteInventoryCardViewButton')?.addEventListener('click',
+ ()=>chooseInventoryViewMode('cards'));
+document.getElementById('siteInventoryWideViewButton')?.addEventListener('click',
+ ()=>chooseInventoryViewMode('table'));
 applyInventoryViewMode();
 updateBulkCostScopeHelpers();
 updateBulkCostPlaceholder();
@@ -1368,7 +1389,8 @@ return `
             <td data-label="Status">${edit ? `<select class="site-inventory-row-input"data-field="is_active"><option value="1"${Number(x.is_active)!==0?'selected':''}>Active</option><option value="0"${Number(x.is_active)===0?'selected':''}>Inactive</option></select>` : (Number(x.is_active)===0?'Inactive':'Active')}<div class="small">${escapeHtml(x.usage_tracking_mode || (String(x.source_type||'').toLowerCase()==='tool'?'reusable':'exact'))} usage tracking</div></td>
             <td class="site-inventory-row-actions" data-label="Actions"><div class="site-inventory-action-buttons">
               ${edit ? `<button class="btn primary"type="button"data-save-row-id="${x.site_item_inventory_id}"data-item='${escapeHtml(JSON.stringify(x))}'>Save row</button>` : ''}
-              <button class="btn" type="button" data-load-form-id="${x.site_item_inventory_id}" data-item='${escapeHtml(JSON.stringify(x))}'>Full edit</button>
+              <button class="btn" type="button" data-dd387-edit-id="${x.site_item_inventory_id}">Quick stock + HST</button>
+               <button class="btn" type="button" data-load-form-id="${x.site_item_inventory_id}" data-item='${escapeHtml(JSON.stringify(x))}'>Full edit</button>
               <button class="btn" type="button" data-open-inventory-lots="${x.site_item_inventory_id}">Lots</button>
               <button class="btn" type="button" data-adjust-action="receive" data-id="${x.site_item_inventory_id}">Receive</button>
               <button class="btn" type="button" data-adjust-action="consume_usage" data-id="${x.site_item_inventory_id}" data-item='${escapeHtml(JSON.stringify(x))}'>Record use</button>

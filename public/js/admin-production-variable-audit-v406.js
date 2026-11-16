@@ -333,3 +333,44 @@ button.addEventListener('click',async()=>{
   }finally{button.disabled=false}
  });
 })();
+
+// Build 726: owner-triggered original D1 local evidence Inbox. No sender.
+(()=>{
+ 'use strict';
+ const button=document.getElementById('dd726Inspect'),
+  status=document.getElementById('dd726Status'),
+  result=document.getElementById('dd726Result');
+ if(!button||!status||!result||!window.DDAuth?.apiFetch)return;
+ button.addEventListener('click',async()=>{
+  if(button.disabled)return;button.disabled=true;
+  status.textContent='Reading a bounded local source-only event window…';
+  try{
+   const response=await window.DDAuth.apiFetch(
+    '/api/admin/production-variable-audit-406?review=726',
+    {method:'GET',cache:'no-store'});
+   const data=await response.json().catch(()=>null);
+   if(!response.ok||!data?.ok||data.review726?.contract?.build!==726)
+    throw Error('Protected original event source unavailable');
+   const state=data.review726,items=state.inbox?.events||[];
+   result.textContent=[
+    'Schema: '+state.contract.schema_id+'; protocol 1.1, legacy 1.0 health unchanged',
+    'D1 unique deduped local event storage: '+state.contract.db_schema,
+    'Source-only families: '+state.contract.approved_source_event_families.join(' · '),
+    'Original reviewed events (15 maximum): '+items.length,
+    ...items.map(e=>e.event_id+' · '+e.event_type+' → '+e.target_app+
+     ' · '+e.local_disposition+' · '+(e.created_at||'date unverified')),
+    'External message sent: NO',
+    'Live Master ACK / receiver: NOT VERIFIED',
+    'Remote consumer Inbox delivered: NO',
+    'D1 ACK-review does not establish external transport or customer consent',
+    'Inventory Fit to screen and existing Quick stock + HST remain local UI'
+   ].join('\n');
+   status.textContent=state.inbox?.source?
+    'Local D1 review loaded. Peer delivery and live ACK remain HOLD.':
+    'HOLD — local D1 source readback unavailable.';
+  }catch(_){
+   result.textContent='HOLD — protected local event source not available.';
+   status.textContent='HOLD — No remote delivery or event receipt inferred.';
+  }finally{button.disabled=false}
+ });
+})();
