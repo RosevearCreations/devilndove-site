@@ -6,8 +6,8 @@ import json
 ROOT=Path(__file__).resolve().parents[1]
 migration=ROOT/"migrations/canonical/0051_release467_event_outbox_dedupe_ack_deadletter.sql"
 manifest=json.loads((ROOT/"migrations/canonical/manifest.json").read_text())
-assert manifest["migrations"][-1]["version"]==51
-assert manifest["migrations"][-1]["file"]==migration.name
+assert manifest["migrations"][50]["version"]==51
+assert manifest["migrations"][50]["file"]==migration.name
 db=sqlite3.connect(":memory:")
 db.execute("PRAGMA foreign_keys=ON")
 db.execute("CREATE TABLE users(user_id INTEGER PRIMARY KEY)")
