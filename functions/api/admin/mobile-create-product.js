@@ -8,6 +8,7 @@ import { captureRuntimeIncident, getAdminUserFromRequest, getDb, jsonResponse, n
 import { DEFAULT_PRODUCT_NUMBER_START, allocateNextProductNumber, ensureProductNumberSequenceAtLeast, getNextProductNumber } from "./_product-numbering.js";
 import { parseProductResourceLinksJson, persistProductResourceLinks } from "./_productResourcePersistence.js";
 import {handleCamera702} from "./_cameraField702.mjs";
+import {denyUnenrolledDelegatedAdmin725} from "../_lib/appModuleRoutes.js";
 
 function json(data, status = 200) {
   return jsonResponse(data, status);
@@ -588,6 +589,7 @@ export async function onRequestPost(context) {
   try {
     const adminUser = await getAdminUserFromRequest(request, env);
     if (!adminUser) return json({ ok: false, error: "Unauthorized." }, 401);
+    if (denyUnenrolledDelegatedAdmin725(request)) return json({ok:false,error:"Unenrolled cross-application delegation cannot authorize a local camera Product draft. HOLD.", cross_app_connected:false,build:725},403);
 
     let form;
     try {
