@@ -16,7 +16,7 @@
     "max_js_bytes": 600000,
     "max_css_bytes": 500000,
     "max_html_bytes": 500000,
-    "max_runtime_source_bytes": 19739000,
+    "max_runtime_source_bytes": 19747000,
     "max_runtime_source_files": 1857,
     "max_inline_data_uri_bytes": 650000
   },
@@ -33,6 +33,25 @@
     "production_mutation": false
   },
   "budget_reviews": [
+    {
+      "build": 730,
+      "date": "2026-11-16",
+      "scope": "Final on-demand original Admin privacy dashboard with exact D1 heartbeat, signed service ACK counts, dead letters, two-Admin reviewed requeue and no-auto-poll safe controls.",
+      "prior_limit_bytes": 19739000,
+      "new_limit_bytes": 19747000,
+      "delta_bytes": 8000,
+      "delta_percent": 0.04053,
+      "measured_runtime_bytes": 19742767,
+      "measured_runtime_files": 1857,
+      "measured_system_gate_run": 43993321876,
+      "measured_overage_bytes": 3767,
+      "measured_remaining_headroom_bytes": 4233,
+      "new_file_limit_unchanged": 1857,
+      "per_file_js_css_html_limits_unchanged": true,
+      "review_reason": "Original System Gate run 43993321876 measured 19,742,767 runtime bytes/1,857 files. The exact Build730 change adds an on-demand protected Admin UI to show D1 schedule receipts and privacy alerts plus two-Admin recovery actions, without client polling or external side effects. Reviewed +8,000 source bytes gives 4,233 measured headroom; original runtime scanner, per-file and file-count ceilings, security, Development D1 and Production exact-head gates remain enforced, not bypassed.",
+      "external_worker_deployed": false,
+      "cloudflare_secrets_provisioned_by_source": false
+    },
     {
       "build": 730,
       "date": "2026-11-16",
