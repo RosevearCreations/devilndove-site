@@ -408,6 +408,27 @@
 <button id="privacy730Approve" type="button" class="btn secondary">Approve independent requeue</button>
 </details>
 </section>
+<section class="card" id="privacy733Command" style="margin-top:18px">
+<h2>Build 733 — Privacy Operations Command Centre</h2>
+<p class="small">Seven-application source-only compliance summary. Non-enrolled apps display HOLD. A local signed ACK never proves external deletion, a key-lineage witness never authorizes key retirement, and a D1 heartbeat never proves Cloudflare Worker deployment.</p>
+<button id="privacy733Refresh" type="button" class="btn">Read 7-application source custody</button>
+<pre id="privacy733Results" role="status" aria-live="polite" style="white-space:pre-wrap;overflow-wrap:anywhere;max-height:390px;overflow:auto">Not checked. Original protected D1 required.</pre>
+<details><summary>Record original signed-ACK SLA closure — two Administrators</summary>
+<p class="small">First Admin records the event's original signed ACK review. A different Admin approves the immutable local SLA resolution using the exact review ID and reason. No external erasure is claimed.</p>
+<label>Withdrawal event UUID <input id="privacy733Event" autocomplete="off" maxlength="36"></label>
+<label>Reason code (uppercase) <input id="privacy733Reason" autocomplete="off" maxlength="80" placeholder="VERIFIED_SIGNED_ACK"></label>
+<label>Existing review UUID for second Admin <input id="privacy733Review" autocomplete="off" maxlength="36"></label>
+<button id="privacy733RecordReview" type="button" class="btn secondary">Record signed ACK review</button>
+<button id="privacy733ApproveReview" type="button" class="btn secondary">Approve independent SLA resolution</button>
+</details>
+<details><summary>Record an independent ciphertext key-lineage witness</summary>
+<p class="small">The logged-in witness must be different from the Administrator who created the latest ciphertext version. Original SHA-256 version chaining and different key IDs are required. This is not cryptographic plaintext verification.</p>
+<label>Evidence UUID <input id="privacy733Evidence" autocomplete="off" maxlength="36"></label>
+<label>Latest ciphertext version <input id="privacy733Version" type="number" min="2" max="999" step="1"></label>
+<label>Reason code <input id="privacy733WitnessReason" autocomplete="off" maxlength="80" placeholder="REVIEWED_CHAIN"></label>
+<button id="privacy733Witness" type="button" class="btn secondary">Witness original metadata lineage</button>
+</details>
+</section>
 <section class="card" id="dd720-provider-drift" style="margin-top:18px">
 <h2>Build 720 — Provider binding drift &amp; independent evidence review</h2>
 <p class="small">Review only the names and presence of active Cloudflare bindings, callback match and legacy PayPal name. No secret values, age guesses, outside calls, background watchers, approval writes or provider authorizations.</p>

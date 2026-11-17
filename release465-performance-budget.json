@@ -16,8 +16,8 @@
     "max_js_bytes": 600000,
     "max_css_bytes": 500000,
     "max_html_bytes": 500000,
-    "max_runtime_source_bytes": 19766000,
-    "max_runtime_source_files": 1857,
+    "max_runtime_source_bytes": 19781000,
+    "max_runtime_source_files": 1858,
     "max_inline_data_uri_bytes": 650000
   },
   "baseline_observed": {
@@ -33,6 +33,24 @@
     "production_mutation": false
   },
   "budget_reviews": [
+    {
+      "build": 733,
+      "date": "2026-11-17",
+      "scope": "Protected original D1 Build733 privacy command centre API, immutable two-person signed ACK SLA closure, source ciphertext key lineage witness and on-demand 7-app compliance summary with deliberate external HOLD states.",
+      "prior_limit_bytes": 19766000,
+      "new_limit_bytes": 19781000,
+      "delta_bytes": 15000,
+      "measured_runtime_bytes": 19776119,
+      "measured_runtime_files": 1858,
+      "prior_file_limit": 1857,
+      "new_file_limit": 1858,
+      "measured_source_run": 44131205067,
+      "measured_overage_bytes": 10119,
+      "measured_remaining_headroom_bytes": 4881,
+      "per_file_js_css_html_limits_unchanged": true,
+      "review_reason": "Authentic failed Development migration #44131205067 measured 19,776,119 bytes and 1,858 files against 19,766,000 and 1,857. Build733 introduced one dedicated protected Admin route (source-only original D1 metadata and two-person immutable receipts) plus manually requested UI. Approved narrowly scoped +15,000-byte and +1 source file with existing scanner, individual limits, original D1 migration first, protected main and live checks unchanged. Neither signed peer deletion nor decryption/key retirement is asserted. Separate Worker credential #951 remains owner-controlled.",
+      "external_worker_verified": false
+    },
     {
       "build": 732,
       "date": "2026-11-17",

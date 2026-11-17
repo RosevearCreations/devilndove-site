@@ -73,6 +73,12 @@ jobs:
           node --check public/js/admin-mobile-product-augment.js
           node --check public/js/admin-social-platform-preflight.js
           node scripts/build707_ninth_field_media_drift_custody_contract.mjs
+      - name: Build 733 immutable SLA resolution and independent key witness quality gates
+        run: |
+          python scripts/build733_privacy_sqlite_gate.py
+          node --check functions/api/admin/privacy-command-centre-733.js
+          node --check public/js/admin-production-variable-audit-v406.js
+          node scripts/build733_privacy_command_contract.mjs
       - name: Build 732 original privacy SLA escalation, automation recovery and cross-app custody negatives
         run: |
           node --check functions/api/admin/_lib/privacyOperations730.js
