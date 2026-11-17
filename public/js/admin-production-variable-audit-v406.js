@@ -547,3 +547,29 @@ document.addEventListener('DOMContentLoaded',()=>{
   finally{button.disabled=false;}
  });
 });
+
+
+/* Build 732: explicit operator-requested, read-only local D1 compliance status. */
+document.addEventListener('DOMContentLoaded',()=>{
+ const root=document.getElementById('privacyOperations730'),
+ button=root?.querySelector('#privacy732Refresh'),out=root?.querySelector('#privacy732Results');
+ if(!button||!out)return;
+ button.addEventListener('click',async()=>{
+  button.disabled=true;out.textContent='Checking original privacy custody and SLA…';
+  try{
+   const url='/api/admin/production-variable-audit-406?review=732';
+   const response=await (window.DDAuth?.apiFetch?window.DDAuth.apiFetch(url):
+    fetch(url,{credentials:'same-origin'}));
+   const data=await response.json().catch(()=>null);
+   if(!response.ok||!data?.ok||!data.review732)throw Error('HOLD_UNVERIFIED_ORIGINAL_D1');
+   const x=data.review732;
+   out.textContent=JSON.stringify({state:x.state||x.automation_recovery,
+    cross_application_compliance:x.cross_application_compliance,
+    privacy_sla_escalations:x.privacy_sla_escalations,
+    key_custody:x.key_custody,
+    queue_evidence_complete:x.queue_evidence_complete,
+    cross_application_delivery_or_remote_erasure_proven:x.cross_application_delivery_or_remote_erasure_proven},null,2);
+  }catch{out.textContent='HOLD — independent original source evidence unavailable.';}
+  finally{button.disabled=false;}
+ });
+});
