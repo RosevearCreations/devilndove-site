@@ -493,8 +493,27 @@ async function review730(db,env){
    }
   }catch{alerts.alerts.push({code:'WITHDRAWAL_D1_UNAVAILABLE',severity:'critical',count:1});}
  }
+ let latestTick=null,autoAckCount=null,deadLetterCount=null;
+ if(db&&durableSchema){
+  try{
+   latestTick=await db.prepare(`SELECT tick_id,tick_state,considered_events,signed_ack_count,
+     held_events,rotation_backlog,created_at
+     FROM dnd_privacy_schedule_receipts_730 ORDER BY created_at DESC LIMIT 1`).first();
+   autoAckCount=Number((await db.prepare('SELECT COUNT(*) AS n FROM dnd_withdrawal_auto_acks_730').first())?.n||0);
+   deadLetterCount=Number((await db.prepare("SELECT COUNT(*) AS n FROM dnd_withdrawal_retry_state_730 WHERE state='DEAD_LETTER'").first())?.n||0);
+  }catch{alerts.alerts.push({code:'SCHEDULER_LEDGER_READBACK_HOLD',severity:'critical',count:1});}
+ }
+ const tickAge=latestTick?Date.now()-Date.parse(String(latestTick.created_at).replace(' ','T')+'Z'):Infinity;
+ const tickFresh=Number.isFinite(tickAge)&&tickAge>=0&&tickAge<=30*60000;
+ if(durableSchema&&!tickFresh)alerts.alerts.push({code:'SCHEDULED_TICK_MISSING_OR_STALE',severity:'warning',count:1});
+ if(Number(deadLetterCount)>0)alerts.alerts.push({code:'WITHDRAWAL_DEAD_LETTER',severity:'critical',count:deadLetterCount});
  return {build:730,policy:BUILD730_POLICY,alerts:alerts.alerts,
-   queued_review:attempts,scheduler:'NOT_DEPLOYED',
+   queued_review:attempts,
+   scheduler:tickFresh?'D1_SCHEDULE_RECEIPT_FRESH_NOT_EXTERNAL_DELIVERY_PROOF':'NOT_VERIFIED',
+   latest_scheduled_tick:latestTick?{tick_id:latestTick.tick_id,at:latestTick.created_at,
+    considered:Number(latestTick.considered_events||0),signed:Number(latestTick.signed_ack_count||0),
+    held:Number(latestTick.held_events||0),rotation_backlog:Number(latestTick.rotation_backlog||0)}:null,
+   auto_signed_ack_count:autoAckCount,dead_letter_count:deadLetterCount,
    dead_letter_ledger:durableSchema?'D1_SCHEMA_PRESENT_NO_WORKER':'NOT_DEPLOYED',
    retry_attempt_ledger:durableSchema?'D1_SCHEMA_PRESENT_NO_WORKER':'NOT_DEPLOYED',
    manual_delivery:'BUILD728_SUPERVISED_ONLY',
