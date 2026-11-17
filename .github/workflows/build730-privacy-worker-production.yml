@@ -16,7 +16,7 @@ jobs:
     timeout-minutes: 20
     env:
       CLOUDFLARE_ACCOUNT_ID: c0d5bc25df16ae5b7d47c985c4b7b787
-      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_WORKERS_API_TOKEN }}
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
       WORKER_NAME: dnd-privacy-automation-730-prod
       SOURCE_SHA: ${{ github.event.workflow_run.head_sha }}
     steps:
@@ -61,11 +61,19 @@ jobs:
           PY
       - name: Deploy disabled default scheduled Cloudflare Worker
         shell: bash
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_WORKERS_API_TOKEN }}
         run: |
           set -euo pipefail
+          if [[ -z "${CLOUDFLARE_API_TOKEN}" ]]; then
+            echo 'HOLD_CLOUDFLARE_WORKERS_API_TOKEN_NOT_PROVISIONED — owner action #951 required'
+            exit 1
+          fi
           npx --yes wrangler@4.128.0 deploy --config wrangler.privacy730.toml --env production
       - name: Independently read back original Worker script and cron registration
         shell: bash
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_WORKERS_API_TOKEN }}
         run: |
           set -euo pipefail
           BASE="https://api.cloudflare.com/client/v4/accounts/${CLOUDFLARE_ACCOUNT_ID}/workers/scripts/${WORKER_NAME}"
