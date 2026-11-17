@@ -391,6 +391,13 @@
       "release": 467,
       "description": "Durable bounded withdrawal retry custody with atomic lease token state, immutable per-attempt outcomes and two-person reviewed dead-letter requeue evidence; no implicit scheduler activation or external delivery.",
       "recovery": "Do not delete or rewrite attempt receipts. Stop automated send, preserve original outbox/ack and use forward-only remediation; unauthorized scheduler remains OFF."
+    },
+    {
+      "version": 55,
+      "file": "0055_release467_privacy_sla_resolution_rotation_witness.sql",
+      "release": 467,
+      "description": "Immutable original signed withdrawal ACK review + independent Administrator SLA closure, source-version ciphertext hash/key lineage rotation witness with separate users; no remote erasure or key retirement authority.",
+      "recovery": "Retain immutable reviews, resolutions and key-lineage witnesses; reject duplicate or unsupported claims and remediate with forward-only separate reviewed evidence. Never retire historical keys or synthesize an external Master receipt."
     }
   ]
 }
