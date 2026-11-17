@@ -16,7 +16,7 @@
     "max_js_bytes": 600000,
     "max_css_bytes": 500000,
     "max_html_bytes": 500000,
-    "max_runtime_source_bytes": 19747000,
+    "max_runtime_source_bytes": 19755000,
     "max_runtime_source_files": 1857,
     "max_inline_data_uri_bytes": 650000
   },
@@ -33,6 +33,24 @@
     "production_mutation": false
   },
   "budget_reviews": [
+    {
+      "build": 731,
+      "date": "2026-11-16",
+      "scope": "Read-only original D1 privacy automation heartbeat, signed Admin/service ACK provenance consistency, retry SLA aging and historical-versus-active encryption key rotation reference assurance with an explicit protected Admin review UI.",
+      "prior_limit_bytes": 19747000,
+      "new_limit_bytes": 19755000,
+      "delta_bytes": 8000,
+      "measured_runtime_bytes": 19751389,
+      "measured_runtime_files": 1857,
+      "measured_system_gate_run": 44001955414,
+      "measured_overage_bytes": 4389,
+      "measured_remaining_headroom_bytes": 3611,
+      "file_limit_unchanged": 1857,
+      "per_file_js_css_html_limits_unchanged": true,
+      "review_reason": "Original exact-head failing System Gate #44001955414 measured 19,751,389 bytes (1,857 files), 4,389 above the previous 19,747,000-byte cap. Build731 adds original protected D1 assessment and tiny read-only on-demand Admin controls; no additional runtime source files. A narrow +8,000-byte cap allows measured 3,611 headroom without changing the fail-closed scanner, individual JS/CSS/HTML limits, role checks, original D1, encryption, cross-app security or Production promotion gates.",
+      "signed_external_receiver_proven": false,
+      "cloudflare_worker_credential_permission_blocked": true
+    },
     {
       "build": 730,
       "date": "2026-11-16",
