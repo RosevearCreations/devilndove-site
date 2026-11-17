@@ -87,8 +87,8 @@ export function assessPrivacyHealth731({tick=null,events=[],rotation=null,schema
  if(counters.overdue_24h)alerts.push({code:'RETRY_SLA_OVER_24_HOURS',severity:'warning',count:counters.overdue_24h});
  if(counters.dead_letters)alerts.push({code:'DEAD_LETTERS_UNRESOLVED',severity:'critical',count:counters.dead_letters});
  if(counters.expired_leases)alerts.push({code:'RETRY_LEASE_EXPIRED',severity:'warning',count:counters.expired_leases});
- const backlog=Number(rotation?.old_key_latest_versions);
- const historical=Number(rotation?.old_key_history_versions);
+ const backlog=rotation?.old_key_latest_versions==null?NaN:Number(rotation.old_key_latest_versions);
+ const historical=rotation?.old_key_history_versions==null?NaN:Number(rotation.old_key_history_versions);
  const active=String(rotation?.active_key_id||'');
  const configured=!!rotation?.keyring_ready;
  const rotation_state=!configured||!active||!Number.isSafeInteger(backlog)||backlog<0||
