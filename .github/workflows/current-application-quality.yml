@@ -76,6 +76,7 @@ jobs:
       - name: Build 730 retry policy privacy alerts and fail-closed source-only automation boundaries
         run: |
           node --check functions/api/admin/_lib/privacyOperations730.js
+          node --check functions/api/admin/privacy-retry-730.js
           node --check functions/api/admin/production-variable-audit-406.js
           python scripts/build730_retry_sqlite_gate.py
           node scripts/build730_privacy_alerts_retry_contract.mjs
