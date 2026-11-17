@@ -1,0 +1,39 @@
+name: Build 730 Development Worker Real Permission Proof
+on:
+  push:
+    branches: [dev]
+    paths:
+      - '.github/workflows/build730-development-worker-probe.yml'
+permissions:
+  contents: read
+jobs:
+  deploy-development-disabled-worker:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      CLOUDFLARE_ACCOUNT_ID: c0d5bc25df16ae5b7d47c985c4b7b787
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN_EDIT }}
+      WORKER_NAME: dnd-privacy-automation-730
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: '24'
+      - name: Deny Production and assert disabled Development Worker
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "${GITHUB_REF_NAME}" = "dev"
+          grep -q '^name = "dnd-privacy-automation-730"$' wrangler.privacy730.toml
+          grep -q '^database_name = "devilndove-dev"$' wrangler.privacy730.toml
+          grep -q '^database_id = "dbc1615b-dcbe-4951-973b-b47c99c73bfa"$' wrangler.privacy730.toml
+          grep -q '^DND730_AUTOMATION_ENABLED = "false"$' wrangler.privacy730.toml
+          node scripts/build730_worker_contract.mjs
+      - name: Deploy and read back original Development Worker using existing EDIT token
+        shell: bash
+        run: |
+          set -euo pipefail
+          npx --yes wrangler@4.128.0 deploy --config wrangler.privacy730.toml
+          curl --fail --silent --show-error -H "Authorization: Bearer ${CLOUDFLARE_API_TOKEN}" \
+            "https://api.cloudflare.com/client/v4/accounts/${CLOUDFLARE_ACCOUNT_ID}/workers/scripts/${WORKER_NAME}" >/dev/null
+          echo 'Real original Development Worker deployment with existing EDIT token: PASS; production remains untouched and automation disabled.'
