@@ -25,7 +25,7 @@ const ctx={request:new Request('https://devilndove.com/api/admin/production-vari
  env:{SESSION_SECRET:'private-test-secret'},data:{ddModuleAccess:{allowed:true,user:{role:'admin',is_active:1,user_id:7}}}};
 const res=await onRequestGet(ctx),json=await res.json();
 assert.equal(res.status,200);assert.equal(json.review730.build,730);
-assert.equal(json.review730.scheduler,'NOT_DEPLOYED');
+assert.equal(json.review730.scheduler,'NOT_VERIFIED');
 assert.equal(json.review730.retry_attempt_ledger,'NOT_DEPLOYED');
 assert.equal(json.review730.policy.automatic_external_delivery_enabled,false);
 assert.ok(!JSON.stringify(json).includes('private-test-secret'));
