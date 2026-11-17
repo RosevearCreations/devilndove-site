@@ -13,13 +13,22 @@
 - The Admin readback distinguishes `D1_SCHEMA_PRESENT_NO_WORKER` from `NOT_DEPLOYED`. Schema presence alone never authorizes an automatic send.
 - The new protected `POST /api/admin/privacy-retry-730` route records an original `review_dead_letter_730` review, and requires a distinct Administrator for `approve_dead_letter_730`; original consent must remain withdrawn, there must be no signed ACK, the event must be genuinely dead-lettered, and the D1 retry cycle must transition/read back. It never sends or claims an ACK.
 
-## NOT yet implemented — release must remain HOLD
-1. Safe authenticated scheduled runner, atomic runtime claim/settlement and real end-to-end signed delivery.
-2. Approved live external peer receiver enrollment with verified signed ACK and failure escalation.
-3. Encryption version rewrap automation with verified readback and previous-key preservation.
-4. End-to-end operational verification of the new two-person recovery API against real Development D1, and operator UI integration.
-5. Real Development-first D1 migration application, exact-head CI, Production deployment and independent live integrity verification.
 
-The current source explicitly publishes `scheduler: NOT_DEPLOYED`, `retry_attempt_ledger: NOT_DEPLOYED` and `automatic_external_delivery_enabled: false`. **Do not report Build 730 Production GREEN or that remote deletion occurred merely because advisory alerts exist.**
+## Cloudflare Scheduled Worker — code ready, operational enablement HOLD
+- `workers/privacy-automation-730.mjs` provides a Cloudflare native scheduled handler (no public HTTP endpoint). The isolated `wrangler.privacy730.toml` declares a 15-minute Production cron, but `DND730_AUTOMATION_ENABLED=false` by default.
+- The Worker uses the original consent outbox and immutable per-event lease/attempt cycles. It sends only metadata-only signed withdrawal envelopes to an actual independently enrolled Master whose current pinned-key proof is no older than seven days. Only an original fresh Ed25519 response verified against the exact event can produce a service-owned `dnd_withdrawal_auto_acks_730` immutable receipt. It cannot impersonate an Administrator, delete original customer/media/payment data, purge a vault or automatically replace an encryption key.
+- `dnd_privacy_schedule_receipts_730` stores run/held/signed counts and current-version key-rotation backlog. A fresh tick proves a scheduled worker reached original D1, **not** that the external Master deleted content or an external platform recalled media.
+- `.github/workflows/build730-privacy-worker-production.yml` runs only after same-main-SHA Production Pages Deploy SUCCESS, proves Production D1 0054, deploys the disabled Worker and independently reads back the script and 15-minute cron. This workflow has not yet been observed succeeding on Build 730 main.
+- **Activation prerequisite**: original Cloudflare Worker-specific secure configuration for all needed `DND728_PEER_<MASTER>_URL`, `_HMAC_KEY_B64URL`, `_PUBLIC_KEY_B64URL`, `_ENROLLMENT_RECEIPT`, plus non-secret unique `DND730_SERVICE_ID` and `DND728_ACTIVE_KEY_ID`; original Masters must be independently verified and actively return signed ACKs. Cloudflare Pages configuration does not automatically populate a separate Worker. Only a separate operator-approved Production change may set `DND730_AUTOMATION_ENABLED=true`.
+- Existing signed Build 728 Admin delivery remains independently available, and now respects verified service-owned signed ACKs to avoid known redundant sends.
+
+## Remaining Production activation gates — release must remain HOLD
+1. Cloudflare Worker deployment and verified scheduled tick on original Production D1 after exact-main-SHA release; the Worker remains intentionally disabled until independently approved secrets and real Master enrollments exist.
+2. Genuine original Master signed receiver ACK(s), not fabricated source samples; the Worker cannot prove remote erasure, consent deletion or outside publication recall.
+3. Ciphertext version rewrap is still owner-supervised through Build 728; Build 730 schedules and alerts for the rotation backlog, never silently rewrites existing evidence or retires old keys.
+4. Independently verify two-Admin recovery route and source evidence in real Development D1.
+5. Development D1 0054 has a genuine successful workflow run #43993592160; Production D1 0054, exact-head CI, Cloudflare Pages/Worker deployment and live resource integrity remain unverified.
+
+The current source does not automatically claim an operational scheduler merely because Worker source and config exist. Original D1 heartbeat is shown separately, and `DND730_AUTOMATION_ENABLED` remains false by default. **Do not report Build 730 Production GREEN or that remote deletion occurred merely because advisory alerts exist.**
 
 Source and delivery release gates from [Issue 948](https://github.com/RosevearCreations/devilndove-site/issues/948) remain mandatory. Follow Build 729 source consent controls and externally provisioned genuine original Master receivers. Do not simulate Production original signer/ACK or bypass Development-first D1 promotion.
