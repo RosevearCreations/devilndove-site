@@ -5,6 +5,7 @@ import {sourceVerifiedOwnerReview721,verifyIndependentRotationReceipt722,reconci
 import {masterTrustStatus724,verifyMasterEnvelope724,verifyKeyCustodyRotation724,recordMasterReplayReview724} from './_lib/projectFinanceEvidence.js';
 import {eventEnvelopeContract726,queueSourceEvent726,inspectSourceEvents726,localDeadLetterReview726,verifyPeerAckReview726,signedPeerAckReview726} from './_lib/projectFinanceEvidence.js';
 import {verifiedAdminFromModule} from '../_lib/verifiedAdmin398.mjs';
+import {privacyAlerts730,retryWindow730,BUILD730_POLICY} from './_lib/privacyOperations730.js';
 import {sixTierSecurityInventory723,sevenAxisCompletionBaseline723,assessTierCandidate723} from '../_lib/appModuleRoutes.js';
 import {independentReleaseStatus725,negotiateIndependentSync725,assessConsentTenantCapability725,resolveKeyring728,vaultEncrypt728,vaultDecryptForRotation728,digest728,hmacScope728,retentionEligibility728,verifyLiveWithdrawalAck728,BUILD728_POLICY,BUILD729_PEERS,peerConfig729,verifyPeerChallenge729} from '../_lib/appModuleRoutes.js';
 const checks=Object.freeze([
@@ -460,6 +461,30 @@ async function review729(db,env){
   production_secrets_provisioned_by_this_release:false,original_master_receivers_enabled:false};
 }
 
+
+// Build 730: read-only truthful operations dashboard; no cron/remote state is asserted.
+async function review730(db,env){
+ const source=await review729(db,env),alerts=privacyAlerts730(source);
+ const attempts=[];
+ if(db){
+  try{
+   const rows=(await db.prepare(`SELECT w.event_id,w.target_app,w.created_at,
+      CASE WHEN a.event_id IS NULL THEN 0 ELSE 1 END AS acknowledged
+      FROM dnd_withdrawal_outbox_728 w
+      LEFT JOIN dnd_withdrawal_acks_728 a ON a.event_id=w.event_id
+      ORDER BY w.created_at ASC LIMIT 60`).all())?.results||[];
+   for(const row of rows)attempts.push({event_id:row.event_id,target_app:row.target_app,
+     ...retryWindow730({attempts:0,created_at:row.created_at,acknowledged:!!row.acknowledged}),
+     attempt_history:'NOT_RECORDED_NO_DURABLE_RETRY_LEDGER'});
+  }catch{alerts.alerts.push({code:'WITHDRAWAL_D1_UNAVAILABLE',severity:'critical',count:1});}
+ }
+ return {build:730,policy:BUILD730_POLICY,alerts:alerts.alerts,
+   queued_review:attempts,scheduler:'NOT_DEPLOYED',dead_letter_ledger:'NOT_DEPLOYED',
+   retry_attempt_ledger:'NOT_DEPLOYED',manual_delivery:'BUILD728_SUPERVISED_ONLY',
+   rotation_schedule:'ADVISORY_ONLY_NO_AUTOMATIC_REENCRYPTION',
+   remote_ack_implied:false,source};
+}
+
 export async function onRequestPost(c){
  const admin=verifiedAdminFromModule(c),db=getDb(c.env||{});
  if(!admin)return jsonResponse({ok:false,error:'Active verified Administrator required.'},401,{'Cache-Control':'no-store'});
@@ -630,6 +655,7 @@ export async function onRequestGet(c){
  const review726=requestUrl.searchParams.get('review')==='726';
  const isReview728=requestUrl.searchParams.get('review')==='728';
  const isReview729=requestUrl.searchParams.get('review')==='729';
+ const isReview730=requestUrl.searchParams.get('review')==='730';
  let ledger721=null;
  if(review721||review722){
   const n=Number(requestUrl.searchParams.get('campaign_queue_id'));
@@ -716,5 +742,6 @@ export async function onRequestGet(c){
   }}:{}),
   ...(isReview728?{review728:await review728(getDb(env),env)}:{}),
   ...(isReview729?{review729:await review729(getDb(env),env)}:{}),
+  ...(isReview730?{review730:await review730(getDb(env),env)}:{}),
   documentation:'/docs/operations/RELEASE_467_BUILD_406_PRODUCTION_CONFIGURATION_AUDIT.md'},200,{'Cache-Control':'no-store'});
 }
