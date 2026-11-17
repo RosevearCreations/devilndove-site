@@ -73,6 +73,11 @@ jobs:
           node --check public/js/admin-mobile-product-augment.js
           node --check public/js/admin-social-platform-preflight.js
           node scripts/build707_ninth_field_media_drift_custody_contract.mjs
+      - name: Build 731 independent privacy health, SLA, delivery proof and encryption rotation completion negatives
+        run: |
+          node --check functions/api/admin/_lib/privacyOperations730.js
+          node --check functions/api/admin/production-variable-audit-406.js
+          node scripts/build731_privacy_health_delivery_rotation_contract.mjs
       - name: Build 730 retry policy privacy alerts and fail-closed source-only automation boundaries
         run: |
           node --check functions/api/admin/_lib/privacyOperations730.js
