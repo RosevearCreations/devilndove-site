@@ -273,6 +273,10 @@ async function action728continued(c,db,admin,p){
    return hold728('HOLD_WITHDRAWN_SOURCE_NOT_VERIFIED');
   if(await db.prepare('SELECT event_id FROM dnd_withdrawal_acks_728 WHERE event_id=?').bind(eventId).first())
    return ok728('PREVIOUS_SIGNED_PEER_ACK_RECORDED',{event_id:eventId,no_resend:true});
+  const autoSigned=await db.prepare('SELECT ack_envelope_sha256 FROM dnd_withdrawal_auto_acks_730 WHERE event_id=?')
+   .bind(eventId).first().catch(()=>null);
+  if(autoSigned)return ok728('PREVIOUS_SIGNED_AUTOMATED_PEER_ACK_RECORDED',{event_id:eventId,no_resend:true,
+   original_admin_signature_claimed:false});
   const prefix='DND728_PEER_'+e.target_app.replace(/-/g,'_').toUpperCase()+'_';
   const urlText=String(c.env[prefix+'URL']||''),pk=String(c.env[prefix+'PUBLIC_KEY_B64URL']||''),
    secret=String(c.env[prefix+'HMAC_KEY_B64URL']||''),
