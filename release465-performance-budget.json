@@ -16,7 +16,7 @@
     "max_js_bytes": 600000,
     "max_css_bytes": 500000,
     "max_html_bytes": 500000,
-    "max_runtime_source_bytes": 19755000,
+    "max_runtime_source_bytes": 19766000,
     "max_runtime_source_files": 1857,
     "max_inline_data_uri_bytes": 650000
   },
@@ -33,6 +33,23 @@
     "production_mutation": false
   },
   "budget_reviews": [
+    {
+      "build": 732,
+      "date": "2026-11-17",
+      "scope": "Original D1 privacy SLA escalation, three-Master compliance review and key custody reporting.",
+      "prior_limit_bytes": 19755000,
+      "new_limit_bytes": 19766000,
+      "delta_bytes": 11000,
+      "measured_runtime_bytes": 19761206,
+      "measured_runtime_files": 1857,
+      "measured_system_gate_run": 44097708683,
+      "measured_overage_bytes": 6206,
+      "measured_remaining_headroom_bytes": 4794,
+      "runtime_file_limit_unchanged": 1857,
+      "per_file_js_css_html_limits_unchanged": true,
+      "review_reason": "Exact Build732 System Gate #44097708683 measured 19,761,206 bytes and 1,857 files, exceeding previous source cap by 6,206. Scoped original read-only Admin D1 SLA and custody assurance. Narrow 11,000-byte increase preserves full security, file count, per-file size, Development D1, exact main Production and Cloudflare integrity checks. Worker remains unprovisioned per issue #951; no live peer ACK, remote erasure or key retirement implied.",
+      "worker_production_operational": false
+    },
     {
       "build": 731,
       "date": "2026-11-16",
