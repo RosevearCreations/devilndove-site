@@ -16,8 +16,8 @@
     "max_js_bytes": 600000,
     "max_css_bytes": 500000,
     "max_html_bytes": 500000,
-    "max_runtime_source_bytes": 19727000,
-    "max_runtime_source_files": 1855,
+    "max_runtime_source_bytes": 19739000,
+    "max_runtime_source_files": 1857,
     "max_inline_data_uri_bytes": 650000
   },
   "baseline_observed": {
@@ -33,6 +33,28 @@
     "production_mutation": false
   },
   "budget_reviews": [
+    {
+      "build": 730,
+      "date": "2026-11-16",
+      "scope": "Original Admin-only privacy withdrawal retry advice, immutable D1 lease/attempt/dead-letter cycles, two-distinct-Admin reviewed dead-letter requeue and read-only privacy alerts. No live scheduler, automatic Master dispatch, Cloudflare key swap or customer purge.",
+      "prior_limit_bytes": 19727000,
+      "new_limit_bytes": 19739000,
+      "delta_bytes": 12000,
+      "delta_percent": 0.06083,
+      "prior_file_limit": 1855,
+      "new_file_limit": 1857,
+      "measured_runtime_bytes": 19736327,
+      "measured_runtime_files": 1857,
+      "measured_system_gate_run": 43992359126,
+      "measured_overage_bytes": 9327,
+      "measured_file_overage": 2,
+      "measured_projected_headroom_bytes": 2673,
+      "per_file_js_css_html_limits_unchanged": true,
+      "original_provider_and_peer_authority_gates_unchanged": true,
+      "review_reason": "Original failing System Gate run 43992359126 explicitly measured 19,736,327 bytes and 1,857 runtime files. Reviewed Build 730 additions introduce two dedicated runtime modules (bounded privacy alert calculations and protected dead-letter recovery), migration-owned immutable retry cycle state and protected read-only Admin review. A narrow +12,000-byte / +2-file adjustment permits only 2,673 bytes measured headroom; existing size-count scanner and all per-file, inline data, System Gate, Development D1 first, protected main and live production checks remain fail-closed. This is not an allowance for phantom signed peer ACK, automatic delivery, secret rotation or deletion.",
+      "deployment_and_ci_not_yet_verified": true,
+      "automatic_delivery_enabled": false
+    },
     {
       "build": 729,
       "date": "2026-11-16",
