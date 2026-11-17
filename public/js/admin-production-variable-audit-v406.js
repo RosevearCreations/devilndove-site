@@ -573,3 +573,61 @@ document.addEventListener('DOMContentLoaded',()=>{
   finally{button.disabled=false;}
  });
 });
+
+
+/* Build 733: explicit Admin-only read and supervised original D1 closure actions. */
+document.addEventListener('DOMContentLoaded',()=>{
+ const root=document.getElementById('privacy733Command');if(!root)return;
+ const $=id=>root.querySelector('#'+id),out=$('privacy733Results');
+ const uuid=s=>/^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(s);
+ const reason=s=>/^[A-Z0-9_]{4,80}$/.test(s);
+ const endpoint='/api/admin/privacy-command-centre-733';
+ const call=(options={})=>window.DDAuth?.apiFetch?
+  window.DDAuth.apiFetch(endpoint,options):fetch(endpoint,{credentials:'same-origin',...options});
+ $('privacy733Refresh').addEventListener('click',async()=>{
+  $('privacy733Refresh').disabled=true;out.textContent='Reading original source evidence…';
+  try{
+   const r=await call(),d=await r.json();
+   if(!r.ok||!d.ok)throw Error('HOLD_SOURCE_READBACK');
+   out.textContent=JSON.stringify({scheduler:d.scheduler_state,
+    seven_application_matrix:d.seven_application_matrix,latest_tick:d.latest_tick,
+    independent_key_lineage_witness_count:d.independent_key_lineage_witness_count,
+    remote_erasure_verified:d.remote_erasure_verified,
+    old_key_retirement_authorized:d.old_key_retirement_authorized},null,2);
+  }catch{out.textContent='HOLD — independently verified original D1 custody is unavailable.';}
+  finally{$('privacy733Refresh').disabled=false;}
+ });
+ const act=async(button,body,label)=>{
+  if(!window.confirm(label))return;
+  button.disabled=true;out.textContent='Verifying original D1…';
+  try{
+   const r=await call({method:'POST',headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({...body,owner_review_confirmed:true})});
+   const d=await r.json().catch(()=>({}));
+   if(!r.ok||!d.ok)throw Error('HOLD_ORIGINAL_APPROVAL');
+   out.textContent=JSON.stringify(d,null,2);
+  }catch{out.textContent='HOLD — original signature, distinct-Admin, lineage or D1 constraints rejected this action.';}
+  finally{button.disabled=false;}
+ };
+ $('privacy733RecordReview').addEventListener('click',()=>{
+  const event_id=$('privacy733Event').value.trim(),reason_code=$('privacy733Reason').value.trim();
+  if(!uuid(event_id)||!reason(reason_code)){out.textContent='Enter exact event UUID and uppercase reason code.';return;}
+  act($('privacy733RecordReview'),{action:'review_sla_733',event_id,reason_code},
+   'Record an immutable source signed ACK review? Independent Admin approval remains required.');
+ });
+ $('privacy733ApproveReview').addEventListener('click',()=>{
+  const review_id=$('privacy733Review').value.trim(),reason_code=$('privacy733Reason').value.trim();
+  if(!uuid(review_id)||!reason(reason_code)){out.textContent='Enter original review UUID and exact uppercase reason code.';return;}
+  act($('privacy733ApproveReview'),{action:'approve_sla_733',review_id,reason_code},
+   'Confirm you are a different Administrator approving this source-only SLA closure? No remote erasure is claimed.');
+ });
+ $('privacy733Witness').addEventListener('click',()=>{
+  const evidence_id=$('privacy733Evidence').value.trim(),
+   target_version=Number($('privacy733Version').value),
+   reason_code=$('privacy733WitnessReason').value.trim();
+  if(!uuid(evidence_id)||!Number.isSafeInteger(target_version)||target_version<2||target_version>999||
+     !reason(reason_code)){out.textContent='Enter evidence UUID, latest version 2–999 and uppercase reason.';return;}
+  act($('privacy733Witness'),{action:'witness_key_lineage_733',evidence_id,target_version,reason_code},
+   'Record an independent original ciphertext metadata witness? This is NOT decryption proof or key retirement authority.');
+ });
+});
