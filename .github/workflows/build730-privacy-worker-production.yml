@@ -82,8 +82,15 @@ jobs:
           python - <<'PY'
           import json
           data=json.load(open('/tmp/build730-worker-cron.json'))
-          assert data.get('success') is True,data
-          assert any(x.get('cron')=='*/15 * * * *' for x in data.get('result') or []),data
+          assert isinstance(data,dict) and data.get('success') is True,'Cloudflare schedules API did not succeed'
+          result=data.get('result')
+          if isinstance(result,dict):
+              result=result.get('schedules',result.get('triggers',result.get('cron')))
+          if isinstance(result,str):
+              result=[result]
+          assert isinstance(result,list),'Unknown Cloudflare schedules API result schema'
+          crons=[entry if isinstance(entry,str) else entry.get('cron') if isinstance(entry,dict) else None for entry in result]
+          assert '*/15 * * * *' in crons,'Original 15-minute cron not found in Cloudflare readback'
           print('Build730 original Cloudflare Worker script and 15-minute cron readback: PASS')
           print('Delivery activation remains OFF until original keys/receivers are independently enrolled.')
           PY
