@@ -1,0 +1,23 @@
+name = "dnd-privacy-automation-730"
+main = "workers/privacy-automation-730.mjs"
+compatibility_date = "2026-11-16"
+
+# Do not deploy this default environment to Production.
+[[d1_databases]]
+binding = "DB"
+database_name = "devilndove-dev"
+database_id = "dbc1615b-dcbe-4951-973b-b47c99c73bfa"
+
+[vars]
+DND730_AUTOMATION_ENABLED = "false"
+
+[env.production]
+name = "dnd-privacy-automation-730-prod"
+[[env.production.d1_databases]]
+binding = "DB"
+database_name = "devilndove-prod-r462"
+database_id = "f34a741b-0000-45b0-9a96-6be08754d563"
+[env.production.vars]
+DND730_AUTOMATION_ENABLED = "false"
+[env.production.triggers]
+crons = ["*/15 * * * *"]
