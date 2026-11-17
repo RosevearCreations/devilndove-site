@@ -44,8 +44,14 @@ reject("""INSERT INTO dnd_dead_letter_recovery_730(recovery_id,event_id,decision
 VALUES(?,?, 'REQUEUE_REQUESTED',1,1,'OWNER_CONFIRM')""",("44444444-4444-4444-8444-444444444444",eid))
 reject("""INSERT INTO dnd_dead_letter_recovery_730(recovery_id,event_id,decision,requested_by_user_id,reason_code)
 VALUES(?,?,'REQUEUE_REQUESTED',1,'OWNER_CONFIRM')""",("55555555-5555-4555-8555-555555555555",eid))
-db.execute("""INSERT INTO dnd_dead_letter_recovery_730(recovery_id,event_id,decision,target_cycle,requested_by_user_id,approved_by_user_id,reason_code)
-VALUES(?,?,'REQUEUE_REQUESTED',1,1,2,'OWNER_CONFIRM')""",("66666666-6666-4666-8666-666666666666",eid))
+db.execute("""INSERT INTO dnd_dead_letter_recovery_730(recovery_id,event_id,decision,target_cycle,requested_by_user_id,reason_code)
+VALUES(?,?,'REVIEW_HOLD',1,1,'OWNER_CONFIRM')""",("88888888-8888-4888-8888-888888888888",eid))
+reject("""INSERT INTO dnd_dead_letter_recovery_730(recovery_id,event_id,decision,target_cycle,original_review_id,requested_by_user_id,approved_by_user_id,reason_code)
+VALUES(?,?,'REQUEUE_REQUESTED',1,?,1,2,'OWNER_CONFIRM')""",
+("99999999-9999-4999-8999-999999999999",eid,"00000000-0000-4000-8000-000000000000"))
+db.execute("""INSERT INTO dnd_dead_letter_recovery_730(recovery_id,event_id,decision,target_cycle,original_review_id,requested_by_user_id,approved_by_user_id,reason_code)
+VALUES(?,?,'REQUEUE_REQUESTED',1,?,1,2,'OWNER_CONFIRM')""",
+("66666666-6666-4666-8666-666666666666",eid,"88888888-8888-4888-8888-888888888888"))
 reject("DELETE FROM dnd_dead_letter_recovery_730")
 # An independent review for target cycle 1 must not unlock a different cycle.
 db.execute("""UPDATE dnd_withdrawal_retry_state_730 SET
