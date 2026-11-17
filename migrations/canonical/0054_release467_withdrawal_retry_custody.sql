@@ -23,6 +23,12 @@ CREATE TABLE IF NOT EXISTS dnd_withdrawal_attempts_730 (
  recorded_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
  UNIQUE(event_id,attempt_number)
 );
+CREATE TRIGGER IF NOT EXISTS trg_dnd_withdrawal_attempt_lease_730 BEFORE INSERT ON dnd_withdrawal_attempts_730
+ WHEN NOT EXISTS (SELECT 1 FROM dnd_withdrawal_retry_state_730 s
+ WHERE s.event_id=NEW.event_id AND s.state='LEASED'
+ AND s.lease_token=NEW.lease_token AND s.attempt_count+1=NEW.attempt_number
+ AND s.lease_expires_at>datetime('now'))
+ BEGIN SELECT RAISE(ABORT,'current_live_retry_lease_required'); END;
 CREATE TRIGGER IF NOT EXISTS trg_dnd_withdrawal_attempts_no_update_730 BEFORE UPDATE ON dnd_withdrawal_attempts_730
  BEGIN SELECT RAISE(ABORT,'immutable_retry_attempt'); END;
 CREATE TRIGGER IF NOT EXISTS trg_dnd_withdrawal_attempts_no_delete_730 BEFORE DELETE ON dnd_withdrawal_attempts_730
