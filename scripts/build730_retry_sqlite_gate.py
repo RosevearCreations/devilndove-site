@@ -29,7 +29,11 @@ def reject(sql,args=()):
  except sqlite3.IntegrityError:
   return
  raise AssertionError("Expected SQLite schema denial: "+sql)
-reject("""INSERT INTO dnd_withdrawal_attempts_730\n (attempt_id,event_id,lease_token,attempt_number,outcome)\n VALUES(?,?,?,?,?)""",("77777777-7777-4777-8777-777777777777",eid,\n "99999999-9999-4999-8999-999999999999",1,"UNAVAILABLE"))\ndb.execute("""INSERT INTO dnd_withdrawal_attempts_730
+reject("""INSERT INTO dnd_withdrawal_attempts_730
+ (attempt_id,event_id,lease_token,attempt_number,outcome)
+ VALUES(?,?,?,?,?)""",("77777777-7777-4777-8777-777777777777",eid,
+ "99999999-9999-4999-8999-999999999999",1,"UNAVAILABLE"))
+db.execute("""INSERT INTO dnd_withdrawal_attempts_730
  (attempt_id,event_id,lease_token,attempt_number,outcome)
  VALUES(?,?,?,?,?)""",("33333333-3333-4333-8333-333333333333",eid,
  "22222222-2222-4222-8222-222222222222",1,"UNAVAILABLE"))
