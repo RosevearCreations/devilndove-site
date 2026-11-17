@@ -520,3 +520,30 @@ document.addEventListener('DOMContentLoaded',()=>{
   });
  }
 });
+
+
+/* Build 731: operator-requested, read-only privacy health and evidence review. */
+document.addEventListener('DOMContentLoaded',()=>{
+ const root=document.getElementById('privacyOperations730');
+ const button=root?.querySelector('#privacy731Refresh'),out=root?.querySelector('#privacy731Results');
+ if(!button||!out)return;
+ button.addEventListener('click',async()=>{
+  button.disabled=true;out.textContent='Checking original D1 evidence…';
+  try{
+   const url='/api/admin/production-variable-audit-406?review=731';
+   const response=await (window.DDAuth?.apiFetch?window.DDAuth.apiFetch(url):
+    fetch(url,{credentials:'same-origin'}));
+   const body=await response.json();
+   if(!response.ok||!body?.ok||!body.review731)throw Error('HOLD_ORIGINAL_D1');
+   const x=body.review731;
+   out.textContent=JSON.stringify({state:x.state||x.scheduler_health,
+    signed_delivery_evidence:x.delivery_evidence,
+    counters:x.counters,alerts:x.alerts,
+    rotation:x.rotation,
+    sample_count:x.queue_sample_bounded,
+    full_queue_sla_certified:x.full_queue_sla_certified,
+    external_data_removed_verified:x.external_data_removed_verified},null,2);
+  }catch{out.textContent='HOLD — original privacy health and signed evidence cannot be verified.';}
+  finally{button.disabled=false;}
+ });
+});
