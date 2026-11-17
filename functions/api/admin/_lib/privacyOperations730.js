@@ -106,3 +106,86 @@ export function assessPrivacyHealth731({tick=null,events=[],rotation=null,schema
   queue_sample_bounded:reviewed.length,full_queue_sla_certified:false,
   external_data_removed_verified:false,live_peer_connected_implied:false};
 }
+
+/* Build 732: original source-only escalation, recovery and cross-application compliance.
+   No outbound communication, credential exposure, purge, or secret-retirement permission. */
+export function assessPrivacyGovernance732({health={},events=[],peers=[],rotation=null,
+ scheduleReceipts=[],now=Date.now(),complete=false}={}){
+ const allowed=['ai-data-platform','rosevear-ai-hub','rosevear-comms-hub'];
+ const stamp=s=>{
+  if(typeof s!=='string'||!/^\d{4}-\d\d-\d\d[ T]\d\d:\d\d:\d\d(?:\.\d+)?(?:Z)?$/.test(s))return NaN;
+  return Date.parse(s.replace(' ','T')+(s.endsWith('Z')?'':'Z'));
+ };
+ const alerts=[],matrix=allowed.map(name=>({peer_app:name,withdrawn_pending:0,
+  breached_24h:0,breached_7d:0,dead_letter:0,expired_lease:0,
+  verified_local_ack:0,conflicting_ack:0,remote_receipt_verified:false,
+  compliance_state:'HOLD_ORIGINAL_PEER_EVIDENCE'}));
+ const limited=Array.isArray(events)?events.slice(0,100):[];
+ for(const e of limited){
+  const m=matrix.find(x=>x.peer_app===e.target_app);
+  if(!m){alerts.push({code:'HOLD_UNRECOGNIZED_MASTER_TARGET',severity:'critical'});continue;}
+  const manual=Number(e.manual_receipt||0),service=Number(e.service_receipt||0);
+  const signatureOk=(manual===1&&Number(e.manual_signature_verified)===1&&e.manual_target===m.peer_app)||
+   (service===1&&Number(e.service_signature_verified)===1&&e.service_target===m.peer_app);
+  const valid=manual+service===1&&signatureOk&&Number(e.consent_withdrawn)===1;
+  if(manual+service){
+   if(valid)m.verified_local_ack++;
+   else {m.conflicting_ack++;alerts.push({code:'HOLD_CONFLICTING_LOCAL_DELIVERY_EVIDENCE',severity:'critical',peer_app:m.peer_app});}
+   continue;
+  }
+  m.withdrawn_pending++;
+  if(e.state==='DEAD_LETTER')m.dead_letter++;
+  if(e.state==='LEASED'&&Number.isFinite(stamp(e.lease_expires_at))&&stamp(e.lease_expires_at)<now)m.expired_lease++;
+  const age=now-stamp(e.created_at);
+  if(Number.isFinite(age)&&age>=7*86400000)m.breached_7d++;
+  else if(Number.isFinite(age)&&age>=86400000)m.breached_24h++;
+  else if(!Number.isFinite(age)||age<0)alerts.push({code:'HOLD_UNKNOWN_EVENT_AGE',severity:'warning',peer_app:m.peer_app});
+ }
+ const proofs=Array.isArray(peers)?peers:[];
+ for(const m of matrix){
+  const p=proofs.find(x=>x.peer_app===m.peer_app);
+  const live=!!p&&p.state==='CURRENT_LIVE_SIGNED_CHALLENGE_PROOF'&&
+   Number.isFinite(stamp(p.latest_proof_at))&&now-stamp(p.latest_proof_at)>=0&&
+   now-stamp(p.latest_proof_at)<=7*86400000;
+  m.compliance_state=!complete?'HOLD_QUEUE_SAMPLE_INCOMPLETE':
+   !live?'HOLD_ORIGINAL_SIGNED_PEER_ENROLLMENT':
+   m.conflicting_ack?'HOLD_DELIVERY_EVIDENCE_CONFLICT':
+   m.dead_letter||m.breached_7d?'ESCALATE_ORIGINAL_PRIVACY_SLA':
+   m.breached_24h||m.expired_lease?'REVIEW_PRIVACY_SLA':
+   'LOCAL_SOURCE_COMPLIANCE_REVIEW_ONLY';
+  if(m.breached_7d||m.dead_letter)
+   alerts.push({code:'CRITICAL_PRIVACY_SLA_ESCALATION',severity:'critical',peer_app:m.peer_app,
+    count:m.breached_7d+m.dead_letter});
+  else if(m.breached_24h||m.expired_lease)
+   alerts.push({code:'PRIVACY_SLA_OPERATOR_REVIEW',severity:'warning',peer_app:m.peer_app,
+    count:m.breached_24h+m.expired_lease});
+ }
+ const ticks=Array.isArray(scheduleReceipts)?scheduleReceipts.slice(0,2):[];
+ const newest=ticks[0]||null,prev=ticks[1]||null;
+ const latest=stamp(newest?.created_at);
+ const fresh=Number.isFinite(latest)&&now-latest>=0&&now-latest<=30*60000;
+ const consistent=fresh&&newest.tick_state==='RUN'&&Number(newest.signed_ack_count)>=0&&
+  Number(newest.held_events)>=0&&Number(newest.considered_events)>=0&&
+  Number(newest.signed_ack_count)+Number(newest.held_events)<=Number(newest.considered_events);
+ const monotonic=(!prev||Number.isFinite(stamp(prev.created_at))&&
+   stamp(prev.created_at)<=latest&&newest.tick_id!==prev.tick_id);
+ const automation=consistent&&monotonic?'ORIGINAL_D1_TICK_EVIDENCE_OBSERVED':
+  'HOLD_SCHEDULER_RECOVERY_NOT_VERIFIED';
+ if(automation.startsWith('HOLD'))alerts.push({code:automation,severity:'critical'});
+ const oldLatest=rotation?.current_old_key_versions,oldHistorical=rotation?.historical_old_key_references;
+ const validRotation=Number.isSafeInteger(oldLatest)&&oldLatest>=0&&
+  Number.isSafeInteger(oldHistorical)&&oldHistorical>=0&&!!rotation?.active_key_id;
+ const custody=!validRotation?'HOLD_KEY_CUSTODY_PROOF_INCOMPLETE':
+  oldLatest>0?'HOLD_ACTIVE_CIPHERTEXT_ROTATION_PENDING':
+  oldHistorical>0?'HOLD_HISTORICAL_KEY_REFERENCES_RETAINED':
+  'LOCAL_REFERENCE_SCAN_CLEAR_NOT_RETIREMENT_PROOF';
+ if(custody.startsWith('HOLD'))alerts.push({code:custody,severity:'warning'});
+ return {build:732,automation_recovery:automation,privacy_sla_escalations:alerts,
+  cross_application_compliance:matrix,queue_evidence_complete:complete,
+  key_custody:{status:custody,active_key_id:rotation?.active_key_id||null,
+   original_rotation_attested:false,old_key_retirement_authorized:false,
+   independently_decrypted_ciphertext_verified:false},
+  scheduler_actual_cloudflare_deployment_verified:false,
+  cross_application_delivery_or_remote_erasure_proven:false,
+  no_auto_send:true,operator_decision_required:true};
+}
