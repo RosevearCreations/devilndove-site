@@ -465,22 +465,39 @@ async function review729(db,env){
 // Build 730: read-only truthful operations dashboard; no cron/remote state is asserted.
 async function review730(db,env){
  const source=await review729(db,env),alerts=privacyAlerts730(source);
- const attempts=[];
+ const attempts=[];let durableSchema=false;
  if(db){
   try{
-   const rows=(await db.prepare(`SELECT w.event_id,w.target_app,w.created_at,
+   const schema=await db.prepare("SELECT name FROM sqlite_master WHERE type='table' AND name='dnd_withdrawal_retry_state_730'").first();
+   durableSchema=!!schema;
+   const sql=durableSchema?`SELECT w.event_id,w.target_app,w.created_at,
+      CASE WHEN a.event_id IS NULL THEN 0 ELSE 1 END AS acknowledged,
+      s.attempt_count,s.retry_after,s.state,s.updated_at
+      FROM dnd_withdrawal_outbox_728 w
+      LEFT JOIN dnd_withdrawal_acks_728 a ON a.event_id=w.event_id
+      LEFT JOIN dnd_withdrawal_retry_state_730 s ON s.event_id=w.event_id
+      ORDER BY w.created_at ASC LIMIT 60`:
+    `SELECT w.event_id,w.target_app,w.created_at,
       CASE WHEN a.event_id IS NULL THEN 0 ELSE 1 END AS acknowledged
       FROM dnd_withdrawal_outbox_728 w
       LEFT JOIN dnd_withdrawal_acks_728 a ON a.event_id=w.event_id
-      ORDER BY w.created_at ASC LIMIT 60`).all())?.results||[];
-   for(const row of rows)attempts.push({event_id:row.event_id,target_app:row.target_app,
-     ...retryWindow730({attempts:0,created_at:row.created_at,acknowledged:!!row.acknowledged}),
-     attempt_history:'NOT_RECORDED_NO_DURABLE_RETRY_LEDGER'});
+      ORDER BY w.created_at ASC LIMIT 60`;
+   const rows=(await db.prepare(sql).all())?.results||[];
+   for(const row of rows){
+    const current=durableSchema&&row.state?row.state:'HOLD_UNINITIALIZED_DURABLE_RETRY';
+    attempts.push({event_id:row.event_id,target_app:row.target_app,
+      ...retryWindow730({attempts:Number(row.attempt_count||0),created_at:row.created_at,
+       last_attempt_at:row.updated_at,acknowledged:!!row.acknowledged}),
+      durable_state:current,durable_retry_after:durableSchema?row.retry_after||null:null,
+      automatic_send_authorized:false});
+   }
   }catch{alerts.alerts.push({code:'WITHDRAWAL_D1_UNAVAILABLE',severity:'critical',count:1});}
  }
  return {build:730,policy:BUILD730_POLICY,alerts:alerts.alerts,
-   queued_review:attempts,scheduler:'NOT_DEPLOYED',dead_letter_ledger:'NOT_DEPLOYED',
-   retry_attempt_ledger:'NOT_DEPLOYED',manual_delivery:'BUILD728_SUPERVISED_ONLY',
+   queued_review:attempts,scheduler:'NOT_DEPLOYED',
+   dead_letter_ledger:durableSchema?'D1_SCHEMA_PRESENT_NO_WORKER':'NOT_DEPLOYED',
+   retry_attempt_ledger:durableSchema?'D1_SCHEMA_PRESENT_NO_WORKER':'NOT_DEPLOYED',
+   manual_delivery:'BUILD728_SUPERVISED_ONLY',
    rotation_schedule:'ADVISORY_ONLY_NO_AUTOMATIC_REENCRYPTION',
    remote_ack_implied:false,source};
 }
