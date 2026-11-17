@@ -71,3 +71,36 @@ CREATE TRIGGER IF NOT EXISTS trg_dnd_dead_letter_provenance_730 BEFORE INSERT ON
  AND original.decision='REVIEW_HOLD' AND original.requested_by_user_id=NEW.requested_by_user_id
  AND original.approved_by_user_id IS NULL)
  BEGIN SELECT RAISE(ABORT,'original_independent_recovery_review_required'); END;
+-- Automated receipts are explicitly service-authored; never masquerade as an original Administrator.
+CREATE TABLE IF NOT EXISTS dnd_withdrawal_auto_acks_730 (
+ event_id TEXT PRIMARY KEY REFERENCES dnd_withdrawal_outbox_728(event_id) ON DELETE RESTRICT,
+ peer_app TEXT NOT NULL CHECK(peer_app IN ('ai-data-platform','rosevear-ai-hub','rosevear-comms-hub')),
+ ack_envelope_sha256 TEXT NOT NULL CHECK(length(ack_envelope_sha256)=64),
+ peer_signature_verified INTEGER NOT NULL CHECK(peer_signature_verified=1),
+ observed_live_response INTEGER NOT NULL CHECK(observed_live_response=1),
+ service_id TEXT NOT NULL CHECK(length(service_id) BETWEEN 12 AND 80),
+ created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+CREATE TRIGGER IF NOT EXISTS trg_dnd_auto_ack_scope_730 BEFORE INSERT ON dnd_withdrawal_auto_acks_730
+ WHEN NOT EXISTS(SELECT 1 FROM dnd_withdrawal_outbox_728 w WHERE w.event_id=NEW.event_id
+ AND w.target_app=NEW.peer_app)
+ BEGIN SELECT RAISE(ABORT,'automatic_signed_ack_receiver_mismatch'); END;
+CREATE TRIGGER IF NOT EXISTS trg_dnd_auto_ack_no_update_730 BEFORE UPDATE ON dnd_withdrawal_auto_acks_730
+ BEGIN SELECT RAISE(ABORT,'immutable_automatic_signed_ack'); END;
+CREATE TRIGGER IF NOT EXISTS trg_dnd_auto_ack_no_delete_730 BEFORE DELETE ON dnd_withdrawal_auto_acks_730
+ BEGIN SELECT RAISE(ABORT,'immutable_automatic_signed_ack'); END;
+CREATE TABLE IF NOT EXISTS dnd_privacy_schedule_receipts_730 (
+ tick_id TEXT PRIMARY KEY CHECK(length(tick_id)=36),
+ service_id TEXT NOT NULL CHECK(length(service_id) BETWEEN 12 AND 80),
+ tick_state TEXT NOT NULL CHECK(tick_state IN ('RUN','HOLD','ERROR')),
+ considered_events INTEGER NOT NULL CHECK(considered_events BETWEEN 0 AND 100),
+ signed_ack_count INTEGER NOT NULL CHECK(signed_ack_count BETWEEN 0 AND 100),
+ held_events INTEGER NOT NULL CHECK(held_events BETWEEN 0 AND 100),
+ rotation_backlog INTEGER NOT NULL CHECK(rotation_backlog BETWEEN 0 AND 1000000),
+ reason_code TEXT NOT NULL CHECK(length(reason_code) BETWEEN 2 AND 80),
+ created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+CREATE TRIGGER IF NOT EXISTS trg_dnd_privacy_schedule_no_update_730 BEFORE UPDATE ON dnd_privacy_schedule_receipts_730
+ BEGIN SELECT RAISE(ABORT,'immutable_scheduler_run_receipt'); END;
+CREATE TRIGGER IF NOT EXISTS trg_dnd_privacy_schedule_no_delete_730 BEFORE DELETE ON dnd_privacy_schedule_receipts_730
+ BEGIN SELECT RAISE(ABORT,'immutable_scheduler_run_receipt'); END;
