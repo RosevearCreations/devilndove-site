@@ -2,6 +2,7 @@ import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
 import {retryWindow730,privacyAlerts730,BUILD730_POLICY} from '../functions/api/admin/_lib/privacyOperations730.js';
 import {onRequestGet} from '../functions/api/admin/production-variable-audit-406.js';
+import {onRequestPost as recover730} from '../functions/api/admin/privacy-retry-730.js';
 assert.equal(BUILD730_POLICY.automatic_external_delivery_enabled,false);
 const now=Date.parse('2026-11-16T19:00:00Z');
 const base={created_at:'2026-11-16 18:00:00',now};
@@ -31,4 +32,16 @@ assert.ok(!JSON.stringify(json).includes('private-test-secret'));
 assert.equal((await onRequestGet({...ctx,data:{}})).status,401);
 const source=readFileSync(new URL('../functions/api/admin/production-variable-audit-406.js',import.meta.url),'utf8');
 assert.ok(source.includes('review730:await review730'));
+const recoveryUrl='https://devilndove.com/api/admin/privacy-retry-730';
+const recoveryCtx={request:new Request(recoveryUrl,{method:'POST',
+ headers:{'Origin':'https://devilndove.com','Content-Type':'application/json'},
+ body:JSON.stringify({action:'approve_dead_letter_730',owner_review_confirmed:true,
+ event_id:'11111111-1111-4111-8111-111111111111',reason_code:'REVIEWED',review_id:'22222222-2222-4222-8222-222222222222'})}),
+ env:{},data:ctx.data};
+assert.equal((await recover730({...recoveryCtx,data:{}})).status,401);
+assert.equal((await recover730(recoveryCtx)).status,503);
+const recoverySrc=readFileSync(new URL('../functions/api/admin/privacy-retry-730.js',import.meta.url),'utf8');
+for(const guard of ["HOLD_DISTINCT_ORIGINAL_REVIEW_REQUIRED","HOLD_ORIGINAL_DEAD_LETTER_AND_WITHDRAWAL_REQUIRED",
+ "TWO_ADMIN_RECOVERY_REQUEUED_NO_SEND","NOT EXISTS (SELECT 1 FROM dnd_withdrawal_acks_728"])
+ assert.ok(recoverySrc.includes(guard),guard);
 console.log('Build 730 source-only alerts, retry policy, bounded Admin HOLD and authorization negatives: PASS');
