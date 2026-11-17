@@ -23,16 +23,16 @@ db.execute("""UPDATE dnd_withdrawal_retry_state_730 SET
  updated_at=CURRENT_TIMESTAMP WHERE event_id=? AND state='READY' AND attempt_count<6""",
  ("22222222-2222-4222-8222-222222222222",eid))
 assert db.execute("SELECT state FROM dnd_withdrawal_retry_state_730").fetchone()[0]=="LEASED"
-reject("""INSERT INTO dnd_withdrawal_attempts_730\n (attempt_id,event_id,lease_token,attempt_number,outcome)\n VALUES(?,?,?,?,?)""",("77777777-7777-4777-8777-777777777777",eid,\n "99999999-9999-4999-8999-999999999999",1,"UNAVAILABLE"))\ndb.execute("""INSERT INTO dnd_withdrawal_attempts_730
- (attempt_id,event_id,lease_token,attempt_number,outcome)
- VALUES(?,?,?,?,?)""",("33333333-3333-4333-8333-333333333333",eid,
- "22222222-2222-4222-8222-222222222222",1,"UNAVAILABLE"))
 def reject(sql,args=()):
  try:
   db.execute(sql,args)
  except sqlite3.IntegrityError:
   return
  raise AssertionError("Expected SQLite schema denial: "+sql)
+reject("""INSERT INTO dnd_withdrawal_attempts_730\n (attempt_id,event_id,lease_token,attempt_number,outcome)\n VALUES(?,?,?,?,?)""",("77777777-7777-4777-8777-777777777777",eid,\n "99999999-9999-4999-8999-999999999999",1,"UNAVAILABLE"))\ndb.execute("""INSERT INTO dnd_withdrawal_attempts_730
+ (attempt_id,event_id,lease_token,attempt_number,outcome)
+ VALUES(?,?,?,?,?)""",("33333333-3333-4333-8333-333333333333",eid,
+ "22222222-2222-4222-8222-222222222222",1,"UNAVAILABLE"))
 reject("UPDATE dnd_withdrawal_attempts_730 SET outcome='SIGNED_ACK_VERIFIED'")
 reject("DELETE FROM dnd_withdrawal_attempts_730")
 reject("UPDATE dnd_withdrawal_retry_state_730 SET state='DEAD_LETTER' WHERE event_id=?",(eid,))
