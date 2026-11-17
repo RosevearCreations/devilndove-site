@@ -40,6 +40,12 @@ const recoveryCtx={request:new Request(recoveryUrl,{method:'POST',
  env:{},data:ctx.data};
 assert.equal((await recover730({...recoveryCtx,data:{}})).status,401);
 assert.equal((await recover730(recoveryCtx)).status,503);
+const html=readFileSync(new URL('../admin/it-integrations/index.html',import.meta.url),'utf8');
+const client=readFileSync(new URL('../public/js/admin-production-variable-audit-v406.js',import.meta.url),'utf8');
+for(const id of ['privacyOperations730','privacy730Refresh','privacy730Record','privacy730Approve'])
+ assert.ok(html.includes(id),id);
+for(const guard of ['review=730','review_dead_letter_730','approve_dead_letter_730'])
+ assert.ok(client.includes(guard),guard);
 const recoverySrc=readFileSync(new URL('../functions/api/admin/privacy-retry-730.js',import.meta.url),'utf8');
 for(const guard of ["HOLD_DISTINCT_ORIGINAL_REVIEW_REQUIRED","HOLD_ORIGINAL_DEAD_LETTER_AND_WITHDRAWAL_REQUIRED",
  "TWO_ADMIN_RECOVERY_REQUEUED_NO_SEND","NOT EXISTS (SELECT 1 FROM dnd_withdrawal_acks_728"])
