@@ -5,7 +5,7 @@ import {sourceVerifiedOwnerReview721,verifyIndependentRotationReceipt722,reconci
 import {masterTrustStatus724,verifyMasterEnvelope724,verifyKeyCustodyRotation724,recordMasterReplayReview724} from './_lib/projectFinanceEvidence.js';
 import {eventEnvelopeContract726,queueSourceEvent726,inspectSourceEvents726,localDeadLetterReview726,verifyPeerAckReview726,signedPeerAckReview726} from './_lib/projectFinanceEvidence.js';
 import {verifiedAdminFromModule} from '../_lib/verifiedAdmin398.mjs';
-import {privacyAlerts730,retryWindow730,BUILD730_POLICY,assessPrivacyHealth731} from './_lib/privacyOperations730.js';
+import {privacyAlerts730,retryWindow730,BUILD730_POLICY,assessPrivacyHealth731,assessPrivacyGovernance732} from './_lib/privacyOperations730.js';
 import {sixTierSecurityInventory723,sevenAxisCompletionBaseline723,assessTierCandidate723} from '../_lib/appModuleRoutes.js';
 import {independentReleaseStatus725,negotiateIndependentSync725,assessConsentTenantCapability725,resolveKeyring728,vaultEncrypt728,vaultDecryptForRotation728,digest728,hmacScope728,retentionEligibility728,verifyLiveWithdrawalAck728,BUILD728_POLICY,BUILD729_PEERS,peerConfig729,verifyPeerChallenge729} from '../_lib/appModuleRoutes.js';
 const checks=Object.freeze([
@@ -570,6 +570,52 @@ async function review731(db,env){
     full_queue_sla_certified:false,delivery_evidence_verified:false,
     rotation_complete_verified:false,automatic_delivery_enabled:false};}
 }
+
+/* Build 732: protected, read-only original D1 audit. Bounded oldest-event sample. */
+async function review732(db,env){
+ if(!db)return {build:732,state:'HOLD_ORIGINAL_D1_UNAVAILABLE',verified:false};
+ try{
+  const ticks=(await db.prepare(`SELECT tick_id,tick_state,considered_events,signed_ack_count,
+   held_events,created_at FROM dnd_privacy_schedule_receipts_730
+   ORDER BY created_at DESC,tick_id DESC LIMIT 2`).all())?.results||[];
+  const q=(await db.prepare(`SELECT w.event_id,w.target_app,w.created_at,
+   CASE WHEN m.consent_status IN ('revoked','blocked') THEN 1 ELSE 0 END consent_withdrawn,
+   COALESCE(s.state,'HOLD_MISSING_RETRY_STATE') AS state,s.lease_expires_at,
+   CASE WHEN a.event_id IS NULL THEN 0 ELSE 1 END manual_receipt,
+   CASE WHEN b.event_id IS NULL THEN 0 ELSE 1 END service_receipt,
+   a.peer_app AS manual_target,b.peer_app AS service_target,
+   a.peer_signature_verified AS manual_signature_verified,
+   b.peer_signature_verified AS service_signature_verified
+   FROM dnd_withdrawal_outbox_728 w
+   JOIN media_consent_records m ON m.consent_record_id=w.consent_record_id
+   LEFT JOIN dnd_withdrawal_retry_state_730 s ON s.event_id=w.event_id
+   LEFT JOIN dnd_withdrawal_acks_728 a ON a.event_id=w.event_id
+   LEFT JOIN dnd_withdrawal_auto_acks_730 b ON b.event_id=w.event_id
+   ORDER BY w.created_at ASC LIMIT 100`).all())?.results||[];
+  const total=Number((await db.prepare('SELECT COUNT(*) AS n FROM dnd_withdrawal_outbox_728').first())?.n);
+  const complete=Number.isSafeInteger(total)&&total>=0&&total<=100;
+  const peerProof=(await db.prepare(`SELECT peer_app,MAX(created_at) AS latest_proof_at
+   FROM dnd_peer_enrollment_proofs_729 GROUP BY peer_app LIMIT 3`).all())?.results||[];
+  const proofs=peerProof.map(p=>({...p,state:'SOURCE_RECEIPT_ONLY_NOT_LIVE_PROOF_VERIFIED'}));
+  const ring=resolveKeyring728(env),key=ring.ready?ring.active_id:null;
+  const versions=key?await db.prepare(`SELECT
+   SUM(CASE WHEN v.key_id<>? AND v.version=(SELECT MAX(x.version) FROM dnd_evidence_versions_728 x WHERE x.evidence_id=v.evidence_id) THEN 1 ELSE 0 END) AS latest,
+   SUM(CASE WHEN v.key_id<>? THEN 1 ELSE 0 END) AS historical
+   FROM dnd_evidence_versions_728 v`).bind(key,key).first():null;
+  const rotated=versions&&key?{active_key_id:key,
+   current_old_key_versions:Number(versions.latest||0),
+   historical_old_key_references:Number(versions.historical||0)}:null;
+  const result=assessPrivacyGovernance732({
+   events:q,peers:proofs,rotation:rotated,scheduleReceipts:ticks,complete});
+  result.source_queue_count=total;
+  result.verified=false;
+  result.scope='ORIGINAL_LOCAL_D1_ONLY_NOT_EXTERNAL_MASTER_ATTESTATION';
+  result.external_master_contact_attempted=false;
+  return result;
+ }catch{return {build:732,state:'HOLD_ORIGINAL_D1_SCHEMA_OR_READ_FAILURE',
+  verified:false,cross_application_delivery_or_remote_erasure_proven:false,
+  old_key_retirement_authorized:false};}
+}
 export async function onRequestPost(c){
  const admin=verifiedAdminFromModule(c),db=getDb(c.env||{});
  if(!admin)return jsonResponse({ok:false,error:'Active verified Administrator required.'},401,{'Cache-Control':'no-store'});
@@ -742,6 +788,7 @@ export async function onRequestGet(c){
  const isReview729=requestUrl.searchParams.get('review')==='729';
  const isReview730=requestUrl.searchParams.get('review')==='730';
  const isReview731=requestUrl.searchParams.get('review')==='731';
+ const isReview732=requestUrl.searchParams.get('review')==='732';
  let ledger721=null;
  if(review721||review722){
   const n=Number(requestUrl.searchParams.get('campaign_queue_id'));
@@ -830,5 +877,6 @@ export async function onRequestGet(c){
   ...(isReview729?{review729:await review729(getDb(env),env)}:{}),
   ...(isReview730?{review730:await review730(getDb(env),env)}:{}),
   ...(isReview731?{review731:await review731(getDb(env),env)}:{}),
+  ...(isReview732?{review732:await review732(getDb(env),env)}:{}),
   documentation:'/docs/operations/RELEASE_467_BUILD_406_PRODUCTION_CONFIGURATION_AUDIT.md'},200,{'Cache-Control':'no-store'});
 }
