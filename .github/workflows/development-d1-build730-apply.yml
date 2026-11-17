@@ -1,0 +1,102 @@
+# Build730 runtime UI budget reviewed from genuine failing System Gate 43993321876.
+name: Development Build 730 D1 Ordered Apply and Proof
+on:
+  push:
+    branches: [dev]
+    paths:
+      - '.github/workflows/development-d1-build730-apply.yml'
+permissions:
+  contents: read
+concurrency:
+  group: dnd-build730-development-d1-ordered
+  cancel-in-progress: false
+jobs:
+  development-only:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    env:
+      CLOUDFLARE_ACCOUNT_ID: c0d5bc25df16ae5b7d47c985c4b7b787
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v7
+        with:
+          node-version: '24'
+      - uses: actions/setup-python@v7
+        with:
+          python-version: '3.12'
+      - name: Refuse Production and require exact canonical 0054
+        run: |
+          set -euo pipefail
+          test "${GITHUB_REF_NAME}" = "dev"
+          grep -q '^database_name = "devilndove-dev"$' wrangler.toml
+          grep -q '^database_id = "dbc1615b-dcbe-4951-973b-b47c99c73bfa"$' wrangler.toml
+          ! grep -q 'f34a741b-0000-45b0-9a96-6be08754d563' wrangler.toml
+          python - <<'PY'
+          import json
+          m=json.load(open('migrations/canonical/manifest.json'))
+          assert len(m['migrations'])==54
+          assert m['migrations'][-1]['version']==54
+          assert m['migrations'][-1]['file']=='0054_release467_withdrawal_retry_custody.sql'
+          print('Build730 Development-only D1 authority: PASS')
+          PY
+          python scripts/build730_retry_sqlite_gate.py
+          node scripts/build730_privacy_alerts_retry_contract.mjs
+          node scripts/build730_worker_contract.mjs
+          python scripts/release465_performance_budget_gate.py
+      - name: Snapshot original Development business rows and 0053 prerequisite
+        run: |
+          set -euo pipefail
+          npx --yes wrangler@4.128.0 d1 execute devilndove-dev --remote --config wrangler.toml --json --command "SELECT (SELECT COUNT(*) FROM users) AS users, (SELECT COUNT(*) FROM products) AS products, (SELECT COUNT(*) FROM orders) AS orders, (SELECT COUNT(*) FROM d1_migrations WHERE name='0053_release467_peer_enrollment_live_proof.sql') AS v53, (SELECT COUNT(*) FROM d1_migrations WHERE name='0054_release467_withdrawal_retry_custody.sql') AS v54;" > /tmp/build730-dev-before.json
+          python - <<'PY'
+          import json
+          raw=json.load(open('/tmp/build730-dev-before.json')); rows=[]
+          def walk(x):
+              if isinstance(x,dict):
+                  if all(k in x for k in ('users','products','orders','v53','v54')):rows.append(x)
+                  for v in x.values():walk(v)
+              elif isinstance(x,list):
+                  for v in x:walk(v)
+          walk(raw);assert len(rows)==1,raw
+          x=rows[0]; assert int(x['v53'])==1,'Build729 Dev D1 missing'
+          assert int(x['v54']) in (0,1),x
+          json.dump({k:int(x[k]) for k in ('users','products','orders')},open('/tmp/build730-dev-before-counts.json','w'))
+          print('Original Development business snapshot and 0053 prerequisite: PASS')
+          PY
+      - name: Apply canonical Development D1 0054 and independently verify migrator
+        run: |
+          set -euo pipefail
+          python scripts/d1_migrate.py --target development --apply --source-sha "${GITHUB_SHA}"
+          python scripts/d1_migrate.py --target development --source-sha "${GITHUB_SHA}"
+      - name: Independent Development 0054 readback and data preservation
+        run: |
+          set -euo pipefail
+          npx --yes wrangler@4.128.0 d1 execute devilndove-dev --remote --config wrangler.toml --json --command "SELECT (SELECT COUNT(*) FROM users) AS users, (SELECT COUNT(*) FROM products) AS products, (SELECT COUNT(*) FROM orders) AS orders, (SELECT COUNT(*) FROM d1_migrations WHERE name='0054_release467_withdrawal_retry_custody.sql') AS v54, (SELECT COUNT(*) FROM app_schema_migration_proofs WHERE migration_name='0054_release467_withdrawal_retry_custody.sql' AND environment='development') AS proof54, (SELECT COUNT(*) FROM sqlite_master WHERE type='table' AND name IN ('dnd_withdrawal_retry_state_730','dnd_withdrawal_attempts_730','dnd_dead_letter_recovery_730','dnd_withdrawal_auto_acks_730','dnd_privacy_schedule_receipts_730')) AS tables730;" > /tmp/build730-dev-after.json
+          npx --yes wrangler@4.128.0 d1 execute devilndove-dev --remote --config wrangler.toml --json --command "PRAGMA foreign_key_check;" > /tmp/build730-fk.json
+          python - <<'PY'
+          import json
+          raw=json.load(open('/tmp/build730-dev-after.json'));rows=[]
+          def walk(x):
+              if isinstance(x,dict):
+                  if all(k in x for k in ('users','products','orders','v54','proof54','tables730')):rows.append(x)
+                  for v in x.values():walk(v)
+              elif isinstance(x,list):
+                  for v in x:walk(v)
+          walk(raw);assert len(rows)==1,raw
+          before=json.load(open('/tmp/build730-dev-before-counts.json'));x=rows[0]
+          for k in ('users','products','orders'):assert int(x[k])==before[k],(k,x,before)
+          assert int(x['v54'])==int(x['proof54'])==1,x
+          assert int(x['tables730'])==5,x
+          fk=json.load(open('/tmp/build730-fk.json'));found=[]
+          def collect(z):
+              if isinstance(z,dict):
+                  if isinstance(z.get('results'),list):found.extend(z['results'])
+                  for v in z.values():collect(v)
+              elif isinstance(z,list):
+                  for v in z:collect(v)
+          collect(fk)
+          assert not [v for v in found if isinstance(v,dict) and 'table' in v],found
+          print('Original Development D1 0054 applied and independently verified: PASS')
+          PY

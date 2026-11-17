@@ -389,6 +389,21 @@
 </details>
 <p class="small">Cloudflare secret setup: <a href="https://github.com/RosevearCreations/devilndove-site/blob/main/docs/operations/BUILD_728_ENCRYPTED_VAULT_DELIVERY_RETENTION.md" target="_blank" rel="noopener">Build 728 owner configuration guide</a>. Never enter encryption keys into this page or GitHub.</p>
 </section>
+<section class="card" id="privacyOperations730" style="margin-top:18px">
+<h2>Build 730 — Privacy Automation &amp; Dead-Letter Operations</h2>
+<p class="small">Status is based on original D1 receipts, never source configuration alone. No automatic client polling, external deletion, encryption-key changes or unverified ACK claims.</p>
+<button id="privacy730Refresh" type="button" class="btn">Read privacy automation status and alerts</button>
+<p id="privacy730Status" class="small" role="status">Not checked. Scheduled Worker must have a genuine fresh D1 tick.</p>
+<pre id="privacy730Results" style="white-space:pre-wrap;overflow-wrap:anywhere;max-height:340px;overflow:auto"></pre>
+<details><summary>Two-Administrator dead-letter review and requeue</summary>
+<p class="small">Requires an original dead-letter event with withdrawn consent and no existing signed ACK. One Admin records a review; a different Admin confirms the exact review ID. Requeue never means a Master has received anything.</p>
+<label>Exact event UUID <input id="privacy730Event" type="text" maxlength="36" autocomplete="off"></label>
+<label>Reason code <input id="privacy730Reason" type="text" maxlength="80" placeholder="REVIEWED_RETRY" autocomplete="off"></label>
+<label>Original review UUID (second Administrator only) <input id="privacy730Review" type="text" maxlength="36" autocomplete="off"></label>
+<button id="privacy730Record" type="button" class="btn secondary">Record initial dead-letter review</button>
+<button id="privacy730Approve" type="button" class="btn secondary">Approve independent requeue</button>
+</details>
+</section>
 <section class="card" id="dd720-provider-drift" style="margin-top:18px">
 <h2>Build 720 — Provider binding drift &amp; independent evidence review</h2>
 <p class="small">Review only the names and presence of active Cloudflare bindings, callback match and legacy PayPal name. No secret values, age guesses, outside calls, background watchers, approval writes or provider authorizations.</p>

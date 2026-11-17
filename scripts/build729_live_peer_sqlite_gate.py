@@ -5,8 +5,8 @@ from pathlib import Path
 root=Path(__file__).resolve().parents[1]
 manifest=json.loads((root/"migrations/canonical/manifest.json").read_text())
 file=root/"migrations/canonical/0053_release467_peer_enrollment_live_proof.sql"
-assert manifest["migrations"][-1]["version"]==53
-assert manifest["migrations"][-1]["file"]==file.name
+assert manifest["migrations"][52]["version"]==53
+assert manifest["migrations"][52]["file"]==file.name
 db=sqlite3.connect(":memory:")
 db.execute("PRAGMA foreign_keys=ON")
 db.executescript("CREATE TABLE users(user_id INTEGER PRIMARY KEY); INSERT INTO users VALUES(1);")

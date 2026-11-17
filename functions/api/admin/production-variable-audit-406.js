@@ -5,6 +5,7 @@ import {sourceVerifiedOwnerReview721,verifyIndependentRotationReceipt722,reconci
 import {masterTrustStatus724,verifyMasterEnvelope724,verifyKeyCustodyRotation724,recordMasterReplayReview724} from './_lib/projectFinanceEvidence.js';
 import {eventEnvelopeContract726,queueSourceEvent726,inspectSourceEvents726,localDeadLetterReview726,verifyPeerAckReview726,signedPeerAckReview726} from './_lib/projectFinanceEvidence.js';
 import {verifiedAdminFromModule} from '../_lib/verifiedAdmin398.mjs';
+import {privacyAlerts730,retryWindow730,BUILD730_POLICY} from './_lib/privacyOperations730.js';
 import {sixTierSecurityInventory723,sevenAxisCompletionBaseline723,assessTierCandidate723} from '../_lib/appModuleRoutes.js';
 import {independentReleaseStatus725,negotiateIndependentSync725,assessConsentTenantCapability725,resolveKeyring728,vaultEncrypt728,vaultDecryptForRotation728,digest728,hmacScope728,retentionEligibility728,verifyLiveWithdrawalAck728,BUILD728_POLICY,BUILD729_PEERS,peerConfig729,verifyPeerChallenge729} from '../_lib/appModuleRoutes.js';
 const checks=Object.freeze([
@@ -272,6 +273,10 @@ async function action728continued(c,db,admin,p){
    return hold728('HOLD_WITHDRAWN_SOURCE_NOT_VERIFIED');
   if(await db.prepare('SELECT event_id FROM dnd_withdrawal_acks_728 WHERE event_id=?').bind(eventId).first())
    return ok728('PREVIOUS_SIGNED_PEER_ACK_RECORDED',{event_id:eventId,no_resend:true});
+  const autoSigned=await db.prepare('SELECT ack_envelope_sha256 FROM dnd_withdrawal_auto_acks_730 WHERE event_id=?')
+   .bind(eventId).first().catch(()=>null);
+  if(autoSigned)return ok728('PREVIOUS_SIGNED_AUTOMATED_PEER_ACK_RECORDED',{event_id:eventId,no_resend:true,
+   original_admin_signature_claimed:false});
   const prefix='DND728_PEER_'+e.target_app.replace(/-/g,'_').toUpperCase()+'_';
   const urlText=String(c.env[prefix+'URL']||''),pk=String(c.env[prefix+'PUBLIC_KEY_B64URL']||''),
    secret=String(c.env[prefix+'HMAC_KEY_B64URL']||''),
@@ -460,6 +465,66 @@ async function review729(db,env){
   production_secrets_provisioned_by_this_release:false,original_master_receivers_enabled:false};
 }
 
+
+// Build 730: read-only truthful operations dashboard; no cron/remote state is asserted.
+async function review730(db,env){
+ const source=await review729(db,env),alerts=privacyAlerts730(source);
+ const attempts=[];let durableSchema=false;
+ if(db){
+  try{
+   const schema=await db.prepare("SELECT name FROM sqlite_master WHERE type='table' AND name='dnd_withdrawal_retry_state_730'").first();
+   durableSchema=!!schema;
+   const sql=durableSchema?`SELECT w.event_id,w.target_app,w.created_at,
+      CASE WHEN a.event_id IS NULL THEN 0 ELSE 1 END AS acknowledged,
+      s.attempt_count,s.retry_after,s.state,s.updated_at
+      FROM dnd_withdrawal_outbox_728 w
+      LEFT JOIN dnd_withdrawal_acks_728 a ON a.event_id=w.event_id
+      LEFT JOIN dnd_withdrawal_retry_state_730 s ON s.event_id=w.event_id
+      ORDER BY w.created_at ASC LIMIT 60`:
+    `SELECT w.event_id,w.target_app,w.created_at,
+      CASE WHEN a.event_id IS NULL THEN 0 ELSE 1 END AS acknowledged
+      FROM dnd_withdrawal_outbox_728 w
+      LEFT JOIN dnd_withdrawal_acks_728 a ON a.event_id=w.event_id
+      ORDER BY w.created_at ASC LIMIT 60`;
+   const rows=(await db.prepare(sql).all())?.results||[];
+   for(const row of rows){
+    const current=durableSchema&&row.state?row.state:'HOLD_UNINITIALIZED_DURABLE_RETRY';
+    attempts.push({event_id:row.event_id,target_app:row.target_app,
+      ...retryWindow730({attempts:Number(row.attempt_count||0),created_at:row.created_at,
+       last_attempt_at:row.updated_at,acknowledged:!!row.acknowledged}),
+      durable_state:current,durable_retry_after:durableSchema?row.retry_after||null:null,
+      automatic_send_authorized:false});
+   }
+  }catch{alerts.alerts.push({code:'WITHDRAWAL_D1_UNAVAILABLE',severity:'critical',count:1});}
+ }
+ let latestTick=null,autoAckCount=null,deadLetterCount=null;
+ if(db&&durableSchema){
+  try{
+   latestTick=await db.prepare(`SELECT tick_id,tick_state,considered_events,signed_ack_count,
+     held_events,rotation_backlog,created_at
+     FROM dnd_privacy_schedule_receipts_730 ORDER BY created_at DESC LIMIT 1`).first();
+   autoAckCount=Number((await db.prepare('SELECT COUNT(*) AS n FROM dnd_withdrawal_auto_acks_730').first())?.n||0);
+   deadLetterCount=Number((await db.prepare("SELECT COUNT(*) AS n FROM dnd_withdrawal_retry_state_730 WHERE state='DEAD_LETTER'").first())?.n||0);
+  }catch{alerts.alerts.push({code:'SCHEDULER_LEDGER_READBACK_HOLD',severity:'critical',count:1});}
+ }
+ const tickAge=latestTick?Date.now()-Date.parse(String(latestTick.created_at).replace(' ','T')+'Z'):Infinity;
+ const tickFresh=Number.isFinite(tickAge)&&tickAge>=0&&tickAge<=30*60000;
+ if(durableSchema&&!tickFresh)alerts.alerts.push({code:'SCHEDULED_TICK_MISSING_OR_STALE',severity:'warning',count:1});
+ if(Number(deadLetterCount)>0)alerts.alerts.push({code:'WITHDRAWAL_DEAD_LETTER',severity:'critical',count:deadLetterCount});
+ return {build:730,policy:BUILD730_POLICY,alerts:alerts.alerts,
+   queued_review:attempts,
+   scheduler:tickFresh?'D1_SCHEDULE_RECEIPT_FRESH_NOT_EXTERNAL_DELIVERY_PROOF':'NOT_VERIFIED',
+   latest_scheduled_tick:latestTick?{tick_id:latestTick.tick_id,at:latestTick.created_at,
+    considered:Number(latestTick.considered_events||0),signed:Number(latestTick.signed_ack_count||0),
+    held:Number(latestTick.held_events||0),rotation_backlog:Number(latestTick.rotation_backlog||0)}:null,
+   auto_signed_ack_count:autoAckCount,dead_letter_count:deadLetterCount,
+   dead_letter_ledger:durableSchema?'D1_SCHEMA_PRESENT_NO_WORKER':'NOT_DEPLOYED',
+   retry_attempt_ledger:durableSchema?'D1_SCHEMA_PRESENT_NO_WORKER':'NOT_DEPLOYED',
+   manual_delivery:'BUILD728_SUPERVISED_ONLY',
+   rotation_schedule:'ADVISORY_ONLY_NO_AUTOMATIC_REENCRYPTION',
+   remote_ack_implied:false,source};
+}
+
 export async function onRequestPost(c){
  const admin=verifiedAdminFromModule(c),db=getDb(c.env||{});
  if(!admin)return jsonResponse({ok:false,error:'Active verified Administrator required.'},401,{'Cache-Control':'no-store'});
@@ -630,6 +695,7 @@ export async function onRequestGet(c){
  const review726=requestUrl.searchParams.get('review')==='726';
  const isReview728=requestUrl.searchParams.get('review')==='728';
  const isReview729=requestUrl.searchParams.get('review')==='729';
+ const isReview730=requestUrl.searchParams.get('review')==='730';
  let ledger721=null;
  if(review721||review722){
   const n=Number(requestUrl.searchParams.get('campaign_queue_id'));
@@ -716,5 +782,6 @@ export async function onRequestGet(c){
   }}:{}),
   ...(isReview728?{review728:await review728(getDb(env),env)}:{}),
   ...(isReview729?{review729:await review729(getDb(env),env)}:{}),
+  ...(isReview730?{review730:await review730(getDb(env),env)}:{}),
   documentation:'/docs/operations/RELEASE_467_BUILD_406_PRODUCTION_CONFIGURATION_AUDIT.md'},200,{'Cache-Control':'no-store'});
 }

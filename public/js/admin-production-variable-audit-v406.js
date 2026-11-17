@@ -471,3 +471,52 @@ document.addEventListener('DOMContentLoaded',()=>{
    await refresh();
   }));
 });
+
+
+/* Build 730: source-only D1 heartbeat and two-person dead-letter operator actions. */
+document.addEventListener('DOMContentLoaded',()=>{
+ const root=document.getElementById('privacyOperations730');
+ if(!root)return;
+ const $=id=>root.querySelector('#'+id),status=$('privacy730Status'),out=$('privacy730Results');
+ const call=(url,options)=>window.DDAuth?.apiFetch?window.DDAuth.apiFetch(url,options):
+  fetch(url,{credentials:'same-origin',...options});
+ const uuid=s=>/^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(s);
+ $('privacy730Refresh').addEventListener('click',async()=>{
+  status.textContent='Reading original D1 state…';
+  try{
+   const response=await call('/api/admin/production-variable-audit-406?review=730');
+   const data=await response.json();
+   if(!response.ok||!data.ok||!data.review730)throw Error('HOLD_ORIGINAL_SOURCE_NOT_READY');
+   const v=data.review730;
+   out.textContent=JSON.stringify({scheduler:v.scheduler,latest_tick:v.latest_scheduled_tick,
+    auto_signed_ack_count:v.auto_signed_ack_count,dead_letter_count:v.dead_letter_count,
+    key_rotation:v.source?.keyring?.latest_ciphertexts_needing_rotation,
+    alerts:v.alerts,queued_review:v.queued_review},null,2);
+   status.textContent='Original D1 readback complete. A tick or ACK never proves deletion on external platforms.';
+  }catch{status.textContent='HOLD — protected privacy automation source unavailable.';}
+ });
+ for(const [id,action] of [['privacy730Record','review_dead_letter_730'],['privacy730Approve','approve_dead_letter_730']]){
+  $(id).addEventListener('click',async()=>{
+   const event_id=$('privacy730Event').value.trim(),reason_code=$('privacy730Reason').value.trim();
+   const review_id=$('privacy730Review').value.trim();
+   if(!uuid(event_id)||!/^[A-Z0-9_]{4,80}$/.test(reason_code)||
+      (action==='approve_dead_letter_730'&&!uuid(review_id))){
+    status.textContent='Enter an exact UUID and uppercase reason code.';return;
+   }
+   if(!window.confirm(action==='review_dead_letter_730'?
+    'Record an immutable original review? A different Admin must approve.':
+    'Approve this original review as a different Admin? This requeues locally but never sends automatically from the browser.'))return;
+   $(id).disabled=true;
+   try{
+    const response=await call('/api/admin/privacy-retry-730',{method:'POST',
+     headers:{'Content-Type':'application/json','Origin':location.origin},
+     body:JSON.stringify({action,event_id,reason_code,review_id,owner_review_confirmed:true})});
+    const data=await response.json().catch(()=>({}));
+    if(!response.ok||!data.ok)throw Error(String(data.code||'HOLD_REVIEW_NOT_ACCEPTED'));
+    out.textContent=JSON.stringify(data,null,2);
+    status.textContent='Original D1 receipt recorded. No Master delivery or deletion inferred.';
+   }catch{status.textContent='HOLD — review rejected or not independently authorized.';}
+   finally{$(id).disabled=false}
+  });
+ }
+});
