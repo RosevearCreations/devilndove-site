@@ -60,5 +60,15 @@ reject("UPDATE dnd_withdrawal_retry_state_730 SET state='READY',retry_cycle=2,at
 db.execute("""UPDATE dnd_withdrawal_retry_state_730 SET
  state='READY',retry_cycle=1,attempt_count=0 WHERE event_id=?""",(eid,))
 assert db.execute("SELECT retry_cycle FROM dnd_withdrawal_retry_state_730").fetchone()[0]==1
+db.execute("""INSERT INTO dnd_withdrawal_auto_acks_730
+(event_id,peer_app,ack_envelope_sha256,peer_signature_verified,observed_live_response,service_id)
+VALUES(?,?,?,1,1,?)""",(eid,"ai-data-platform","f"*64,"dnd-scheduler-production"))
+reject("UPDATE dnd_withdrawal_auto_acks_730 SET peer_app='rosevear-ai-hub'")
+reject("DELETE FROM dnd_withdrawal_auto_acks_730")
+db.execute("""INSERT INTO dnd_privacy_schedule_receipts_730
+(tick_id,service_id,tick_state,considered_events,signed_ack_count,held_events,rotation_backlog,reason_code)
+VALUES(?,?,'RUN',1,1,0,0,'SIGNED_ACK_REQUIRED')""",
+("aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa","dnd-scheduler-production"))
+reject("DELETE FROM dnd_privacy_schedule_receipts_730")
 assert db.execute("PRAGMA foreign_key_check").fetchall()==[]
 print("Build 730 D1 retry lease, immutable attempts, two-person dead-letter evidence: PASS")
