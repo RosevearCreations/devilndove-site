@@ -41,12 +41,13 @@ CREATE TABLE IF NOT EXISTS dnd_dead_letter_recovery_730 (
  event_id TEXT NOT NULL REFERENCES dnd_withdrawal_outbox_728(event_id) ON DELETE RESTRICT,
  decision TEXT NOT NULL CHECK(decision IN ('REVIEW_HOLD','ESCALATED','REQUEUE_REQUESTED')),
  target_cycle INTEGER NOT NULL DEFAULT 0 CHECK(target_cycle BETWEEN 0 AND 99),
+ original_review_id TEXT REFERENCES dnd_dead_letter_recovery_730(recovery_id) ON DELETE RESTRICT,
  requested_by_user_id INTEGER NOT NULL REFERENCES users(user_id) ON DELETE RESTRICT,
  approved_by_user_id INTEGER REFERENCES users(user_id) ON DELETE RESTRICT,
  reason_code TEXT NOT NULL CHECK(length(reason_code) BETWEEN 4 AND 80),
  created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
  CHECK(decision<>'REQUEUE_REQUESTED' OR
-   (approved_by_user_id IS NOT NULL AND approved_by_user_id<>requested_by_user_id))
+   (approved_by_user_id IS NOT NULL AND approved_by_user_id<>requested_by_user_id AND original_review_id IS NOT NULL))
 );
 CREATE TRIGGER IF NOT EXISTS trg_dnd_dead_letter_recovery_no_update_730 BEFORE UPDATE ON dnd_dead_letter_recovery_730
  BEGIN SELECT RAISE(ABORT,'immutable_dead_letter_recovery'); END;
@@ -62,3 +63,11 @@ CREATE TRIGGER IF NOT EXISTS trg_dnd_retry_requeue_730 BEFORE UPDATE ON dnd_with
      WHERE d.event_id=OLD.event_id AND d.target_cycle=NEW.retry_cycle
        AND d.decision='REQUEUE_REQUESTED' AND d.requested_by_user_id<>d.approved_by_user_id))
  BEGIN SELECT RAISE(ABORT,'independent_requeue_approval_required'); END;
+CREATE TRIGGER IF NOT EXISTS trg_dnd_dead_letter_provenance_730 BEFORE INSERT ON dnd_dead_letter_recovery_730
+ WHEN NEW.decision='REQUEUE_REQUESTED' AND NOT EXISTS (
+ SELECT 1 FROM dnd_dead_letter_recovery_730 original
+ WHERE original.recovery_id=NEW.original_review_id
+ AND original.event_id=NEW.event_id AND original.target_cycle=NEW.target_cycle
+ AND original.decision='REVIEW_HOLD' AND original.requested_by_user_id=NEW.requested_by_user_id
+ AND original.approved_by_user_id IS NULL)
+ BEGIN SELECT RAISE(ABORT,'original_independent_recovery_review_required'); END;
