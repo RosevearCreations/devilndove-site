@@ -17,6 +17,7 @@ const db={prepare(sql){
  return {bind(...args){values=args;return this;},
   async first(){
    if(sql.includes('FROM dnd_recovery_inbox_pilots_736')){
+    if(sql.includes('WHERE pilot_id=?'))return records.get(values[0])||null;
     return Array.from(records.values()).filter(r=>r.admin_user_id===values[0])
      .sort((a,b)=>b.created_at.localeCompare(a.created_at))[0]||null;
    }
