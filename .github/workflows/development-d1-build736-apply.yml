@@ -1,4 +1,4 @@
-# Build736 original owner inbox migration; original fail-closed budget scanner remains enforced.
+# Build736 source 0057: null-safe immutability negatives verified before D1 apply; reviewed byte cap run 44310709430. All gates remain on.
 name: Development Build 736 D1 Ordered Apply and Proof
 on:
   push:
