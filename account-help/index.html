@@ -33,29 +33,46 @@
 <div class="grid cols-2" style="gap:18px">
 <div class="card">
 <h2 style="margin-top:0">Forgot password</h2>
-<p class="small">Tell us the email you think you used. We will review the request and help you recover access.</p>
+<p class="small">Enter the email registered to your Devil n Dove account. If eligible, we will send a private one-time reset link, valid for 30 minutes.</p>
 <form class="grid" id="forgotPasswordForm" style="gap:12px">
-<input class="input" name="contact_email" placeholder="Your contact email" required="" type="email"/>
-<input class="input" name="possible_email" placeholder="Account email you think you used" required="" type="email"/>
-<textarea class="input" name="note" placeholder="Optional note" rows="4"></textarea>
-<button class="btn primary" type="submit">Request password help</button>
+<label for="recovery734Email">Registered account email</label>
+<input class="input" id="recovery734Email" name="email" autocomplete="email" placeholder="Your registered email address" required type="email" maxlength="254"/>
+<button class="btn primary" type="submit">Email password reset link</button>
 </form>
+<p class="small">If you no longer have access to the registered email, use the account help form beside this one. For security, we cannot email a reset token to an unverified alternate address.</p>
 </div>
 <div class="card">
-<h2 style="margin-top:0">Forgot email</h2>
-<p class="small">Tell us how to reach you and any details that can help identify your account.</p>
+<h2 style="margin-top:0">Forgot account / email</h2>
+<p class="small">Unsure which email we used? Submit a secure account recovery request for staff review. We never reveal whether an account exists or send a password to a different address.</p>
 <form class="grid" id="forgotEmailForm" style="gap:12px">
 <input class="input" name="contact_email" placeholder="Your contact email" required="" type="email"/>
 <input class="input" name="display_name" placeholder="Name used on the account" type="text"/>
 <textarea class="input" name="note" placeholder="Optional note: old email, order number, or anything helpful" rows="4"></textarea>
-<button class="btn primary" type="submit">Request email lookup help</button>
+<button class="btn primary" type="submit">Request account lookup help</button>
+</form>
+<p class="small">Remember a possible registered email? We can send an account reminder to that exact address:</p>
+<form class="grid" id="accountReminder734Form" style="gap:8px">
+<label for="accountReminder734Email">Possible registered email</label>
+<input class="input" id="accountReminder734Email" name="email" type="email" autocomplete="email" maxlength="254" required/>
+<button class="btn secondary" type="submit">Send account email reminder</button>
 </form>
 </div>
+</div>
+<div class="card" id="reset734Card" style="margin-top:18px" hidden>
+<h2 style="margin-top:0">Set a new password</h2>
+<p class="small">Use the private link received by email. It can be used once, and expires 30 minutes after the request. All existing sessions will be signed out.</p>
+<form class="grid" id="reset734Form" style="gap:12px">
+<label for="reset734Password">New password (12 characters minimum)</label>
+<input class="input" id="reset734Password" name="new_password" type="password" autocomplete="new-password" minlength="12" maxlength="128" required/>
+<label for="reset734Confirm">Confirm new password</label>
+<input class="input" id="reset734Confirm" name="confirm_password" type="password" autocomplete="new-password" minlength="12" maxlength="128" required/>
+<button class="btn primary" type="submit">Reset password and sign out other sessions</button>
+</form>
 </div>
 <div class="card" style="margin-top:18px">
 <h2 style="margin-top:0">What happens next</h2>
 <ul class="clean small">
-<li>Your request is stored for admin review.</li>
+<li>Password resets are emailed only to the original registered address, if email delivery is configured.</li><li>Forgot-account support requests are stored for staff review.</li>
 <li>The site does not reveal whether a matching account exists.</li>
 <li>You can still create a new account later if needed.</li>
 </ul>
