@@ -1,4 +1,4 @@
-# Reviewed runtime source cap: original CI #44131205067, one new protected API route, no bypass.
+# Build734 runtime cap reverified from actual failed System Gate #44216887822; scanners remain enforced.
 name: Development Build 734 D1 Ordered Apply and Proof
 on:
   push:
@@ -45,7 +45,7 @@ jobs:
           python scripts/build734_auth_recovery_sqlite_gate.py
           node scripts/build734_account_and_receiver_contract.mjs
           python scripts/release465_performance_budget_gate.py
-      - name: Snapshot original Development D1 business data and prerequisite 0054
+      - name: Snapshot original Development D1 business data and prerequisite 0055
         shell: bash
         run: |
           set -euo pipefail
@@ -64,13 +64,13 @@ jobs:
           json.dump({k:int(x[k]) for k in ('users','products','orders')},open('/tmp/build734-dev-counts.json','w'))
           print('Original Development 0055 prerequisite and customer row snapshot: PASS')
           PY
-      - name: Apply canonical 0055 to original Development D1
+      - name: Apply canonical 0056 to original Development D1
         shell: bash
         run: |
           set -euo pipefail
           python scripts/d1_migrate.py --target development --apply --source-sha "${GITHUB_SHA}"
           python scripts/d1_migrate.py --target development --source-sha "${GITHUB_SHA}"
-      - name: Independently verify 0055 migration, tables, foreign keys and business counts
+      - name: Independently verify 0056 migration, tables, foreign keys and business counts
         shell: bash
         run: |
           set -euo pipefail
