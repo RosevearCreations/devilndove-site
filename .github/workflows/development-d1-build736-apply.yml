@@ -45,7 +45,7 @@ jobs:
           python scripts/build736_owner_inbox_sqlite_gate.py
           node scripts/build736_owner_inbox_contract.mjs
           python scripts/release465_performance_budget_gate.py
-      - name: Snapshot original Development D1 business data and prerequisite 0055
+      - name: Snapshot original Development D1 business data and prerequisite 0056
         shell: bash
         run: |
           set -euo pipefail
@@ -99,5 +99,5 @@ jobs:
                   for x in v:parse(x)
           parse(fk)
           assert not [x for x in problems if isinstance(x,dict) and 'table' in x],problems
-          print('Build736 original Development migration 0056, row preservation, 2 tables, foreign keys: PASS')
+          print('Build736 original Development migration 0057, row preservation, 1 table, foreign keys: PASS')
           PY
