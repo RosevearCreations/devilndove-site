@@ -49,7 +49,7 @@ assert.ok(js.includes('review=recovery735'));
 assert.ok(auth.includes("context.waitUntil(requestRecovery734(db,env,request,body).catch(()=>null))"));
 assert.ok(auth.includes("return Number(result?.meta?.changes)===1;"));
 // Historical Build 735 checks must accept the *current* rolling queue after later builds.
-assert.ok(queue.includes('755')&&queue.includes('NEXT_20_BUILDS'));
+assert.ok(queue.includes('755')&&queue.includes('Current Rolling 20-Build Queue'));
 assert.ok(!queue.includes('| 736 |'), 'Completed 736 cannot be an unstarted future proposal');
 const archive=readFileSync(new URL('../docs/architecture/ARCHIVED_NEXT_20_BUILDS_383_412.md',import.meta.url),'utf8');
 assert.ok(archive.includes('383–392')&&archive.includes('403–412'),'Prior executed queue is preserved');
