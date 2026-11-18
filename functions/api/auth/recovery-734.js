@@ -35,17 +35,18 @@ async function sendEmail734(env,to,subject,html){
 async function rateProof734(db,request,action,identity){
  const identityHash=await hash('dnd734-identity:'+identity);
  const ipHash=await hash('dnd734-ip:'+privateIp(request));
- const rows=await db.prepare(`SELECT
-   (SELECT COUNT(*) FROM dnd_auth_recovery_attempts_734
-    WHERE action=? AND identity_sha256=? AND created_at>=datetime('now','-1 hour')) AS by_email,
-   (SELECT COUNT(*) FROM dnd_auth_recovery_attempts_734
-    WHERE action=? AND ip_sha256=? AND created_at>=datetime('now','-1 hour')) AS by_ip`)
-  .bind(action,identityHash,action,ipHash).first();
- if(Number(rows?.by_email||0)>=3||Number(rows?.by_ip||0)>=12)return false;
- await db.prepare(`INSERT INTO dnd_auth_recovery_attempts_734
-  (attempt_id,action,identity_sha256,ip_sha256) VALUES(?,?,?,?)`)
-  .bind(crypto.randomUUID(),action,identityHash,ipHash).run();
- return true;
+ // Build 735: one original D1 write-statement gate instead of a racy SELECT+INSERT.
+ // Concurrent contenders cannot both pass a stale prior count; fail closed on D1 errors.
+ const result=await db.prepare(`INSERT INTO dnd_auth_recovery_attempts_734
+  (attempt_id,action,identity_sha256,ip_sha256)
+  SELECT ?,?,?,?
+  WHERE (SELECT COUNT(*) FROM dnd_auth_recovery_attempts_734
+   WHERE action=? AND identity_sha256=? AND created_at>=datetime('now','-1 hour'))<3
+  AND (SELECT COUNT(*) FROM dnd_auth_recovery_attempts_734
+   WHERE action=? AND ip_sha256=? AND created_at>=datetime('now','-1 hour'))<12`)
+  .bind(crypto.randomUUID(),action,identityHash,ipHash,
+    action,identityHash,action,ipHash).run();
+ return Number(result?.meta?.changes)===1;
 }
 async function requestRecovery734(db,env,request,body){
  const action=body.action;
