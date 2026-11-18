@@ -48,9 +48,9 @@ for(const s of ['privacy735Refresh','privacy735Results'])assert.ok(html.includes
 assert.ok(js.includes('review=recovery735'));
 assert.ok(auth.includes("context.waitUntil(requestRecovery734(db,env,request,body).catch(()=>null))"));
 assert.ok(auth.includes("return Number(result?.meta?.changes)===1;"));
-// Build 736 queue renewal must retain exactly 19 future proposed items, not stale 735 planning.
-assert.ok(queue.includes('737')&&queue.includes('755')&&queue.includes('19 future proposed builds'));
-assert.ok(!queue.includes('| 736 |'), 'Current build must no longer appear as an unstarted future proposal');
+// Historical Build 735 checks must accept the *current* rolling queue after later builds.
+assert.ok(queue.includes('755')&&queue.includes('NEXT_20_BUILDS'));
+assert.ok(!queue.includes('| 736 |'), 'Completed 736 cannot be an unstarted future proposal');
 const archive=readFileSync(new URL('../docs/architecture/ARCHIVED_NEXT_20_BUILDS_383_412.md',import.meta.url),'utf8');
 assert.ok(archive.includes('383–392')&&archive.includes('403–412'),'Prior executed queue is preserved');
 console.log('BUILD735 PASS: protected D1 metrics, no PII/credentials, no mail, genuine provider HOLD, 20 new proposed future builds');
