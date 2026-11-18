@@ -24,10 +24,10 @@ CREATE TRIGGER IF NOT EXISTS trg_dnd_recovery_pilots_immutable_identity_736
  WHEN NEW.pilot_id<>OLD.pilot_id OR NEW.admin_user_id<>OLD.admin_user_id OR
   NEW.recipient_sha256<>OLD.recipient_sha256 OR NEW.code_sha256<>OLD.code_sha256 OR
   NEW.created_at<>OLD.created_at OR NEW.expires_at<>OLD.expires_at OR
-  (OLD.provider_accepted_at IS NOT NULL AND NEW.provider_accepted_at<>OLD.provider_accepted_at) OR
-  (OLD.provider_message_sha256 IS NOT NULL AND NEW.provider_message_sha256<>OLD.provider_message_sha256) OR
-  (OLD.inbox_confirmed_at IS NOT NULL AND NEW.inbox_confirmed_at<>OLD.inbox_confirmed_at) OR
-  (OLD.invalidated_at IS NOT NULL AND NEW.invalidated_at<>OLD.invalidated_at) OR
+  (OLD.provider_accepted_at IS NOT NULL AND NEW.provider_accepted_at IS NOT OLD.provider_accepted_at) OR
+  (OLD.provider_message_sha256 IS NOT NULL AND NEW.provider_message_sha256 IS NOT OLD.provider_message_sha256) OR
+  (OLD.inbox_confirmed_at IS NOT NULL AND NEW.inbox_confirmed_at IS NOT OLD.inbox_confirmed_at) OR
+  (OLD.invalidated_at IS NOT NULL AND NEW.invalidated_at IS NOT OLD.invalidated_at) OR
   NEW.failed_attempts<OLD.failed_attempts
  BEGIN SELECT RAISE(ABORT,'immutable_original_recovery_inbox_custody'); END;
 CREATE TRIGGER IF NOT EXISTS trg_dnd_recovery_pilots_no_delete_736
