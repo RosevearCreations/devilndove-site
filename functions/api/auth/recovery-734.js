@@ -134,7 +134,7 @@ export async function onRequestPost({request,env}){
  if(!sameOrigin(request))return reply(403,{ok:false,error:'Request origin was not accepted.'});
  if(Number(request.headers.get('Content-Length')||0)>2048)
   return reply(413,{ok:false,error:'Request too large.'});
- let body;try{body=await request.json();}catch{return reply(400,{ok:false,error:'Invalid request.');}
+ let body;try{body=await request.json();}catch{return reply(400,{ok:false,error:'Invalid request.'});}
  if(JSON.stringify(body).length>1800)return reply(413,{ok:false,error:'Request too large.'});
  const action=String(body.action||'');
  if(!['reset_request','account_reminder','reset_redeem'].includes(action))
