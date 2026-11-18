@@ -405,6 +405,13 @@
       "release": 467,
       "description": "Build 734 append-only privacy-preserving hashed one-time member password reset tokens with current-sessions invalidation and immutable SHA-256-scoped recovery abuse receipts. No raw link token, alternate-email delivery or fake external peer enrollment.",
       "recovery": "Do not edit applied migration; preserve original user/session data and immutable recovery attempts, expire compromised tokens via signed claim and use a forward-only repair. Do not turn on external privacy sends from this auth migration."
+    },
+    {
+      "version": 57,
+      "file": "0057_release467_recovery_inbox_owner_pilot.sql",
+      "release": 467,
+      "description": "Immutable Admin-only original D1 hashed one-time owner inbox code, provider API acceptance receipt and separate actual consenting inbox-code confirmation, with limited attempts and no customer sends.",
+      "recovery": "Retain original pilot history and no plaintext codes, mail IDs, keys or addresses. Fail closed on missing verified provider or owner confirmation. Forward-only repair only; never auto-email customers or activate privacy Master Worker."
     }
   ]
 }
