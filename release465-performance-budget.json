@@ -16,8 +16,8 @@
     "max_js_bytes": 600000,
     "max_css_bytes": 500000,
     "max_html_bytes": 500000,
-    "max_runtime_source_bytes": 19781000,
-    "max_runtime_source_files": 1858,
+    "max_runtime_source_bytes": 19797000,
+    "max_runtime_source_files": 1860,
     "max_inline_data_uri_bytes": 650000
   },
   "baseline_observed": {
@@ -33,6 +33,24 @@
     "production_mutation": false
   },
   "budget_reviews": [
+    {
+      "build": 734,
+      "date": "2026-11-17",
+      "scope": "Protected original D1 account recovery API and three-Master independent peer readiness API; time-limited hashed reset tokens, password PBKDF2, single-use claim, session invalidation, and no external sends without owner activation.",
+      "prior_limit_bytes": 19781000,
+      "new_limit_bytes": 19797000,
+      "delta_bytes": 16000,
+      "measured_runtime_bytes": 19792122,
+      "measured_runtime_files": 1860,
+      "prior_file_limit": 1858,
+      "new_file_limit": 1860,
+      "measured_system_gate_run": 44216887822,
+      "measured_overage_bytes": 11122,
+      "measured_remaining_headroom_bytes": 4878,
+      "per_file_js_css_html_limits_unchanged": true,
+      "review_reason": "Original exact-head System Gate run #44216887822 measured 19,792,122 runtime source bytes / 1,860 files, 11,122 bytes and 2 files over previous caps. Scope accounts for two new protected routes: auth/recovery-734 and admin/privacy-readiness-734, plus minimal UI changes. Additive narrowly reviewed +16,000 bytes and +2 files leaves 4,878 bytes headroom. Scanner and per-file limits remain enforced; all Dev, D1 migration, protected main, Cloudflare deployment and Worker checks remain mandatory. Actual mail delivery requires confirmed authorized Resend provider, and original Master signed receiver readiness cannot be inferred.",
+      "automatic_sender_activation": false
+    },
     {
       "build": 733,
       "date": "2026-11-17",
