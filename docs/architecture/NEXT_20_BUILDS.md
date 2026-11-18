@@ -1,74 +1,42 @@
-# Devil n Dove — Rolling Next 20 Builds
+# Devil n Dove — Current Rolling 20-Build Queue
 
-Updated 2026-08-25 after staging the 10-build Commerce & Operations batch (Builds 383–392).
+Updated 2026-11-17. **The old August 25 Builds 383–412 queue was stale and is preserved in [historical archive](ARCHIVED_NEXT_20_BUILDS_383_412.md).** These are **new proposals, not previously approved or completed tickets**. The most recently authorized release is Build **735** (Recovery Delivery Readiness and Atomic Abuse Limits); these 20 are the **following proposed builds**, so the count after 735's successful promotion is **20 proposed builds (736–755)**. This list is not a claim that all remaining company work can be done in 20 builds.
 
-## Cadence rule
+## After Build 735 — proposed queue (20 items)
 
-Work in **10-build execution batches**. Keep the next **20 builds** visible here so two full batches are always queued behind the current work.
+| Build | Next proposed work | Original-evidence and owner boundary | Status |
+| --- | --- | --- | --- |
+| 736 | Resend Recovery Deliverability & Owner Inbox Acceptance | Check production sender configuration and a separately consented original inbox pilot; never infer inbox delivery from provider acceptance. | PROPOSED / NOT STARTED |
+| 737 | Password Recovery Threat-Model & Abuse-Resistance Review | Verify mixed-IP/email concurrency, 30-minute expiry, token replay and safe lockout recovery without automatic credential changes. | PROPOSED / NOT STARTED |
+| 738 | Forgot Account Support Queue & Identity Review | Admin triage and privacy-safe manual account identification; no disclosure to an unverified alternate email. | PROPOSED / NOT STARTED |
+| 739 | Original Three-Master Peer Enrollment Pilot | Independently attest original master receiver URL, Ed25519 key ownership and true live signed challenges, with HOLD if any peer is unavailable. | PROPOSED / NOT STARTED |
+| 740 | Owner-Gated Privacy Sender Activation Ceremony | Separate explicit authorization only after all original peer proofs; preserve disabled defaults and no auto-send otherwise. | PROPOSED / NOT STARTED |
+| 741 | Signed Withdrawal Retry & Dead-Letter Operations | Reconcile genuine live ACKs, SLA closure and no duplicate/remote erasure claims. | PROPOSED / NOT STARTED |
+| 742 | Dovlin Collection Landing & Approved Eight-Plush Catalog | Design dedicated branded collection linked to original approved Dovlin imagery and sellable SKUs only with actual assets/rights. | PROPOSED / NOT STARTED |
+| 743 | Dovlin Gallery, Character Fidelity & Material Evidence | Check authorized colourways, collector photos, 3+ labelling and sample evidence; no invented certifications. | PROPOSED / NOT STARTED |
+| 744 | Dovlin Stories, Collectibles & Product Bundle Presentation | Curate genuine stories and merchandise links without automatic listing or unsupported imagery. | PROPOSED / NOT STARTED |
+| 745 | Mobile Storefront Product-First Navigation | Bring actual products above introductory content, clarify menus and maintain responsive accessibility. | PROPOSED / NOT STARTED |
+| 746 | Mobile Product Camera Capture & Draft Recovery | Verify photos/videos, draft auto IDs, upload consistency and no duplicate media writes. | PROPOSED / NOT STARTED |
+| 747 | Unique Product Card Images & Gallery Provenance | Audit missing and repeated images using approved shop media; no AI guesses about customer assets. | PROPOSED / NOT STARTED |
+| 748 | Customer Account, Checkout & Saved-Profile Usability | Improve sign-in, registration and checkout continuity while keeping payment controls explicit. | PROPOSED / NOT STARTED |
+| 749 | Canada Shipping, HST & Returns Readiness | Connect shipping and tax source evidence; never claim provider, carrier or CRA acceptance without proof. | PROPOSED / NOT STARTED |
+| 750 | Deposits, Refunds & Invoice Source Reconciliation | Link actual orders and provider settlement evidence without invented financial closure. | PROPOSED / NOT STARTED |
+| 751 | Workshop Inventory, Materials & Costing | Relate jewelry supplies, approved materials, finished lots and original cost receipts. | PROPOSED / NOT STARTED |
+| 752 | Maker Job Traveler & QC Handoffs | Link production steps, source photos, worker observations and actual sign-off. | PROPOSED / NOT STARTED |
+| 753 | Social Content & Catalog Publication Review | Source-link media and product drafts for owner-approved posting; never auto-post. | PROPOSED / NOT STARTED |
+| 754 | Seven-App Read-Only Master Status Assurance | Show verified source statuses and signed provenance, not unproven live integrations. | PROPOSED / NOT STARTED |
+| 755 | Mobile Accessibility, Security Acceptance & Queue Renewal | Run owner-visible device checks, audit unresolved acceptance and replan the next 20. | PROPOSED / NOT STARTED |
 
-A validation failure may insert a bounded correction build and shift later numbers. Production remains frozen unless separately promoted.
+## How to use the queue
+1. Only a separately owner-authorized build is released; this queue itself grants no authority for customer email pilots, external privacy-message sends, automatic posting, payments, key rotation, data deletion or Master receiver enrollment.
+2. Exact-head Development checks must pass (System Gate, Current Application Quality, I.T. Admin Runtime and Branch Hygiene), including canonical Development preview, before protected `dev` → `main` promotion.
+3. Protected `main` must pass independent Production Pages, D1 migration (when applicable), live-resource integrity, and the still-disabled Cloudflare scheduled privacy Worker verification. An externally unverified provider or Master receiver remains HOLD even if the website application is GREEN.
+4. Reprioritize or split builds when original D1/Cloudflare evidence, owner needs, or dependencies change. A build number does not certify actual supplier/material/financial/customer acceptance.
+5. After Build 755, review authentic open work and renew the queue. Never subtract 20 from a made-up fixed lifetime target.
 
-## Current execution batch — Builds 383–392
-
-| Build | Target | Staged outcome |
-| --- | --- | --- |
-| 383 | Gift Cards schema authority audit | Identified Gift Card-owned schema, startup GET mutation, shared notification conflict. |
-| 384 | Gift Cards fresh-install parity | Added `database_gift_card_runtime_parity.sql` for eight Gift Card-owned tables/default templates. |
-| 385 | Gift Cards read contract | Added readiness-aware GET-only `operations-gift-cards-read`. |
-| 386 | Gift Cards Operations workspace | Automatic page read now uses one passive service; Commerce runtime/page activation added. |
-| 387 | Gift Cards mutation audit | Kept writes compatibility-owned; made delivery-history GET non-mutating. |
-| 388 | Orders schema/read audit | Confirmed current list GET is SELECT-only and uses `*_cents`/`total_cents`. |
-| 389 | Orders status mutation contract | Added Operations-owned order-status authority delegating mature implementation. |
-| 390 | Orders payment/refund boundary | Audited provider-aware refund/dispute writes; no provider behavior changed. |
-| 391 | Orders fulfillment boundary | Added narrow `fulfilled` transition authority. |
-| 392 | Today Tasks action contract | Added Operations-owned completed/ignored/snoozed authority; schema follow-up deferred to 393. |
-
-## Next execution batch — Builds 393–402
-
-| Build | Planned target | Guardrail / expected result |
-| --- | --- | --- |
-| 393 | Today Tasks action schema ownership | Move `today_task_actions` table/column creation to migration authority; remove POST self-repair after parity proof. |
-| 394 | Membership assignment mutation contract | Extract assign/remove tier writes without changing validated read runtime. |
-| 395 | Membership policy mutation contract | Extract policy edits from compatibility POST; keep Build 362 read untouched. |
-| 396 | Customer Documents startup-read audit | Identify automatic reads and hidden schema mutation. |
-| 397 | Customer Documents owned read boundary | Add page-specific read contract/service only if audit is clean. |
-| 398 | Customer Documents mutation audit | Map create/send/archive/delete/document-state writes to retained authorities. |
-| 399 | Accounting parity repair batch | Address active missing accounting schema such as `accounting_order_records`, `accountant_export_manifests`, and known column drift. |
-| 400 | Aggregate-schema execution verification | Resolve `notification_dispatch_log(s)` discrepancy and prove declared aggregate tables materialize. |
-| 401 | Production-only active-table parity | Re-audit active Production-only tables and add justified fresh-install definitions. |
-| 402 | Fresh-install parity smoke + data-copy gate | Rebuild clean Development schema, verify parity, then decide whether Production business-data copy is safe. |
-
-## Following execution batch — Builds 403–412
-
-| Build | Planned target | Guardrail / expected result |
-| --- | --- | --- |
-| 403 | Shared notification_outbox authority | Reconcile current aggregate shape with Gift Card and Orders writer expectations before consumer migration. |
-| 404 | Gift Card card-action mutation contract | Formalize activate/void/refund/reissue authority after Build 384 migration proof. |
-| 405 | Gift Card template/resend mutation contract | Extract template/resend writes; default templates remain migration-owned. |
-| 406 | Gift Card provider-send contract | Extract queue/provider/outbox write authority only after notification schema reconciliation. |
-| 407 | Gift Card abuse lock/unlock contract | Replace legacy action/key mismatch with stable lockout-ID semantics and audit evidence. |
-| 408 | Orders mutation consumer migration | Move reviewed status/fulfillment UI calls to Builds 389/391 contracts after source + browser safety proof. |
-| 409 | Payment/refund schema + integration gate | Prove refund/dispute columns and provider test harness before any refund consumer migration. |
-| 410 | Commerce & Operations boundary sanity | Re-run every page-specific Operations runtime/read contract and mutation-ownership invariant. |
-| 411 | Modular documentation consolidation | Consolidate architecture/validation handoff while preserving exact historical validation states. |
-| 412 | Development release-candidate gate | Full Development regression, schema readiness, browser sanity, and Production-promotion decision checkpoint. |
-
-## Standing constraints
-
-- Exactly one Core + Commerce & Operations + Creative & Production + Business & Administration.
-- GET/read paths report readiness; migrations/readiness tooling owns schema creation/repair.
-- Top-level runtime activation never implies mutation ownership.
-- Creative & Production loader/read boundaries are closed and should not be expanded merely to create activity.
-- Production/main remains frozen.
-- Fresh-install schema parity must be resolved before Production business-data copy.
-- Passing browser/local writes are not repeated merely to prove a wrapper.
-- External provider mutations (Stripe/PayPal/etc.) require dedicated integration gates before consumer migration.
-
-## Rolling maintenance rule
-
-When a 10-build batch closes:
-
-1. Mark exact local/browser state in validation files.
-2. Promote the next 10 rows into the current execution batch.
-3. Append another 10 rows so the document again contains 20 future builds.
-4. Reorder only when validation or parity evidence makes the planned order unsafe.
+## Queue accounting
+- Authorized current build before promotion: **735**.
+- Next proposed after 735: **736**.
+- Future proposals in this list: **20** (736 through 755 inclusive).
+- Verified completed builds in this table: **0**. Historical builds 383–412 are not counted.
+- Unbounded project work outside these 20 proposals: **not numerically determined**.
