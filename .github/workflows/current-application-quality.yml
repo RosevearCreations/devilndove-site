@@ -73,6 +73,12 @@ jobs:
           node --check public/js/admin-mobile-product-augment.js
           node --check public/js/admin-social-platform-preflight.js
           node scripts/build707_ninth_field_media_drift_custody_contract.mjs
+      - name: Build 736 owner-consented Resend inbox pilot, immutable D1 and replay/CSRF negatives
+        run: |
+          python scripts/build736_owner_inbox_sqlite_gate.py
+          node --check functions/api/admin/recovery-inbox-pilot-736.js
+          node --check public/js/admin-production-variable-audit-v406.js
+          node scripts/build736_owner_inbox_contract.mjs
       - name: Build 735 atomic recovery abuse limits and truthful provider delivery readiness
         run: |
           python scripts/build735_atomic_abuse_d1_gate.py
