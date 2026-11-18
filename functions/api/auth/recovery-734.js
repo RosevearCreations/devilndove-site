@@ -130,7 +130,8 @@ async function redeem734(db,request,body){
   return reply(200,{ok:true,message:'Password updated. All previous sessions were signed out. Please sign in using your new password.'});
  }catch{return reply(503,{ok:false,error:'Password reset could not be completed. Try again later.'});}
 }
-export async function onRequestPost({request,env}){
+export async function onRequestPost(context){
+ const {request,env}=context;
  if(!sameOrigin(request))return reply(403,{ok:false,error:'Request origin was not accepted.'});
  if(Number(request.headers.get('Content-Length')||0)>2048)
   return reply(413,{ok:false,error:'Request too large.'});
@@ -142,6 +143,13 @@ export async function onRequestPost({request,env}){
  const db=env?.DB;
  if(!db||typeof db.prepare!=='function'||typeof db.batch!=='function')
   return reply(503,{ok:false,error:'Account recovery is temporarily unavailable.'});
- return action==='reset_redeem'?redeem734(db,request,body):
-  requestRecovery734(db,env,request,body);
+ if(action==='reset_redeem')return redeem734(db,request,body);
+ // Return the same generic response before any original account lookup or provider call.
+ // Cloudflare waitUntil retains work without leaking registered-account existence via mail latency.
+ if(typeof context.waitUntil==='function'){
+  context.waitUntil(requestRecovery734(db,env,request,body).catch(()=>null));
+  return reply(200,{ok:true,message:okMessage,delivery_unconfirmed:true});
+ }
+ // Non-Cloudflare harness only. Production always supplies Pages Functions waitUntil.
+ return requestRecovery734(db,env,request,body);
 }
