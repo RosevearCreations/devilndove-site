@@ -654,3 +654,31 @@ document.addEventListener('DOMContentLoaded',()=>{
   finally{button.disabled=false;}
  });
 });
+
+
+/* Build 735: source-only recovery email acceptance and provider configuration.
+   No external mail test, customer or credential details, and no implicit GREEN. */
+document.addEventListener('DOMContentLoaded',()=>{
+ const button=document.getElementById('privacy735Refresh'),out=document.getElementById('privacy735Results');
+ if(!button||!out)return;
+ button.addEventListener('click',async()=>{
+  button.disabled=true;out.textContent='Checking original D1 recovery delivery status…';
+  try{
+   const uri='/api/admin/privacy-readiness-734?review=recovery735';
+   const response=await(window.DDAuth?.apiFetch?window.DDAuth.apiFetch(uri):fetch(uri,{credentials:'same-origin'}));
+   const d=await response.json().catch(()=>null);
+   if(!response.ok||!d?.ok)throw Error('HOLD_ORIGINAL_READBACK');
+   out.textContent=JSON.stringify({
+    status:d.status,provider_configuration_present:d.provider_configuration_present,
+    original_provider_acceptances_not_inbox_deliveries:d.original_provider_acceptances_not_inbox_deliveries,
+    original_reset_requests_last_24h:d.original_reset_requests_last_24h,
+    original_pending_unused_reset_links:d.original_pending_unused_reset_links,
+    original_unconfirmed_unsent_reset_tokens:d.original_unconfirmed_unsent_reset_tokens,
+    original_abuse_attempts_last_24h:d.original_abuse_attempts_last_24h,
+    actual_external_inbox_delivery_verified:d.actual_external_inbox_delivery_verified,
+    genuine_owner_consented_inbox_pilot_pending:d.genuine_owner_consented_inbox_pilot_pending
+   },null,2);
+  }catch{out.textContent='HOLD — original D1 or verified Admin permission unavailable.';}
+  finally{button.disabled=false;}
+ });
+});
