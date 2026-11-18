@@ -16,8 +16,8 @@
     "max_js_bytes": 600000,
     "max_css_bytes": 500000,
     "max_html_bytes": 500000,
-    "max_runtime_source_bytes": 19801000,
-    "max_runtime_source_files": 1860,
+    "max_runtime_source_bytes": 19817000,
+    "max_runtime_source_files": 1861,
     "max_inline_data_uri_bytes": 650000
   },
   "baseline_observed": {
@@ -33,6 +33,26 @@
     "production_mutation": false
   },
   "budget_reviews": [
+    {
+      "build": 736,
+      "date": "2026-11-18",
+      "scope": "One protected, owner-consented registered-Admin inbox pilot route plus manually refreshed Admin UI, exact source D1 hashed one-use code custody and no automatic sends to customers. A single new runtime route.",
+      "prior_limit_bytes": 19801000,
+      "new_limit_bytes": 19817000,
+      "delta_bytes": 16000,
+      "measured_runtime_bytes": 19812347,
+      "measured_runtime_files": 1861,
+      "prior_file_limit": 1860,
+      "new_file_limit": 1861,
+      "measured_system_gate_run": 44310709430,
+      "measured_overage_bytes": 11347,
+      "measured_remaining_headroom_bytes": 4653,
+      "per_file_js_css_html_limits_unchanged": true,
+      "review_reason": "Exact original System Gate #44310709430 measured 19,812,347 bytes / 1,861 runtime files, exceeding 19,801,000-byte / 1,860-file limits by 11,347 bytes / one protected Admin API. The added runtime code only supports consented original registered-owner Resend code pilot with original D1 0057, no customer sends, no external delivery claims, no automatic privacy sender activation. Narrow +16,000-byte and +1-file cap retains explicit source scanner, individual JS/CSS/HTML caps, original Development migration, exact Dev CI, protected main and Cloudflare Production / independent live and disabled Worker readback gates.",
+      "automatic_customer_email_pilot": false,
+      "original_owner_inbox_confirmed": false,
+      "original_master_sender_enabled": false
+    },
     {
       "build": 735,
       "date": "2026-11-17",
