@@ -14,7 +14,8 @@ const sameOrigin=request=>{
  const site=request.headers.get('Sec-Fetch-Site');
  return !site||site==='same-origin'||site==='none';
 };
-function privateIp(request){return String(request.headers.get('CF-Connecting-IP')||request.headers.get('X-Forwarded-For')?.split(',')[0]||'unknown').slice(0,90);}
+// Client forwarding headers are attacker-controlled; the platform IP is the only quota input.
+function privateIp(request){return String(request.headers.get('CF-Connecting-IP')||'unknown').slice(0,90);}
 export function providerReady734(env={}){
  return Boolean(String(env.RESEND_API_KEY||'').trim()&&String(env.NOTIFICATION_FROM_EMAIL||env.RESEND_FROM_EMAIL||env.SUPPORT_FROM_EMAIL||'').trim());
 }
@@ -137,6 +138,7 @@ export async function onRequestPost(context){
  if(Number(request.headers.get('Content-Length')||0)>2048)
   return reply(413,{ok:false,error:'Request too large.'});
  let body;try{body=await request.json();}catch{return reply(400,{ok:false,error:'Invalid request.'});}
+ if(!body||typeof body!=='object'||Array.isArray(body))return reply(400,{ok:false,error:'Invalid request.'});
  if(JSON.stringify(body).length>1800)return reply(413,{ok:false,error:'Request too large.'});
  const action=String(body.action||'');
  if(!['reset_request','account_reminder','reset_redeem'].includes(action))
