@@ -73,6 +73,11 @@ jobs:
           node --check public/js/admin-mobile-product-augment.js
           node --check public/js/admin-social-platform-preflight.js
           node scripts/build707_ninth_field_media_drift_custody_contract.mjs
+      - name: Build 737 original D1 mixed-IP concurrency, expiry, replay and malformed recovery security gate
+        run: |
+          python scripts/build737_recovery_threat_model_gate.py
+          node --check functions/api/auth/recovery-734.js
+          node scripts/build737_recovery_endpoint_contract.mjs
       - name: Build 736 owner-consented Resend inbox pilot, immutable D1 and replay/CSRF negatives
         run: |
           python scripts/build736_owner_inbox_sqlite_gate.py
