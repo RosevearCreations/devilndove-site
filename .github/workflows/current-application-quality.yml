@@ -73,6 +73,13 @@ jobs:
           node --check public/js/admin-mobile-product-augment.js
           node --check public/js/admin-social-platform-preflight.js
           node scripts/build707_ninth_field_media_drift_custody_contract.mjs
+      - name: Build 735 atomic recovery abuse limits and truthful provider delivery readiness
+        run: |
+          python scripts/build735_atomic_abuse_d1_gate.py
+          node --check functions/api/auth/recovery-734.js
+          node --check functions/api/admin/privacy-readiness-734.js
+          node --check public/js/admin-production-variable-audit-v406.js
+          node scripts/build735_recovery_readiness_contract.mjs
       - name: Build 734 original privacy receiver readiness and secure member recovery security negatives
         run: |
           python scripts/build734_auth_recovery_sqlite_gate.py

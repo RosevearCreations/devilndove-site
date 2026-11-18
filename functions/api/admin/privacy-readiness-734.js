@@ -1,5 +1,6 @@
 // Build 734: original source-only independent receiver enrollment and signed ACK readiness.
 import {getDb,jsonResponse} from '../_lib/adminAudit.js';
+import {providerReady734} from '../auth/recovery-734.js';
 import {verifiedAdminFromModule} from '../_lib/verifiedAdmin398.mjs';
 import {BUILD729_PEERS,peerConfig729,digest728} from '../_lib/appModuleRoutes.js';
 const reply=(status,data)=>jsonResponse({build:734,...data,external_privacy_sending_authorized:false,
@@ -10,6 +11,54 @@ export async function onRequestGet(c){
  if(!user||!Number.isSafeInteger(Number(user.user_id))||Number(user.user_id)<1)
   return reply(401,{ok:false,status:'HOLD_VERIFIED_ADMIN_REQUIRED'});
  if(!db)return reply(503,{ok:false,status:'HOLD_ORIGINAL_D1_UNAVAILABLE'});
+ if(new URL(c.request.url).searchParams.get('review')==='recovery735'){
+  try{
+   // No email addresses, tokens, fingerprints, provider IDs, customer IDs or source secrets.
+   const metrics=await db.prepare(`SELECT
+     COUNT(*) AS recent_reset_requests,
+     COALESCE(SUM(CASE WHEN sent_at IS NOT NULL THEN 1 ELSE 0 END),0) AS provider_accepted,
+     COALESCE(SUM(CASE WHEN sent_at IS NULL AND consumed_at IS NULL THEN 1 ELSE 0 END),0) AS unconfirmed_unsent,
+     COALESCE(SUM(CASE WHEN sent_at IS NOT NULL AND consumed_at IS NULL
+       AND expires_at>datetime('now') THEN 1 ELSE 0 END),0) AS active_unused,
+     COALESCE(SUM(CASE WHEN consumed_at IS NOT NULL THEN 1 ELSE 0 END),0) AS claimed_or_invalidated,
+     COALESCE(SUM(CASE WHEN consumed_at IS NULL AND
+       expires_at<=datetime('now') THEN 1 ELSE 0 END),0) AS expired_without_claim
+     FROM dnd_password_reset_tokens_734
+     WHERE created_at>=datetime('now','-1 day')`).first();
+   const rate=await db.prepare(`SELECT
+     COUNT(*) AS attempts_24h,
+     COALESCE(SUM(CASE WHEN action='reset_request' THEN 1 ELSE 0 END),0) AS reset_requests,
+     COALESCE(SUM(CASE WHEN action='account_reminder' THEN 1 ELSE 0 END),0) AS account_reminders,
+     COALESCE(SUM(CASE WHEN action='reset_redeem' THEN 1 ELSE 0 END),0) AS reset_redemptions_attempted
+     FROM dnd_auth_recovery_attempts_734
+     WHERE created_at>=datetime('now','-1 day')`).first();
+   const configured=providerReady734(c.env||{});
+   return reply(200,{ok:true,build:735,
+    status:configured?'READY_FOR_SUPERVISED_REAL_INBOX_PILOT':
+       'HOLD_RESEND_PROVIDER_CONFIGURATION',
+    original_d1_schema_verified:true,provider_configuration_present:configured,
+    original_provider_acceptances_not_inbox_deliveries:Number(metrics?.provider_accepted||0),
+    original_reset_requests_last_24h:Number(metrics?.recent_reset_requests||0),
+    original_pending_unused_reset_links:Number(metrics?.active_unused||0),
+    original_unconfirmed_unsent_reset_tokens:Number(metrics?.unconfirmed_unsent||0),
+    original_claimed_or_invalidated_tokens:Number(metrics?.claimed_or_invalidated||0),
+    original_expired_without_claim:Number(metrics?.expired_without_claim||0),
+    original_abuse_attempts_last_24h:Number(rate?.attempts_24h||0),
+    original_request_attempts_last_24h:Number(rate?.reset_requests||0),
+    original_account_reminder_attempts_last_24h:Number(rate?.account_reminders||0),
+    original_redeem_attempts_last_24h:Number(rate?.reset_redemptions_attempted||0),
+    actual_external_inbox_delivery_verified:false,
+    actual_independent_user_password_change_verified:false,
+    genuine_owner_consented_inbox_pilot_pending:true,
+    no_mail_sent_by_status_check:true,read_only:true,
+    customer_identifiers_exposed:false,secret_values_exposed:false});
+  }catch{
+   return reply(503,{ok:false,build:735,status:'HOLD_ORIGINAL_RECOVERY_D1_SCHEMA_OR_READ_FAILURE',
+    actual_external_inbox_delivery_verified:false,no_mail_sent_by_status_check:true,
+    customer_identifiers_exposed:false,secret_values_exposed:false});
+  }
+ }
+
  const peers=[];
  for(const target of BUILD729_PEERS){
   const cfg=peerConfig729(c.env,target);
