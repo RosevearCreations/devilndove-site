@@ -398,6 +398,13 @@
       "release": 467,
       "description": "Immutable original signed withdrawal ACK review + independent Administrator SLA closure, source-version ciphertext hash/key lineage rotation witness with separate users; no remote erasure or key retirement authority.",
       "recovery": "Retain immutable reviews, resolutions and key-lineage witnesses; reject duplicate or unsupported claims and remediate with forward-only separate reviewed evidence. Never retire historical keys or synthesize an external Master receipt."
+    },
+    {
+      "version": 56,
+      "file": "0056_release467_auth_recovery_privacy_sender_custody.sql",
+      "release": 467,
+      "description": "Build 734 append-only privacy-preserving hashed one-time member password reset tokens with current-sessions invalidation and immutable SHA-256-scoped recovery abuse receipts. No raw link token, alternate-email delivery or fake external peer enrollment.",
+      "recovery": "Do not edit applied migration; preserve original user/session data and immutable recovery attempts, expire compromised tokens via signed claim and use a forward-only repair. Do not turn on external privacy sends from this auth migration."
     }
   ]
 }

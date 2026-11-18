@@ -631,3 +631,26 @@ document.addEventListener('DOMContentLoaded',()=>{
    'Record an independent original ciphertext metadata witness? This is NOT decryption proof or key retirement authority.');
  });
 });
+
+
+/* Build 734: on-demand original signed Master enrollment evidence; no sends or authority change. */
+document.addEventListener('DOMContentLoaded',()=>{
+ const button=document.getElementById('privacy734Refresh'),
+  out=document.getElementById('privacy734Results');
+ if(!button||!out)return;
+ button.addEventListener('click',async()=>{
+  button.disabled=true;out.textContent='Checking original signed peer enrollment…';
+  try{
+   const url='/api/admin/privacy-readiness-734';
+   const res=await (window.DDAuth?.apiFetch?
+    window.DDAuth.apiFetch(url):fetch(url,{credentials:'same-origin'}));
+   const json=await res.json().catch(()=>null);
+   if(!res.ok||!json?.ok)throw Error('HOLD_ORIGINAL_SOURCE_AUTHORITY');
+   out.textContent=JSON.stringify({status:json.status,peers:json.peers,
+    external_privacy_sending_authorized:json.external_privacy_sending_authorized,
+    owner_activation_received:json.owner_activation_received,
+    worker_environment_activation_verified:json.worker_environment_activation_verified},null,2);
+  }catch{out.textContent='HOLD — original Master signed enrollment authority unavailable.';}
+  finally{button.disabled=false;}
+ });
+});

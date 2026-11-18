@@ -1,0 +1,103 @@
+# Build734 runtime cap reverified from actual failed System Gate #44216887822; scanners remain enforced.
+name: Development Build 734 D1 Ordered Apply and Proof
+on:
+  push:
+    branches: [dev]
+    paths:
+      - '.github/workflows/development-d1-build734-apply.yml'
+permissions:
+  contents: read
+concurrency:
+  group: dnd-build734-development-d1-ordered
+  cancel-in-progress: false
+jobs:
+  apply-development-only:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    env:
+      CLOUDFLARE_ACCOUNT_ID: c0d5bc25df16ae5b7d47c985c4b7b787
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v7
+        with:
+          node-version: '24'
+      - uses: actions/setup-python@v7
+        with:
+          python-version: '3.12'
+      - name: Verify exact Development 0056 and original negative constraints
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "${GITHUB_REF_NAME}" = dev
+          grep -q '^database_name = "devilndove-dev"$' wrangler.toml
+          grep -q '^database_id = "dbc1615b-dcbe-4951-973b-b47c99c73bfa"$' wrangler.toml
+          ! grep -q 'f34a741b-0000-45b0-9a96-6be08754d563' wrangler.toml
+          python - <<'PY'
+          import json
+          m=json.load(open('migrations/canonical/manifest.json'))['migrations']
+          assert len(m)==56
+          assert m[-1]['version']==56
+          assert m[-1]['file']=='0056_release467_auth_recovery_privacy_sender_custody.sql'
+          PY
+          python scripts/build734_auth_recovery_sqlite_gate.py
+          node scripts/build734_account_and_receiver_contract.mjs
+          python scripts/release465_performance_budget_gate.py
+      - name: Snapshot original Development D1 business data and prerequisite 0055
+        shell: bash
+        run: |
+          set -euo pipefail
+          npx --yes wrangler@4.128.0 d1 execute devilndove-dev --remote --config wrangler.toml --json --command "SELECT (SELECT COUNT(*) FROM users) AS users,(SELECT COUNT(*) FROM products) AS products,(SELECT COUNT(*) FROM orders) AS orders,(SELECT COUNT(*) FROM d1_migrations WHERE name='0055_release467_privacy_sla_resolution_rotation_witness.sql') AS v55,(SELECT COUNT(*) FROM d1_migrations WHERE name='0056_release467_auth_recovery_privacy_sender_custody.sql') AS v56;" >/tmp/build734-dev-before.json
+          python - <<'PY'
+          import json
+          raw=json.load(open('/tmp/build734-dev-before.json'));found=[]
+          def find(v):
+              if isinstance(v,dict):
+                  if all(k in v for k in ('users','products','orders','v55','v56')):found.append(v)
+                  for a in v.values():find(a)
+              elif isinstance(v,list):
+                  for a in v:find(a)
+          find(raw);assert len(found)==1,raw
+          x=found[0];assert int(x['v55'])==1 and int(x['v56']) in (0,1),x
+          json.dump({k:int(x[k]) for k in ('users','products','orders')},open('/tmp/build734-dev-counts.json','w'))
+          print('Original Development 0055 prerequisite and customer row snapshot: PASS')
+          PY
+      - name: Apply canonical 0056 to original Development D1
+        shell: bash
+        run: |
+          set -euo pipefail
+          python scripts/d1_migrate.py --target development --apply --source-sha "${GITHUB_SHA}"
+          python scripts/d1_migrate.py --target development --source-sha "${GITHUB_SHA}"
+      - name: Independently verify 0056 migration, tables, foreign keys and business counts
+        shell: bash
+        run: |
+          set -euo pipefail
+          npx --yes wrangler@4.128.0 d1 execute devilndove-dev --remote --config wrangler.toml --json --command "SELECT (SELECT COUNT(*) FROM users) AS users,(SELECT COUNT(*) FROM products) AS products,(SELECT COUNT(*) FROM orders) AS orders,(SELECT COUNT(*) FROM d1_migrations WHERE name='0056_release467_auth_recovery_privacy_sender_custody.sql') AS v56,(SELECT COUNT(*) FROM app_schema_migration_proofs WHERE migration_name='0056_release467_auth_recovery_privacy_sender_custody.sql' AND environment='development') AS proof56,(SELECT COUNT(*) FROM sqlite_master WHERE type='table' AND name IN ('dnd_password_reset_tokens_734','dnd_auth_recovery_attempts_734')) AS tables734;" >/tmp/build734-dev-after.json
+          npx --yes wrangler@4.128.0 d1 execute devilndove-dev --remote --config wrangler.toml --json --command "PRAGMA foreign_key_check;" >/tmp/build734-dev-fk.json
+          python - <<'PY'
+          import json
+          raw=json.load(open('/tmp/build734-dev-after.json'));found=[]
+          def find(v):
+              if isinstance(v,dict):
+                  if all(k in v for k in ('users','products','orders','v56','proof56','tables734')):found.append(v)
+                  for a in v.values():find(a)
+              elif isinstance(v,list):
+                  for a in v:find(a)
+          find(raw);assert len(found)==1,raw
+          x=found[0];before=json.load(open('/tmp/build734-dev-counts.json'))
+          for k in ('users','products','orders'):assert int(x[k])==before[k],(k,x,before)
+          assert int(x['v56'])==int(x['proof56'])==1,x
+          assert int(x['tables734'])==2,x
+          fk=json.load(open('/tmp/build734-dev-fk.json'));problems=[]
+          def parse(v):
+              if isinstance(v,dict):
+                  if isinstance(v.get('results'),list):problems.extend(v['results'])
+                  for x in v.values():parse(x)
+              elif isinstance(v,list):
+                  for x in v:parse(x)
+          parse(fk)
+          assert not [x for x in problems if isinstance(x,dict) and 'table' in x],problems
+          print('Build734 original Development migration 0056, row preservation, 2 tables, foreign keys: PASS')
+          PY

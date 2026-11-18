@@ -73,6 +73,13 @@ jobs:
           node --check public/js/admin-mobile-product-augment.js
           node --check public/js/admin-social-platform-preflight.js
           node scripts/build707_ninth_field_media_drift_custody_contract.mjs
+      - name: Build 734 original privacy receiver readiness and secure member recovery security negatives
+        run: |
+          python scripts/build734_auth_recovery_sqlite_gate.py
+          node --check functions/api/auth/recovery-734.js
+          node --check functions/api/admin/privacy-readiness-734.js
+          node --check public/js/account-help.js
+          node scripts/build734_account_and_receiver_contract.mjs
       - name: Build 733 immutable SLA resolution and independent key witness quality gates
         run: |
           python scripts/build733_privacy_sqlite_gate.py
