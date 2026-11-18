@@ -16,7 +16,7 @@
     "max_js_bytes": 600000,
     "max_css_bytes": 500000,
     "max_html_bytes": 500000,
-    "max_runtime_source_bytes": 19797000,
+    "max_runtime_source_bytes": 19801000,
     "max_runtime_source_files": 1860,
     "max_inline_data_uri_bytes": 650000
   },
@@ -33,6 +33,24 @@
     "production_mutation": false
   },
   "budget_reviews": [
+    {
+      "build": 735,
+      "date": "2026-11-17",
+      "scope": "Original D1 atomic customer password-reset/account reminder abuse ceiling, protected read-only recovery status and owner source-only UI. No extra runtime files, no schema migration or external sends.",
+      "prior_limit_bytes": 19797000,
+      "new_limit_bytes": 19801000,
+      "delta_bytes": 4000,
+      "measured_runtime_bytes": 19797820,
+      "measured_runtime_files": 1860,
+      "measured_system_gate_run": 44220201892,
+      "measured_overage_bytes": 820,
+      "measured_remaining_headroom_bytes": 3180,
+      "runtime_file_limit_unchanged": 1860,
+      "per_file_js_css_html_limits_unchanged": true,
+      "review_reason": "Original exact-head System Gate #44220201892 measured 19,797,820 runtime bytes and unchanged 1,860 files against existing 19,797,000-byte cap. Net +820 above original approved limit for source-only authenticated recovery readiness, atomic D1 quotas and one on-demand Admin control. Narrow 4,000-byte cap change leaves 3,180 headroom. Retains full scanner, per-file caps, existing D1 0056 and all exact-head Development/Production checks. Provider configuration is not inbox proof; original Master receiver remains HOLD and Worker stays disabled.",
+      "external_email_inbox_verified": false,
+      "original_master_sender_authorized": false
+    },
     {
       "build": 734,
       "date": "2026-11-17",
