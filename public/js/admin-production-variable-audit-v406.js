@@ -682,3 +682,64 @@ document.addEventListener('DOMContentLoaded',()=>{
   finally{button.disabled=false;}
  });
 });
+
+
+/* Build 736: user-initiated original registered Admin inbox pilot. No auto-send. */
+document.addEventListener('DOMContentLoaded',()=>{
+ const root=document.getElementById('recovery736OwnerInbox');if(!root)return;
+ const $=id=>root.querySelector('#'+id),out=$('recovery736Results');
+ const url='/api/admin/recovery-inbox-pilot-736';
+ let pilotId='';
+ const call=opts=>window.DDAuth?.apiFetch?
+  window.DDAuth.apiFetch(url,opts):fetch(url,{credentials:'same-origin',...opts});
+ const display=d=>{out.textContent=JSON.stringify({
+  status:d.status,provider_configuration_present:d.provider_configuration_present,
+  provider_api_acceptance_observed:d.provider_api_acceptance_observed,
+  owner_inbox_code_confirmed:d.owner_inbox_code_confirmed,
+  provider_delivered_webhook_verified:d.provider_delivered_webhook_verified,
+  actual_customer_reset_delivery_verified:d.actual_customer_reset_delivery_verified,
+  original_expires_at:d.original_expires_at,
+  wrong_code_attempts:d.wrong_code_attempts,
+  original_expires_in_minutes:d.original_expires_in_minutes
+ },null,2);};
+ async function read(){
+  const button=$('recovery736Refresh');button.disabled=true;
+  try{
+   const response=await call(),d=await response.json().catch(()=>({}));
+   if(!response.ok||!d.ok)throw Error('HOLD_SOURCE_STATUS');
+   pilotId=d.original_pilot_id||'';
+   display(d);
+  }catch{out.textContent='HOLD — independently verified Admin and original D1 required.';}
+  finally{button.disabled=false;}
+ }
+ async function write(button,body){
+  button.disabled=true;
+  try{
+   const response=await call({method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});
+   const d=await response.json().catch(()=>({}));
+   if(!response.ok||!d.ok){out.textContent=d.status||'HOLD_ORIGINAL_SOURCE_REJECTED';return false;}
+   if(d.original_pilot_id)pilotId=d.original_pilot_id;
+   display(d);return true;
+  }catch{out.textContent='HOLD — original Admin, D1, Resend or network readback unverified.';return false;}
+  finally{button.disabled=false;}
+ }
+ $('recovery736Refresh').addEventListener('click',read);
+ $('recovery736Start').addEventListener('click',async()=>{
+  if(!$('recovery736Consent').checked){
+   out.textContent='HOLD — check express registered Admin inbox consent before sending.';return;
+  }
+  if(!window.confirm('Send exactly one verification email to the currently authenticated Admin registered mailbox? This will not email customers or reset any password.'))return;
+  const success=await write($('recovery736Start'),{action:'start',
+   consent_confirmed:true,purpose:'OWNER_REGISTERED_INBOX_PILOT'});
+  $('recovery736Consent').checked=false;
+  if(success)$('recovery736Code').value='';
+ });
+ $('recovery736Confirm').addEventListener('click',async()=>{
+  const code=$('recovery736Code').value.trim().toUpperCase();
+  $('recovery736Code').value='';
+  if(!/^[0-9A-F]{32}$/.test(code)||!pilotId){
+   out.textContent='HOLD — load your original pilot and enter the 32-character code from your registered inbox.';return;
+  }
+  await write($('recovery736Confirm'),{action:'confirm',pilot_id:pilotId,code});
+ });
+});

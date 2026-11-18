@@ -415,6 +415,19 @@
 <button id="privacy734Refresh" type="button" class="btn secondary">Verify Build 734 original Master receiver readiness</button>
 <button id="privacy735Refresh" type="button" class="btn secondary">Check customer recovery email readiness</button>
 <pre id="privacy735Results" style="white-space:pre-wrap;overflow-wrap:anywhere;max-height:300px;overflow:auto" aria-live="polite">Not checked. This review never sends email and cannot prove inbox delivery.</pre>
+
+<details id="recovery736OwnerInbox" class="card" style="margin-top:12px">
+<summary><strong>Build 736 — Real registered-owner recovery inbox acceptance (opt-in)</strong></summary>
+<p class="small">Only an explicitly consenting signed-in Admin can send one 15-minute, one-time challenge to that Admin's original registered address. Two pilot requests per 24 hours. This does not reset passwords, email any customers, confirm Resend's delivery webhook, or enable privacy messages.</p>
+<button id="recovery736Refresh" type="button" class="btn secondary">Read original inbox-pilot status (no send)</button>
+<p><label><input id="recovery736Consent" type="checkbox" /> I control my registered Admin inbox and expressly consent to sending one test code to it now.</label></p>
+<button id="recovery736Start" type="button" class="btn secondary">Send one owner-consented verification code</button>
+<p class="small">If a code arrives, paste it here. Codes are never saved in the browser or the original D1 database.</p>
+<label for="recovery736Code">Inbox verification code (32 hexadecimal characters)</label>
+<input id="recovery736Code" class="input" type="text" inputmode="text" autocomplete="off" autocapitalize="characters" spellcheck="false" maxlength="32" placeholder="Code from registered Admin email" />
+<button id="recovery736Confirm" type="button" class="btn secondary">Verify actual original Admin inbox receipt</button>
+<pre id="recovery736Results" style="white-space:pre-wrap;overflow-wrap:anywhere;max-height:280px;overflow:auto" aria-live="polite">HOLD — no genuine consented inbox confirmation recorded.</pre>
+</details>
 <pre id="privacy734Results" style="white-space:pre-wrap;overflow-wrap:anywhere;max-height:340px;overflow:auto" aria-live="polite">No original Master enrollment reviewed. External privacy sending is OFF.</pre>
 <pre id="privacy733Results" role="status" aria-live="polite" style="white-space:pre-wrap;overflow-wrap:anywhere;max-height:390px;overflow:auto">Not checked. Original protected D1 required.</pre>
 <details><summary>Record original signed-ACK SLA closure — two Administrators</summary>

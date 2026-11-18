@@ -1,12 +1,11 @@
 # Devil n Dove — Current Rolling 20-Build Queue
 
-Updated 2026-11-17. **The old August 25 Builds 383–412 queue was stale and is preserved in [historical archive](ARCHIVED_NEXT_20_BUILDS_383_412.md).** These are **new proposals, not previously approved or completed tickets**. The most recently authorized release is Build **735** (Recovery Delivery Readiness and Atomic Abuse Limits); these 20 are the **following proposed builds**, so the count after 735's successful promotion is **20 proposed builds (736–755)**. This list is not a claim that all remaining company work can be done in 20 builds.
+Updated 2026-11-18. Historical August 2026 planning is archived in [the original 383–412 roadmap](ARCHIVED_NEXT_20_BUILDS_383_412.md). Build **736** is the owner-authorized current release, with original Production closure requiring independent GitHub evidence and owner inbox-code confirmation separately. There are **19 future proposed builds (737–755)**, not 19 already-authorized commitments. This is not a fixed estimate of all remaining company work.
 
-## After Build 735 — proposed queue (20 items)
+## After current Build 736 — proposed queue (19 items)
 
 | Build | Next proposed work | Original-evidence and owner boundary | Status |
 | --- | --- | --- | --- |
-| 736 | Resend Recovery Deliverability & Owner Inbox Acceptance | Check production sender configuration and a separately consented original inbox pilot; never infer inbox delivery from provider acceptance. | PROPOSED / NOT STARTED |
 | 737 | Password Recovery Threat-Model & Abuse-Resistance Review | Verify mixed-IP/email concurrency, 30-minute expiry, token replay and safe lockout recovery without automatic credential changes. | PROPOSED / NOT STARTED |
 | 738 | Forgot Account Support Queue & Identity Review | Admin triage and privacy-safe manual account identification; no disclosure to an unverified alternate email. | PROPOSED / NOT STARTED |
 | 739 | Original Three-Master Peer Enrollment Pilot | Independently attest original master receiver URL, Ed25519 key ownership and true live signed challenges, with HOLD if any peer is unavailable. | PROPOSED / NOT STARTED |
@@ -35,8 +34,8 @@ Updated 2026-11-17. **The old August 25 Builds 383–412 queue was stale and is 
 5. After Build 755, review authentic open work and renew the queue. Never subtract 20 from a made-up fixed lifetime target.
 
 ## Queue accounting
-- Authorized current build before promotion: **735**.
-- Next proposed after 735: **736**.
-- Future proposals in this list: **20** (736 through 755 inclusive).
-- Verified completed builds in this table: **0**. Historical builds 383–412 are not counted.
+- Authorized current release: **736**, with original owner inbox-code confirmation remaining operator-gated.
+- Next proposed after 736: **737 — Password Recovery Threat-Model & Abuse-Resistance Review**.
+- Future proposals in this list: **19** (737 through 755 inclusive).
+- Verified completed builds in this table: **0**; Build 736 is separately tracked under original release PR and GitHub Actions.
 - Unbounded project work outside these 20 proposals: **not numerically determined**.
