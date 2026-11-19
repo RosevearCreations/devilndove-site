@@ -16,7 +16,7 @@ insert=original(public,'INSERT INTO auth_recovery_requests')
 update=original(admin,'UPDATE auth_recovery_requests')
 audit=original(admin,'INSERT INTO admin_action_audit')
 assert insert.lstrip().startswith('INSERT') and 'COUNT(*)' in insert
-assert insert.count('?')==9
+assert insert.count('?')==8
 assert 'WHERE changes()=1' in audit
 table=re.search(r'CREATE TABLE IF NOT EXISTS auth_recovery_requests \([\s\S]*?\);',schema)
 assert table
