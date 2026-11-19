@@ -351,6 +351,10 @@
               "label": "Users & Access"
             },
             {
+              "href": "/admin/account-help-review/",
+              "label": "Forgot Account Staff Review"
+            },
+            {
               "href": "/admin/command-center/",
               "label": "Command Center"
             }

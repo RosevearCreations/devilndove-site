@@ -161,6 +161,7 @@ const IT_ADMIN_PAGES = Object.freeze([
   '/admin/safe-deploy-package',
   '/admin/startup-readiness',
   '/admin/users',
+  '/admin/account-help-review',
 ]);
 // Build 398
 const ETSY_OPERATOR_ADMIN_APIS = Object.freeze([
@@ -253,6 +254,7 @@ const FINANCIAL_ADMIN_APIS = Object.freeze([
   '/api/payment-providers',
 ]);
 const IT_ADMIN_APIS = Object.freeze([
+  '/api/admin/account-help-review-738',
   '/api/admin/module-acceptance-656',
   '/api/admin/infrastructure-readiness',
   '/api/admin/payment-provider-testing-blockers',

@@ -16,11 +16,11 @@
     "Settings & Configuration"
   ],
   "totals": {
-    "total": 157,
+    "total": 158,
     "keep": 5,
     "improve": 4,
     "rebuild": 0,
-    "review": 148
+    "review": 149
   },
   "routes": [
     {
@@ -33,6 +33,21 @@
         "byte_length": 25224,
         "stylesheets": 5,
         "scripts": 12,
+        "forms": 0,
+        "has_viewport": true
+      },
+      "owner_visual_acceptance": "PENDING"
+    },
+    {
+      "route": "/admin/account-help-review/",
+      "source": "admin/account-help-review/index.html",
+      "decision": "REVIEW",
+      "reference_screen": "Unassigned / contextual module",
+      "reason": "Not individually approved for a revamp; inspect actual signed-in UI and owner acceptance before changing.",
+      "evidence": {
+        "byte_length": 3150,
+        "stylesheets": 2,
+        "scripts": 3,
         "forms": 0,
         "has_viewport": true
       },
