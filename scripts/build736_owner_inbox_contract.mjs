@@ -27,25 +27,25 @@ const db={prepare(sql){
    if(sql.startsWith('INSERT INTO dnd_recovery_inbox_pilots_736')){
     if(Array.from(records.values()).filter(r=>r.admin_user_id===values[1]).length>=2)return {meta:{changes:0}};
     records.set(values[0],{pilot_id:values[0],admin_user_id:values[1],
-     recipient_sha256:values[2],code_sha256:values[3],created_at:'2026-11-18 12:00:00',
-     expires_at:'2026-11-19 12:00:00',provider_accepted_at:null,provider_message_sha256:null,
+     recipient_sha256:values[2],code_sha256:values[3],created_at:new Date().toISOString().slice(0,19).replace('T',' '),
+     expires_at:new Date(Date.now()+15*60000).toISOString().slice(0,19).replace('T',' '),provider_accepted_at:null,provider_message_sha256:null,
      inbox_confirmed_at:null,invalidated_at:null,failed_attempts:0});
     return {meta:{changes:1}};
    }
    const r=records.get(values[sql.includes('WHERE pilot_id=?')?1:0]); // provider start uses values[1]
    if(sql.includes('SET invalidated_at=CURRENT_TIMESTAMP')){
-    if(!r)return {meta:{changes:0}};r.invalidated_at='2026-11-18 12:00:00';return {meta:{changes:1}};
+    if(!r)return {meta:{changes:0}};r.invalidated_at=new Date().toISOString();return {meta:{changes:1}};
    }
    if(sql.includes('SET provider_accepted_at=CURRENT_TIMESTAMP')){
     if(!r)return {meta:{changes:0}};
-    r.provider_accepted_at='2026-11-18 12:00:00';r.provider_message_sha256=values[0];
+    r.provider_accepted_at=new Date().toISOString();r.provider_message_sha256=values[0];
     return {meta:{changes:1}};
    }
    if(sql.includes('SET inbox_confirmed_at=CURRENT_TIMESTAMP')){
     const q=records.get(values[0]);
     if(!q||q.inbox_confirmed_at||q.code_sha256!==values[2]||!q.provider_accepted_at||q.failed_attempts>=5)
      return {meta:{changes:0}};
-    q.inbox_confirmed_at='2026-11-18 12:05:00';return {meta:{changes:1}};
+    q.inbox_confirmed_at=new Date().toISOString();return {meta:{changes:1}};
    }
    if(sql.includes('SET failed_attempts=failed_attempts+1')){
     const q=records.get(values[0]);

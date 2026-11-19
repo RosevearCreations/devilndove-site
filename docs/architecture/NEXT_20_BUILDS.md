@@ -1,12 +1,11 @@
 # Devil n Dove — Current Rolling 20-Build Queue
 
-Updated 2026-11-18. Historical August 2026 planning is archived in [the original 383–412 roadmap](ARCHIVED_NEXT_20_BUILDS_383_412.md). Build **738** is the owner-authorized current release, with original Production closure requiring independent GitHub evidence and Build 736 owner inbox-code confirmation separately. There are **17 future proposed builds (739–755)**, not 19 already-authorized commitments. This is not a fixed estimate of all remaining company work.
+Updated 2026-11-18. Historical August 2026 planning is archived in [the original 383–412 roadmap](ARCHIVED_NEXT_20_BUILDS_383_412.md). Build **739** is the owner-authorized current release, with original Production closure requiring independent GitHub evidence and Build 736 owner inbox-code confirmation separately. There are **16 future proposed builds (740–755)**, not 16 already-authorized commitments. This is not a fixed estimate of all remaining company work.
 
-## After current Build 738 — proposed queue (17 items)
+## After current Build 739 — proposed queue (16 items)
 
 | Build | Next proposed work | Original-evidence and owner boundary | Status |
 | --- | --- | --- | --- |
-| 739 | Original Three-Master Peer Enrollment Pilot | Independently attest original master receiver URL, Ed25519 key ownership and true live signed challenges, with HOLD if any peer is unavailable. | PROPOSED / NOT STARTED |
 | 740 | Owner-Gated Privacy Sender Activation Ceremony | Separate explicit authorization only after all original peer proofs; preserve disabled defaults and no auto-send otherwise. | PROPOSED / NOT STARTED |
 | 741 | Signed Withdrawal Retry & Dead-Letter Operations | Reconcile genuine live ACKs, SLA closure and no duplicate/remote erasure claims. | PROPOSED / NOT STARTED |
 | 742 | Dovlin Collection Landing & Approved Eight-Plush Catalog | Design dedicated branded collection linked to original approved Dovlin imagery and sellable SKUs only with actual assets/rights. | PROPOSED / NOT STARTED |
@@ -32,8 +31,8 @@ Updated 2026-11-18. Historical August 2026 planning is archived in [the original
 5. After Build 755, review authentic open work and renew the queue. Never subtract 20 from a made-up fixed lifetime target.
 
 ## Queue accounting
-- Authorized current release: **738**; independent customer inbox delivery and the prior Build 736 owner inbox-code confirmation remain operator-gated.
-- Next proposed after 738: **739 — Original Three-Master Peer Enrollment Pilot**.
-- Future proposals in this list: **17** (739 through 755 inclusive).
-- Verified completed builds in this table: **0**; Build 738 is separately tracked under original release PR and GitHub Actions.
+- Authorized current release: **739**; independent customer inbox delivery and the prior Build 736 owner inbox-code confirmation remain operator-gated.
+- Next proposed after 739: **740 — Owner-Gated Privacy Sender Activation Ceremony**.
+- Future proposals in this list: **16** (740 through 755 inclusive).
+- Verified completed builds in this table: **0**; Build 739 is separately tracked under original release PR and GitHub Actions.
 - Unbounded project work outside these 20 proposals: **not numerically determined**.
