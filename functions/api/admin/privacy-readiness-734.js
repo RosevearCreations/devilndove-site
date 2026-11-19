@@ -100,6 +100,33 @@ export async function onRequestGet(c){
    new_live_probe_performed:false,remote_content_erased_verified:false});
  }
  const allProofs=peers.length===3&&peers.every(p=>p.state==='ORIGINAL_SIGNED_ENROLLMENT_PROOF_CURRENT');
+ // Build 739: local signed D1 receipts do not prove physical receiver ownership.
+ if(new URL(c.request.url).searchParams.get('review')==='peer739'){
+  return reply(200,{ok:true,build:739,read_only:true,
+   status:allProofs?'HOLD_INDEPENDENT_THREE_MASTER_OWNER_ACCEPTANCE':
+      'HOLD_MISSING_OR_STALE_ORIGINAL_MASTER_PROOFS',
+   source_application:'devilndove',required_peers:3,
+   configured_peers:peers.filter(x=>x.configuration_present).length,
+   current_local_signed_proofs:peers.filter(x=>x.state==='ORIGINAL_SIGNED_ENROLLMENT_PROOF_CURRENT').length,
+   peers:peers.map(x=>({peer_app:x.peer_app,state:x.state,
+    configuration_present:x.configuration_present,original_proof_at:x.original_proof_at,
+    original_verified_local_acks:x.original_verified_local_acks,
+    held_original_events:x.held_original_events,
+    independent_receiver_owner_attested:false,
+    original_host_reboot_witness_verified:false,
+    live_reporting_connection_verified:false,
+    next_step:!x.configuration_present?'ENROLL_ORIGINAL_CONFIG_PRIVATELY':
+     x.state!=='ORIGINAL_SIGNED_ENROLLMENT_PROOF_CURRENT'?
+      'PERFORM_OWNER_AUTHORIZED_ONE_USE_SIGNED_CHALLENGE':
+      'OBTAIN_INDEPENDENT_ORIGINAL_RECEIVER_OWNER_ATTESTATION'})),
+   independent_three_master_receiver_ack_verified:false,
+   cross_application_statistics_enabled:false,
+   original_windows_host_reboot_event_verified:false,
+   customer_identifiers_exposed:false,new_live_probe_performed:false,
+   external_call_performed:false,secret_values_exposed:false,
+   automatic_privacy_dispatch_enabled:false,
+   evidence_scope:'SOURCE_D1_LOCAL_SIGNED_PROOFS_NOT_RECEIVER_OWNER_CERTIFICATION'});
+ }
  return reply(200,{ok:true,status:allProofs?'READY_FOR_SEPARATE_OWNER_ACTIVATION_REVIEW':
   'HOLD_PEER_ENROLLMENT_OR_SIGNED_PROOF',
   peers,scheduled_worker_deployed_by_this_read:false,
