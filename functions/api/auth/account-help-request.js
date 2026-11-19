@@ -5,7 +5,7 @@ const reply=(status,code,extra={})=>jsonResponse({ok:status===202,code,
  message:status===202?generic:undefined,...extra},status,
  {'Cache-Control':'no-store','Referrer-Policy':'no-referrer'});
 const email=s=>String(s||'').trim().toLowerCase();
-const validEmail=s=>s.length<=254&&!/[\\t\\r\\n]/.test(s)&&/^[^@ ]{1,64}@[^@ ]+[.][^@ ]+$/.test(s);
+const validEmail=s=>s.length<=254&&![...s].some(ch=>ch.charCodeAt(0)<=32)&&/^[^@ ]{1,64}@[^@ ]+[.][^@ ]+$/.test(s);
 const safeText=(s,max)=>String(s||'').trim().slice(0,max);
 export async function onRequestPost({request,env}){
  const origin=new URL(request.url).origin,site=request.headers.get('Sec-Fetch-Site');
