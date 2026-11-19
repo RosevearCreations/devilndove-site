@@ -61,14 +61,56 @@
     byId('reviewPublication').value = row.publication_status || 'private';
     byId('reviewCard')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
   }
+  // Build 739: review-author supplied public URLs only. No arbitrary HTML embeds.
+  // A third-party player is loaded only after a deliberate owner click.
+  function reviewVideo739(value) {
+    let u; try { u = new URL(text(value)); } catch { return null; }
+    if (u.protocol !== 'https:' || u.username || u.password || u.port) return null;
+    const host = u.hostname.toLowerCase(),parts=u.pathname.split('/').filter(Boolean);
+    let id='';
+    if (['youtube.com','www.youtube.com','m.youtube.com','youtu.be','www.youtu.be'].includes(host)) {
+      id = host.endsWith('youtu.be') ? parts[0] : parts[0]==='watch'?u.searchParams.get('v'):
+        ['shorts','embed','live'].includes(parts[0])?parts[1]:'';
+      if (!/^[a-zA-Z0-9_-]{11}$/.test(id||'')) return null;
+      return {platform:'YouTube',src:'https://www.youtube-nocookie.com/embed/'+id};
+    }
+    if (['instagram.com','www.instagram.com'].includes(host) &&
+      ['reel','p','tv'].includes(parts[0]) && /^[A-Za-z0-9_-]{5,24}$/.test(parts[1]||'')) {
+      return {platform:'Instagram',src:'https://www.instagram.com/'+parts[0]+'/'+parts[1]+'/embed/'};
+    }
+    if (['facebook.com','www.facebook.com','m.facebook.com'].includes(host) &&
+      ((parts[0]==='watch' && /^\d{5,25}$/.test(u.searchParams.get('v')||'')) ||
+       (parts.includes('videos') && /^\d{5,25}$/.test(parts.at(-1)||'')))) {
+      const canonical='https://www.facebook.com'+u.pathname+
+        (parts[0]==='watch'?'?v='+u.searchParams.get('v'):'');
+      return {platform:'Facebook',src:'https://www.facebook.com/plugins/video.php?href='+encodeURIComponent(canonical)};
+    }
+    return null;
+  }
+  function mountVideo739(button) {
+    const video=reviewVideo739(button.dataset.reviewVideo||'');
+    const slot=button.closest('article')?.querySelector('[data-video-slot]');
+    if(!video||!slot){button.textContent='Unsupported or private video link';button.disabled=true;return;}
+    if(slot.firstElementChild){slot.replaceChildren();button.textContent='Load review video';return;}
+    const frame=document.createElement('iframe');
+    frame.src=video.src;frame.title=video.platform+' first-party equipment review';
+    frame.loading='lazy';frame.referrerPolicy='no-referrer';
+    frame.allow='encrypted-media; fullscreen; picture-in-picture';
+    frame.setAttribute('allowfullscreen','');frame.setAttribute('sandbox','allow-scripts allow-same-origin allow-presentation');
+    frame.style.cssText='width:100%;aspect-ratio:16/9;border:0;border-radius:12px;max-width:840px';
+    slot.appendChild(frame);button.textContent='Unload third-party player';
+  }
   function renderHistory(reviews) {
     const node = byId('reviewHistory'); if (!node) return;
     if (!reviews.length) { node.innerHTML = '<p class="small">No saved reviews for this item.</p>'; return; }
     node.innerHTML = reviews.map((row) => `<article class="card" style="margin-top:10px">
       <div style="display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap"><div><strong>${esc(row.review_title || `${row.platform_code || 'local'} review`)}</strong><div class="small">${esc(row.manufacturer_name || 'Manufacturer not linked')} • ${esc(row.vendor_name || row.platform_code || 'local')}${row.external_item_id ? ` • ${esc(row.external_item_id)}` : ''}</div></div><div class="small">${row.rating_value == null ? '' : `${Number(row.rating_value)}/5 • `}${esc(row.verification_status)} • ${esc(row.publication_status)}</div></div>
       <p class="small">${esc(row.review_body).slice(0, 700)}</p>
-      <div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn" type="button" data-edit-review="${Number(row.inventory_vendor_review_id)}">Edit</button>${row.external_review_url ? `<a class="btn" href="${esc(row.external_review_url)}" target="_blank" rel="noopener noreferrer">Open external review</a>` : ''}${row.source_url ? `<a class="btn" href="${esc(row.source_url)}" target="_blank" rel="noopener noreferrer">Open item source</a>` : ''}</div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn" type="button" data-edit-review="${Number(row.inventory_vendor_review_id)}">Edit</button>${row.external_review_url ? `<a class="btn" href="${esc(row.external_review_url)}" target="_blank" rel="noopener noreferrer">Open external review</a>` : ''}${reviewVideo739(row.external_review_url) ? `<button class="btn" type="button" data-review-video="${esc(row.external_review_url)}">Load review video</button>` : ''}${row.source_url ? `<a class="btn" href="${esc(row.source_url)}" target="_blank" rel="noopener noreferrer">Open item source</a>` : ''}</div>
+      <div data-video-slot style="margin-top:12px"></div>
     </article>`).join('');
+    node.querySelectorAll('[data-review-video]').forEach(button=>
+      button.addEventListener('click',()=>mountVideo739(button)));
     node.querySelectorAll('[data-edit-review]').forEach((button) => button.addEventListener('click', () => {
       const review = reviews.find((row) => Number(row.inventory_vendor_review_id) === Number(button.getAttribute('data-edit-review')));
       if (review) fillReview(review);
