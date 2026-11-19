@@ -1,21 +1,48 @@
-import { getDb,getClientIp,jsonResponse,normalizeText } from '../_lib/adminAudit.js';
-import { queuePublicNotification } from '../_lib/publicNotificationQueue.js';
-function normalizeEmail(value){return normalizeText(value).toLowerCase();}
-export async function onRequestPost(context){
-  const {request,env}=context;const db=getDb(env);if(!db)return jsonResponse({ok:false,error:'Account help is temporarily unavailable.'},503);
-  let body;try{body=await request.json();}catch{return jsonResponse({ok:false,error:'Invalid JSON body.'},400);}
-  const requestType=normalizeText(body.request_type),contactEmail=normalizeEmail(body.contact_email),possibleEmail=normalizeEmail(body.possible_email),displayName=normalizeText(body.display_name),note=normalizeText(body.note),ipAddress=getClientIp(request),userAgent=normalizeText(request.headers.get('User-Agent'));
-  if(!['forgot_password','forgot_email'].includes(requestType))return jsonResponse({ok:false,error:'Invalid request type.'},400);
-  if(!contactEmail)return jsonResponse({ok:false,error:'A contact email is required.'},400);
-  try{
-    const recentByEmail=await db.prepare(`SELECT COUNT(*) AS count FROM auth_recovery_requests WHERE contact_email=? AND created_at>=datetime('now','-1 hour')`).bind(contactEmail).first();
-    const recentByIp=await db.prepare(`SELECT COUNT(*) AS count FROM auth_recovery_requests WHERE COALESCE(ip_address,'')=? AND created_at>=datetime('now','-1 hour')`).bind(ipAddress||'').first();
-    if(Number(recentByEmail?.count||0)>=3||(ipAddress&&Number(recentByIp?.count||0)>=6))return jsonResponse({ok:true,message:'Your request has been recorded. For privacy, we do not confirm whether a matching account exists.'},202);
-  }catch{}
-  const inserted=await db.prepare(`INSERT INTO auth_recovery_requests (request_type,contact_email,possible_email,display_name,note,ip_address,user_agent,status,created_at,updated_at) VALUES (?,?,?,?,?,?,?,'open',CURRENT_TIMESTAMP,CURRENT_TIMESTAMP)`).bind(requestType,contactEmail,possibleEmail||null,displayName||null,note||null,ipAddress||null,userAgent||null).run();
-  const requestId=Number(inserted?.meta?.last_row_id||0);
-  const adminDestination=normalizeEmail(env.ACCOUNT_HELP_REVIEW_EMAIL||env.NOTIFICATION_ADMIN_TO||env.NOTIFICATION_FROM_EMAIL);
-  if(adminDestination)await queuePublicNotification(db,{notification_kind:'account_recovery_request',channel:'email',destination:adminDestination,payload:{request_id:requestId,request_type:requestType,contact_email:contactEmail,possible_email:possibleEmail||'',display_name:displayName||'',note:note||''}}).catch(()=>null);
-  await queuePublicNotification(db,{notification_kind:'account_recovery_received',channel:'email',destination:contactEmail,payload:{request_id:requestId,request_type:requestType,contact_email:contactEmail}}).catch(()=>null);
-  return jsonResponse({ok:true,message:'Your request has been recorded. For privacy, we do not confirm whether a matching account exists.'});
+// Build 738: non-enumerating account support intake. No account lookup or automatic email.
+import {getDb,jsonResponse} from '../_lib/adminAudit.js';
+const generic='Your request has been recorded for private staff review. For privacy, we do not confirm whether a matching account exists.';
+const reply=(status,code,extra={})=>jsonResponse({ok:status===202,code,
+ message:status===202?generic:undefined,...extra},status,
+ {'Cache-Control':'no-store','Referrer-Policy':'no-referrer'});
+const email=s=>String(s||'').trim().toLowerCase();
+const validEmail=s=>s.length<=254&&/^[^\\s@]{1,64}@[^\\s@]+\\.[^\\s@]+$/.test(s);
+const safeText=(s,max)=>String(s||'').trim().slice(0,max);
+export async function onRequestPost({request,env}){
+ const origin=new URL(request.url).origin,site=request.headers.get('Sec-Fetch-Site');
+ if(request.headers.get('Origin')&&request.headers.get('Origin')!==origin)
+  return reply(403,'ORIGIN_DENIED');
+ if(site&&site!=='same-origin'&&site!=='none')return reply(403,'SITE_DENIED');
+ if(Number(request.headers.get('Content-Length')||0)>2200)
+  return reply(413,'REQUEST_TOO_LARGE');
+ let body;try{body=await request.json();}catch{return reply(400,'INVALID_JSON');}
+ if(!body||typeof body!=='object'||Array.isArray(body)||JSON.stringify(body).length>2000)
+  return reply(400,'INVALID_BODY');
+ if(body.request_type!=='forgot_email')return reply(400,'UNSUPPORTED_REQUEST');
+ const contact=email(body.contact_email),possible=email(body.possible_email),
+  name=safeText(body.display_name,120),note=safeText(body.note,900);
+ if(!validEmail(contact)||(possible&&!validEmail(possible)))
+  return reply(400,'INVALID_CONTACT_EMAIL');
+ // Only the trusted Cloudflare-provided client address determines the source-IP quota.
+ // Empty/invalid IP shares a conservative "unknown" bucket; user headers cannot spoof it.
+ const ip=safeText(request.headers.get('CF-Connecting-IP')||'unknown',90);
+ const db=getDb(env||{});
+ if(!db)return reply(503,'ORIGINAL_D1_UNAVAILABLE');
+ try{
+  // One atomic D1 gate prevents concurrent requests from bypassing limits.
+  // No arbitrary submitted email is contacted, even when it looks registered.
+  const result=await db.prepare(`INSERT INTO auth_recovery_requests
+   (request_type,contact_email,possible_email,display_name,note,
+    ip_address,user_agent,status,created_at,updated_at)
+   SELECT 'forgot_email',?,?,?,?,?,?,'open',CURRENT_TIMESTAMP,CURRENT_TIMESTAMP
+   WHERE (SELECT COUNT(*) FROM auth_recovery_requests
+    WHERE contact_email=? AND created_at>=datetime('now','-1 hour'))<3
+   AND (SELECT COUNT(*) FROM auth_recovery_requests
+    WHERE COALESCE(ip_address,'')=? AND created_at>=datetime('now','-1 hour'))<6`)
+   .bind(contact,possible||null,name||null,note||null,ip,
+    safeText(request.headers.get('User-Agent'),160)||null,contact,ip).run();
+  // Rate-limited requests intentionally get the same generic public response.
+  if(Number(result?.meta?.changes)===0)return reply(202,'PRIVATE_REVIEW_INTAKE');
+  if(Number(result?.meta?.changes)!==1)return reply(503,'ORIGINAL_WRITE_UNCONFIRMED');
+  return reply(202,'PRIVATE_REVIEW_INTAKE');
+ }catch{return reply(503,'ORIGINAL_D1_WRITE_FAILED');}
 }
