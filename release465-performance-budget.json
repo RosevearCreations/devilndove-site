@@ -16,8 +16,8 @@
     "max_js_bytes": 600000,
     "max_css_bytes": 500000,
     "max_html_bytes": 500000,
-    "max_runtime_source_bytes": 19817000,
-    "max_runtime_source_files": 1863,
+    "max_runtime_source_bytes": 19833000,
+    "max_runtime_source_files": 1866,
     "max_inline_data_uri_bytes": 650000
   },
   "baseline_observed": {
@@ -33,6 +33,27 @@
     "production_mutation": false
   },
   "budget_reviews": [
+    {
+      "build": 738,
+      "date": "2026-11-18",
+      "scope": "Authenticated private forgot-account Admin queue and dedicated staff page, atomic bounded public intake, selected case read, manual audited D1 triage. No new database schema or customer credentials, real email, external receiver or privacy Worker action.",
+      "prior_limit_bytes": 19817000,
+      "new_limit_bytes": 19833000,
+      "delta_bytes": 16000,
+      "prior_file_limit": 1863,
+      "new_file_limit": 1866,
+      "delta_files": 3,
+      "measured_runtime_bytes": 19828353,
+      "measured_runtime_files": 1866,
+      "measured_system_gate_run": 44457133504,
+      "measured_overage_bytes": 11353,
+      "remaining_headroom_bytes": 4647,
+      "per_file_js_css_html_limits_unchanged": true,
+      "review_reason": "Original PR System Gate #44457133504 measured 19,828,353 source bytes/1,866 files against 19,817,000/1,863, over by 11,353 bytes and three intentional runtime files: protected account-help Admin API, staff UI HTML, staff JS. A narrow 16,000-byte/+3-file review leaves 4,647 bytes headroom; no new migration, binary assets, individual file cap or safety gate changes. No claim of inbox delivery, external Master acceptance, identity proof or automatic customer mail.",
+      "live_provider_acceptance_verified": false,
+      "external_master_signer_enrolled": false,
+      "automatic_email_sent": false
+    },
     {
       "build": "AIDP-423",
       "date": "2026-11-18",
