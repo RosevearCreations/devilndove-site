@@ -161,6 +161,7 @@ const IT_ADMIN_PAGES = Object.freeze([
   '/admin/safe-deploy-package',
   '/admin/startup-readiness',
   '/admin/users',
+  '/admin/account-help-review',
 ]);
 // Build 398
 const ETSY_OPERATOR_ADMIN_APIS = Object.freeze([

@@ -41,7 +41,12 @@ for token in ('consumeAbuseBudget','cloudflare_cache','fingerprint_exposed:false
     q(token in guard,f'Abuse guard missing {token}')
 q("scope:'login'" in login and 'limit:8' in login and 'windowSeconds:900' in login,'Login throttle contract missing')
 q("scope:'password_change'" in change and 'limit:6' in change and 'windowSeconds:900' in change,'Password-change throttle contract missing')
-q("contact_email=? AND created_at>=datetime('now','-1 hour')" in recovery and ">=3" in recovery and ">=6" in recovery,'Existing bounded account-recovery throttle must remain')
+# Build 738 upgrades the historical two-query throttle to a stronger single-write D1 ceiling.
+legacy=("contact_email=? AND created_at>=datetime('now','-1 hour')" in recovery and ">=3" in recovery and ">=6" in recovery)
+atomic=("INSERT INTO auth_recovery_requests" in recovery and "COUNT(*)" in recovery and
+        "contact_email=? AND created_at>=datetime('now','-1 hour')" in recovery and
+        "COALESCE(ip_address,'')=?" in recovery and "<3" in recovery and "<6" in recovery)
+q(legacy or atomic,'Existing bounded account-recovery throttle must remain; Build 738 atomic alternative accepted')
 q('current_session_preserved:true' in revoke and 'session_id<>?' in revoke,'Revoke-other-sessions must preserve current session')
 for token in ('expired_sessions','expiring_soon_sessions','stale_expired_sessions','other_active_sessions'):
     q(token in session,f'Session summary missing {token}')
