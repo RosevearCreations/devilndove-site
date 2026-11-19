@@ -66,4 +66,10 @@ const peerHtml=readFileSync(new URL('../admin/it-integrations/index.html',import
 const peerJs=readFileSync(new URL('../public/js/admin-production-variable-audit-v406.js',import.meta.url),'utf8');
 assert.ok(peerHtml.includes('peer739Refresh')&&peerHtml.includes('peer739Status'));
 assert.ok(peerJs.includes('review=peer739')&&peerJs.includes('peer739Status'));
+const securityHeaders=readFileSync(new URL('../_headers',import.meta.url),'utf8');
+for(const domain of ['https://www.youtube-nocookie.com','https://www.instagram.com','https://www.facebook.com'])
+ assert.ok(securityHeaders.includes(domain),'CSP must permit vetted video provider '+domain);
+assert.ok(securityHeaders.includes("frame-ancestors 'none'")&&
+ securityHeaders.includes("object-src 'none'"));
+assert.ok(!securityHeaders.includes("frame-src *")&&!securityHeaders.includes("frame-src https:"));
 console.log('BUILD739 PASS: three source-only Master HOLDs, verified Admin, no network/PII/secrets, gated supplier YouTube/Instagram/Facebook media');
