@@ -17,7 +17,7 @@
     "max_css_bytes": 500000,
     "max_html_bytes": 500000,
     "max_runtime_source_bytes": 19817000,
-    "max_runtime_source_files": 1861,
+    "max_runtime_source_files": 1863,
     "max_inline_data_uri_bytes": 650000
   },
   "baseline_observed": {
@@ -33,6 +33,23 @@
     "production_mutation": false
   },
   "budget_reviews": [
+    {
+      "build": "AIDP-423",
+      "date": "2026-11-18",
+      "scope": "Two protected read-only Sysop telemetry runtime files: one isolated Ed25519 aggregate source module and one exact internal GET route; no customer/business payloads, no D1/R2 mutation, no automatic action.",
+      "prior_file_limit": 1861,
+      "new_file_limit": 1863,
+      "delta_files": 2,
+      "runtime_bytes_limit_unchanged": 19817000,
+      "measured_runtime_bytes": 19815999,
+      "measured_runtime_files": 1863,
+      "measured_system_gate_run": 44435642219,
+      "remaining_byte_headroom": 1001,
+      "per_file_js_css_html_limits_unchanged": true,
+      "review_reason": "Exact PR System Gate measured 19,815,999 bytes and 1,863 runtime files. Total bytes remain within the existing 19,817,000-byte cap; only the two intentionally added protected telemetry runtime files exceed the previous 1,861-file ceiling. Narrow +2-file review preserves total-byte, per-file, inline-data, security, Development, Production and independent live-source gates. Telemetry remains read-only, aggregate-only and NOT_ENROLLED until independent signer/token/source-commit enrollment.",
+      "live_connected_claim": false,
+      "external_authority_granted": false
+    },
     {
       "build": 736,
       "date": "2026-11-18",

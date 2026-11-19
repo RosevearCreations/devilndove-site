@@ -1,0 +1,28 @@
+name: AIDP Build 423 Sysop Telemetry
+on:
+  pull_request:
+    branches: [dev, main]
+    paths:
+      - 'functions/api/_lib/sysopTelemetry423.mjs'
+      - 'functions/internal/rosevear/sysop/telemetry/v1.js'
+      - 'scripts/aidp_build423_sysop_telemetry.test.mjs'
+      - 'docs/operations/AIDP_BUILD423_SYSOP_TELEMETRY_HANDOFF.md'
+  push:
+    branches: [main]
+    paths:
+      - 'functions/api/_lib/sysopTelemetry423.mjs'
+      - 'functions/internal/rosevear/sysop/telemetry/v1.js'
+      - 'scripts/aidp_build423_sysop_telemetry.test.mjs'
+permissions:
+  contents: read
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+      - run: node --check functions/api/_lib/sysopTelemetry423.mjs
+      - run: node --check functions/internal/rosevear/sysop/telemetry/v1.js
+      - run: node --test scripts/aidp_build423_sysop_telemetry.test.mjs
