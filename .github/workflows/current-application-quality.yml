@@ -73,6 +73,13 @@ jobs:
           node --check public/js/admin-mobile-product-augment.js
           node --check public/js/admin-social-platform-preflight.js
           node scripts/build707_ninth_field_media_drift_custody_contract.mjs
+      - name: Build 738 original account-help intake, protected staff queue, audit and non-sending controls
+        run: |
+          python scripts/build738_account_help_sqlite_gate.py
+          node --check functions/api/auth/account-help-request.js
+          node --check functions/api/admin/account-help-review-738.js
+          node --check public/js/admin-account-help-review-738.js
+          node scripts/build738_account_help_contract.mjs
       - name: Build 737 original D1 mixed-IP concurrency, expiry, replay and malformed recovery security gate
         run: |
           python scripts/build737_recovery_threat_model_gate.py

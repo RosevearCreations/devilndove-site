@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex,nofollow"><title>Forgot Account Staff Review | Devil n Dove</title>
+<link rel="stylesheet" href="/css/styles.css"><link rel="stylesheet" href="/css/admin-convergence.css">
+</head><body data-admin-page="account-help-review" data-admin-module="it-platform">
+<div class="container admin-shell">
+<nav class="nav"><strong>Devil n Dove · I.T.</strong><div class="links"><a href="/admin/">Admin</a>
+<a href="/admin/it-platform/">I.T.</a><a href="/admin/it-integrations/">Integrations</a></div></nav>
+<header class="hero compact-hero"><h1>Forgot Account — Private Staff Review</h1>
+<p>Verified administrators may review submitted support requests. A request is not evidence that an account exists.
+This page cannot send mail, disclose passwords, identify an account automatically, or approve an alternate email.</p></header>
+<section class="card"><h2>Support queue</h2>
+<div class="dd-admin-responsive-actions" style="display:flex;gap:12px;flex-wrap:wrap;align-items:end">
+<label for="dd738Status">Status <select class="input" id="dd738Status">
+<option value="open">Open</option><option value="reviewed">Reviewed</option>
+<option value="closed">Closed</option><option value="resolved">Legacy resolved</option></select></label>
+<button class="btn" id="dd738Refresh" type="button">Refresh private queue</button></div>
+<p class="small" id="dd738Counts">No data loaded.</p>
+<div id="dd738List" role="list" style="display:grid;gap:8px"></div></section>
+<section class="card" style="margin-top:16px"><h2>Selected private case</h2>
+<p class="small">Only verified administrators can load the original submitted details. Never put passwords,
+ID documents, payment data or alternate email verification secrets into case notes.</p>
+<pre id="dd738Detail" style="white-space:pre-wrap;overflow-wrap:anywhere;max-width:100%">Select a case above.</pre>
+<label for="dd738Reason">Reason code (uppercase, no personal details)</label>
+<input class="input" id="dd738Reason" maxlength="40" placeholder="REVIEWED_SOURCE_DETAILS">
+<p><label><input type="checkbox" id="dd738Confirm"> I have reviewed this request and understand no identity or alternate email is verified by this action.</label></p>
+<div class="dd-admin-responsive-actions" style="display:flex;flex-wrap:wrap;gap:8px">
+<button class="btn primary" id="dd738MarkReviewed" disabled type="button">Mark reviewed</button>
+<button class="btn" id="dd738Close" disabled type="button">Close reviewed request</button></div>
+<p class="small" id="dd738Message" role="status" aria-live="polite">No request selected.</p></section>
+<p class="small">This Build 738 queue uses original D1 and append-only Admin audit records. Close means staff triage finished,
+not identity authentication or recovered access. Production customer email delivery and provider acceptance remain separate HOLD lanes.</p>
+</div><script src="/js/main.js"></script><script src="/public/js/auth.js"></script>
+<script src="/public/js/admin-account-help-review-738.js"></script>
+</body></html>
