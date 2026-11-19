@@ -73,6 +73,12 @@ jobs:
           node --check public/js/admin-mobile-product-augment.js
           node --check public/js/admin-social-platform-preflight.js
           node scripts/build707_ninth_field_media_drift_custody_contract.mjs
+      - name: Build 739 original three-Master HOLD evidence and safe supplier video cards
+        run: |
+          node --check functions/api/admin/privacy-readiness-734.js
+          node --check public/js/admin-production-variable-audit-v406.js
+          node --check public/js/admin-vendor-reviews.js
+          node scripts/build739_peer_supplier_video_contract.mjs
       - name: Build 738 original account-help intake, protected staff queue, audit and non-sending controls
         run: |
           python scripts/build738_account_help_sqlite_gate.py

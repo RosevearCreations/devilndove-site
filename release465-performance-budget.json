@@ -16,7 +16,7 @@
     "max_js_bytes": 600000,
     "max_css_bytes": 500000,
     "max_html_bytes": 500000,
-    "max_runtime_source_bytes": 19833000,
+    "max_runtime_source_bytes": 19841000,
     "max_runtime_source_files": 1866,
     "max_inline_data_uri_bytes": 650000
   },
@@ -33,6 +33,27 @@
     "production_mutation": false
   },
   "budget_reviews": [
+    {
+      "build": 739,
+      "date": "2026-11-19",
+      "scope": "Add bounded original three-Master read-only Admin source proof matrix to existing functions and IT screen; click-to-load allowlisted third-party review video previews in existing Tool/Supply Vendor Reviews; no new runtime file, D1 schema or provider activation.",
+      "prior_limit_bytes": 19833000,
+      "new_limit_bytes": 19841000,
+      "delta_bytes": 8000,
+      "prior_file_limit": 1866,
+      "new_file_limit": 1866,
+      "delta_files": 0,
+      "measured_runtime_bytes": 19835988,
+      "measured_runtime_files": 1866,
+      "measured_system_gate_run": 44565225257,
+      "remaining_headroom_bytes": 5012,
+      "per_file_js_css_html_limits_unchanged": true,
+      "review_reason": "Original Build739 PR System Gate #44565225257 measured 19,835,988 runtime bytes against the existing 19,833,000 budget (over by 2,988). Narrow +8,000 byte budget review to 19,841,000 permits two original existing runtime UIs and peer evidence logic while retaining 5,012 bytes headroom, unchanged 1,866-file count and all per-file limits. No new JavaScript resource, D1 schema or external service activation.",
+      "live_master_enrollment_verified": false,
+      "customer_data_processed_by_peer_review": false,
+      "third_party_video_autoload": false,
+      "paid_supplier_endorsement_claimed": false
+    },
     {
       "build": 738,
       "date": "2026-11-18",

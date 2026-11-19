@@ -930,7 +930,7 @@
       "reference_screen": "Unassigned / contextual module",
       "reason": "Not individually approved for a revamp; inspect actual signed-in UI and owner acceptance before changing.",
       "evidence": {
-        "byte_length": 75939,
+        "byte_length": 76608,
         "stylesheets": 5,
         "scripts": 42,
         "forms": 0,
@@ -2295,7 +2295,7 @@
       "reference_screen": "Unassigned / contextual module",
       "reason": "Not individually approved for a revamp; inspect actual signed-in UI and owner acceptance before changing.",
       "evidence": {
-        "byte_length": 7896,
+        "byte_length": 8685,
         "stylesheets": 2,
         "scripts": 7,
         "forms": 0,

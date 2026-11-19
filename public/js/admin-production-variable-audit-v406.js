@@ -743,3 +743,28 @@ document.addEventListener('DOMContentLoaded',()=>{
   await write($('recovery736Confirm'),{action:'confirm',pilot_id:pilotId,code});
  });
 });
+
+/* Build 739: manual read-only original three-Master enrollment status. */
+document.addEventListener('DOMContentLoaded',()=>{
+ const button=document.getElementById('peer739Refresh'),out=document.getElementById('peer739Status');
+ if(!button||!out)return;
+ button.addEventListener('click',async()=>{
+  button.disabled=true;out.textContent='Checking source-owned signed proof receipts…';
+  try{
+   const url='/api/admin/privacy-readiness-734?review=peer739';
+   const res=await(window.DDAuth?.apiFetch?
+    window.DDAuth.apiFetch(url,{cache:'no-store'}):fetch(url,{credentials:'same-origin',cache:'no-store'}));
+   const data=await res.json().catch(()=>null);
+   if(!res.ok||!data?.ok)throw Error('HOLD_VERIFIED_SOURCE_UNAVAILABLE');
+   out.textContent=JSON.stringify({status:data.status,
+    configured_peers:data.configured_peers,
+    current_local_signed_proofs:data.current_local_signed_proofs,
+    independent_three_master_receiver_ack_verified:data.independent_three_master_receiver_ack_verified,
+    cross_application_statistics_enabled:data.cross_application_statistics_enabled,
+    original_windows_host_reboot_event_verified:data.original_windows_host_reboot_event_verified,
+    peers:(data.peers||[]).map(p=>({peer:p.peer_app,state:p.state,proof_at:p.original_proof_at,
+     next_step:p.next_step,independent_owner_attested:p.independent_receiver_owner_attested}))},null,2);
+  }catch{out.textContent='HOLD — verified Admin and original D1 must be available. No source connection was made.';}
+  finally{button.disabled=false;}
+ });
+});
