@@ -1,8 +1,10 @@
 import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
 import {onRequestGet,onRequestPost} from '../functions/api/admin/account-help-review-738.js';
+import {moduleKeyForPath} from '../functions/api/_lib/appModuleRoutes.js';
 import {onRequestPost as publicPost} from '../functions/api/auth/account-help-request.js';
 const root='https://devilndove.com',adminUrl=root+'/api/admin/account-help-review-738';
+assert.equal(moduleKeyForPath('/api/admin/account-help-review-738'),'it-platform','Review API must receive verified Admin middleware access');
 const publicUrl=root+'/api/auth/account-help-request';
 const user={ddModuleAccess:{allowed:true,user:{user_id:7,role:'admin',is_active:1,email:'owner@example.invalid'}}};
 const headers={'Content-Type':'application/json',Origin:root,'Sec-Fetch-Site':'same-origin'};
