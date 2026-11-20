@@ -73,6 +73,12 @@ jobs:
           node --check public/js/admin-mobile-product-augment.js
           node --check public/js/admin-social-platform-preflight.js
           node scripts/build707_ninth_field_media_drift_custody_contract.mjs
+      - name: Build 740 owner-only non-sending activation ceremony and three-Master Worker fail-closed proof
+        run: |
+          node --check functions/api/admin/privacy-sender-ceremony-740.js
+          node --check public/js/admin-privacy-sender-740.js
+          node --check workers/privacy-automation-730.mjs
+          node scripts/build740_privacy_sender_ceremony_contract.mjs
       - name: Build 739 original three-Master HOLD evidence and safe supplier video cards
         run: |
           node --check functions/api/admin/privacy-readiness-734.js
