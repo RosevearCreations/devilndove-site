@@ -16,8 +16,8 @@
     "max_js_bytes": 600000,
     "max_css_bytes": 500000,
     "max_html_bytes": 500000,
-    "max_runtime_source_bytes": 19841000,
-    "max_runtime_source_files": 1866,
+    "max_runtime_source_bytes": 19849000,
+    "max_runtime_source_files": 1868,
     "max_inline_data_uri_bytes": 650000
   },
   "baseline_observed": {
@@ -33,6 +33,27 @@
     "production_mutation": false
   },
   "budget_reviews": [
+    {
+      "build": 740,
+      "date": "2026-11-19",
+      "scope": "One verified Admin-only non-sending original three-Master privacy activation ceremony endpoint plus small Admin UI script; hardened existing Worker to require a distinct owner-arm, restricted scope and all three original signed D1 source proof flags BEFORE any D1 mutation or HTTP. No schema, mail, key enrollment or sender activation.",
+      "prior_limit_bytes": 19841000,
+      "new_limit_bytes": 19849000,
+      "delta_bytes": 8000,
+      "prior_file_limit": 1866,
+      "new_file_limit": 1868,
+      "delta_files": 2,
+      "measured_runtime_bytes": 19845250,
+      "measured_runtime_files": 1868,
+      "measured_system_gate_run": 44650280746,
+      "measured_overage_bytes": 4250,
+      "measured_remaining_headroom_bytes": 3750,
+      "per_file_js_css_html_limits_unchanged": true,
+      "review_reason": "Failed exact PR System Gate #44650280746 measured 19,845,250 runtime bytes / 1,868 files vs cap 19,841,000 / 1,866. Only two new runtime source files (verified Admin privacy-sender ceremony API and manually used UI script), plus existing Worker and HTML edits. Narrow +8,000 byte / +2 file review retains original per-file size, inline data URI, source scanner, dev/main/production gates and privacy Worker OFF/cron proof. External recipient and independent owner approval remain HOLD.",
+      "actual_external_sender_enabled": false,
+      "original_owner_witness_signed": false,
+      "three_master_remote_receipts_verified": false
+    },
     {
       "build": 739,
       "date": "2026-11-19",

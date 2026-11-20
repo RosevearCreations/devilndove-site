@@ -2,18 +2,26 @@
 // No public POST trigger, no customer payload, no automatic purge or key replacement.
 import {peerConfig729,digest728,hmacScope728,verifyLiveWithdrawalAck728} from '../functions/api/_lib/appModuleRoutes.js';
 const known=Object.freeze(['ai-data-platform','rosevear-ai-hub','rosevear-comms-hub']);
+/* Build 740: this source release can NEVER arm the sender by itself.
+   The separate Worker operator boundary stays false in Production.
+   Config presence is not independent owner/receiver attestation. */
+const sourceArm740=env=>env?.DND740_OWNER_ACTIVATION_CONFIRMED==='true'&&
+ env?.DND740_APPROVED_SCOPE==='CONSENT_WITHDRAWAL_ONLY'&&
+ /^[0-9a-f]{64}$/.test(String(env?.DND740_INDEPENDENT_WITNESS_SHA256||''));
 const caps=Object.freeze({per_tick:3,attempts:6,lease_seconds:120,timeout_ms:7000});
 const nowSql="datetime('now')";
 async function proofCurrent(db,env,target){
  const cfg=peerConfig729(env,target);
  if(!cfg.ready)return null;
- const row=await db.prepare(`SELECT pinned_public_key_sha256,original_enrollment_receipt_sha256,created_at
+ const row=await db.prepare(`SELECT pinned_public_key_sha256,original_enrollment_receipt_sha256,
+  signature_verified,observed_live_response,created_at
   FROM dnd_peer_enrollment_proofs_729 WHERE peer_app=? ORDER BY created_at DESC LIMIT 1`)
   .bind(target).first();
  if(!row)return null;
  const pin=await digest728('pinned-key:'+cfg.public_key),receipt=await digest728('enrollment:'+cfg.receipt);
  const age=Date.now()-Date.parse(String(row.created_at).replace(' ','T')+'Z');
- if(pin!==row.pinned_public_key_sha256||receipt!==row.original_enrollment_receipt_sha256||
+ if(Number(row.signature_verified)!==1||Number(row.observed_live_response)!==1||
+    pin!==row.pinned_public_key_sha256||receipt!==row.original_enrollment_receipt_sha256||
     !Number.isFinite(age)||age<0||age>7*86400000)return null;
  return cfg;
 }
@@ -39,8 +47,18 @@ async function attemptDelivery(env,event,cfg){
 }
 export async function runPrivacyTick730(env){
  const db=env?.DB,serviceId=String(env?.DND730_SERVICE_ID||'');
- if(!db||env?.DND730_AUTOMATION_ENABLED!=='true'||!/^[A-Za-z0-9._:-]{12,80}$/.test(serviceId))
+ if(!db||env?.DND730_AUTOMATION_ENABLED!=='true'||!/^[A-Za-z0-9._:-]{12,80}$/.test(serviceId)||
+  !sourceArm740(env))
   return {status:'HOLD_DISABLED_OR_UNPROVISIONED',considered:0,signed:0};
+ // All three sources must have fresh, genuine signed proof records before any
+ // lease, retry-state write, or external call. Local proofs are still not a
+ // substitute for independent external owner acceptance.
+ try{
+  for(const target of known){
+   if(!await proofCurrent(db,env,target))
+    return {status:'HOLD_THREE_MASTER_SOURCE_PROOF_INCOMPLETE',considered:0,signed:0};
+  }
+ }catch{return {status:'HOLD_THREE_MASTER_SOURCE_PROOF_UNAVAILABLE',considered:0,signed:0};}
  const tickId=crypto.randomUUID();let considered=0,signed=0,held=0;
  // D1 0054 must have been applied via the verified Development-first migration gate.
  const initial=await db.prepare(`INSERT OR IGNORE INTO dnd_withdrawal_retry_state_730(event_id)

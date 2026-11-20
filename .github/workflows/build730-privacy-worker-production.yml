@@ -40,6 +40,9 @@ jobs:
           grep -q '^crons = \["\*/15 \* \* \* \*"\]$' wrangler.privacy730.toml
           node --check workers/privacy-automation-730.mjs
           node scripts/build730_worker_contract.mjs
+          test "$(grep -c 'DND740_OWNER_ACTIVATION_CONFIRMED = \"false\"' wrangler.privacy730.toml)" = 2
+          test "$(grep -c 'DND740_APPROVED_SCOPE = \"NONE\"' wrangler.privacy730.toml)" = 2
+          node scripts/build740_privacy_sender_ceremony_contract.mjs
       - name: Independently prove canonical Production D1 0054 before Worker deployment
         shell: bash
         run: |
