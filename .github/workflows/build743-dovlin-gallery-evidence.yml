@@ -1,0 +1,29 @@
+name: Build 743 Dovlin Gallery Fidelity and Material Evidence
+on:
+  pull_request:
+    paths:
+      - 'dovlin/**'
+      - 'scripts/verify_build742_dovlin.py'
+      - 'scripts/verify_build743_dovlin.py'
+      - '.github/workflows/build743-dovlin-gallery-evidence.yml'
+  push:
+    branches: [dev, main]
+    paths:
+      - 'dovlin/**'
+      - 'scripts/verify_build743_dovlin.py'
+      - '.github/workflows/build743-dovlin-gallery-evidence.yml'
+  workflow_dispatch:
+permissions: {contents: read}
+jobs:
+  source-gallery-evidence:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: '24'
+      - name: Reprove Build 742 owner-source inventory and concept-only statuses
+        run: python3 scripts/verify_build742_dovlin.py
+      - name: Independently pin every gallery image and forbid imaginary material or sale claims
+        run: python3 scripts/verify_build743_dovlin.py
