@@ -49,6 +49,16 @@ async function rateProof734(db,request,action,identity){
     action,identityHash,action,ipHash).run();
  return Number(result?.meta?.changes)===1;
 }
+const canonicalResetLink734=(request,token)=>{
+ const url=new URL(request.url);
+ const host=url.hostname.toLowerCase();
+ // An untrusted Host / vanity domain must never control a credential-recovery URL.
+ const authorizedHost=host==='devilndove.com'||host==='www.devilndove.com'||
+   host==='dev.devilndove-site.pages.dev'||/^[0-9a-f]{8}\.devilndove-site\.pages\.dev$/.test(host);
+ if(url.protocol!=='https:'||!authorizedHost)return '';
+ const target=new URL('/account-help/index.html?mode=reset',url.origin);
+ return target.href+'#token='+token;
+};
 async function requestRecovery734(db,env,request,body){
  const action=body.action;
  const address=email(body.email);
@@ -73,7 +83,11 @@ async function requestRecovery734(db,env,request,body){
     VALUES(?,?,?,datetime('now','+30 minutes'))`)
    .bind(id,Number(user.user_id),digest).run();
   // Fragment-only bearer never enters web server URL logs/referrers and is never stored in plaintext D1.
-  const link='https://devilndove.com/account-help/index.html?mode=reset#token='+raw;
+  const link=canonicalResetLink734(request,raw);
+  if(!link){
+   await db.prepare(`UPDATE dnd_password_reset_tokens_734 SET consumed_at=CURRENT_TIMESTAMP,claim_id=? WHERE reset_id=? AND consumed_at IS NULL`).bind(crypto.randomUUID(),id).run();
+   return generic;
+  }
   const html='<p>To reset your Devil n Dove password, open this single-use link within 30 minutes:</p>'+
    '<p><a href="'+link+'">Reset password</a></p>'+
    '<p>If you did not request this, you can ignore this email. Do not share this link.</p>';

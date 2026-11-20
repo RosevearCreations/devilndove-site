@@ -1,0 +1,19 @@
+name: Build 742 Dovlin original-asset source acceptance
+on:
+  pull_request:
+    paths:
+      - 'dovlin/**'
+      - 'index.html'
+      - 'sitemap.xml'
+      - 'scripts/verify_build742_dovlin.py'
+      - '.github/workflows/build742-dovlin-source-acceptance.yml'
+  workflow_dispatch:
+jobs:
+  approved-concept-source:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - name: Verify exact approved-story provenance and concept-only asset boundaries
+        run: python3 scripts/verify_build742_dovlin.py

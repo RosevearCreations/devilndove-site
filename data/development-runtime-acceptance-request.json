@@ -1,9 +1,9 @@
 {
   "authority_release": 467,
-  "authority_build": 2,
+  "authority_build": 742,
   "application_release": 466,
-  "expected_parent_sha": "8606a836e2a59ffccde2e83ac3bf1df5a8beb910",
-  "purpose": "final_authenticated_it_admin_runtime_boundary_acceptance",
+  "expected_parent_sha": "408773469c5bc9f9514dc58fa59f12d64bf7ba4e",
+  "purpose": "build742_dovlin_original_source_authenticated_read_only_development_acceptance",
   "d1_mutation": false,
   "r2_mutation": false,
   "provider_execution": false,

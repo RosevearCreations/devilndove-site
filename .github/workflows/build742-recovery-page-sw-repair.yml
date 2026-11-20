@@ -1,0 +1,59 @@
+name: Build 742 Development Recovery Page ServiceWorker Repair
+on:
+  pull_request:
+    paths:
+      - account-help/index.html
+      - sw.js
+      - scripts/build742_recovery_page_asset_gate.py
+      - scripts/build742_recovery_firefox_browser_qa.mjs
+      - .github/workflows/build742-recovery-page-sw-repair.yml
+  push:
+    branches: [dev, main]
+    paths:
+      - account-help/index.html
+      - sw.js
+      - scripts/build742_recovery_page_asset_gate.py
+      - scripts/build742_recovery_firefox_browser_qa.mjs
+      - .github/workflows/build742-recovery-page-sw-repair.yml
+permissions:
+  contents: read
+jobs:
+  recovery-page-no-missing-script:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
+        with:
+          python-version: '3.12'
+      - name: Prove all local recovery scripts exist and critical cache bypass
+        run: python scripts/build742_recovery_page_asset_gate.py
+      - name: Reprove Dev-password recovery endpoint remains environment isolated
+        run: |
+          node --check public/js/account-help.js
+          node --check sw.js
+          node scripts/build742_recovery_origin_environment_contract.mjs
+  firefox-recovery-ui:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: '24'
+      - name: Install Firefox test browser
+        run: |
+          npm init -y >/dev/null
+          npm install --no-save --package-lock=false playwright@1.56.1
+          npx playwright install --with-deps firefox
+      - name: Serve source-only recovery page
+        run: |
+          python3 -m http.server 18746 --bind 127.0.0.1 >/tmp/recovery-browser-source.log 2>&1 &
+          for i in 1 2 3 4 5; do
+            if curl -fsS http://127.0.0.1:18746/account-help/ >/dev/null; then exit 0; fi
+            sleep 1
+          done
+          cat /tmp/recovery-browser-source.log
+          exit 1
+      - name: Verify Firefox reset form has no missing scripts (mocked POST)
+        run: node scripts/build742_recovery_firefox_browser_qa.mjs
