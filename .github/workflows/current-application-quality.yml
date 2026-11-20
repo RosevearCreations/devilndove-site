@@ -73,6 +73,18 @@ jobs:
           node --check public/js/admin-mobile-product-augment.js
           node --check public/js/admin-social-platform-preflight.js
           node scripts/build707_ninth_field_media_drift_custody_contract.mjs
+      - name: Build 742 owner-approved Dovlin collection, 48 source assets and no fabricated commerce
+        run: |
+          python scripts/build742_dovlin_collection_contract.py
+          node --check dovlin/app.js
+          python - <<'PY'
+          import json,pathlib
+          base=pathlib.Path('dovlin')
+          seed=json.loads((base/'data/collection_seed.json').read_text())
+          assert seed['featured_plush'][0]['name']=='Original Crimson'
+          assert (base/'collector-passport-concept.pdf').read_bytes()[:4]==b'%PDF'
+          print('Build742 official source, concept passport and client code: PASS')
+          PY
       - name: Build 741 canonical D1 original Admin/Worker signed ACK, dead-letter and no-send operations
         run: |
           python scripts/build741_signed_withdrawal_sqlite_gate.py
