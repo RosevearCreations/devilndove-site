@@ -1,2 +1,9 @@
 # Cloudflare D1 remote migration parser is sensitive to CRLF in trigger migrations.
 migrations/canonical/*.sql text eol=lf
+
+# Build 742 source-owned imagery and collector print master are binary; never whitespace-normalize originals.
+dovlin/assets/*.webp binary
+dovlin/thumbs/*.webp binary
+dovlin/*.pdf binary
+# Preserve the source manifest CSV byte-for-byte, including the original input whitespace.
+dovlin/data/asset_manifest.csv -whitespace
