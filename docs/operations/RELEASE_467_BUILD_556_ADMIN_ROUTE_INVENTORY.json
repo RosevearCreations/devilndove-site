@@ -930,9 +930,9 @@
       "reference_screen": "Unassigned / contextual module",
       "reason": "Not individually approved for a revamp; inspect actual signed-in UI and owner acceptance before changing.",
       "evidence": {
-        "byte_length": 76608,
+        "byte_length": 78020,
         "stylesheets": 5,
-        "scripts": 42,
+        "scripts": 43,
         "forms": 0,
         "has_viewport": true
       },
