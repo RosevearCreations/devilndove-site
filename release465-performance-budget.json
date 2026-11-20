@@ -16,8 +16,8 @@
     "max_js_bytes": 600000,
     "max_css_bytes": 500000,
     "max_html_bytes": 500000,
-    "max_runtime_source_bytes": 19849000,
-    "max_runtime_source_files": 1868,
+    "max_runtime_source_bytes": 19857000,
+    "max_runtime_source_files": 1869,
     "max_inline_data_uri_bytes": 650000
   },
   "baseline_observed": {
@@ -33,6 +33,28 @@
     "production_mutation": false
   },
   "budget_reviews": [
+    {
+      "build": 741,
+      "date": "2026-11-19",
+      "scope": "One verified Admin-only read-only original D1 signed withdrawal retry/dead-letter operations API; reused existing I.T. HTML and JS for manual source queue readback, hardened existing two-Admin requeue API, canonical forward-only 0058 triggers, and original protected deployment preflight list. No external messages, producer authority or Worker activation.",
+      "prior_limit_bytes": 19849000,
+      "new_limit_bytes": 19857000,
+      "delta_bytes": 8000,
+      "prior_file_limit": 1868,
+      "new_file_limit": 1869,
+      "delta_files": 1,
+      "measured_runtime_bytes": 19854170,
+      "measured_runtime_files": 1869,
+      "measured_system_gate_run": 44670436416,
+      "measured_overage_bytes": 5170,
+      "measured_remaining_headroom_bytes": 2830,
+      "per_file_js_css_html_limits_unchanged": true,
+      "review_reason": "Exact PR System Gate #44670436416 measured 19,854,170 runtime bytes/1,869 files, over prior 19,849,000/1,868 by 5,170 bytes and one original authenticated source-read-only Admin API. Minimal +8,000 bytes and +1 file keeps per-file JS/CSS/HTML limits, inline-data scanner, original D1 migration approval and protected Preview/Production proof gates unchanged. Neither API nor Worker dispatches external data or certifies remote erasure.",
+      "original_admin_or_worker_ack_requeue_guard": true,
+      "live_customer_data_sent": false,
+      "remote_master_ack_certified": false,
+      "worker_sender_enabled": false
+    },
     {
       "build": 740,
       "date": "2026-11-19",

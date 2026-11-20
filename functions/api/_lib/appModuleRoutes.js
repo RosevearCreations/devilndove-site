@@ -254,6 +254,7 @@ const FINANCIAL_ADMIN_APIS = Object.freeze([
   '/api/payment-providers',
 ]);
 const IT_ADMIN_APIS = Object.freeze([
+  '/api/admin/privacy-retry-audit-741',
   '/api/admin/privacy-sender-ceremony-740',
   '/api/admin/account-help-review-738',
   '/api/admin/module-acceptance-656',

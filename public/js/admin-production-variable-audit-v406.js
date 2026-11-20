@@ -768,3 +768,28 @@ document.addEventListener('DOMContentLoaded',()=>{
   finally{button.disabled=false;}
  });
 });
+
+/* Build 741: user-triggered original D1 withdrawal, signed receipt and dead-letter readback. */
+document.addEventListener('DOMContentLoaded',()=>{
+ const button=document.getElementById('privacy741Refresh'),out=document.getElementById('privacy741Results');
+ if(!button||!out)return;
+ button.addEventListener('click',async()=>{
+  button.disabled=true;out.textContent='Reading original D1 event and ACK source counts…';
+  try{
+   const url='/api/admin/privacy-retry-audit-741';
+   const res=await (window.DDAuth?.apiFetch?
+    window.DDAuth.apiFetch(url,{method:'GET',cache:'no-store'}):
+    fetch(url,{method:'GET',credentials:'same-origin',cache:'no-store'}));
+   const d=await res.json().catch(()=>null);
+   if(!res.ok||!d?.ok||d.build!==741)throw Error('Source readback unavailable');
+   out.textContent=JSON.stringify({source:d.code,master_matrix:d.peers,
+    latest_scheduler_source:d.source_schedule_receipt,
+    bounded_dead_letter_cases:d.cases,
+    signed_ack_status:d.signed_ack_status,
+    remote_data_removed_verified:d.external_erasure_proven,
+    sender_enabled_by_this_route:d.worker_enabled_by_this_route,
+    next:'Use the existing two-distinct-Admin review only after checking case evidence.'},null,2);
+  }catch{out.textContent='HOLD — authentic private D1 evidence unavailable. No retry or send was performed.';}
+  finally{button.disabled=false;}
+ });
+});

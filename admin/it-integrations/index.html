@@ -392,6 +392,12 @@
 <section class="card" id="privacyOperations730" style="margin-top:18px">
 <h2>Build 730 — Privacy Automation &amp; Dead-Letter Operations</h2>
 <p class="small">Status is based on original D1 receipts, never source configuration alone. No automatic client polling, external deletion, encryption-key changes or unverified ACK claims.</p>
+<div class="card" id="privacy741Audit" style="margin:12px 0;padding:12px" aria-labelledby="privacy741Title">
+<h3 id="privacy741Title">Build 741 — Signed withdrawal retry and dead-letter register</h3>
+<p class="small">Read-only original D1 counts by Master and up to 25 actionable event UUIDs. See separate manual/Worker ACKs, double-receipt conflicts, expired leases, due retries, and independent SLA decisions. This panel does not verify remote erasure, send messages, or override the two-Admin approval workflow.</p>
+<button class="btn" type="button" id="privacy741Refresh">Read original withdrawal operations</button>
+<pre id="privacy741Results" role="status" aria-live="polite" style="white-space:pre-wrap;overflow-wrap:anywhere;max-height:400px;overflow:auto">Not checked. Worker remains disabled.</pre>
+</div>
 <button id="privacy730Refresh" type="button" class="btn">Read privacy automation status and alerts</button>
 <button id="privacy731Refresh" type="button" class="btn secondary">Review Build 731 health, SLA &amp; rotation evidence</button>
 <button id="privacy732Refresh" type="button" class="btn secondary">Review Build 732 escalations and custody holds</button>

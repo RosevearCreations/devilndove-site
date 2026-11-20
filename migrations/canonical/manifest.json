@@ -412,6 +412,13 @@
       "release": 467,
       "description": "Immutable Admin-only original D1 hashed one-time owner inbox code, provider API acceptance receipt and separate actual consenting inbox-code confirmation, with limited attempts and no customer sends.",
       "recovery": "Retain original pilot history and no plaintext codes, mail IDs, keys or addresses. Fail closed on missing verified provider or owner confirmation. Forward-only repair only; never auto-email customers or activate privacy Master Worker."
+    },
+    {
+      "version": 58,
+      "file": "0058_release467_signed_withdrawal_retry_ack_guard.sql",
+      "release": 467,
+      "description": "Build 741 forward-only original D1 trigger guards prohibit dead-letter requeue approvals or retry-state transitions whenever either original Admin or signed Worker ACK exists, requiring a current dead-letter state and consent withdrawal.",
+      "recovery": "Preserve the immutable signed ACK and dead-letter approvals. Keep the sender disabled; on a proof or constraint failure, stop requeues and remediate only with a separately reviewed forward migration; never delete original receipts or infer remote erasure."
     }
   ]
 }

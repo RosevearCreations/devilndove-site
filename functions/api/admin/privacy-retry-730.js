@@ -21,14 +21,16 @@ export async function onRequestPost(c){
   return result(400,'HOLD_ACTION_NOT_ALLOWED');
  try{
   const current=await db.prepare(`SELECT s.state,s.retry_cycle,s.attempt_count,w.event_id,
-   m.consent_status,(SELECT COUNT(*) FROM dnd_withdrawal_acks_728 a WHERE a.event_id=w.event_id) AS ack_count
+   m.consent_status,
+   (SELECT COUNT(*) FROM dnd_withdrawal_acks_728 a WHERE a.event_id=w.event_id) AS admin_ack_count,
+   (SELECT COUNT(*) FROM dnd_withdrawal_auto_acks_730 a WHERE a.event_id=w.event_id) AS worker_ack_count
    FROM dnd_withdrawal_outbox_728 w
    JOIN dnd_withdrawal_retry_state_730 s ON s.event_id=w.event_id
    JOIN media_consent_records m ON m.consent_record_id=w.consent_record_id
    WHERE w.event_id=?`).bind(id).first();
   if(!current||current.state!=='DEAD_LETTER'||Number(current.attempt_count)!==6||
    !['revoked','blocked'].includes(String(current.consent_status||'').toLowerCase())||
-   Number(current.ack_count)!==0)
+   Number(current.admin_ack_count)!==0||Number(current.worker_ack_count)!==0)
    return result(409,'HOLD_ORIGINAL_DEAD_LETTER_AND_WITHDRAWAL_REQUIRED');
   const cycle=Number(current.retry_cycle)+1;
   if(cycle>99)return result(409,'HOLD_MAX_RECOVERY_CYCLES');
@@ -61,13 +63,15 @@ export async function onRequestPost(c){
      state='READY',retry_cycle=?,attempt_count=0,retry_after=datetime('now','+5 minutes'),
      lease_token=NULL,lease_expires_at=NULL,updated_at=CURRENT_TIMESTAMP
      WHERE event_id=? AND state='DEAD_LETTER' AND retry_cycle=? AND attempt_count=6
-     AND NOT EXISTS (SELECT 1 FROM dnd_withdrawal_acks_728 a WHERE a.event_id=?)`)
-    .bind(cycle,id,cycle-1,id)
+     AND NOT EXISTS (SELECT 1 FROM dnd_withdrawal_acks_728 a WHERE a.event_id=?)
+     AND NOT EXISTS (SELECT 1 FROM dnd_withdrawal_auto_acks_730 a WHERE a.event_id=?)`)
+    .bind(cycle,id,cycle-1,id,id)
   ]);
   const after=await db.prepare('SELECT state,retry_cycle FROM dnd_withdrawal_retry_state_730 WHERE event_id=?')
    .bind(id).first();
   if(after?.state!=='READY'||Number(after.retry_cycle)!==cycle)
    return result(409,'HOLD_RECOVERY_READBACK');
-  return result(200,'TWO_ADMIN_RECOVERY_REQUEUED_NO_SEND',{event_id:id,target_cycle:cycle,approval_id:approvalId});
+  return result(200,'TWO_ADMIN_RECOVERY_REQUEUED_NO_SEND',{event_id:id,target_cycle:cycle,approval_id:approvalId,
+   signed_admin_ack_observed:false,signed_worker_ack_observed:false,external_compliance_verified:false});
  }catch{return result(409,'HOLD_SCHEMA_APPROVAL_OR_CONCURRENT_RECOVERY_FAILURE');}
 }
