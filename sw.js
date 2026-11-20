@@ -22,7 +22,7 @@ const CORE_ASSETS = [
   '/workshop-journal/'
 ];
 const NO_CACHE_PATH_PREFIXES = ['/admin/', '/members/', '/login/', '/register/', '/account-help/', '/api/'];
-const AUTH_CRITICAL_ASSETS = new Set(['/public/js/auth.js','/public/js/login.js','/public/js/site-auth-ui.js','/auth.js']);
+const AUTH_CRITICAL_ASSETS = new Set(['/public/js/auth.js','/public/js/login.js','/public/js/site-auth-ui.js','/public/js/account-help.js','/auth.js']);
 function shouldBypassCache(url){return url.pathname.startsWith('/media/')||AUTH_CRITICAL_ASSETS.has(url.pathname)||NO_CACHE_PATH_PREFIXES.some((prefix)=>url.pathname.startsWith(prefix));}
 // Retained offline authority shape for source compatibility. Direct server-authority routes
 // are intentionally not intercepted below, so this response is not used for Admin/API traffic.
