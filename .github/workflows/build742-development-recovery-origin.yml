@@ -1,0 +1,32 @@
+name: Build 742 Development Account Recovery Origin Isolation
+on:
+  pull_request:
+    paths:
+      - 'functions/api/auth/recovery-734.js'
+      - 'scripts/build742_recovery_origin_environment_contract.mjs'
+      - '.github/workflows/build742-development-recovery-origin.yml'
+  push:
+    branches: [dev, main]
+    paths:
+      - 'functions/api/auth/recovery-734.js'
+      - 'scripts/build742_recovery_origin_environment_contract.mjs'
+      - '.github/workflows/build742-development-recovery-origin.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  account-recovery-origin-isolation:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: '24'
+      - name: Run exact Dev/Production reset-link host isolation without sending mail
+        run: |
+          node --check functions/api/auth/recovery-734.js
+          node scripts/build742_recovery_origin_environment_contract.mjs
+          node scripts/build734_account_and_receiver_contract.mjs
+          node scripts/build737_recovery_endpoint_contract.mjs
+          python3 scripts/build737_recovery_threat_model_gate.py
