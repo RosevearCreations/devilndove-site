@@ -1,0 +1,66 @@
+name: Build 743 Dovlin Gallery Fidelity and Material Evidence
+on:
+  pull_request:
+    paths:
+      - 'dovlin/**'
+      - 'scripts/verify_build742_dovlin.py'
+      - 'scripts/verify_build743_dovlin.py'
+      - 'scripts/dovlin_build743_browser_qa.mjs'
+      - '.github/workflows/build743-dovlin-gallery-evidence.yml'
+  push:
+    branches: [dev, main]
+    paths:
+      - 'dovlin/**'
+      - 'scripts/verify_build743_dovlin.py'
+      - '.github/workflows/build743-dovlin-gallery-evidence.yml'
+  workflow_dispatch:
+permissions: {contents: read}
+jobs:
+  source-gallery-evidence:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: '24'
+      - name: Reprove Build 742 owner-source inventory and concept-only statuses
+        run: python3 scripts/verify_build742_dovlin.py
+      - name: Independently pin every gallery image and forbid imaginary material or sale claims
+        run: python3 scripts/verify_build743_dovlin.py
+
+  chromium-concept-gallery:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: '24'
+      - name: Install pinned Chromium browser acceptance tooling
+        run: |
+          npm init -y >/dev/null
+          npm install --no-save --package-lock=false playwright@1.56.1
+          npx playwright install --with-deps chromium
+      - name: Serve exact source tree without mutating any business backend
+        run: |
+          python3 -m http.server 18743 --bind 127.0.0.1 >/tmp/dovlin-build743-http.log 2>&1 &
+          for i in 1 2 3 4 5; do
+            if curl -fsS http://127.0.0.1:18743/dovlin/ >/dev/null; then exit 0; fi
+            sleep 1
+          done
+          cat /tmp/dovlin-build743-http.log
+          exit 1
+      - name: Test actual desktop and mobile Chromium on collection and evidence gallery
+        run: node scripts/dovlin_build743_browser_qa.mjs
+        env:
+          DOVLIN_BASE: http://127.0.0.1:18743
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: build743-dovlin-chromium-source-screenshots
+          path: /tmp/dovlin-browser-*.png
+          retention-days: 7
+          if-no-files-found: ignore
