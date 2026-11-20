@@ -36,7 +36,184 @@ jobs:
           test "$(git rev-parse HEAD)" = "${SOURCE_SHA}"
           test -f migrations/canonical/0054_release467_withdrawal_retry_custody.sql
           test -f workers/privacy-automation-730.mjs
-          grep -q '^DND730_AUTOMATION_ENABLED = "false"$' wrangler.privacy730.toml
+          grep -q '^DND730_AUTOMATION_ENABLED = "false"
+          grep -q '^crons = \["\*/15 \* \* \* \*"\]$' wrangler.privacy730.toml
+          node --check workers/privacy-automation-730.mjs
+          node scripts/build730_worker_contract.mjs
+      - name: Independently prove canonical Production D1 0054 before Worker deployment
+        shell: bash
+        run: |
+          set -euo pipefail
+          npx --yes wrangler@4.128.0 d1 execute devilndove-prod-r462 --remote --config wrangler.privacy730.toml --env production --json --command "SELECT (SELECT COUNT(*) FROM d1_migrations WHERE name='0054_release467_withdrawal_retry_custody.sql') AS migration54, (SELECT COUNT(*) FROM app_schema_migration_proofs WHERE migration_name='0054_release467_withdrawal_retry_custody.sql' AND environment='production') AS proof54, (SELECT COUNT(*) FROM sqlite_master WHERE type='table' AND name IN ('dnd_withdrawal_retry_state_730','dnd_withdrawal_attempts_730','dnd_dead_letter_recovery_730','dnd_withdrawal_auto_acks_730','dnd_privacy_schedule_receipts_730')) AS tables730;" > /tmp/build730-worker-prod-d1.json
+          python - <<'PY'
+          import json
+          data=json.load(open('/tmp/build730-worker-prod-d1.json'));rows=[]
+          def walk(v):
+              if isinstance(v,dict):
+                  if all(k in v for k in ('migration54','proof54','tables730')):rows.append(v)
+                  for x in v.values():walk(x)
+              elif isinstance(v,list):
+                  for x in v:walk(x)
+          walk(data);assert len(rows)==1,data
+          x=rows[0];assert int(x['migration54'])==int(x['proof54'])==1,x
+          assert int(x['tables730'])==5,x
+          print('Build730 original Production D1 0054 verified: PASS')
+          PY
+      - name: Deploy disabled default scheduled Cloudflare Worker
+        shell: bash
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_WORKERS_API_TOKEN }}
+        run: |
+          set -euo pipefail
+          if [[ -z "${CLOUDFLARE_API_TOKEN}" ]]; then
+            echo 'HOLD_CLOUDFLARE_WORKERS_API_TOKEN_NOT_PROVISIONED — owner action #951 required'
+            exit 1
+          fi
+          npx --yes wrangler@4.128.0 deploy --config wrangler.privacy730.toml --env production
+      - name: Independently read back original Worker script and cron registration
+        shell: bash
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_WORKERS_API_TOKEN }}
+        run: |
+          set -euo pipefail
+          BASE="https://api.cloudflare.com/client/v4/accounts/${CLOUDFLARE_ACCOUNT_ID}/workers/scripts/${WORKER_NAME}"
+          curl --fail --silent --show-error -H "Authorization: Bearer ${CLOUDFLARE_API_TOKEN}" "${BASE}" >/dev/null
+          curl --fail --silent --show-error -H "Authorization: Bearer ${CLOUDFLARE_API_TOKEN}" "${BASE}/schedules" > /tmp/build730-worker-cron.json
+          python - <<'PY'
+          import json
+          data=json.load(open('/tmp/build730-worker-cron.json'))
+          assert isinstance(data,dict) and data.get('success') is True,'Cloudflare schedules API did not succeed'
+          result=data.get('result')
+          if isinstance(result,dict):
+              result=result.get('schedules',result.get('triggers',result.get('cron')))
+          if isinstance(result,str):
+              result=[result]
+          assert isinstance(result,list),'Unknown Cloudflare schedules API result schema'
+          crons=[entry if isinstance(entry,str) else entry.get('cron') if isinstance(entry,dict) else None for entry in result]
+          assert '*/15 * * * *' in crons,'Original 15-minute cron not found in Cloudflare readback'
+          print('Build730 original Cloudflare Worker script and 15-minute cron readback: PASS')
+          print('Delivery activation remains OFF until original keys/receivers are independently enrolled.')
+          PY
+ wrangler.privacy730.toml
+          test "$(grep -c '^DND740_OWNER_ACTIVATION_CONFIRMED = "false"
+          grep -q '^crons = \["\*/15 \* \* \* \*"\]$' wrangler.privacy730.toml
+          node --check workers/privacy-automation-730.mjs
+          node scripts/build730_worker_contract.mjs
+      - name: Independently prove canonical Production D1 0054 before Worker deployment
+        shell: bash
+        run: |
+          set -euo pipefail
+          npx --yes wrangler@4.128.0 d1 execute devilndove-prod-r462 --remote --config wrangler.privacy730.toml --env production --json --command "SELECT (SELECT COUNT(*) FROM d1_migrations WHERE name='0054_release467_withdrawal_retry_custody.sql') AS migration54, (SELECT COUNT(*) FROM app_schema_migration_proofs WHERE migration_name='0054_release467_withdrawal_retry_custody.sql' AND environment='production') AS proof54, (SELECT COUNT(*) FROM sqlite_master WHERE type='table' AND name IN ('dnd_withdrawal_retry_state_730','dnd_withdrawal_attempts_730','dnd_dead_letter_recovery_730','dnd_withdrawal_auto_acks_730','dnd_privacy_schedule_receipts_730')) AS tables730;" > /tmp/build730-worker-prod-d1.json
+          python - <<'PY'
+          import json
+          data=json.load(open('/tmp/build730-worker-prod-d1.json'));rows=[]
+          def walk(v):
+              if isinstance(v,dict):
+                  if all(k in v for k in ('migration54','proof54','tables730')):rows.append(v)
+                  for x in v.values():walk(x)
+              elif isinstance(v,list):
+                  for x in v:walk(x)
+          walk(data);assert len(rows)==1,data
+          x=rows[0];assert int(x['migration54'])==int(x['proof54'])==1,x
+          assert int(x['tables730'])==5,x
+          print('Build730 original Production D1 0054 verified: PASS')
+          PY
+      - name: Deploy disabled default scheduled Cloudflare Worker
+        shell: bash
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_WORKERS_API_TOKEN }}
+        run: |
+          set -euo pipefail
+          if [[ -z "${CLOUDFLARE_API_TOKEN}" ]]; then
+            echo 'HOLD_CLOUDFLARE_WORKERS_API_TOKEN_NOT_PROVISIONED — owner action #951 required'
+            exit 1
+          fi
+          npx --yes wrangler@4.128.0 deploy --config wrangler.privacy730.toml --env production
+      - name: Independently read back original Worker script and cron registration
+        shell: bash
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_WORKERS_API_TOKEN }}
+        run: |
+          set -euo pipefail
+          BASE="https://api.cloudflare.com/client/v4/accounts/${CLOUDFLARE_ACCOUNT_ID}/workers/scripts/${WORKER_NAME}"
+          curl --fail --silent --show-error -H "Authorization: Bearer ${CLOUDFLARE_API_TOKEN}" "${BASE}" >/dev/null
+          curl --fail --silent --show-error -H "Authorization: Bearer ${CLOUDFLARE_API_TOKEN}" "${BASE}/schedules" > /tmp/build730-worker-cron.json
+          python - <<'PY'
+          import json
+          data=json.load(open('/tmp/build730-worker-cron.json'))
+          assert isinstance(data,dict) and data.get('success') is True,'Cloudflare schedules API did not succeed'
+          result=data.get('result')
+          if isinstance(result,dict):
+              result=result.get('schedules',result.get('triggers',result.get('cron')))
+          if isinstance(result,str):
+              result=[result]
+          assert isinstance(result,list),'Unknown Cloudflare schedules API result schema'
+          crons=[entry if isinstance(entry,str) else entry.get('cron') if isinstance(entry,dict) else None for entry in result]
+          assert '*/15 * * * *' in crons,'Original 15-minute cron not found in Cloudflare readback'
+          print('Build730 original Cloudflare Worker script and 15-minute cron readback: PASS')
+          print('Delivery activation remains OFF until original keys/receivers are independently enrolled.')
+          PY
+ wrangler.privacy730.toml)" = 2
+          test "$(grep -c '^DND740_APPROVED_SCOPE = "NONE"
+          grep -q '^crons = \["\*/15 \* \* \* \*"\]$' wrangler.privacy730.toml
+          node --check workers/privacy-automation-730.mjs
+          node scripts/build730_worker_contract.mjs
+      - name: Independently prove canonical Production D1 0054 before Worker deployment
+        shell: bash
+        run: |
+          set -euo pipefail
+          npx --yes wrangler@4.128.0 d1 execute devilndove-prod-r462 --remote --config wrangler.privacy730.toml --env production --json --command "SELECT (SELECT COUNT(*) FROM d1_migrations WHERE name='0054_release467_withdrawal_retry_custody.sql') AS migration54, (SELECT COUNT(*) FROM app_schema_migration_proofs WHERE migration_name='0054_release467_withdrawal_retry_custody.sql' AND environment='production') AS proof54, (SELECT COUNT(*) FROM sqlite_master WHERE type='table' AND name IN ('dnd_withdrawal_retry_state_730','dnd_withdrawal_attempts_730','dnd_dead_letter_recovery_730','dnd_withdrawal_auto_acks_730','dnd_privacy_schedule_receipts_730')) AS tables730;" > /tmp/build730-worker-prod-d1.json
+          python - <<'PY'
+          import json
+          data=json.load(open('/tmp/build730-worker-prod-d1.json'));rows=[]
+          def walk(v):
+              if isinstance(v,dict):
+                  if all(k in v for k in ('migration54','proof54','tables730')):rows.append(v)
+                  for x in v.values():walk(x)
+              elif isinstance(v,list):
+                  for x in v:walk(x)
+          walk(data);assert len(rows)==1,data
+          x=rows[0];assert int(x['migration54'])==int(x['proof54'])==1,x
+          assert int(x['tables730'])==5,x
+          print('Build730 original Production D1 0054 verified: PASS')
+          PY
+      - name: Deploy disabled default scheduled Cloudflare Worker
+        shell: bash
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_WORKERS_API_TOKEN }}
+        run: |
+          set -euo pipefail
+          if [[ -z "${CLOUDFLARE_API_TOKEN}" ]]; then
+            echo 'HOLD_CLOUDFLARE_WORKERS_API_TOKEN_NOT_PROVISIONED — owner action #951 required'
+            exit 1
+          fi
+          npx --yes wrangler@4.128.0 deploy --config wrangler.privacy730.toml --env production
+      - name: Independently read back original Worker script and cron registration
+        shell: bash
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_WORKERS_API_TOKEN }}
+        run: |
+          set -euo pipefail
+          BASE="https://api.cloudflare.com/client/v4/accounts/${CLOUDFLARE_ACCOUNT_ID}/workers/scripts/${WORKER_NAME}"
+          curl --fail --silent --show-error -H "Authorization: Bearer ${CLOUDFLARE_API_TOKEN}" "${BASE}" >/dev/null
+          curl --fail --silent --show-error -H "Authorization: Bearer ${CLOUDFLARE_API_TOKEN}" "${BASE}/schedules" > /tmp/build730-worker-cron.json
+          python - <<'PY'
+          import json
+          data=json.load(open('/tmp/build730-worker-cron.json'))
+          assert isinstance(data,dict) and data.get('success') is True,'Cloudflare schedules API did not succeed'
+          result=data.get('result')
+          if isinstance(result,dict):
+              result=result.get('schedules',result.get('triggers',result.get('cron')))
+          if isinstance(result,str):
+              result=[result]
+          assert isinstance(result,list),'Unknown Cloudflare schedules API result schema'
+          crons=[entry if isinstance(entry,str) else entry.get('cron') if isinstance(entry,dict) else None for entry in result]
+          assert '*/15 * * * *' in crons,'Original 15-minute cron not found in Cloudflare readback'
+          print('Build730 original Cloudflare Worker script and 15-minute cron readback: PASS')
+          print('Delivery activation remains OFF until original keys/receivers are independently enrolled.')
+          PY
+ wrangler.privacy730.toml)" = 2
+          node scripts/build740_privacy_sender_ceremony_contract.mjs
           grep -q '^crons = \["\*/15 \* \* \* \*"\]$' wrangler.privacy730.toml
           node --check workers/privacy-automation-730.mjs
           node scripts/build730_worker_contract.mjs
