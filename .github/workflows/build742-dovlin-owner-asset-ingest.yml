@@ -1,0 +1,83 @@
+name: Build 742 Dovlin Owner Concept Asset Ingestion (Feature Only)
+on:
+  push:
+    branches:
+      - feature/build742-dovlin-collection-source-assets
+    paths:
+      - 'build742-staging/**'
+      - '.github/workflows/build742-dovlin-owner-asset-ingest.yml'
+permissions:
+  contents: write
+concurrency:
+  group: build742-dovlin-private-feature-ingest
+  cancel-in-progress: false
+jobs:
+  unpack-verify-feature-only:
+    if: github.ref_name == 'feature/build742-dovlin-collection-source-assets'
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+          persist-credentials: true
+      - name: Verify original source parts, unpack WebP/metadata under isolated dovlin path
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [ ! -e build742-staging/chunk_00.bin ]; then
+            echo 'Staging already consumed; no second extraction'; exit 0
+          fi
+          python - <<'PY'
+          from pathlib import Path
+          from zipfile import ZipFile
+          import hashlib,io,json
+          root=Path('.')
+          parts=sorted((root/'build742-staging').glob('chunk_*.bin'))
+          assert len(parts)==13,[p.name for p in parts]
+          assert [p.name for p in parts]==[f'chunk_{i:02d}.bin' for i in range(13)]
+          blob=b''.join(p.read_bytes() for p in parts)
+          assert len(blob)==13591668
+          assert hashlib.sha256(blob).hexdigest()=='a6660940924af6cff2425693c919dea995443de7431e23c3bf3f6b84e88a5559'
+          with ZipFile(io.BytesIO(blob)) as z:
+              names=z.namelist()
+              assert len(names)==140,len(names)
+              assert len(names)==len(set(names))
+              assert all(n.startswith('dovlin/') and not Path(n).is_absolute() and
+                 not '..' in Path(n).parts for n in names)
+              assets=[n for n in names if n.startswith('dovlin/assets/') and n.endswith('.webp')]
+              thumbs=[n for n in names if n.startswith('dovlin/thumbs/') and n.endswith('.webp')]
+              assert len(assets)==len(thumbs)==68
+              manifest=json.loads(z.read('dovlin/data/asset_manifest.json'))
+              seed=json.loads(z.read('dovlin/data/collection_seed.json'))
+              assert len(manifest['uploaded_assets'])==48
+              assert len(manifest['cropped_colourways'])==20
+              assert len(seed['featured_plush'])==10
+              assert len(seed['shop_concepts'])==38
+              assert len(seed['colour_lab'])==20
+              story=z.read('dovlin/The_Legend_of_Dovlin_APPROVED.txt').decode()
+              assert seed['canonical_story'] in story
+              hashes=json.loads(z.read('dovlin/data/build742_source_sha256.json'))['files']
+              assert len(hashes)==139
+              assert all(hashlib.sha256(z.read(n)).hexdigest()==sha for n,sha in hashes.items())
+              for n in assets+thumbs:
+                  raw=z.read(n)
+                  assert raw[:4]==b'RIFF' and raw[8:12]==b'WEBP',n
+                  assert len(raw)<=550000,n
+              z.extractall(root)
+              print('Build 742 source ZIP, 48 original/20 crop WebP, 68 thumbnails, 10 planned mates, 38 maker concepts, approved verbatim legend: PASS')
+          PY
+      - name: Commit verified owner assets to feature branch, do not touch dev or main
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [ ! -e build742-staging/chunk_00.bin ]; then
+            echo 'Already expanded'; exit 0
+          fi
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add dovlin/assets dovlin/thumbs dovlin/data dovlin/The_Legend_of_Dovlin_APPROVED.txt
+          git rm build742-staging/chunk_*.bin
+          git diff --cached --check
+          git commit -m 'Build 742: install original approved Dovlin WebP assets, 48 manifest entries, 20 colour crops and canonical seed'
+          git push origin "HEAD:refs/heads/feature/build742-dovlin-collection-source-assets"
