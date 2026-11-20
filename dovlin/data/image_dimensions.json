@@ -1,0 +1,546 @@
+{
+  "assets/01_dove-forge-reverse-token.webp": [
+    1536,
+    1024
+  ],
+  "assets/02_dovlin-challenge-medallion-obverse.webp": [
+    1536,
+    1024
+  ],
+  "assets/03_original-crimson-dtf-tee.webp": [
+    1312,
+    1199
+  ],
+  "assets/04_dovlin-slate-coaster.webp": [
+    1254,
+    1254
+  ],
+  "assets/05_dovlin-leather-patch-cap.webp": [
+    1536,
+    1024
+  ],
+  "assets/06_cherry-resin-dovlin.webp": [
+    1374,
+    1145
+  ],
+  "assets/07_cnc-carved-dovlin-wood-sign.webp": [
+    1374,
+    1145
+  ],
+  "assets/08_cnc-pink-foam-back.webp": [
+    1536,
+    1024
+  ],
+  "assets/09_clear-resin-recessed-maple-board.webp": [
+    1536,
+    1024
+  ],
+  "assets/10_original-crimson-plush-concept.webp": [
+    1312,
+    1199
+  ],
+  "assets/11_round-mascot-keychain.webp": [
+    1536,
+    1024
+  ],
+  "assets/12_dovlin-monochrome-ceramic-tile.webp": [
+    1536,
+    1024
+  ],
+  "assets/13_devil-n-dove-metal-wall-sign.webp": [
+    1536,
+    1024
+  ],
+  "assets/14_ebony-style-clear-inlay-board.webp": [
+    1536,
+    1024
+  ],
+  "assets/15_dovlin-soap-on-a-rope.webp": [
+    1536,
+    1024
+  ],
+  "assets/16_emerald-treasure-plush-concept.webp": [
+    1222,
+    1287
+  ],
+  "assets/17_colourway-sheet-arctic-to-moonstone.webp": [
+    1800,
+    600
+  ],
+  "assets/18_colourway-sheet-amethyst-to-sunrise.webp": [
+    1800,
+    600
+  ],
+  "assets/19_colourway-sheet-aurora-to-gold.webp": [
+    1800,
+    600
+  ],
+  "assets/20_colourway-sheet-original-to-pink.webp": [
+    1800,
+    601
+  ],
+  "assets/21_forged-dovlin-bottle-opener.webp": [
+    1536,
+    1024
+  ],
+  "assets/22_frost-dove-plush-concept.webp": [
+    1222,
+    1287
+  ],
+  "assets/23_turquoise-colour-ceramic-tile.webp": [
+    1254,
+    1254
+  ],
+  "assets/24_amethyst-gem-gold-dovlin-pendant.webp": [
+    1536,
+    1024
+  ],
+  "assets/25_shallow-sculpted-maple-serving-board.webp": [
+    1502,
+    1047
+  ],
+  "assets/26_silver-dovlin-garnet-pendant.webp": [
+    1536,
+    1024
+  ],
+  "assets/27_forged-copper-mascot-cuff.webp": [
+    1536,
+    1024
+  ],
+  "assets/28_dovlin-custom-coin-ring.webp": [
+    1536,
+    1024
+  ],
+  "assets/29_burned-birch-dovlin-coaster.webp": [
+    1536,
+    1024
+  ],
+  "assets/30_burgundy-laser-canvas.webp": [
+    1312,
+    1199
+  ],
+  "assets/31_natural-leather-dovlin-patch.webp": [
+    1536,
+    1024
+  ],
+  "assets/32_midnight-eclipse-plush-concept.webp": [
+    1222,
+    1287
+  ],
+  "assets/33_laser-line-art-mascot.webp": [
+    1227,
+    1282
+  ],
+  "assets/34_two-part-mascot-silicone-mold.webp": [
+    1536,
+    1024
+  ],
+  "assets/35_painted-3d-printed-dovlin.webp": [
+    1283,
+    1226
+  ],
+  "assets/36_rose-quartz-plush-concept.webp": [
+    1222,
+    1287
+  ],
+  "assets/37_cnc-pink-foam-front.webp": [
+    1402,
+    1122
+  ],
+  "assets/38_red-burgundy-paracord-lanyard.webp": [
+    1536,
+    1024
+  ],
+  "assets/39_cherry-tone-clear-inlay-board.webp": [
+    1536,
+    1024
+  ],
+  "assets/40_maple-pattern-dovlin-tumbler.webp": [
+    1536,
+    1024
+  ],
+  "assets/41_red-black-paracord-key-fob.webp": [
+    1536,
+    1024
+  ],
+  "assets/42_red-black-paracord-bracelet.webp": [
+    1536,
+    1024
+  ],
+  "assets/43_red-dovlin-sculpted-candle.webp": [
+    1347,
+    1167
+  ],
+  "assets/44_original-crimson-master-art.webp": [
+    1222,
+    1287
+  ],
+  "assets/45_silver-dove-horns-earrings.webp": [
+    1536,
+    1024
+  ],
+  "assets/46_violet-canvas-artwork.webp": [
+    1355,
+    1161
+  ],
+  "assets/47_walnut-tone-clear-resin-board.webp": [
+    1536,
+    1024
+  ],
+  "assets/48_white-sublimation-dovlin-tee.webp": [
+    1536,
+    1024
+  ],
+  "assets/color_amethyst.webp": [
+    418,
+    615
+  ],
+  "assets/color_arctic-pearl.webp": [
+    418,
+    615
+  ],
+  "assets/color_aurora.webp": [
+    418,
+    615
+  ],
+  "assets/color_autumn-maple.webp": [
+    418,
+    615
+  ],
+  "assets/color_cherry-blossom.webp": [
+    419,
+    615
+  ],
+  "assets/color_cocoa-caramel.webp": [
+    419,
+    615
+  ],
+  "assets/color_copper-ember.webp": [
+    419,
+    615
+  ],
+  "assets/color_electric-lime.webp": [
+    418,
+    615
+  ],
+  "assets/color_emerald.webp": [
+    418,
+    616
+  ],
+  "assets/color_frost.webp": [
+    418,
+    616
+  ],
+  "assets/color_gold-edition.webp": [
+    418,
+    615
+  ],
+  "assets/color_golden-sunrise.webp": [
+    418,
+    615
+  ],
+  "assets/color_lavender-dream.webp": [
+    419,
+    615
+  ],
+  "assets/color_midnight.webp": [
+    418,
+    616
+  ],
+  "assets/color_moonstone.webp": [
+    418,
+    615
+  ],
+  "assets/color_ocean-tide.webp": [
+    418,
+    615
+  ],
+  "assets/color_original.webp": [
+    418,
+    616
+  ],
+  "assets/color_pink.webp": [
+    418,
+    616
+  ],
+  "assets/color_sapphire.webp": [
+    419,
+    615
+  ],
+  "assets/color_shadow-ruby.webp": [
+    419,
+    615
+  ],
+  "thumbs/01_dove-forge-reverse-token.webp": [
+    440,
+    440
+  ],
+  "thumbs/02_dovlin-challenge-medallion-obverse.webp": [
+    440,
+    440
+  ],
+  "thumbs/03_original-crimson-dtf-tee.webp": [
+    440,
+    440
+  ],
+  "thumbs/04_dovlin-slate-coaster.webp": [
+    440,
+    440
+  ],
+  "thumbs/05_dovlin-leather-patch-cap.webp": [
+    440,
+    440
+  ],
+  "thumbs/06_cherry-resin-dovlin.webp": [
+    440,
+    440
+  ],
+  "thumbs/07_cnc-carved-dovlin-wood-sign.webp": [
+    440,
+    440
+  ],
+  "thumbs/08_cnc-pink-foam-back.webp": [
+    440,
+    440
+  ],
+  "thumbs/09_clear-resin-recessed-maple-board.webp": [
+    440,
+    440
+  ],
+  "thumbs/10_original-crimson-plush-concept.webp": [
+    440,
+    440
+  ],
+  "thumbs/11_round-mascot-keychain.webp": [
+    440,
+    440
+  ],
+  "thumbs/12_dovlin-monochrome-ceramic-tile.webp": [
+    440,
+    440
+  ],
+  "thumbs/13_devil-n-dove-metal-wall-sign.webp": [
+    440,
+    440
+  ],
+  "thumbs/14_ebony-style-clear-inlay-board.webp": [
+    440,
+    440
+  ],
+  "thumbs/15_dovlin-soap-on-a-rope.webp": [
+    440,
+    440
+  ],
+  "thumbs/16_emerald-treasure-plush-concept.webp": [
+    440,
+    440
+  ],
+  "thumbs/17_colourway-sheet-arctic-to-moonstone.webp": [
+    440,
+    440
+  ],
+  "thumbs/18_colourway-sheet-amethyst-to-sunrise.webp": [
+    440,
+    440
+  ],
+  "thumbs/19_colourway-sheet-aurora-to-gold.webp": [
+    440,
+    440
+  ],
+  "thumbs/20_colourway-sheet-original-to-pink.webp": [
+    440,
+    440
+  ],
+  "thumbs/21_forged-dovlin-bottle-opener.webp": [
+    440,
+    440
+  ],
+  "thumbs/22_frost-dove-plush-concept.webp": [
+    440,
+    440
+  ],
+  "thumbs/23_turquoise-colour-ceramic-tile.webp": [
+    440,
+    440
+  ],
+  "thumbs/24_amethyst-gem-gold-dovlin-pendant.webp": [
+    440,
+    440
+  ],
+  "thumbs/25_shallow-sculpted-maple-serving-board.webp": [
+    440,
+    440
+  ],
+  "thumbs/26_silver-dovlin-garnet-pendant.webp": [
+    440,
+    440
+  ],
+  "thumbs/27_forged-copper-mascot-cuff.webp": [
+    440,
+    440
+  ],
+  "thumbs/28_dovlin-custom-coin-ring.webp": [
+    440,
+    440
+  ],
+  "thumbs/29_burned-birch-dovlin-coaster.webp": [
+    440,
+    440
+  ],
+  "thumbs/30_burgundy-laser-canvas.webp": [
+    440,
+    440
+  ],
+  "thumbs/31_natural-leather-dovlin-patch.webp": [
+    440,
+    440
+  ],
+  "thumbs/32_midnight-eclipse-plush-concept.webp": [
+    440,
+    440
+  ],
+  "thumbs/33_laser-line-art-mascot.webp": [
+    440,
+    440
+  ],
+  "thumbs/34_two-part-mascot-silicone-mold.webp": [
+    440,
+    440
+  ],
+  "thumbs/35_painted-3d-printed-dovlin.webp": [
+    440,
+    440
+  ],
+  "thumbs/36_rose-quartz-plush-concept.webp": [
+    440,
+    440
+  ],
+  "thumbs/37_cnc-pink-foam-front.webp": [
+    440,
+    440
+  ],
+  "thumbs/38_red-burgundy-paracord-lanyard.webp": [
+    440,
+    440
+  ],
+  "thumbs/39_cherry-tone-clear-inlay-board.webp": [
+    440,
+    440
+  ],
+  "thumbs/40_maple-pattern-dovlin-tumbler.webp": [
+    440,
+    440
+  ],
+  "thumbs/41_red-black-paracord-key-fob.webp": [
+    440,
+    440
+  ],
+  "thumbs/42_red-black-paracord-bracelet.webp": [
+    440,
+    440
+  ],
+  "thumbs/43_red-dovlin-sculpted-candle.webp": [
+    440,
+    440
+  ],
+  "thumbs/44_original-crimson-master-art.webp": [
+    440,
+    440
+  ],
+  "thumbs/45_silver-dove-horns-earrings.webp": [
+    440,
+    440
+  ],
+  "thumbs/46_violet-canvas-artwork.webp": [
+    440,
+    440
+  ],
+  "thumbs/47_walnut-tone-clear-resin-board.webp": [
+    440,
+    440
+  ],
+  "thumbs/48_white-sublimation-dovlin-tee.webp": [
+    440,
+    440
+  ],
+  "thumbs/color_amethyst.webp": [
+    299,
+    440
+  ],
+  "thumbs/color_arctic-pearl.webp": [
+    299,
+    440
+  ],
+  "thumbs/color_aurora.webp": [
+    299,
+    440
+  ],
+  "thumbs/color_autumn-maple.webp": [
+    299,
+    440
+  ],
+  "thumbs/color_cherry-blossom.webp": [
+    300,
+    440
+  ],
+  "thumbs/color_cocoa-caramel.webp": [
+    300,
+    440
+  ],
+  "thumbs/color_copper-ember.webp": [
+    300,
+    440
+  ],
+  "thumbs/color_electric-lime.webp": [
+    299,
+    440
+  ],
+  "thumbs/color_emerald.webp": [
+    299,
+    440
+  ],
+  "thumbs/color_frost.webp": [
+    299,
+    440
+  ],
+  "thumbs/color_gold-edition.webp": [
+    299,
+    440
+  ],
+  "thumbs/color_golden-sunrise.webp": [
+    299,
+    440
+  ],
+  "thumbs/color_lavender-dream.webp": [
+    300,
+    440
+  ],
+  "thumbs/color_midnight.webp": [
+    299,
+    440
+  ],
+  "thumbs/color_moonstone.webp": [
+    299,
+    440
+  ],
+  "thumbs/color_ocean-tide.webp": [
+    299,
+    440
+  ],
+  "thumbs/color_original.webp": [
+    299,
+    440
+  ],
+  "thumbs/color_pink.webp": [
+    299,
+    440
+  ],
+  "thumbs/color_sapphire.webp": [
+    300,
+    440
+  ],
+  "thumbs/color_shadow-ruby.webp": [
+    300,
+    440
+  ]
+}
