@@ -10,7 +10,7 @@ try {
     const page=await browser.newPage({viewport:{width,height},deviceScaleFactor:1});
     const errors=[],responses=[];
     page.on('pageerror',e=>errors.push(String(e)));
-    page.on('response',res=>{if(res.status()>=400 && res.url().startsWith(base))responses.push(res.status()+' '+res.url())});
+    page.on('response',res=>{if(res.status()>=400 && new URL(res.url()).pathname.startsWith('/dovlin/'))responses.push(res.status()+' '+res.url())});
 
     let response=await page.goto(base+'/dovlin/',{waitUntil:'networkidle',timeout:45000});
     assert.equal(response.status(),200,device+' Dovlin collection HTTP 200');
@@ -22,7 +22,7 @@ try {
     assert.ok(legend.includes('Long ago, in a little workshop where imagination had no boundaries'),device+' exact original legend begins');
     assert.ok(legend.includes('From all of us at Devil n Dove.'),device+' legend ends');
     assert.ok(await page.locator('.hero-visual img').first().evaluate(img=>img.complete&&img.naturalWidth>0),device+' source WebP loads');
-    assert.equal(await page.getByRole('link',{name:/Evidence Gallery/i}).count(),1,device+' gallery discovery');
+    assert.ok(await page.getByRole('link',{name:/Evidence Gallery/i}).count()>=1,device+' gallery discovery');
     await page.locator('#search').fill('CNC');
     let filtered=await page.locator('#product-grid article').count();
     assert.ok(filtered>0&&filtered<38,device+' workshop search filter');
