@@ -55,4 +55,121 @@
   try{const d=await get('?order_id='+encodeURIComponent(id));showOrder(d);matrix(d.owner);}
   catch(e){update('a660OrderStatus','HOLD: '+e.message+' No cached order will be shown.');}
   finally{busy=false;$('a660Inspect').disabled=false;}});
+
+ // Build 745: user-initiated public buyer-journey integrity proof.
+ // Only allowlisted SAME-ORIGIN GETs, never a payment/provider or customer mutation.
+ const buyerRoutes745=Object.freeze([
+  {name:'Shop and product search',path:'/shop/',selectors:['h1','#shopSearchInput','#shopProducts','#shopResultsSection'],script:'/public/js/shop.js',detail:'Search, results and original shop controller exist'},
+  {name:'Shopping cart',path:'/cart/',selectors:['h1','#cartItems','#cartEmpty'],script:'/public/js/cart-page.js',detail:'Cart review and empty state exist'},
+  {name:'Checkout form',path:'/checkout/',selectors:['h1','#checkoutForm','#checkoutSubmitButton','#fulfillment_method'],script:'/public/js/checkout.js',detail:'Checkout and fulfilment controls exist; no purchase attempted'},
+  {name:'Local pickup',path:'/pickup/',selectors:['h1'],script:null,detail:'Pickup guidance page exists; no pickup promised'},
+  {name:'Contact and support',path:'/contact/',selectors:['h1'],script:null,detail:'Contact information page exists; no message sent'},
+  {name:'Sale terms',path:'/terms/',selectors:['h1'],script:null,detail:'Sale and return terms page exists; no refund performed'},
+  {name:'Customer Help Centre',path:'/help/',selectors:['h1'],script:null,detail:'Customer help page exists; no ticket created'}
+ ]);
+ let buyerProof745=null,buyerChecking745=false;
+ let buyerExport745=null;
+ window.addEventListener('pagehide',()=>{if(buyerExport745)window.URL.revokeObjectURL(buyerExport745);});
+ const addBuyer745=(parent,tag,value)=>{const e=document.createElement(tag);e.textContent=String(value??'');parent.append(e);return e;};
+ const fetchBuyer745=async path=>{
+  if(!/^\/[a-z0-9/_-]+(?:\.[a-z]+)?\/?$/.test(path)||path.includes('/dovlin/'))
+   throw Error('Path is not an allowlisted public resource.');
+  const signal=typeof AbortSignal==='function'&&typeof AbortSignal.timeout==='function'
+   ?AbortSignal.timeout(8000):undefined;
+  const res=await fetch(path,{method:'GET',credentials:'omit',cache:'no-store',
+    redirect:'manual',...(signal?{signal}:{})});
+  {
+   if(res.status!==200||res.type==='opaqueredirect')
+    throw Error('HTTP '+res.status+(res.type==='opaqueredirect'?' redirect':''));
+   const ct=String(res.headers.get('content-type')||'').toLowerCase();
+   if(path.endsWith('.js')&&ct&&!(ct.includes('javascript')||ct.includes('text/plain')))
+    throw Error('Script returned unexpected content type');
+   if(!path.endsWith('.js')&&ct&&!ct.includes('html'))
+    throw Error('Page returned unexpected content type');
+   const body=await res.text();
+   if(body.length<100||body.length>1250000)throw Error('Unexpected content length');
+   return body;
+  }
+ };
+ const formatBuyer745=reason=>String(reason?.message||reason||'Unverified')
+  .replace(/[\u0000-\u001f]/g,' ').slice(0,160);
+ async function checkBuyer745(entry){
+  const result={name:entry.name,path:entry.path,checked_at:new Date().toISOString(),
+   structure:'HOLD',script:entry.script?'HOLD':'NOT_APPLICABLE',
+   details:entry.detail,static_only:true,provider_verified:false,
+   customer_device_verified:false,order_created:false};
+  try{
+   const source=await fetchBuyer745(entry.path);
+   const parsed=new DOMParser().parseFromString(source,'text/html');
+   if(!parsed.querySelector('title')||!parsed.querySelector('h1'))
+    throw Error('Missing title or visible main heading');
+   const absent=entry.selectors.filter(selector=>!parsed.querySelector(selector));
+   if(absent.length)throw Error('Missing required page elements: '+absent.join(', '));
+   result.structure='PASS_STATIC_STRUCTURE';
+  }catch(error){result.details='Page structure HOLD: '+formatBuyer745(error);return result;}
+  if(entry.script){
+   try{
+    const source=await fetchBuyer745(entry.script);
+    if(!source.trim()||!/(?:function|=>|addEventListener|DOMContentLoaded)/.test(source))
+     throw Error('JavaScript source does not resemble an executable controller');
+    result.script='PASS_SOURCE_RESPONSE';
+   }catch(error){result.script='HOLD';result.details='Essential script HOLD: '+formatBuyer745(error);}
+  }
+  return result;
+ }
+ function drawBuyer745(reports){
+  const tbody=$('a745Results');tbody.replaceChildren();
+  for(const report of reports){
+   const tr=addBuyer745(tbody,'tr','');
+   addBuyer745(tr,'td',report.name);
+   addBuyer745(tr,'td',report.structure);
+   addBuyer745(tr,'td',report.script);
+   addBuyer745(tr,'td',report.details);
+   const cell=addBuyer745(tr,'td',''),link=addBuyer745(cell,'a','Open '+report.name);
+   link.href=report.path;
+  }
+ }
+ async function buyerStart745(){
+  if(buyerChecking745)return;
+  const run=$('a745Run'),exp=$('a745Export'),stat=$('a745Status');
+  if(!run||!exp||!stat)return;
+  buyerChecking745=true;buyerProof745=null;run.disabled=true;exp.disabled=true;
+  const started_at=new Date().toISOString(),reports=[];
+  drawBuyer745([]);
+  try{
+   for(const entry of buyerRoutes745){
+    stat.textContent='Checking '+entry.name+'… '+reports.length+' of '+buyerRoutes745.length+' steps checked.';
+    const report=await checkBuyer745(entry);
+    reports.push(report);drawBuyer745(reports);
+   }
+   const pass=reports.filter(r=>r.structure==='PASS_STATIC_STRUCTURE'&&
+    (r.script==='PASS_SOURCE_RESPONSE'||r.script==='NOT_APPLICABLE')).length;
+   buyerProof745={schema:'devilndove-buyer-journey-preflight-745',build:745,
+    scope:'public customer route and essential JS responses only',site:location.origin,
+    started_at,finished_at:new Date().toISOString(),step_count:reports.length,
+    static_pass:pass,static_hold:reports.length-pass,reports,
+    payment_processed:false,customer_identity_read:false,provider_settlement_verified:false,
+    carrier_verified:false,original_device_acceptance_verified:false,
+    dovlin_collection_changed:false};
+   stat.textContent='Live preflight: '+pass+'/'+reports.length+
+    ' public page/script steps passed static inspection. '+
+    (pass===reports.length?'No broken structural paths found.':'At least one HOLD needs investigation.')+
+    ' Payments, shipping, refund and real customer-device success remain unverified.';
+   exp.disabled=false;
+  }catch(e){stat.textContent='Inspection interrupted: '+formatBuyer745(e)+
+   '. No business data or provider action was changed.';}
+  finally{buyerChecking745=false;run.disabled=false;}
+ }
+ function exportBuyer745(){
+  if(!buyerProof745)return;
+  const blob=new Blob([JSON.stringify(buyerProof745,null,2)+'\n'],
+   {type:'application/json;charset=utf-8'});
+  if(buyerExport745)window.URL.revokeObjectURL(buyerExport745);
+  buyerExport745=window.URL.createObjectURL(blob);
+  const a=document.createElement('a');a.href=buyerExport745;
+  a.download='devilndove-buyer-preflight-745-'+buyerProof745.finished_at.slice(0,10)+'.json';
+  a.hidden=true;document.body.append(a);a.click();a.remove();
+ }
+ $('a745Run')?.addEventListener('click',buyerStart745);
+ $('a745Export')?.addEventListener('click',exportBuyer745);
 })();

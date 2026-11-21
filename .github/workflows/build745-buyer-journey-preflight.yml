@@ -1,0 +1,68 @@
+name: Build 745 Live Storefront Buyer Journey Preflight
+on:
+  pull_request:
+    paths:
+      - 'admin/storefront-acceptance/index.html'
+      - 'public/js/admin-storefront-acceptance-660.js'
+      - 'release465-performance-budget.json'
+      - 'scripts/build745_buyer_journey_*'
+      - '.github/workflows/build745-buyer-journey-preflight.yml'
+  push:
+    branches: [dev, main]
+    paths:
+      - 'admin/storefront-acceptance/index.html'
+      - 'public/js/admin-storefront-acceptance-660.js'
+      - 'release465-performance-budget.json'
+      - 'scripts/build745_buyer_journey_*'
+      - '.github/workflows/build745-buyer-journey-preflight.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  buyer-route-contract:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: '24'
+      - name: Verify exact seven original source routes, zero Dovlin changes and no checkout mutation
+        run: |
+          node --check public/js/admin-storefront-acceptance-660.js
+          node --check scripts/build745_buyer_journey_contract.mjs
+          node scripts/build745_buyer_journey_contract.mjs
+
+  buyer-journey-chromium:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: '24'
+      - name: Install real Chromium test browser
+        run: |
+          npm init -y >/dev/null
+          npm install --no-save --package-lock=false playwright@1.56.1
+          npx playwright install --with-deps chromium
+      - name: Serve original public static source without business backend
+        run: |
+          python3 -m http.server 18745 --bind 127.0.0.1 >/tmp/buyer745-http.log 2>&1 &
+          for i in 1 2 3 4 5; do
+            if curl -fsS http://127.0.0.1:18745/admin/storefront-acceptance/ >/dev/null; then exit 0; fi
+            sleep 1
+          done
+          cat /tmp/buyer745-http.log
+          exit 1
+      - name: Verify desktop/mobile 7-route GET-only journey, JSON export and negative HOLD
+        run: node scripts/build745_buyer_journey_browser_qa.mjs
+        env:
+          DD_ORIGIN: http://127.0.0.1:18745
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: build745-buyer-preflight-desktop-mobile
+          path: /tmp/dd-build745-*.png
+          if-no-files-found: ignore
+          retention-days: 7
