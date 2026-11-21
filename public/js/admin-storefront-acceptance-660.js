@@ -68,15 +68,17 @@
   {name:'Customer Help Centre',path:'/help/',selectors:['h1'],script:null,detail:'Customer help page exists; no ticket created'}
  ]);
  let buyerProof745=null,buyerChecking745=false;
+ let buyerExport745=null;
+ window.addEventListener('pagehide',()=>{if(buyerExport745)window.URL.revokeObjectURL(buyerExport745);});
  const addBuyer745=(parent,tag,value)=>{const e=document.createElement(tag);e.textContent=String(value??'');parent.append(e);return e;};
  const fetchBuyer745=async path=>{
   if(!/^\/[a-z0-9/_-]+(?:\.[a-z]+)?\/?$/.test(path)||path.includes('/dovlin/'))
    throw Error('Path is not an allowlisted public resource.');
-  const controller=typeof AbortController==='function'?new AbortController():null;
-  const timer=controller?setTimeout(()=>controller.abort(),8000):null;
-  try{
-   const res=await fetch(path,{method:'GET',credentials:'omit',cache:'no-store',
-    redirect:'manual',...(controller?{signal:controller.signal}:{})});
+  const signal=typeof AbortSignal==='function'&&typeof AbortSignal.timeout==='function'
+   ?AbortSignal.timeout(8000):undefined;
+  const res=await fetch(path,{method:'GET',credentials:'omit',cache:'no-store',
+    redirect:'manual',...(signal?{signal}:{})});
+  {
    if(res.status!==200||res.type==='opaqueredirect')
     throw Error('HTTP '+res.status+(res.type==='opaqueredirect'?' redirect':''));
    const ct=String(res.headers.get('content-type')||'').toLowerCase();
@@ -87,7 +89,7 @@
    const body=await res.text();
    if(body.length<100||body.length>1250000)throw Error('Unexpected content length');
    return body;
-  }finally{if(timer!==null)clearTimeout(timer);}
+  }
  };
  const formatBuyer745=reason=>String(reason?.message||reason||'Unverified')
   .replace(/[\u0000-\u001f]/g,' ').slice(0,160);
@@ -162,11 +164,11 @@
   if(!buyerProof745)return;
   const blob=new Blob([JSON.stringify(buyerProof745,null,2)+'\n'],
    {type:'application/json;charset=utf-8'});
-  const href=window.URL.createObjectURL(blob);
-  try{const a=document.createElement('a');a.href=href;
-   a.download='devilndove-buyer-preflight-745-'+buyerProof745.finished_at.slice(0,10)+'.json';
-   a.hidden=true;document.body.append(a);a.click();a.remove();
-  }finally{setTimeout(()=>window.URL.revokeObjectURL(href),2500);}
+  if(buyerExport745)window.URL.revokeObjectURL(buyerExport745);
+  buyerExport745=window.URL.createObjectURL(blob);
+  const a=document.createElement('a');a.href=buyerExport745;
+  a.download='devilndove-buyer-preflight-745-'+buyerProof745.finished_at.slice(0,10)+'.json';
+  a.hidden=true;document.body.append(a);a.click();a.remove();
  }
  $('a745Run')?.addEventListener('click',buyerStart745);
  $('a745Export')?.addEventListener('click',exportBuyer745);
