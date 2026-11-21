@@ -1,0 +1,104 @@
+name: Build 744 Dovlin Artwork Sample BOM Admin Readiness
+on:
+  pull_request:
+    paths:
+      - 'admin/dovlin-readiness/**'
+      - 'admin/index.html'
+      - 'functions/api/admin/dovlin-readiness-744.js'
+      - 'functions/api/_lib/dovlinSource744.mjs'
+      - 'functions/api/_lib/appModuleRoutes.js'
+      - 'functions/_middleware.js'
+      - 'public/js/admin-dovlin-readiness-744.js'
+      - 'scripts/build744_dovlin_*'
+      - '.github/workflows/build744-dovlin-private-readiness.yml'
+  push:
+    branches: [dev, main]
+    paths:
+      - 'admin/dovlin-readiness/**'
+      - 'admin/index.html'
+      - 'functions/api/admin/dovlin-readiness-744.js'
+      - 'functions/api/_lib/dovlinSource744.mjs'
+      - 'functions/api/_lib/appModuleRoutes.js'
+      - 'functions/_middleware.js'
+      - 'public/js/admin-dovlin-readiness-744.js'
+      - 'scripts/build744_dovlin_*'
+      - '.github/workflows/build744-dovlin-private-readiness.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  private-evidence-and-no-sale:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 14
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: '24'
+      - name: Validate all new JS and exact approved artwork inventory
+        run: |
+          node --check functions/api/admin/dovlin-readiness-744.js
+          node --check functions/api/_lib/dovlinSource744.mjs
+          node --check public/js/admin-dovlin-readiness-744.js
+          node --check scripts/build744_dovlin_private_api_contract.mjs
+          node --check scripts/build744_dovlin_admin_browser_qa.mjs
+          python3 scripts/verify_build742_dovlin.py
+          python3 scripts/verify_build743_dovlin.py
+      - name: Prove admin grants, private D1 journal, evidence validation, no phantom stock
+        run: node scripts/build744_dovlin_private_api_contract.mjs
+      - name: Prove Home and Shop Dovlin menus remain hidden and Admin workflow is routed
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          paths=['index.html','shop/index.html']
+          for f in paths:
+              s=Path(f).read_text(encoding='utf-8')
+              assert 'data-dovlin-temporary-menu-hold="2026-11-21"' in s,f
+              assert 'style="display:none!important"' in s,f
+          routes=Path('functions/api/_lib/appModuleRoutes.js').read_text()
+          assert "'/admin/dovlin-readiness'" in routes
+          assert "'/api/admin/dovlin-readiness-744'" in routes
+          middleware=Path('functions/_middleware.js').read_text()
+          assert "normalizedPagePath(pathname) === '/admin/dovlin-readiness/'" in middleware
+          assert "String(access.user.role || '').toLowerCase() !== 'admin'" in middleware
+          admin=Path('admin/index.html').read_text()
+          assert 'href="/admin/dovlin-readiness/"' in admin
+          html=Path('admin/dovlin-readiness/index.html').read_text()
+          assert 'noindex,nofollow,noarchive' in html
+          assert '<script src="/public/js/admin-dovlin-readiness-744.js' in html
+          print('Build 744 source access and hidden-public-menu contract: PASS')
+          PY
+
+  private-admin-chromium:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: '24'
+      - name: Install real Chromium for desktop/mobile private source UI test
+        run: |
+          npm init -y >/dev/null
+          npm install --no-save --package-lock=false playwright@1.56.1
+          npx playwright install --with-deps chromium
+      - name: Serve source only with mock D1 (no deployment)
+        run: |
+          python3 -m http.server 18744 --bind 127.0.0.1 >/tmp/build744-serve.log 2>&1 &
+          for i in 1 2 3 4 5; do
+            if curl -fsS http://127.0.0.1:18744/admin/dovlin-readiness/ >/dev/null; then exit 0; fi
+            sleep 1
+          done
+          cat /tmp/build744-serve.log
+          exit 1
+      - name: Real browser tests of source artwork and mock-only evidence saves
+        run: node scripts/build744_dovlin_admin_browser_qa.mjs
+        env:
+          DOVLIN_BASE: http://127.0.0.1:18744
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: build744-dovlin-admin-desktop-mobile
+          path: /tmp/dovlin744-*-admin.png
+          retention-days: 7
+          if-no-files-found: ignore

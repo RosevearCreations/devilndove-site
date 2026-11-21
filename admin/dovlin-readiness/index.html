@@ -1,0 +1,138 @@
+<!doctype html>
+<html lang="en-CA">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex,nofollow,noarchive">
+<title>Dovlin Artwork, Sample &amp; BOM Readiness — Devil n Dove Admin</title>
+<link rel="stylesheet" href="/css/styles.css?v=467">
+<link rel="stylesheet" href="/css/brand-v3-theme.css?v=467b744">
+<style>
+:root{--d-navy:#111526;--d-card:#20213a;--d-purple:#4b2e67;--d-gold:#e4c188;--d-lav:#ddd0ed;--d-border:#8c78a0;--d-warn:#ffd49b;--d-ok:#b4edd2}
+*{box-sizing:border-box}
+body{margin:0;background:var(--d-navy);color:#f8f1f8;font:16px/1.55 system-ui,-apple-system,Segoe UI,Arial,sans-serif}
+a{color:var(--d-gold)}a:hover{text-decoration:underline}
+.skip{position:absolute;top:-80px;left:8px;background:white;color:#181526;padding:10px;z-index:10}.skip:focus{top:8px}
+.wrap{width:min(1250px,95%);margin:0 auto;padding:22px 0 80px}
+.nav{display:flex;flex-wrap:wrap;gap:14px 26px;align-items:center;border-bottom:1px solid var(--d-border);padding:12px max(2.5vw,12px);background:#19172b}
+.nav strong{font:1.3rem Georgia,serif;color:var(--d-gold)}.nav div{display:flex;gap:15px;flex-wrap:wrap}
+.hero{padding:23px 0 18px}
+.eyebrow{font-size:.78rem;letter-spacing:.14em;text-transform:uppercase;font-weight:800;color:var(--d-gold)}
+h1{font:clamp(2rem,4vw,3.1rem)/1.16 Georgia,serif;margin:6px 0 10px;color:#f4e6ff}
+h2{font:1.45rem Georgia,serif;color:#f6e5ff}h3{margin:8px 0}
+p{max-width:88ch}
+.card{background:var(--d-card);color:#f6efff;border:1px solid #695d83;border-radius:14px;padding:20px;margin:18px 0}
+.hold{border-left:5px solid var(--d-gold)}.muted{color:#dfd1e7}.status{font-weight:700;color:var(--d-warn)}
+.ok{color:var(--d-ok)}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:14px}
+.two{display:grid;grid-template-columns:minmax(200px,310px) minmax(0,1fr);gap:18px;align-items:start}
+label{display:grid;gap:6px;font-weight:700;font-size:.94rem;min-width:0}
+:is(input,select,textarea){width:100%;max-width:100%;padding:10px 12px;border:1px solid #b69ac9;border-radius:8px;background:#111527;color:#fff;font:inherit}
+textarea{min-height:95px;resize:vertical}
+input[type=checkbox]{width:auto;accent-color:#e1b975}
+.checkbox{display:flex;align-items:center;gap:10px;font-weight:650}
+button{padding:10px 15px;border-radius:8px;background:var(--d-purple);color:#fff;border:1px solid #b9a3cf;cursor:pointer;font:inherit;min-height:44px}
+button:hover{background:#674780}button:disabled{opacity:.52;cursor:wait}
+a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible{outline:3px solid #ffd47e;outline-offset:3px}
+.preview{padding:14px;background:#f1e8f5;border-radius:11px;position:sticky;top:14px;color:#301c41}
+.preview img{width:100%;max-height:305px;object-fit:contain}
+.preview .small{font-size:.82rem;word-break:break-word}
+.summary{display:flex;flex-wrap:wrap;gap:10px;margin:13px 0}
+.summary span{border:1px solid var(--d-border);border-radius:7px;padding:5px 9px;background:#231a39}
+.bom{overflow-x:auto}
+table{border-collapse:collapse;width:100%;min-width:750px}
+td,th{padding:8px;border-bottom:1px solid #675776;text-align:left;vertical-align:top}
+th{font-size:.85rem;color:var(--d-gold)}
+td input{min-width:82px}
+td button{white-space:nowrap}
+footer{padding:20px;text-align:center;color:#d1bddc}
+@media(max-width:700px){.two{grid-template-columns:1fr}.preview{position:static}.card{padding:14px}h1{font-size:2rem}}
+@media(prefers-reduced-motion:reduce){html{scroll-behavior:auto!important}}
+</style>
+</head>
+<body data-admin-module="creator" data-admin-page="dovlin-readiness">
+<a class="skip" href="#main">Skip to Dovlin review</a>
+<nav class="nav" aria-label="Administrator navigation"><strong>Devil n Dove · Dovlin</strong>
+<div><a href="/admin/">Admin dashboard</a><a href="/dovlin/">Private working collection link</a><a href="/dovlin/gallery/">Concept gallery</a><a href="/admin/product-editor/">Product Editor</a></div>
+</nav>
+<main id="main" class="wrap">
+<header class="hero"><div class="eyebrow">Build 744 · Original maker evidence</div>
+<h1>Dovlin Artwork, Sample &amp; BOM Readiness</h1>
+<p>Our private production-planning workspace for approved character design comparisons, hands-on prototypes, material lots and actual costs. The public Home and Shop Dovlin links remain hidden until we choose to release the collection.</p></header>
+<div class="card hold" role="note"><strong>Evidence is not approval to sell.</strong> Images, concepts, swatches and mockups are not proof of physical stock. Original artwork comparisons require real source files; a sample must actually exist before dimensions or materials are recorded. This form cannot create products, inventory, social posts, checkout offers or financial journal entries.</div>
+<section class="card" aria-labelledby="selectHeading">
+<h2 id="selectHeading">1. Choose one original concept</h2>
+<div class="grid"><label for="findConcept">Search by name or category<input type="search" id="findConcept" placeholder="Crimson, plush, coaster, colour…" autocomplete="off"></label>
+<label for="conceptId">Artwork or planned product<select id="conceptId"><option value="">Checking verified Admin access…</option></select></label>
+</div>
+<div class="summary" id="collectionCounts" aria-live="polite"></div>
+<p class="muted" id="listStatus" role="status" aria-live="polite">Loading the original concept register…</p>
+</section>
+<section id="activeWorkspace" hidden>
+<div class="two">
+<aside class="preview" aria-label="Original source artwork">
+<img id="artImage" src="/assets/logo-clear-nav.webp" alt="Selected Dovlin concept artwork" width="400" height="400">
+<h3 id="artTitle"></h3>
+<p id="sourceKind" class="small"></p>
+<p id="provisionalNote" class="small"></p>
+<p class="small"><strong>Original file:</strong> <span id="originalFilename"></span></p>
+<p class="small"><strong>Git source image SHA:</strong> <code id="originalSha"></code></p>
+<p><strong id="readinessStage" class="status">HOLD</strong></p>
+<p id="readinessHolds" class="small" aria-live="polite"></p>
+<p id="currentVersion" class="small"></p>
+<p id="planningCost" class="small"></p>
+</aside>
+<div>
+<form id="reviewForm" class="card" autocomplete="off">
+<h2>2. Record only what we can prove</h2>
+<fieldset class="card"><legend><strong>Original character lines and design</strong></legend>
+<div class="grid">
+<label for="artDecision">Owner comparison status<select id="artDecision"><option value="hold">HOLD · not compared</option><option value="owner_compared">Owner compared against approved original</option></select></label>
+<label for="originalPng">Original PNG/source reference<input id="originalPng" placeholder="Original approved PNG filename or trusted reference"></label>
+<label for="artComparison">Comparison evidence location<input id="artComparison" placeholder="Private comparison reference / date"></label>
+</div>
+<label for="geometryNote">Visual geometry review notes<textarea id="geometryNote" placeholder="Confirm lines, wings, horn, tail, eyes, silhouette, emblem and colour-only changes; record any mismatch."></textarea></label>
+<p class="muted">For Burgundy Shadow, Ivory Dove and Silver Moon, the existing image is provisional. No release approval is inferred from an owner comparison note.</p>
+</fieldset>
+<fieldset class="card"><legend><strong>Physical prototype and actual measurement</strong></legend>
+<label class="checkbox" for="sampleObserved"><input type="checkbox" id="sampleObserved"> We have personally examined a real finished physical sample</label>
+<div class="grid"><label for="sampleRef">Physical sample reference<input id="sampleRef" placeholder="Sample ID, date, workshop photo or record"></label>
+<label for="heightMm">Height (millimetres)<input type="number" step="0.1" min="0" max="2000" id="heightMm" placeholder="Measured, not guessed"></label>
+<label for="widthMm">Width (millimetres)<input type="number" step="0.1" min="0" max="2000" id="widthMm"></label>
+<label for="depthMm">Depth (millimetres)<input type="number" step="0.1" min="0" max="2000" id="depthMm"></label></div>
+<p class="muted">Planned plush goal: approximately 8 inches (203 mm). We will record the actual measured finished size separately.</p>
+</fieldset>
+<fieldset class="card"><legend><strong>Material bill of materials (BOM)</strong></legend>
+<div class="grid">
+<label for="bomRevision">BOM version or revision<input id="bomRevision" placeholder="Example: sample-01 (not pre-approved)"></label>
+<label for="wastePercent">Allowance for waste (%)<input type="number" id="wastePercent" min="0" max="100" step="0.1" value="0"></label>
+<label for="labourMinutes">Actual labour minutes<input type="number" id="labourMinutes" min="0" step="1" value="0"></label>
+<label for="labourRate">Planning labour rate (CAD/hour)<input type="number" id="labourRate" min="0" step="0.01" value="0"></label>
+</div>
+<div class="bom"><table aria-label="Material component register"><thead><tr><th>Component and material</th><th>Supplier and lot</th><th>Unit and quantity</th><th>Unit cost (CAD)</th><th>Evidence reference</th><th>Remove</th></tr></thead><tbody id="bomRows"></tbody></table></div>
+<p><button type="button" id="addMaterial">Add component</button></p>
+<p class="muted">Only real, sourced material and supplier details belong here. CAD values are planning estimates, not accounting postings.</p>
+</fieldset>
+<fieldset class="card"><legend><strong>Care, safety and intended audience</strong></legend>
+<div class="grid">
+<label for="safetyState">Document review<select id="safetyState"><option value="not_verified">Not verified · HOLD</option><option value="documents_recorded">Original supporting documents have been recorded</option></select></label>
+<label for="safetyRef">Safety / care document reference<input id="safetyRef" placeholder="Original signed test or care document location"></label>
+<label for="ageBasis">Age use / basis<input id="ageBasis" placeholder="Actual 3+ basis, adult collectible, or unverified"></label>
+</div>
+<label for="careNote">Care and material-risk notes<textarea id="careNote" placeholder="Small parts, fibres, seams, flammability considerations, cleaning instructions, real supporting evidence."></textarea></label>
+</fieldset>
+<fieldset class="card"><legend><strong>Owner decision</strong></legend>
+<label for="reviewDecision">Evidence packet decision<select id="reviewDecision"><option value="hold">Keep on HOLD</option><option value="submit_for_independent_review">Submit complete owner packet for separate independent review</option></select></label>
+<label for="reviewNote">Factual review notes (at least 20 characters)<textarea id="reviewNote" required minlength="20" maxlength="900" placeholder="Describe exactly what we observed; note missing facts rather than guessing."></textarea></label>
+<label for="independentRef">Independent reviewer reference (optional; not automatic approval)<input id="independentRef" placeholder="External reviewer file or reference, if any"></label>
+</fieldset>
+<p class="status" id="saveStatus" role="status" aria-live="polite">No review submitted.</p>
+<p><button type="submit" id="saveReview">Save private evidence receipt</button> <button type="button" id="reloadReview">Reload original record</button></p>
+</form>
+<section class="card"><h2>3. Review history and readiness</h2><p id="historyStatus" class="muted">No owner evidence recorded.</p><ol id="receiptHistory"></ol>
+<p><a href="/admin/finished-pieces/">Finished pieces &amp; unique stock</a> · <a href="/admin/project-costs/">True project costs</a> · <a href="/admin/media-content-studio/">Source media studio</a></p>
+</section>
+</div></div></section>
+</main>
+<footer>Devil n Dove · Private planning evidence only · No stock or public product approval</footer>
+<script src="/public/js/auth.js?v=467" defer></script>
+<script src="/public/js/admin-dovlin-readiness-744.js?v=467b744" defer></script>
+</body></html>

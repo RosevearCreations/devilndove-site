@@ -508,6 +508,21 @@ export async function onRequest(context) {
   context.data.ddModuleAccess = access;
   context.data.ddModuleRelease = CURRENT_RELEASE;
   if (!access.allowed) return finish(moduleUnavailableResponse(access, { api: isApiPath(pathname) }), request, { moduleKey }, env);
+  // Build 744: even a member with incidental Creator-module visibility must
+  // never receive the Dovlin private owner evidence workbench. The API has
+  // its own verifiedAdminFromModule check as a second enforcement boundary.
+  if (normalizedPagePath(pathname) === '/admin/dovlin-readiness/' &&
+    (!access.user || String(access.user.role || '').toLowerCase() !== 'admin' ||
+     Number(access.user.is_active || 0) !== 1)) {
+    return finish(new Response('<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="robots" content="noindex,nofollow"><title>Admin access required</title></head><body><main><h1>Admin access required</h1><p>This private Dovlin workshop is available only to verified Devil n Dove administrators.</p><p><a href="/login/">Sign in</a></p></main></body></html>', {
+      status: 403, headers: {
+        'Content-Type': 'text/html; charset=utf-8',
+        'Cache-Control': 'private, no-store',
+        'X-Robots-Tag': 'noindex,nofollow',
+        'X-Content-Type-Options': 'nosniff',
+      },
+    }), request, { moduleKey }, env);
+  }
   if (isApiPath(pathname) && access.access_level === 'read' && !isReadMethod(request.method)) {
     return finish(readOnlyDeniedResponse(access), request, { moduleKey }, env);
   }
