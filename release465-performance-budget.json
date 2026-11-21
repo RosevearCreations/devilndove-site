@@ -16,8 +16,8 @@
     "max_js_bytes": 600000,
     "max_css_bytes": 500000,
     "max_html_bytes": 500000,
-    "max_runtime_source_bytes": 19857000,
-    "max_runtime_source_files": 1869,
+    "max_runtime_source_bytes": 19925000,
+    "max_runtime_source_files": 1873,
     "max_inline_data_uri_bytes": 650000
   },
   "baseline_observed": {
@@ -33,6 +33,30 @@
     "production_mutation": false
   },
   "budget_reviews": [
+    {
+      "build": "744-feature-completion",
+      "date": "2026-11-21",
+      "scope": "Four private, on-demand Creator/Admin Dovlin evidence runtime files: source-pinned 68-concept manifest module, 1 verified-Admin private app_settings evidence API, 1 on-demand responsive Admin page and 1 on-demand browser client. The existing Admin home and module route map receive small targeted navigation/auth changes. Full original art and physical BOM evidence stays unverified unless entered by the owner, no automatic sale or inventory.",
+      "prior_limit_bytes": 19857000,
+      "new_limit_bytes": 19925000,
+      "delta_bytes": 68000,
+      "prior_file_limit": 1869,
+      "new_file_limit": 1873,
+      "delta_files": 4,
+      "measured_runtime_bytes": 19919208,
+      "measured_runtime_files": 1873,
+      "measured_system_gate_run": 44915185184,
+      "measured_overage_bytes": 62208,
+      "measured_remaining_headroom_bytes": 5792,
+      "per_file_js_css_html_limits_unchanged": true,
+      "inline_data_uri_limit_unchanged": true,
+      "review_reason": "Exact reviewed PR #996 System Gate run #44915185184 measured 19,919,208 source bytes / 1,873 files against Release 465 limits 19,857,000 / 1,869, failing closed by 62,208 bytes / four files. Four intentionally added on-demand private review files are not loaded on Home or Shop and do not expand customer startup payload. This explicit +68,000 source bytes / +4 source files (approximately 0.342 percent) leaves 5,792 measured headroom, preserves individual JS/CSS/HTML, inline-data-URI, original security, D1 migration and protected dev/main/Cloudflare production gates. No schema migration, SKU publication, inventory, customer mail, provider execution or account ledger write.",
+      "public_home_extra_scripts": false,
+      "physical_samples_actually_verified": false,
+      "original_png_fidelity_independently_approved": false,
+      "real_inventory_created": false,
+      "production_financial_posting": false
+    },
     {
       "build": 741,
       "date": "2026-11-19",

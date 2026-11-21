@@ -118,6 +118,7 @@ const STOREFRONT_ADMIN_PAGES = Object.freeze([
   '/admin/public-display-order',
 ]);
 const CREATOR_ADMIN_PAGES = Object.freeze([
+  '/admin/dovlin-readiness',
   '/admin/project-work-orders',
   '/admin/workshop-production',
   '/admin/creative-project',
@@ -228,6 +229,7 @@ const STOREFRONT_ADMIN_APIS = Object.freeze([
   '/api/admin/contracts/inventory-',
 ]);
 const CREATOR_ADMIN_APIS = Object.freeze([
+  '/api/admin/dovlin-readiness-744',
   '/api/admin/project-work-orders',
   '/api/admin/workshop-production-657',
   '/api/admin/creative',

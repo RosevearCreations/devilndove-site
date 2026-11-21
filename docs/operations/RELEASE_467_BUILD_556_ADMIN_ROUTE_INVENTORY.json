@@ -16,11 +16,11 @@
     "Settings & Configuration"
   ],
   "totals": {
-    "total": 158,
+    "total": 159,
     "keep": 5,
     "improve": 4,
     "rebuild": 0,
-    "review": 149
+    "review": 150
   },
   "routes": [
     {
@@ -30,7 +30,7 @@
       "reference_screen": "Admin Dashboard",
       "reason": "Existing Admin dashboard already received a dedicated shell/hero modernization. Preserve until owner review.",
       "evidence": {
-        "byte_length": 25224,
+        "byte_length": 25682,
         "stylesheets": 5,
         "scripts": 12,
         "forms": 0,
@@ -529,6 +529,21 @@
         "stylesheets": 1,
         "scripts": 9,
         "forms": 0,
+        "has_viewport": true
+      },
+      "owner_visual_acceptance": "PENDING"
+    },
+    {
+      "route": "/admin/dovlin-readiness/",
+      "source": "admin/dovlin-readiness/index.html",
+      "decision": "REVIEW",
+      "reference_screen": "Unassigned / contextual module",
+      "reason": "Not individually approved for a revamp; inspect actual signed-in UI and owner acceptance before changing.",
+      "evidence": {
+        "byte_length": 11975,
+        "stylesheets": 2,
+        "scripts": 2,
+        "forms": 1,
         "has_viewport": true
       },
       "owner_visual_acceptance": "PENDING"
