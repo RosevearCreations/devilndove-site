@@ -16,7 +16,7 @@
     "max_js_bytes": 600000,
     "max_css_bytes": 500000,
     "max_html_bytes": 500000,
-    "max_runtime_source_bytes": 19925000,
+    "max_runtime_source_bytes": 19935000,
     "max_runtime_source_files": 1873,
     "max_inline_data_uri_bytes": 650000
   },
@@ -33,6 +33,29 @@
     "production_mutation": false
   },
   "budget_reviews": [
+    {
+      "build": "745",
+      "date": "2026-11-21",
+      "scope": "Expand only the existing, protected Storefront Customer Journey Acceptance Admin HTML and JS with an explicitly clicked seven-route public buyer preflight (Shop/Cart/Checkout/Pickup/Contact/Terms/Help), protected JSON evidence export and privacy-safe GETs. No Dovlin source, art, pages or menu restoration. No customer, Product, D1, payment, provider or Worker mutations. No new runtime files.",
+      "prior_limit_bytes": 19925000,
+      "new_limit_bytes": 19935000,
+      "delta_bytes": 10000,
+      "prior_file_limit": 1873,
+      "new_file_limit": 1873,
+      "delta_files": 0,
+      "measured_existing_runtime_bytes": 19919208,
+      "measured_existing_runtime_files": 1873,
+      "source_system_gate_run": 44915619761,
+      "expected_delta_bytes": 8421,
+      "projected_runtime_bytes": 19927629,
+      "projected_remaining_headroom_bytes": 7371,
+      "per_file_js_css_html_limits_unchanged": true,
+      "inline_data_uri_limit_unchanged": true,
+      "review_reason": "Exact previously accepted Build744 merged Dev System Gate #44915619761 measured 19,919,208 bytes / 1,873 files. Build745 adds approximately 8.4KB to only two already existing Admin-only source files; no browser public page or JS additions and unchanged 1,873 runtime file count. Narrow +10,000-byte increase (0.05% of pre-existing limit) retains 7.3KB projected headroom, single-file caps, no data URI increase and all original security, branch, D1, Cloudflare and live integrity gates. Build745 action is click-to-inspect, not an automatic public-site fetch or simulated commercial approval.",
+      "no_live_customer_transaction": true,
+      "owner_device_acceptance_pending": true,
+      "dovlin_release_held": true
+    },
     {
       "build": "744-feature-completion",
       "date": "2026-11-21",
