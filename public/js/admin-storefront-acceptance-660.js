@@ -162,11 +162,11 @@
   if(!buyerProof745)return;
   const blob=new Blob([JSON.stringify(buyerProof745,null,2)+'\n'],
    {type:'application/json;charset=utf-8'});
-  const href=URL.createObjectURL(blob);
+  const href=window.URL.createObjectURL(blob);
   try{const a=document.createElement('a');a.href=href;
    a.download='devilndove-buyer-preflight-745-'+buyerProof745.finished_at.slice(0,10)+'.json';
    a.hidden=true;document.body.append(a);a.click();a.remove();
-  }finally{setTimeout(()=>URL.revokeObjectURL(href),2500);}
+  }finally{setTimeout(()=>window.URL.revokeObjectURL(href),2500);}
  }
  $('a745Run')?.addEventListener('click',buyerStart745);
  $('a745Export')?.addEventListener('click',exportBuyer745);
