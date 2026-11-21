@@ -7,6 +7,7 @@ on:
       - 'functions/api/admin/dovlin-readiness-744.js'
       - 'functions/api/_lib/dovlinSource744.mjs'
       - 'functions/api/_lib/appModuleRoutes.js'
+      - 'functions/_middleware.js'
       - 'public/js/admin-dovlin-readiness-744.js'
       - 'scripts/build744_dovlin_*'
       - '.github/workflows/build744-dovlin-private-readiness.yml'
@@ -18,6 +19,7 @@ on:
       - 'functions/api/admin/dovlin-readiness-744.js'
       - 'functions/api/_lib/dovlinSource744.mjs'
       - 'functions/api/_lib/appModuleRoutes.js'
+      - 'functions/_middleware.js'
       - 'public/js/admin-dovlin-readiness-744.js'
       - 'scripts/build744_dovlin_*'
       - '.github/workflows/build744-dovlin-private-readiness.yml'
@@ -56,6 +58,9 @@ jobs:
           routes=Path('functions/api/_lib/appModuleRoutes.js').read_text()
           assert "'/admin/dovlin-readiness'" in routes
           assert "'/api/admin/dovlin-readiness-744'" in routes
+          middleware=Path('functions/_middleware.js').read_text()
+          assert "normalizedPagePath(pathname) === '/admin/dovlin-readiness/'" in middleware
+          assert "String(access.user.role || '').toLowerCase() !== 'admin'" in middleware
           admin=Path('admin/index.html').read_text()
           assert 'href="/admin/dovlin-readiness/"' in admin
           html=Path('admin/dovlin-readiness/index.html').read_text()
