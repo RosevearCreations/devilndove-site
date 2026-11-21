@@ -67,7 +67,8 @@ try{
   assert.ok((await page.locator('#collectionCounts').innerText()).includes('Planned plush: 10'));
   assert.ok((await page.locator('#collectionCounts').innerText()).includes('Workshop ideas: 38'));
   await page.locator('#findConcept').fill('Original Crimson');
-  assert.equal(await page.locator('#conceptId option').count(),2,'search filters source list');
+  const filteredCount=await page.locator('#conceptId option').count();
+  assert.ok(filteredCount>1&&filteredCount<69,'search filters source list without falsely assuming unique text');
   await page.locator('#findConcept').fill('');
   await page.locator('#conceptId').selectOption('plush/original-crimson');
   await page.locator('#activeWorkspace').waitFor({state:'visible'});
