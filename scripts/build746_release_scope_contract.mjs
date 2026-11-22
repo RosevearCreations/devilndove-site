@@ -13,7 +13,8 @@ assert.equal(moduleKeyForPath('/api/admin/after-sale-746'),MODULE_KEYS.STOREFRON
 const lean=middleware.indexOf("normalizedPath === '/admin/storefront-acceptance/'");
 const heavy=middleware.indexOf("let rewriter = new HTMLRewriter()");
 assert.ok(lean>0&&heavy>lean,'Lean route must precede optional heavy HTML rewriting');
-assert.ok(middleware.includes("['/admin/dovlin-readiness/','/admin/storefront-acceptance/']"));
+assert.ok(middleware.includes("normalizedPagePath(pathname) === '/admin/dovlin-readiness/'"));
+assert.ok(middleware.includes("normalizedPagePath(pathname) === '/admin/storefront-acceptance/'"));
 assert.ok(middleware.includes("String(access.user.role || '').toLowerCase() !== 'admin'"));
 assert.ok(middleware.includes("Cache-Control','private, no-store, max-age=0'"));
 assert.ok(middleware.includes("withScriptNonceCsp(platform, request)"),'Admin lean route must keep CSP');
