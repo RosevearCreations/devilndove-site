@@ -59,7 +59,7 @@ try {
   await page.waitForFunction(()=>document.querySelector('#a746SaveStatus')?.textContent?.includes('Private case receipt saved'),{timeout:20000});
   assert.equal(posts,1);
   assert.equal(version,1);
-  assert.ok((await page.locator('#a746History').innerText()).includes('pickup_coordination'));
+  assert.ok((await page.locator('#a746History').textContent()).includes('pickup_coordination'));
   await page.locator('#a660Id').fill('92');
   await page.locator('#a746Load').click();
   await page.waitForFunction(()=>document.querySelector('#a746Status')?.textContent?.includes('HOLD:'));
