@@ -1,0 +1,22 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex,nofollow"><title>Customer Journey Recovery — Devil n Dove Admin</title>
+<style>body{background:#151727;color:#faf0ff;font:16px system-ui,sans-serif;margin:0}
+main{max-width:850px;margin:2rem auto;padding:1.25rem;box-sizing:border-box;width:95%}
+section{background:#292940;border:1px solid #8880a6;border-radius:14px;padding:1.2rem;margin:1rem 0}
+a{color:#f5d1ff}button{background:#7648a1;color:white;padding:.8rem 1rem;border:1px solid #e9c1fc;border-radius:8px;margin:.3rem}
+button:disabled{opacity:.5}p,li{line-height:1.5;overflow-wrap:anywhere}:focus-visible{outline:3px solid #ffdf97;outline-offset:3px}
+</style></head><body data-admin-module="storefront" data-admin-page="customer-journey-recovery-748">
+<main><nav aria-label="Recovery navigation"><a href="/admin/">Admin</a> ·
+<a href="/admin/storefront-acceptance/">Customer Journey workspace</a></nav>
+<h1>Customer Journey · lightweight recovery</h1>
+<p>This minimal Admin-only route is for diagnosing a stuck Customer Journey page without loading its normal Admin panels. It does not bypass authentication, retrieve customer records or perform business actions.</p>
+<section><h2>Read-only browser recovery</h2>
+<p>Use Firefox or another browser to check seven public storefront routes. Click-to-run GET requests omit credentials and have a 6.5-second maximum each. A result only confirms page structure, not payment or customer acceptance.</p>
+<button id="a748Probe" type="button">Run bounded public-route diagnostic</button>
+<button id="a748Export" type="button" disabled>Export privacy-safe JSON</button>
+<p id="a748ProbeStatus" role="status" aria-live="polite">No diagnostic run; no background requests.</p>
+<ol id="a748ProbeRows"></ol></section>
+<p><a href="/admin/storefront-acceptance/">Return to Customer Journey</a> ·
+<a href="/admin/">Return to Admin</a></p></main>
+<script defer src="/public/js/admin-journey-recovery-748.js?v=748"></script>
+</body></html>

@@ -90,6 +90,7 @@ export const SHARED_SERVICE_CONTRACTS = Object.freeze([
   }),
 ]);
 const STOREFRONT_ADMIN_PAGES = Object.freeze([
+  '/admin/customer-journey-recovery',
   '/admin/storefront-acceptance',
   '/admin/physical-stock',
   '/admin/catalog',
@@ -203,6 +204,7 @@ const ETSY_OPERATOR_ADMIN_APIS = Object.freeze([
   '/api/admin/product-channel-intent',
 ]);
 const STOREFRONT_ADMIN_APIS = Object.freeze([
+  '/api/admin/customer-journey-closure-748',
   '/api/admin/customer-journey-747',
   '/api/admin/after-sale-746',
   '/api/admin/storefront-acceptance-660',
