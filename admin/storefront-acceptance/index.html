@@ -39,7 +39,29 @@ body{background:#151727;color:#faf0ff}.a660{max-width:1100px;width:94%;margin:2r
 <div class="scroll"><table aria-label="Live storefront page and script checks"><thead><tr><th>Customer step</th><th>Live structure</th><th>Essential script</th><th>What we can verify</th><th>Open the live step</th></tr></thead><tbody id="a745Results"><tr><td colspan="5">Use Inspect to gather the current public route evidence.</td></tr></tbody></table></div>
 <p class="hold" id="a745Limits">A passing page/script check is not an approved purchase, payment, carrier transaction, refund, accessibility certification or independent customer observation. These remain HOLD until we personally test them. No information from the unreleased Dovlin collection is inspected or exposed here.</p>
 </section>
-<section><h2>5. What still needs independent acceptance?</h2><ul>
+<section id="a746AfterSale" aria-labelledby="a746Heading">
+<h2 id="a746Heading">5. Customer Support, Returns &amp; Pickup Coordination</h2>
+<p>Build 746 · Review the <strong>original saved Order ID from section 3</strong>. Record a private, factual support, return-request or pickup-coordination follow-up without changing the original order, customer data, payment, delivery or refund. We only see status and private evidence references here; no customer email or address is displayed.</p>
+<p><button id="a746Load" type="button">Load after-sale case for the Order ID above</button></p>
+<p id="a746Status" role="status" aria-live="polite">No after-sale case loaded. Existing order source required.</p>
+<div id="a746Order" class="grid" aria-label="Original order source and after-sale cases"></div>
+<form id="a746CaseForm" hidden>
+<h3>Record one real follow-up</h3>
+<div class="grid">
+<label>Case category<select id="a746CaseType" required><option value="customer_support">Customer support inquiry</option><option value="return_request">Return request received</option><option value="pickup_coordination">Pickup coordination</option></select></label>
+<label>Operator work stage<select id="a746Stage" required><option value="received">Received — requires follow-up</option><option value="needs_original_evidence">Waiting for original evidence</option><option value="working">In progress — no external outcome confirmed</option><option value="handoff_recorded">Handoff note recorded with evidence</option></select></label>
+</div>
+<label for="a746EvidenceRef">Source reference (required for a handoff; not proof of external completion)</label>
+<input id="a746EvidenceRef" maxlength="220" autocomplete="off" placeholder="Example: internal receipt/file reference; no customer personal information">
+<label for="a746Notes">Factual internal case note (20–800 characters)</label>
+<textarea id="a746Notes" rows="4" minlength="20" maxlength="800" required placeholder="Describe the real customer request and the next manual task. Do not record names, emails or addresses."></textarea>
+<p><button id="a746Save" type="submit">Save a private case receipt</button><button id="a746Reset" type="button">Reload current case</button></p>
+</form>
+<p id="a746SaveStatus" role="status" aria-live="polite">No case evidence submitted.</p>
+<details><summary>Private case receipt history (most recent first)</summary><ol id="a746History"></ol></details>
+<p class="hold">A recorded return request does not authorize a refund; a pickup note does not schedule collection; a support note does not send a reply. Independent provider, customer and carrier confirmation remain HOLD. Live customer data is never used for automated test actions.</p>
+</section>
+<section><h2>6. What still needs independent acceptance?</h2><ul>
 <li>Real device, browser, date and role observations.</li>
 <li>Actual provider settlement/refusal evidence beyond database status.</li>
 <li>Carrier rates, service and delivery acceptance.</li>
@@ -47,4 +69,5 @@ body{background:#151727;color:#faf0ff}.a660{max-width:1100px;width:94%;margin:2r
 <li>Independent Master Shell source/actor acceptance; no automatic 100%.</li>
 </ul><p class="hold">No synthetic transactions, payment capture/refund, external shipping action, personal-data export or automatic Master Shell event is performed by this desk.</p></section>
 </main><script defer src="/public/js/auth.js?v=467"></script><script defer src="/public/js/admin-storefront-acceptance-660.js?v=660"></script>
+<script defer src="/public/js/admin-after-sale-746.js?v=746"></script>
 <script type="module" src="/public/js/admin-shell-467.js?v=467b467"></script></body></html>

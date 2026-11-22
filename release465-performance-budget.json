@@ -16,8 +16,8 @@
     "max_js_bytes": 600000,
     "max_css_bytes": 500000,
     "max_html_bytes": 500000,
-    "max_runtime_source_bytes": 19935000,
-    "max_runtime_source_files": 1873,
+    "max_runtime_source_bytes": 19957000,
+    "max_runtime_source_files": 1875,
     "max_inline_data_uri_bytes": 650000
   },
   "baseline_observed": {
@@ -33,6 +33,32 @@
     "production_mutation": false
   },
   "budget_reviews": [
+    {
+      "build": "746",
+      "date": "2026-11-21",
+      "scope": "Repair actual Admin Customer Journey page hang by preserving central session/Storefront module/CSRF/CSP yet skipping large optional HTMLRewriter enhancement on `/admin/storefront-acceptance/` (exact pathname including tracked `utm_source` query). Add one new on-demand Storefront Admin original-order after-sale case API (`/api/admin/after-sale-746`) and one on-demand original-order case journal client (`admin-after-sale-746.js`) in the already-existing Admin page. Manual source-linked support/return/pickup follow-up receipts, no automatic customer or payment action, all Dovlin resources and hidden menu remain unchanged.",
+      "measured_baseline_development_sha": "834c5928c490ab0b1dc867f2beeac8c6aa3fe21c",
+      "measured_baseline_system_gate_run": 44941670796,
+      "measured_baseline_runtime_source_bytes": 19927687,
+      "measured_baseline_runtime_files": 1873,
+      "prior_limit_bytes": 19935000,
+      "new_limit_bytes": 19957000,
+      "delta_bytes": 22000,
+      "prior_file_limit": 1873,
+      "new_file_limit": 1875,
+      "delta_files": 2,
+      "expected_added_runtime_bytes": 18150,
+      "projected_runtime_source_bytes": 19945837,
+      "projected_remaining_headroom_bytes": 11163,
+      "per_file_js_css_html_limits_unchanged": true,
+      "inline_data_uri_limit_unchanged": true,
+      "new_customer_facing_scripts": false,
+      "admin_only_on_demand": true,
+      "no_live_orders_or_customer_test_data": true,
+      "no_external_refund_or_pickup_execution": true,
+      "no_original_Dovlin_design_changes": true,
+      "review_reason": "Strict Build745 System Gate run #44941670796 measured 19,927,687 bytes / 1,873 runtime files. Add one 8.9KB Admin API and one 5.6KB Admin JS plus ~3KB of existing HTML and middleware/access-route edits. This explicit +22KB cap is ~0.11% of baseline; newly measured source bytes must pass the unchanged comprehensive CI gate. Independent file-size, auth, D1, CI, Cloudflare promotion and live-resource checks remain intact."
+    },
     {
       "build": "745",
       "date": "2026-11-21",

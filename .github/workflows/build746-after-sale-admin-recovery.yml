@@ -1,0 +1,81 @@
+name: Build 746 Customer Care After-Sale and Admin Hang Recovery
+on:
+  pull_request:
+    paths:
+      - 'functions/_middleware.js'
+      - 'functions/api/_lib/appModuleRoutes.js'
+      - 'functions/api/admin/after-sale-746.js'
+      - 'public/js/admin-after-sale-746.js'
+      - 'admin/storefront-acceptance/index.html'
+      - 'docs/operations/RELEASE_467_BUILD_556_ADMIN_ROUTE_INVENTORY.json'
+      - 'release465-performance-budget.json'
+      - 'scripts/build746_*'
+      - '.github/workflows/build746-after-sale-admin-recovery.yml'
+  push:
+    branches: [dev, main]
+    paths:
+      - 'functions/_middleware.js'
+      - 'functions/api/_lib/appModuleRoutes.js'
+      - 'functions/api/admin/after-sale-746.js'
+      - 'public/js/admin-after-sale-746.js'
+      - 'admin/storefront-acceptance/index.html'
+      - 'docs/operations/RELEASE_467_BUILD_556_ADMIN_ROUTE_INVENTORY.json'
+      - 'release465-performance-budget.json'
+      - 'scripts/build746_*'
+      - '.github/workflows/build746-after-sale-admin-recovery.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  original-order-admin-security:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: '24'
+      - name: Parse, static original source and no-Dovlin acceptance
+        run: |
+          node --check functions/_middleware.js
+          node --check functions/api/admin/after-sale-746.js
+          node --check public/js/admin-after-sale-746.js
+          node --check scripts/build746_after_sale_api_contract.mjs
+          node --check scripts/build746_after_sale_browser_qa.mjs
+          node scripts/build746_release_scope_contract.mjs
+      - name: Prove live Order requirement, Admin grants, idempotency and no refund or shipping mutations
+        run: node scripts/build746_after_sale_api_contract.mjs
+
+  original-admin-browser-recovery:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: '24'
+      - name: Install real Chromium desktop/mobile browser
+        run: |
+          npm init -y >/dev/null
+          npm install --no-save --package-lock=false playwright@1.56.1
+          npx playwright install --with-deps chromium
+      - name: Host reviewed HTML and JS with no backend or real login
+        run: |
+          python3 -m http.server 18746 --bind 127.0.0.1 >/tmp/b746-http.log 2>&1 &
+          for i in 1 2 3 4 5; do
+            if curl -fsS http://127.0.0.1:18746/admin/storefront-acceptance/ >/dev/null; then exit 0; fi
+            sleep 1
+          done
+          cat /tmp/b746-http.log
+          exit 1
+      - name: Tracked Admin URL, after-sale UI, error HOLD and zero unsolicited mutations
+        env:
+          DD_ORIGIN: http://127.0.0.1:18746
+        run: node scripts/build746_after_sale_browser_qa.mjs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: build746-admin-recovery-desktop-mobile
+          path: /tmp/dnd-build746-*.png
+          retention-days: 7
+          if-no-files-found: ignore

@@ -255,6 +255,17 @@ async function withPlatformClient(response, request, env = {}) {
     headers.set('X-DND-Admin-Home-Mode','build398-lean-manual-read');
     return new Response(response.body,{status:response.status,statusText:response.statusText,headers});
   }
+  // Build 746 — Customer Journey Acceptance must paint promptly on original
+  // authenticated Production visits, including query-tracked direct links.
+  // Only bypass decorative PWA/observability/HTML enhancement: central
+  // session, module permissions, CSRF, and CSP remain active in onRequest/finish.
+  if (normalizedPath === '/admin/storefront-acceptance/') {
+    const headers=new Headers(response.headers);
+    headers.set('Cache-Control','private, no-store, max-age=0');
+    headers.set('X-DND-Admin-Journey-Mode','lean-authorized-b746');
+    headers.set('X-Robots-Tag','noindex,nofollow,noarchive');
+    return new Response(response.body,{status:response.status,statusText:response.statusText,headers});
+  }
   const isProductsPage = normalizedPath === '/admin/products/';
   if (isProductsPage) {
     if (response.status >= 200 && response.status < 400) return withProductsFastPlatformClient(response);
@@ -508,13 +519,14 @@ export async function onRequest(context) {
   context.data.ddModuleAccess = access;
   context.data.ddModuleRelease = CURRENT_RELEASE;
   if (!access.allowed) return finish(moduleUnavailableResponse(access, { api: isApiPath(pathname) }), request, { moduleKey }, env);
-  // Build 744: even a member with incidental Creator-module visibility must
+  // Builds 744/746: even a member with incidental Storefront or Creator-module visibility must
   // never receive the Dovlin private owner evidence workbench. The API has
   // its own verifiedAdminFromModule check as a second enforcement boundary.
-  if (normalizedPagePath(pathname) === '/admin/dovlin-readiness/' &&
+  if ((normalizedPagePath(pathname) === '/admin/dovlin-readiness/' ||
+       normalizedPagePath(pathname) === '/admin/storefront-acceptance/') &&
     (!access.user || String(access.user.role || '').toLowerCase() !== 'admin' ||
      Number(access.user.is_active || 0) !== 1)) {
-    return finish(new Response('<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="robots" content="noindex,nofollow"><title>Admin access required</title></head><body><main><h1>Admin access required</h1><p>This private Dovlin workshop is available only to verified Devil n Dove administrators.</p><p><a href="/login/">Sign in</a></p></main></body></html>', {
+    return finish(new Response('<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="robots" content="noindex,nofollow"><title>Admin access required</title></head><body><main><h1>Admin access required</h1><p>This private Admin workspace is available only to verified Devil n Dove administrators.</p><p><a href="/login/">Sign in</a></p></main></body></html>', {
       status: 403, headers: {
         'Content-Type': 'text/html; charset=utf-8',
         'Cache-Control': 'private, no-store',
