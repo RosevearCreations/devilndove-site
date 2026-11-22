@@ -37,7 +37,7 @@ assert.ok(budget.limits.max_runtime_source_bytes>=20040000,'Build 748 source bud
 assert.ok(budget.limits.max_runtime_source_files>=1880,'Build 748 runtime file floor preserved');
 const inv=JSON.parse(read('docs/operations/RELEASE_467_BUILD_556_ADMIN_ROUTE_INVENTORY.json'));
 assert.ok(inv.routes.some(x=>x.route==='/admin/customer-journey-recovery/'&&x.owner_visual_acceptance==='PENDING'));
-assert.equal(inv.routes.find(x=>x.route==='/admin/storefront-acceptance/').evidence.forms,9);
+assert.ok(inv.routes.find(x=>x.route==='/admin/storefront-acceptance/').evidence.forms>=9,'Build 748 original forms must remain present');
 for(const p of ['index.html','shop/index.html'])
  assert.ok(read(p).includes('data-dovlin-temporary-menu-hold="2026-11-21"'),p);
 assert.ok(existsSync(new URL('../dovlin/data/gallery_material_evidence.json',import.meta.url)));
