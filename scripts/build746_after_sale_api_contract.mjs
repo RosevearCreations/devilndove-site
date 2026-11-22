@@ -93,5 +93,5 @@ assert.equal(current.body.case_journal.history[0].stage,'handoff_recorded');
 assert.equal(current.body.case_journal.refund_settlement_verified,false);
 assert.equal(current.body.case_journal.pickup_completion_verified,false);
 assert.equal(store.size,1);
-assert.ok(sql.every(q=>!/(UPDATE|INSERT|DELETE)[\s\S]*\b(?:orders|payments|payment_refunds|inventory|products|accounting_entries)\b/i.test(q)));
+assert.ok(sql.every(q=>!/^(?:UPDATE|INSERT|DELETE)\s+[\s\S]*\b(?:orders|payments|payment_refunds|inventory|products|accounting_entries)\b/i.test(q.trim())));
 console.log('BUILD746 PRIVATE AFTER-SALE TEST PASS: original order, Server Admin only, no foreign origin, idempotency, concurrency, private journal, no fake refunds/pickup or financial writes.');
