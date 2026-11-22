@@ -5,6 +5,7 @@
 body{background:#151727;color:#faf0ff}.a660{max-width:1100px;width:94%;margin:2rem auto 5rem}.a660 a{color:#f5d1ff}
 .a660 section{background:#292940;border:1px solid #8880a6;border-radius:16px;margin:1rem 0;padding:1rem 1.3rem}
 .a660 .links{display:flex;gap:1rem;flex-wrap:wrap}.a660 .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:1rem}
+.a660 textarea,.a660 select{box-sizing:border-box;width:100%;padding:.7rem;background:#101323;color:white;border:1px solid #afa6d7;border-radius:8px}
 .a660 input{box-sizing:border-box;width:100%;padding:.7rem;background:#101323;color:white;border:1px solid #afa6d7;border-radius:8px}
 .a660 label{display:block;font-weight:600;margin:.5rem 0}.a660 button{border:1px solid #e9c1fc;border-radius:8px;background:#7648a1;color:white;cursor:pointer;padding:.75rem 1rem;margin:.3rem .5rem .3rem 0}
 .a660 button:disabled{opacity:.5}.a660 .hold{color:#ffe2a4}.a660 li{margin:.5rem 0;overflow-wrap:anywhere}
@@ -68,6 +69,46 @@ body{background:#151727;color:#faf0ff}.a660{max-width:1100px;width:94%;margin:2r
 <li>Authorized customer returns/refunds and original receipts.</li>
 <li>Independent Master Shell source/actor acceptance; no automatic 100%.</li>
 </ul><p class="hold">No synthetic transactions, payment capture/refund, external shipping action, personal-data export or automatic Master Shell event is performed by this desk.</p></section>
+
+<section id="a747Journey" aria-labelledby="a747Heading" data-build747-original-acceptance="1">
+<h2 id="a747Heading">7. Production diagnostics, cross-device evidence and after-sale handover</h2>
+<p>Build 747 · Diagnostics run only when clicked and do not contact the server. Device observations and independent after-sale reviews use private, versioned Admin evidence. They do not prove payment, shipment, customer experience or a provider outcome. Keep names, emails, phone numbers and addresses out of notes and references.</p>
+<h3>Local loading diagnostic (no network request)</h3>
+<button type="button" id="a747Local">Capture this page's diagnostic snapshot</button>
+<button type="button" id="a747Export" disabled>Export privacy-safe diagnostic JSON</button>
+<ul id="a747Diagnostics" aria-label="Local page diagnostic findings"></ul>
+<p id="a747Status" role="status" aria-live="polite">No local diagnosis or private evidence requested. All external outcomes HOLD.</p>
+<h3>Private source-backed device and review ledger</h3>
+<button type="button" id="a747Load">Load private device/handover evidence</button>
+<details><summary>Original private receipts and IDs</summary><ol id="a747Receipts"></ol></details>
+<details><summary>Seven-route cross-device review status</summary><ul id="a747Routes"></ul></details>
+<form id="a747DeviceForm"><h3>Record one genuinely observed browser/device result</h3>
+<div class="grid">
+<label>Public step<select id="a747Route"><option value="/shop/">Shop</option><option value="/cart/">Cart</option><option value="/checkout/">Checkout</option><option value="/pickup/">Pickup</option><option value="/contact/">Contact</option><option value="/terms/">Terms</option><option value="/help/">Help</option></select></label>
+<label>Physical device class<select id="a747Device"><option value="desktop">Desktop</option><option value="tablet">Tablet</option><option value="mobile">Mobile</option></select></label>
+<label>Actual browser<select id="a747Browser"><option value="firefox">Firefox</option><option value="chromium">Chromium/Chrome</option><option value="safari">Safari</option><option value="other">Other</option></select></label>
+<label>Observed decision<select id="a747Decision"><option value="hold">HOLD / problem observed</option><option value="pass">PASS — personally observed only</option></select></label>
+</div>
+<label>Original nonpersonal evidence reference<input id="a747Ref" maxlength="160" autocomplete="off" placeholder="Original screenshot or device-session reference, 8+ characters" required></label>
+<label>Factual observation, at least 20 characters<textarea id="a747Note" rows="3" maxlength="450" minlength="20" required></textarea></label>
+<button type="submit" id="a747DeviceSave">Save actual device observation</button></form>
+<form id="a747ReviewForm"><h3>Independent second-Admin review of a device observation</h3>
+<p>The same Admin cannot review their own observation. Use the source observation receipt ID above.</p>
+<label>Original device observation UUID<input id="a747ReviewId" maxlength="80" required autocomplete="off"></label>
+<label>Decision<select id="a747ReviewDecision"><option value="hold">HOLD</option><option value="pass">PASS — independently examined evidence</option></select></label>
+<label>Independent evidence reference<input id="a747ReviewRef" maxlength="160" required autocomplete="off"></label>
+<label>Factual review note<textarea id="a747ReviewNote" rows="3" maxlength="450" minlength="20" required></textarea></label>
+<button type="submit" id="a747DeviceReviewSave">Record independent device review</button></form>
+<form id="a747HandoffForm"><h3>Independent original-order after-sale handover review</h3>
+<p>Use the existing Order ID from section 3 and an actual Build 746 handoff receipt UUID from section 5. The author cannot self-review. Recording an independent internal handover does not send a customer reply, issue a refund or confirm a pickup.</p>
+<label>Original Build 746 handoff receipt UUID<input id="a747HandoffId" maxlength="80" required autocomplete="off"></label>
+<label>Review decision<select id="a747HandoffDecision"><option value="hold">HOLD — evidence missing or follow-up needed</option><option value="pass">PASS — internal handover independently reviewed</option></select></label>
+<label>Independent source reference<input id="a747HandoffRef" maxlength="160" required autocomplete="off"></label>
+<label>Review notes<textarea id="a747HandoffNote" rows="3" maxlength="450" minlength="20" required></textarea></label>
+<button type="submit" id="a747HandoffSave">Record independently reviewed handover</button></form>
+<p class="hold">Automated tests use fabricated in-memory records. No original owner Firefox acceptance, external settlement, shipping carrier action, refund or pickup completion is fabricated by this release.</p>
+</section>
 </main><script defer src="/public/js/auth.js?v=467"></script><script defer src="/public/js/admin-storefront-acceptance-660.js?v=660"></script>
 <script defer src="/public/js/admin-after-sale-746.js?v=746"></script>
+<script defer src="/public/js/admin-customer-journey-747.js?v=747"></script>
 <script type="module" src="/public/js/admin-shell-467.js?v=467b467"></script></body></html>
