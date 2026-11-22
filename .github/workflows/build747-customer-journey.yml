@@ -1,0 +1,64 @@
+name: Build 747 Customer Journey Diagnostics and Independent Handover
+on:
+  pull_request:
+    branches: [dev, main]
+    paths:
+      - 'functions/api/admin/customer-journey-747.js'
+      - 'functions/api/_lib/appModuleRoutes.js'
+      - 'public/js/admin-customer-journey-747.js'
+      - 'admin/storefront-acceptance/index.html'
+      - 'release465-performance-budget.json'
+      - 'scripts/build747_*'
+      - '.github/workflows/build747-customer-journey.yml'
+  push:
+    branches: [dev, main]
+    paths:
+      - 'functions/api/admin/customer-journey-747.js'
+      - 'functions/api/_lib/appModuleRoutes.js'
+      - 'public/js/admin-customer-journey-747.js'
+      - 'admin/storefront-acceptance/index.html'
+      - 'release465-performance-budget.json'
+      - 'scripts/build747_*'
+      - '.github/workflows/build747-customer-journey.yml'
+permissions:
+  contents: read
+jobs:
+  private-original-evidence:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: '24'
+      - name: Parse private source and client
+        run: |
+          node --check functions/api/admin/customer-journey-747.js
+          node --check public/js/admin-customer-journey-747.js
+          node scripts/build747_source_contract.mjs
+      - name: Prove mocked D1 Admin, immutable original order, two-party review and no financial actions
+        run: node scripts/build747_api_contract.mjs
+  desktop-mobile-diagnostics:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: '24'
+      - name: Install Chromium and host original Admin page
+        run: |
+          npm init -y >/dev/null
+          npm install --no-save --package-lock=false playwright@1.56.1
+          npx playwright install --with-deps chromium
+          python3 -m http.server 18747 --bind 127.0.0.1 >/tmp/b747-http.log 2>&1 &
+          for i in 1 2 3 4 5; do
+            if curl -fsS http://127.0.0.1:18747/admin/storefront-acceptance/ >/dev/null; then exit 0; fi
+            sleep 1
+          done
+          cat /tmp/b747-http.log
+          exit 1
+      - name: Desktop/mobile privacy-safe click-only acceptance
+        env:
+          DD_ORIGIN: http://127.0.0.1:18747
+        run: node scripts/build747_browser_qa.mjs

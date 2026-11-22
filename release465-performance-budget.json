@@ -16,8 +16,8 @@
     "max_js_bytes": 600000,
     "max_css_bytes": 500000,
     "max_html_bytes": 500000,
-    "max_runtime_source_bytes": 19957000,
-    "max_runtime_source_files": 1875,
+    "max_runtime_source_bytes": 19990000,
+    "max_runtime_source_files": 1877,
     "max_inline_data_uri_bytes": 650000
   },
   "baseline_observed": {
@@ -33,6 +33,24 @@
     "production_mutation": false
   },
   "budget_reviews": [
+    {
+      "build": "747",
+      "date": "2026-11-21",
+      "scope": "On-demand local diagnostic JSON and two-party, source-bound private device and after-sale handover evidence in existing Storefront Admin; zero automatic GET/POST or customer-facing JS. Real D1 app_settings CAS, authenticated Storefront Admin, original Build 746 handoff plus Order lookup, no device/provider/payment claims. Dovlin freeze preserved.",
+      "baseline_limit_bytes": 19957000,
+      "new_limit_bytes": 19990000,
+      "delta_bytes": 33000,
+      "baseline_limit_files": 1875,
+      "new_limit_files": 1877,
+      "delta_files": 2,
+      "measured_source_on_first_ci": "System Gate must independently measure; fail closed if over cap",
+      "per_file_limits_unchanged": true,
+      "inline_data_uri_limit_unchanged": true,
+      "no_public_runtime_addition": true,
+      "no_payment_or_provider_mutation": true,
+      "dovlin_source_frozen": true,
+      "review_reason": "Explicit source-growth authorization for exactly two optional Admin-only runtime modules plus bounded enhancement of one existing protected HTML screen and route mapping. Previous Build 746 limit 19,957,000 bytes / 1,875 files. Added approximately 16–22KB, with narrow 33KB cap and full independent source gate." 
+    },
     {
       "build": "746",
       "date": "2026-11-21",
