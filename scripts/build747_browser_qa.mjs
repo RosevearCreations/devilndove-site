@@ -43,7 +43,7 @@ try{
   await page.locator('#a747DeviceSave').click();
   await page.waitForFunction(()=>document.querySelector('#a747Status')?.textContent?.includes('Private evidence receipt saved'));
   assert.equal(posts,1);assert.equal(gets,2);
-  assert.match(await page.locator('#a747Receipts').innerText(),/MOCK-747/);
+  assert.match(await page.locator('#a747Receipts').textContent(),/MOCK-747/);
   assert.equal(errors.length,0,errors.join(' / '));
   assert.ok((await page.evaluate(()=>document.documentElement.scrollWidth-innerWidth))<=5,'Unexpected horizontal overflow');
   console.log('BUILD747 '+label+' PASS: tracked Admin URL, zero automatic requests, click diagnostics, one consented fake private observation, no JS errors.');
