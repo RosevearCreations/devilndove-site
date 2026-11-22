@@ -16,8 +16,8 @@
     "max_js_bytes": 600000,
     "max_css_bytes": 500000,
     "max_html_bytes": 500000,
-    "max_runtime_source_bytes": 19990000,
-    "max_runtime_source_files": 1877,
+    "max_runtime_source_bytes": 20040000,
+    "max_runtime_source_files": 1880,
     "max_inline_data_uri_bytes": 650000
   },
   "baseline_observed": {
@@ -33,6 +33,27 @@
     "production_mutation": false
   },
   "budget_reviews": [
+    {
+      "build": "748",
+      "date": "2026-11-22",
+      "scope": "Original click-to-run Firefox-compatible seven-route recovery, minimal authenticated fallback Admin route, privacy-safe local JSON, source-linked Build 746/747 original Order two-party internal care closure/reopen; no customer/provider/financial actions. Owner real-device acceptance remains HOLD pending their personal signoff; independent second-Admin only with real evidence.",
+      "measured_source_baseline": "Build747 exact protected main source and successful Development/Production release gates; first Build748 System Gate must independently measure new source",
+      "prior_limit_bytes": 19990000,
+      "new_limit_bytes": 20040000,
+      "delta_bytes": 50000,
+      "prior_file_limit": 1877,
+      "new_file_limit": 1880,
+      "delta_files": 3,
+      "expected_added_runtime_bytes": 36500,
+      "per_file_limits_unchanged": true,
+      "inline_data_uri_limit_unchanged": true,
+      "no_customer_facing_runtime_change": true,
+      "allow_new_d1_schema_migrations": false,
+      "no_provider_execution": true,
+      "no_synthetic_owner_firefox_proof": true,
+      "dovlin_hold_preserved": true,
+      "review_reason": "Three Admin-only optional runtime files: original care closure API (~17 KB), browser diagnostic/client (~10 KB), minimal fallback page (~2 KB), plus existing Admin HTML expansion and 2 small secured route changes. Explicit 50 KB source cap increment (~0.25%) with no change to individual JS/CSS/HTML or inline-data caps. All source, quality, original D1, browser, protected branch and Cloudflare gates remain enforced."
+    },
     {
       "build": "747",
       "date": "2026-11-21",
