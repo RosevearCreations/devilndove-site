@@ -1,0 +1,46 @@
+name: AIDP Build 432 Cloudflare signer provisioning
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/aidp-build432-cloudflare-signer-provision.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  provision:
+    name: Provision Cloudflare Ed25519 telemetry signer
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      CLOUDFLARE_ACCOUNT_ID: c0d5bc25df16ae5b7d47c985c4b7b787
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN_EDIT }}
+      CF_PROJECT_NAME: devilndove-site
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Generate service signer and store private key only in Cloudflare
+        shell: bash
+        run: |
+          set -euo pipefail
+          umask 077
+          openssl genpkey -algorithm ED25519 -out /tmp/build432-private.pem
+          openssl pkey -in /tmp/build432-private.pem -pubout -out /tmp/build432-public.pem
+          fingerprint="$(openssl pkey -pubin -in /tmp/build432-public.pem -outform DER | sha256sum | awk '{print $1}')"
+          public_b64="$(base64 -w0 /tmp/build432-public.pem)"
+          cat /tmp/build432-private.pem | npx --yes wrangler@4.129.0 pages secret put ROSEVEAR_SYSOP_TELEMETRY_PRIVATE_KEY_PEM --project-name="$CF_PROJECT_NAME"
+          {
+            echo "### AIDP Build 432 DEVIL signer public evidence"
+            echo ""
+            echo "- SPKI SHA-256: `$fingerprint`"
+            echo "- Public key PEM (base64): `$public_b64`"
+            echo "- Private key: stored only as encrypted Cloudflare Pages secret; not printed or committed."
+          } >> "$GITHUB_STEP_SUMMARY"
+          echo "BUILD432_DEVIL_SPKI_SHA256=$fingerprint"
+          echo "BUILD432_DEVIL_PUBLIC_KEY_PEM_B64=$public_b64"
+          shred -u /tmp/build432-private.pem || rm -f /tmp/build432-private.pem
+          rm -f /tmp/build432-public.pem
