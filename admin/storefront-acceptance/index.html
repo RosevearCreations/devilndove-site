@@ -12,7 +12,7 @@ body{background:#151727;color:#faf0ff}.a660{max-width:1100px;width:94%;margin:2r
 .a660 :is(a,button,input):focus-visible{outline:3px solid #ffdf97;outline-offset:3px}.a660 table{border-collapse:collapse;width:100%}.a660 th,.a660 td{border-bottom:1px solid #706989;text-align:left;padding:.7rem .5rem;vertical-align:top}
 .a660 .scroll{overflow-x:auto}
 </style></head><body data-admin-module="storefront" data-admin-page="storefront-acceptance-660">
-<main class="a660"><nav class="links" aria-label="Admin navigation"><a href="/admin/">Admin</a><a href="/admin/storefront/">Storefront Workspace</a><a href="/admin/module-acceptance/">Owner Device Evidence</a><a href="/admin/orders/">Orders</a></nav>
+<main class="a660"><nav class="links" aria-label="Admin navigation"><a href="/admin/">Admin</a><a href="/admin/storefront/">Storefront Workspace</a><a href="/admin/module-acceptance/">Owner Device Evidence</a><a href="/admin/orders/">Orders</a><a href="/admin/customer-journey-recovery/">Journey Recovery</a></nav>
 <h1>Customer Storefront, Checkout, Shipping &amp; Returns Acceptance</h1>
 <p>Build 660 · Customer desktop, tablet and mobile evidence. On request only, inspect original orders, payments, refunds and owner device receipts. No test purchase, charge, shipping action or refund is created. Unverified outcomes remain HOLD.</p>
 <section><h2>1. Walk through actual customer journeys</h2><div class="grid">
@@ -108,7 +108,67 @@ body{background:#151727;color:#faf0ff}.a660{max-width:1100px;width:94%;margin:2r
 <button type="submit" id="a747HandoffSave">Record independently reviewed handover</button></form>
 <p class="hold">Automated tests use fabricated in-memory records. No original owner Firefox acceptance, external settlement, shipping carrier action, refund or pickup completion is fabricated by this release.</p>
 </section>
+
+<section id="a748Journey" aria-labelledby="a748Heading" data-build748="1">
+<h2 id="a748Heading">8. Original Firefox diagnostics and independently reviewed customer care</h2>
+<p>Build 748 · This workspace never automatically fetches customer, payment, shipping or original care records. A separate lightweight <a href="/admin/customer-journey-recovery/">Customer Journey recovery page</a> is available if this screen is slow or hangs. The production browser result and two-Admin evidence must be entered by real operators; CI is not owner acceptance.</p>
+<h3>Public storefront recovery check · seven bounded GETs</h3>
+<p>Click to inspect only public Shop, Cart, Checkout, Pickup, Contact, Terms and Help structure. This does not place an order, submit a form, use a login cookie, contact providers, or prove customer checkout.</p>
+<button id="a748Probe" type="button">Run bounded public-route diagnostic</button>
+<button id="a748Export" type="button" disabled>Export privacy-safe diagnostic JSON</button>
+<p id="a748ProbeStatus" role="status" aria-live="polite">No recovery diagnostic has run.</p>
+<ol id="a748ProbeRows"></ol>
+<h3>Original private evidence and order-bound closure status</h3>
+<button id="a748EvidenceLoad" type="button">Load private Build 748 evidence</button>
+<button id="a748OrderLoad" type="button">Load original Order from section 3</button>
+<p id="a748Status" role="status" aria-live="polite">No private source loaded. Internal and external acceptance remain HOLD.</p>
+<p id="a748FirefoxStatus" role="status" aria-live="polite">Original Firefox observation has not been independently reviewed.</p>
+<details><summary>Private Build 748 receipt IDs and review history</summary><ol id="a748Receipts"></ol></details>
+<p id="a748OrderStatus" role="status" aria-live="polite">No original Order closure checked.</p>
+<details><summary>Eligible original handoff case IDs</summary><ol id="a748Handoffs"></ol></details>
+<form id="a748FirefoxForm">
+<h3>Record an observation in our actual Firefox browser</h3>
+<p class="hold">Only use this after personally opening this Production Admin page in Firefox and running the seven-route diagnostic. The browser type is client-reported and does not independently prove the physical device. If any route is on HOLD, it cannot be independently marked PASS.</p>
+<label>Original operator observation<select id="a748FirefoxDecision"><option value="hold">HOLD — loading or route problem remains</option><option value="observed">Observed — all seven structural routes passed</option></select></label>
+<label>Original local evidence or screenshot reference<input id="a748FirefoxRef" maxlength="160" autocomplete="off" required placeholder="Nonpersonal screenshot or diagnostic receipt reference"></label>
+<label>What we personally saw (20–450 characters)<textarea id="a748FirefoxNote" rows="3" minlength="20" maxlength="450" required></textarea></label>
+<label><input id="a748Confirm" type="checkbox" required style="width:auto"> I personally ran the original browser observation, rather than copying a CI result.</label>
+<button id="a748FirefoxSave" type="submit">Record Firefox observation</button></form>
+<form id="a748FirefoxReviewForm">
+<h3>Independent Admin review of original Firefox evidence</h3>
+<p>Another Admin must inspect the original evidence and may place it on HOLD. Original observer and reviewer cannot be the same account.</p>
+<label>Original Firefox observation UUID<input id="a748FirefoxId" maxlength="80" required autocomplete="off"></label>
+<label>Independent decision<select id="a748FirefoxReviewDecision"><option value="hold">HOLD — original device proof insufficient</option><option value="pass">PASS — independently examined owner observation</option></select></label>
+<label>Independent evidence reference<input id="a748FirefoxReviewRef" maxlength="160" required autocomplete="off"></label>
+<label>Second-Admin note<textarea id="a748FirefoxReviewNote" rows="3" minlength="20" maxlength="450" required></textarea></label>
+<button id="a748FirefoxReviewSave" type="submit">Record independent Firefox review</button></form>
+<form id="a748ClosureForm">
+<h3>Propose internal customer-care closure</h3>
+<p>Requires the original Order ID in section 3 and a Build 746 handoff receipt that the Build 747 independent review approved. This proposes closure of our internal follow-up only. It does not confirm any customer received a reply, pickup occurred, or refund settled.</p>
+<label>Original Build 746 handoff UUID<input id="a748CaseId" maxlength="80" required autocomplete="off"></label>
+<input type="hidden" id="a748ClosureDecision" value="request">
+<label>Source evidence reference<input id="a748ClosureRef" maxlength="160" required autocomplete="off"></label>
+<label>Factual internal closure proposal<textarea id="a748ClosureNote" rows="3" minlength="20" maxlength="450" required></textarea></label>
+<button id="a748ClosureSave" type="submit">Propose original-order care closure</button></form>
+<form id="a748ClosureReviewForm">
+<h3>Independent second-Admin closure decision</h3>
+<p>A separate Admin must review the original proposal. Any changed source Order, Build 746 case or latest Build 747 approval blocks closure and keeps it on HOLD.</p>
+<label>Original Build 748 closure proposal UUID<input id="a748ProposalId" maxlength="80" required autocomplete="off"></label>
+<label>Reviewer decision<select id="a748ClosureReviewDecision"><option value="hold">HOLD — follow-up or evidence missing</option><option value="pass">PASS — internal care handover reviewed</option></select></label>
+<label>Independent source reference<input id="a748ClosureReviewRef" maxlength="160" required autocomplete="off"></label>
+<label>Second-Admin review note<textarea id="a748ClosureReviewNote" rows="3" minlength="20" maxlength="450" required></textarea></label>
+<button id="a748ClosureReviewSave" type="submit">Record independent internal closure review</button></form>
+<form id="a748ReopenForm">
+<h3>Reopen an internally reviewed case</h3>
+<label>Original closure proposal UUID<input id="a748ReopenId" maxlength="80" required autocomplete="off"></label>
+<input type="hidden" id="a748ReopenDecision" value="reopen">
+<label>Reopen evidence reference<input id="a748ReopenRef" maxlength="160" required autocomplete="off"></label>
+<label>Reason for reopening<textarea id="a748ReopenNote" rows="3" minlength="20" maxlength="450" required></textarea></label>
+<button id="a748ReopenSave" type="submit">Reopen original case with source receipt</button></form>
+<p class="hold">Internal case closure is not payment settlement, return authorization, carrier acceptance, customer notification, original physical pickup completion or independent Master Shell acceptance. Nothing is automatically sent or billed.</p>
+</section>
 </main><script defer src="/public/js/auth.js?v=467"></script><script defer src="/public/js/admin-storefront-acceptance-660.js?v=660"></script>
 <script defer src="/public/js/admin-after-sale-746.js?v=746"></script>
 <script defer src="/public/js/admin-customer-journey-747.js?v=747"></script>
+<script defer src="/public/js/admin-journey-recovery-748.js?v=748"></script>
 <script type="module" src="/public/js/admin-shell-467.js?v=467b467"></script></body></html>

@@ -259,10 +259,11 @@ async function withPlatformClient(response, request, env = {}) {
   // authenticated Production visits, including query-tracked direct links.
   // Only bypass decorative PWA/observability/HTML enhancement: central
   // session, module permissions, CSRF, and CSP remain active in onRequest/finish.
-  if (normalizedPath === '/admin/storefront-acceptance/') {
+  if (normalizedPath === '/admin/storefront-acceptance/' ||
+       normalizedPath === '/admin/customer-journey-recovery/') {
     const headers=new Headers(response.headers);
     headers.set('Cache-Control','private, no-store, max-age=0');
-    headers.set('X-DND-Admin-Journey-Mode','lean-authorized-b746');
+    headers.set('X-DND-Admin-Journey-Mode','lean-authorized-b748');
     headers.set('X-Robots-Tag','noindex,nofollow,noarchive');
     return new Response(response.body,{status:response.status,statusText:response.statusText,headers});
   }
@@ -523,7 +524,8 @@ export async function onRequest(context) {
   // never receive the Dovlin private owner evidence workbench. The API has
   // its own verifiedAdminFromModule check as a second enforcement boundary.
   if ((normalizedPagePath(pathname) === '/admin/dovlin-readiness/' ||
-       normalizedPagePath(pathname) === '/admin/storefront-acceptance/') &&
+       normalizedPagePath(pathname) === '/admin/storefront-acceptance/' ||
+        normalizedPagePath(pathname) === '/admin/customer-journey-recovery/') &&
     (!access.user || String(access.user.role || '').toLowerCase() !== 'admin' ||
      Number(access.user.is_active || 0) !== 1)) {
     return finish(new Response('<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="robots" content="noindex,nofollow"><title>Admin access required</title></head><body><main><h1>Admin access required</h1><p>This private Admin workspace is available only to verified Devil n Dove administrators.</p><p><a href="/login/">Sign in</a></p></main></body></html>', {

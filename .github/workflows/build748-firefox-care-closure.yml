@@ -1,0 +1,75 @@
+name: Build 748 Original Firefox Recovery and Independent Customer Care Closure
+on:
+  pull_request:
+    branches: [dev, main]
+    paths:
+      - 'functions/_middleware.js'
+      - 'functions/api/_lib/appModuleRoutes.js'
+      - 'functions/api/admin/customer-journey-closure-748.js'
+      - 'public/js/admin-journey-recovery-748.js'
+      - 'admin/storefront-acceptance/index.html'
+      - 'admin/customer-journey-recovery/index.html'
+      - 'docs/operations/RELEASE_467_BUILD_556_ADMIN_ROUTE_INVENTORY.json'
+      - 'release465-performance-budget.json'
+      - 'scripts/build748_*'
+      - '.github/workflows/build748-firefox-care-closure.yml'
+  push:
+    branches: [dev, main]
+    paths:
+      - 'functions/_middleware.js'
+      - 'functions/api/_lib/appModuleRoutes.js'
+      - 'functions/api/admin/customer-journey-closure-748.js'
+      - 'public/js/admin-journey-recovery-748.js'
+      - 'admin/storefront-acceptance/index.html'
+      - 'admin/customer-journey-recovery/index.html'
+      - 'docs/operations/RELEASE_467_BUILD_556_ADMIN_ROUTE_INVENTORY.json'
+      - 'release465-performance-budget.json'
+      - 'scripts/build748_*'
+      - '.github/workflows/build748-firefox-care-closure.yml'
+permissions:
+  contents: read
+jobs:
+  original-d1-admin-security:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: '24'
+      - name: Syntax, protected source, CSP, Dovlin freeze and runtime scope
+        run: |
+          node --check functions/_middleware.js
+          node --check functions/api/admin/customer-journey-closure-748.js
+          node --check public/js/admin-journey-recovery-748.js
+          node --check scripts/build748_api_contract.mjs
+          node --check scripts/build748_firefox_browser_qa.mjs
+          node scripts/build748_source_contract.mjs
+      - name: Actual Order-bound fake D1 and two-Admin original evidence tests
+        run: node scripts/build748_api_contract.mjs
+  firefox-production-recovery-browser:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: '24'
+      - name: Install actual Firefox and Chromium browser engines
+        run: |
+          npm init -y >/dev/null
+          npm install --no-save --package-lock=false playwright@1.56.1
+          npx playwright install --with-deps firefox chromium
+      - name: Serve source-hosted original protected Admin UI with fabricated API
+        run: |
+          python3 -m http.server 18748 --bind 127.0.0.1 >/tmp/build748-http.log 2>&1 &
+          for i in 1 2 3 4 5; do
+            if curl -fsS http://127.0.0.1:18748/admin/customer-journey-recovery/ >/dev/null; then exit 0; fi
+            sleep 1
+          done
+          cat /tmp/build748-http.log
+          exit 1
+      - name: Firefox desktop/mobile, Chromium refusal and no automatic private reads
+        env:
+          DD_ORIGIN: http://127.0.0.1:18748
+        run: node scripts/build748_firefox_browser_qa.mjs
