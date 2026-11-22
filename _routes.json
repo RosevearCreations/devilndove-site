@@ -17,7 +17,8 @@
     "/custom-request",
     "/custom-request/*",
     "/members",
-    "/members/*"
+    "/members/*",
+    "/internal/rosevear/sysop/telemetry/*"
   ],
   "exclude": []
 }
