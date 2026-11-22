@@ -49,7 +49,7 @@
       "no_public_runtime_addition": true,
       "no_payment_or_provider_mutation": true,
       "dovlin_source_frozen": true,
-      "review_reason": "Explicit source-growth authorization for exactly two optional Admin-only runtime modules plus bounded enhancement of one existing protected HTML screen and route mapping. Previous Build 746 limit 19,957,000 bytes / 1,875 files. Added approximately 16–22KB, with narrow 33KB cap and full independent source gate." 
+      "review_reason": "Explicit source-growth authorization for exactly two optional Admin-only runtime modules plus bounded enhancement of one existing protected HTML screen and route mapping. Previous Build 746 limit 19,957,000 bytes / 1,875 files. Added approximately 16–22KB, with narrow 33KB cap and full independent source gate."
     },
     {
       "build": "746",

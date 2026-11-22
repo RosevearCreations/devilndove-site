@@ -78,6 +78,7 @@ export async function onRequestPost(ctx){
  let body,raw;
  try{raw=await ctx.request.text();if(raw.length>4500)throw Error('Too long');body=JSON.parse(raw);}
  catch{return respond({error:'Invalid bounded JSON receipt.'},400);}
+ if(!body||typeof body!=='object'||Array.isArray(body))return respond({error:'A JSON receipt object is required.'},400);
  const kind=short(body.kind,32),request_key=short(body.request_key,60);
  const note=privateText(body.note,20,450),source_reference=privateText(body.source_reference,8,160);
  const expected_version=Number(body.expected_version),decision=short(body.decision,16);
@@ -88,10 +89,16 @@ export async function onRequestPost(ctx){
   const {row,doc}=await load(db);
   const prior=doc.receipts.find(x=>x.request_key===request_key);
   if(prior){
-   return prior.actor_user_id===admin.user_id&&prior.kind===kind&&
-    prior.source_reference===source_reference&&prior.note===note&&prior.decision===decision
-    ?respond({replayed:true,receipt:prior,current_version:doc.version})
-    :respond({code:'KEY_CONFLICT',error:'That request key was already used.'},409);
+   const sameSource=kind==='device'?
+    prior.route===short(body.route,40)&&prior.device===short(body.device,16)&&
+    prior.browser===short(body.browser,16):
+    kind==='review_device'?prior.subject_id===short(body.subject_id,80):
+    prior.subject_id===short(body.subject_id,80)&&prior.order_id===orderId(body.order_id);
+   const exact=prior.actor_user_id===admin.user_id&&prior.kind===kind&&
+    prior.source_reference===source_reference&&prior.note===note&&
+    prior.decision===decision&&sameSource;
+   return exact?respond({replayed:true,receipt:prior,current_version:doc.version}):
+    respond({code:'KEY_CONFLICT',error:'That request key was already used for different evidence.'},409);
   }
   if(expected_version!==doc.version)return respond({code:'STALE',error:'Private journal changed. Reload before recording.'},409);
   if(doc.receipts.length>=80)return respond({code:'JOURNAL_CAP',error:'Review/archive private history before recording more evidence.'},409);
@@ -125,6 +132,8 @@ export async function onRequestPost(ctx){
    const receipt=cases.receipts.find(x=>x.receipt_id===subject&&x.stage==='handoff_recorded'&&
     typeof x.evidence_reference==='string'&&x.evidence_reference.length>=8);
    if(!receipt)return respond({code:'HANDOFF_SOURCE_REQUIRED',error:'Original handoff receipt not found or source evidence missing.'},409);
+   if(!Number.isSafeInteger(Number(receipt.owner_user_id))||Number(receipt.owner_user_id)<1)
+    return respond({code:'ORIGINAL_AUTHOR_REQUIRED',error:'Original case author identity missing.'},409);
    if(Number(receipt.owner_user_id)===admin.user_id)
     return respond({code:'INDEPENDENT_REVIEW_REQUIRED',error:'Original handoff author cannot independently review their own work.'},403);
    event.order_id=id;event.subject_id=subject;event.case_type=receipt.case_type;

@@ -59,6 +59,8 @@ const desktopId=x.data.receipt.id;
 assert.equal((await call('POST',desktop)).data.replayed,true);
 const misuse=await call('POST',{...desktop,note:'Different evidence with recycled key for this observed shop.'});
 assert.equal(misuse.status,409);
+const wrongRoute=await call('POST',{...desktop,route:'/cart/'});
+assert.equal(wrongRoute.status,409,'A reused idempotency key cannot approve another route');
 x=await call('POST',payload('review_device',1,{subject_id:desktopId}),id1);
 assert.equal(x.status,403,'No self review');
 x=await call('POST',payload('review_device',1,{subject_id:desktopId}),id2);
