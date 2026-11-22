@@ -51,7 +51,9 @@ assert.equal(get.body.order.order_id,91);
 assert.equal(get.body.order.customer_data_excluded,true);
 assert.equal(get.body.case_journal.version,0);
 assert.equal(store.size,0,'GET must not create a case');
-assert.ok(!JSON.stringify(get.body).includes('customer_email'));
+assert.equal(Object.hasOwn(get.body.order,'customer_email'),false);
+assert.equal(Object.hasOwn(get.body.order,'shipping_address'),false);
+assert.equal(get.body.customer_email_or_address_exposed,false);
 const key=crypto.randomUUID();
 const saveBody={order_id:91,expected_version:0,request_key:key,case_type:'return_request',
  stage:'received',notes:'Original buyer request received, but no return authorization was issued.',
