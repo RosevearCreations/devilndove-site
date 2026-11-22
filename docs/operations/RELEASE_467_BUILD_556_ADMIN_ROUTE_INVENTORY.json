@@ -2145,10 +2145,10 @@
       "reference_screen": "Unassigned / contextual module",
       "reason": "Not individually approved for a revamp; inspect actual signed-in UI and owner acceptance before changing.",
       "evidence": {
-        "byte_length": 6628,
+        "byte_length": 9432,
         "stylesheets": 2,
-        "scripts": 3,
-        "forms": 0,
+        "scripts": 4,
+        "forms": 1,
         "has_viewport": true
       },
       "owner_visual_acceptance": "PENDING"
