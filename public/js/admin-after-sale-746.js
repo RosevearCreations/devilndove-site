@@ -40,7 +40,7 @@
   set('a746Status','Original saved Order loaded. One manual case note may be recorded; no refund, delivery or customer communication will occur.');
  }
  async function getOne(id){
-  const signal=typeof AbortSignal?.timeout==='function'?AbortSignal.timeout(9000):undefined;
+  const signal=typeof AbortSignal!=='undefined'&&typeof AbortSignal.timeout==='function'?AbortSignal.timeout(9000):undefined;
   const res=await fetch(API+'?order_id='+encodeURIComponent(id),{
    method:'GET',cache:'no-store',credentials:'same-origin',
    headers:{Accept:'application/json'},...(signal?{signal}:{})});
@@ -59,7 +59,7 @@
   finally{stateBusy(false);}
  }
  async function postOne(payload){
-  const signal=typeof AbortSignal?.timeout==='function'?AbortSignal.timeout(10000):undefined;
+  const signal=typeof AbortSignal!=='undefined'&&typeof AbortSignal.timeout==='function'?AbortSignal.timeout(10000):undefined;
   const res=await fetch(API,{method:'POST',credentials:'same-origin',cache:'no-store',
    headers:{'Content-Type':'application/json',Accept:'application/json'},body:JSON.stringify(payload),
    ...(signal?{signal}:{})});
