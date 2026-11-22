@@ -12,7 +12,7 @@ body{background:#151727;color:#faf0ff}.a660{max-width:1100px;width:94%;margin:2r
 .a660 :is(a,button,input):focus-visible{outline:3px solid #ffdf97;outline-offset:3px}.a660 table{border-collapse:collapse;width:100%}.a660 th,.a660 td{border-bottom:1px solid #706989;text-align:left;padding:.7rem .5rem;vertical-align:top}
 .a660 .scroll{overflow-x:auto}
 </style></head><body data-admin-module="storefront" data-admin-page="storefront-acceptance-660">
-<main class="a660"><nav class="links" aria-label="Admin navigation"><a href="/admin/">Admin</a><a href="/admin/storefront/">Storefront Workspace</a><a href="/admin/module-acceptance/">Owner Device Evidence</a><a href="/admin/orders/">Orders</a><a href="/admin/customer-journey-recovery/">Journey Recovery</a></nav>
+<main class="a660"><nav class="links" aria-label="Admin navigation"><a href="/admin/">Admin</a><a href="/admin/storefront/">Storefront Workspace</a><a href="/admin/module-acceptance/">Owner Device Evidence</a><a href="/admin/orders/">Orders</a><a href="/admin/customer-journey-recovery/">Journey Recovery</a><a href="#a749WorkQueue">Care Work Queue</a></nav>
 <h1>Customer Storefront, Checkout, Shipping &amp; Returns Acceptance</h1>
 <p>Build 660 · Customer desktop, tablet and mobile evidence. On request only, inspect original orders, payments, refunds and owner device receipts. No test purchase, charge, shipping action or refund is created. Unverified outcomes remain HOLD.</p>
 <section><h2>1. Walk through actual customer journeys</h2><div class="grid">
@@ -167,8 +167,91 @@ body{background:#151727;color:#faf0ff}.a660{max-width:1100px;width:94%;margin:2r
 <button id="a748ReopenSave" type="submit">Reopen original case with source receipt</button></form>
 <p class="hold">Internal case closure is not payment settlement, return authorization, carrier acceptance, customer notification, original physical pickup completion or independent Master Shell acceptance. Nothing is automatically sent or billed.</p>
 </section>
+
+<section id="a749WorkQueue" aria-labelledby="a749Heading" data-build749="1">
+<h2 id="a749Heading">9. Original Firefox acknowledgement &amp; private customer-care work queue</h2>
+<p>Build 749 · Load private source evidence only after clicking. No customer data is automatically read, no email/SMS/social message is sent, and no refund, payment, inventory, shipping or pickup action is performed. Each task requires a genuine existing Order ID and its original Build 746 case receipt. The work queue never fabricates orders or owner Firefox sessions.</p>
+<div class="grid">
+<div>
+<label>Optional original Order ID filter<input id="a749Filter" type="number" min="1" step="1" placeholder="Filter work queue by original Order"></label>
+<button id="a749Load" type="button">Load private follow-up work queue</button>
+</div>
+<div>
+<label>Original task UUID to inspect<input id="a749FindId" maxlength="80" autocomplete="off" placeholder="Original work-item receipt UUID"></label>
+<button id="a749Find" type="button">Inspect original Order/case source</button>
+</div>
+</div>
+<p id="a749Status" role="status" aria-live="polite">No private work queue read. Original evidence and all customer outcomes remain HOLD.</p>
+<p id="a749Summary" role="status" aria-live="polite">No assigned work or due dates loaded.</p>
+<ol id="a749Rows" aria-label="Original private follow-up tasks"></ol>
+<p id="a749TaskStatus" role="status" aria-live="polite">Select a work item to check its original Order and Build 746 case history.</p>
+<details><summary>Private work queue receipt history</summary><ol id="a749History"></ol></details>
+<h3>Original Firefox owner acceptance</h3>
+<p id="a749FirefoxStatus" role="status" aria-live="polite">The latest Build 748 owner observation and independent second-Admin review have not been loaded.</p>
+<form id="a749AckForm">
+<p>Only the Admin who personally recorded the original Firefox observation may acknowledge it, and only after a different Admin approved that exact original Build 748 receipt. A client-reported Firefox browser is not independent proof of a physical device.</p>
+<input id="a749AckDecision" type="hidden" value="acknowledged">
+<label>Evidence source reference<input id="a749AckRef" maxlength="160" required autocomplete="off" placeholder="Original Firefox screenshot/review reference — no personal data"></label>
+<label>Owner factual acknowledgement note<textarea id="a749AckNote" rows="3" minlength="20" maxlength="450" required></textarea></label>
+<label><input id="a749AckConfirm" type="checkbox" required style="width:auto"> I am the original Firefox observer and have checked the second-Admin review.</label>
+<button id="a749AckSave" type="submit">Acknowledge reviewed original Firefox evidence</button>
+</form>
+<h3>Open an actual customer-care work item</h3>
+<form id="a749OpenForm">
+<p>Use an existing Order and a Build 746 original private case receipt ID. We must choose a real active Admin as assignee; the queue does not send customer communications.</p>
+<div class="grid">
+<label>Original Order ID<input id="a749Order" type="number" min="1" step="1" required placeholder="Original numeric Order"></label>
+<label>Original Build 746 case receipt UUID<input id="a749Case" maxlength="80" autocomplete="off" required></label>
+<label>Existing active Admin user ID<input id="a749Assignee" type="number" min="1" step="1" required></label>
+<label>Follow-up due date (UTC)<input id="a749Due" type="date" required></label>
+<label>Priority<select id="a749Priority"><option value="normal">Normal</option><option value="urgent">Urgent</option></select></label>
+</div>
+<input id="a749OpenDecision" type="hidden" value="open">
+<label>Original evidence reference<input id="a749OpenRef" maxlength="160" required autocomplete="off"></label>
+<label>Real follow-up needed (20–450 characters)<textarea id="a749OpenNote" rows="3" minlength="20" maxlength="450" required></textarea></label>
+<button id="a749OpenSave" type="submit">Create original-source private work item</button></form>
+<h3>Record assigned operator's follow-up progress</h3>
+<form id="a749ProgressForm">
+<label>Original work task UUID<input id="a749ProgressId" maxlength="80" required autocomplete="off"></label>
+<div class="grid">
+<label>Operator outcome<select id="a749ProgressDecision">
+<option value="attempted">Internal follow-up attempt documented (external response unverified)</option>
+<option value="blocked">HOLD — blocked, source or customer action pending</option>
+<option value="ready_review">Ready for independent review of internal evidence only</option>
+</select></label>
+<label>Optional revised due date (UTC)<input id="a749NextDue" type="date"></label>
+</div>
+<label>Original nonpersonal source reference<input id="a749ProgressRef" maxlength="160" required autocomplete="off"></label>
+<label>Factual follow-up record<textarea id="a749ProgressNote" rows="3" minlength="20" maxlength="450" required></textarea></label>
+<button id="a749ProgressSave" type="submit">Record original follow-up attempt</button></form>
+<h3>Assign existing work to a different active Admin</h3>
+<form id="a749AssignForm">
+<label>Original work task UUID<input id="a749AssignId" maxlength="80" required autocomplete="off"></label>
+<label>New active Admin user ID<input id="a749NewAssignee" type="number" min="1" step="1" required></label>
+<input id="a749AssignDecision" type="hidden" value="assign">
+<label>Assignment source reference<input id="a749AssignRef" maxlength="160" required autocomplete="off"></label>
+<label>Reason for assignment<textarea id="a749AssignNote" rows="3" minlength="20" maxlength="450" required></textarea></label>
+<button id="a749AssignSave" type="submit">Record assignment custody transfer</button></form>
+<h3>Independent second-Admin review of follow-up evidence</h3>
+<form id="a749ReviewForm">
+<p>Only another Admin—not the task creator or latest operator—may approve a work item after the assigned operator submits a ready-for-review receipt. This is internal evidence review, not confirmation of customer contact, settlement, or service delivery.</p>
+<label>Original work task UUID<input id="a749ReviewId" maxlength="80" required autocomplete="off"></label>
+<label>Review decision<select id="a749ReviewDecision"><option value="hold">HOLD — original follow-up evidence insufficient</option><option value="pass">PASS — independent internal evidence review</option></select></label>
+<label>Independent review source reference<input id="a749ReviewRef" maxlength="160" required autocomplete="off"></label>
+<label>Second-Admin factual review<textarea id="a749ReviewNote" rows="3" minlength="20" maxlength="450" required></textarea></label>
+<button id="a749ReviewSave" type="submit">Record independent follow-up review</button></form>
+<h3>Reopen internally reviewed follow-up</h3>
+<form id="a749ReopenForm">
+<label>Original work task UUID<input id="a749ReopenId" maxlength="80" required autocomplete="off"></label>
+<input id="a749ReopenDecision" type="hidden" value="reopen">
+<label>Reopen source reference<input id="a749ReopenRef" maxlength="160" required autocomplete="off"></label>
+<label>Why the original internal follow-up must reopen<textarea id="a749ReopenNote" rows="3" minlength="20" maxlength="450" required></textarea></label>
+<button id="a749ReopenSave" type="submit">Reopen internal follow-up</button></form>
+<p class="hold">Overdue and due-soon status are calculated on each manual queue read from UTC calendar dates. No background job, outbound message, staff assignment notification or automatic customer-facing action is enabled. Internal review receipts can become HOLD if the original Order or case source changes; inspect the individual task before relying on its status.</p>
+</section>
 </main><script defer src="/public/js/auth.js?v=467"></script><script defer src="/public/js/admin-storefront-acceptance-660.js?v=660"></script>
 <script defer src="/public/js/admin-after-sale-746.js?v=746"></script>
 <script defer src="/public/js/admin-customer-journey-747.js?v=747"></script>
 <script defer src="/public/js/admin-journey-recovery-748.js?v=748"></script>
+<script defer src="/public/js/admin-customer-care-queue-749.js?v=749"></script>
 <script type="module" src="/public/js/admin-shell-467.js?v=467b467"></script></body></html>

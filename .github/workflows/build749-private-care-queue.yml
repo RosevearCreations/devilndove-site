@@ -1,0 +1,73 @@
+name: Build 749 Original Owner Firefox and Private Customer Care Work Queue
+on:
+  pull_request:
+    branches: [dev, main]
+    paths:
+      - 'functions/api/admin/customer-care-queue-749.js'
+      - 'public/js/admin-customer-care-queue-749.js'
+      - 'functions/api/_lib/appModuleRoutes.js'
+      - 'admin/storefront-acceptance/index.html'
+      - 'docs/operations/RELEASE_467_BUILD_556_ADMIN_ROUTE_INVENTORY.json'
+      - 'release465-performance-budget.json'
+      - 'scripts/build748_source_contract.mjs'
+      - 'scripts/build749_*'
+      - '.github/workflows/build749-private-care-queue.yml'
+  push:
+    branches: [dev, main]
+    paths:
+      - 'functions/api/admin/customer-care-queue-749.js'
+      - 'public/js/admin-customer-care-queue-749.js'
+      - 'functions/api/_lib/appModuleRoutes.js'
+      - 'admin/storefront-acceptance/index.html'
+      - 'docs/operations/RELEASE_467_BUILD_556_ADMIN_ROUTE_INVENTORY.json'
+      - 'release465-performance-budget.json'
+      - 'scripts/build748_source_contract.mjs'
+      - 'scripts/build749_*'
+      - '.github/workflows/build749-private-care-queue.yml'
+permissions:
+  contents: read
+jobs:
+  original-case-admin-security:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: '24'
+      - name: Parse protected Admin source and Firefox/queue contracts
+        run: |
+          node --check functions/api/admin/customer-care-queue-749.js
+          node --check public/js/admin-customer-care-queue-749.js
+          node --check scripts/build749_api_contract.mjs
+          node --check scripts/build749_firefox_browser_qa.mjs
+          node scripts/build749_source_contract.mjs
+          node scripts/build748_source_contract.mjs
+      - name: Two-Admin original Order and Firefox evidence fake-D1 test
+        run: node scripts/build749_api_contract.mjs
+  original-owner-firefox-browser:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: '24'
+      - name: Install actual Firefox and Chromium browsers
+        run: |
+          npm init -y >/dev/null
+          npm install --no-save --package-lock=false playwright@1.56.1
+          npx playwright install --with-deps firefox chromium
+      - name: Host original unmodified customer journey Admin source with fake API
+        run: |
+          python3 -m http.server 18749 --bind 127.0.0.1 >/tmp/build749-http.log 2>&1 &
+          for i in 1 2 3 4 5; do
+            if curl -fsS http://127.0.0.1:18749/admin/storefront-acceptance/ >/dev/null; then exit 0; fi
+            sleep 1
+          done
+          cat /tmp/build749-http.log
+          exit 1
+      - name: Firefox desktop/mobile and Chromium refusal, consented private work receipts
+        env:
+          DD_ORIGIN: http://127.0.0.1:18749
+        run: node scripts/build749_firefox_browser_qa.mjs

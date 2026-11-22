@@ -204,6 +204,7 @@ const ETSY_OPERATOR_ADMIN_APIS = Object.freeze([
   '/api/admin/product-channel-intent',
 ]);
 const STOREFRONT_ADMIN_APIS = Object.freeze([
+  '/api/admin/customer-care-queue-749',
   '/api/admin/customer-journey-closure-748',
   '/api/admin/customer-journey-747',
   '/api/admin/after-sale-746',

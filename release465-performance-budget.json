@@ -16,8 +16,8 @@
     "max_js_bytes": 600000,
     "max_css_bytes": 500000,
     "max_html_bytes": 500000,
-    "max_runtime_source_bytes": 20040000,
-    "max_runtime_source_files": 1880,
+    "max_runtime_source_bytes": 20075000,
+    "max_runtime_source_files": 1882,
     "max_inline_data_uri_bytes": 650000
   },
   "baseline_observed": {
@@ -33,6 +33,28 @@
     "production_mutation": false
   },
   "budget_reviews": [
+    {
+      "build": "749",
+      "date": "2026-11-22",
+      "scope": "Original owner Build748 Firefox source acknowledgement after distinct-Admin review; private Build746 case/real Order task queue with active-Admin assignment, due/overdue/urgent tracking, explicit attempts, two-party independent evidence review, reopening, per-task source drift fail-closed and no automatic customer/provider action. Click-only Admin UI; no physical Firefox or customer outcome fabricated.",
+      "measured_source_baseline": "Build748 protected main source; measured release system gate 20,005,321 bytes and 1,880 runtime files.",
+      "prior_limit_bytes": 20040000,
+      "new_limit_bytes": 20075000,
+      "delta_bytes": 35000,
+      "prior_file_limit": 1880,
+      "new_file_limit": 1882,
+      "delta_files": 2,
+      "expected_added_runtime_bytes": 33000,
+      "first_CI_must_measure_actual_runtime_bytes": true,
+      "per_file_limits_unchanged": true,
+      "inline_data_uri_limit_unchanged": true,
+      "no_public_storefront_change": true,
+      "no_new_d1_schema_migration": true,
+      "no_customer_or_provider_automatic_actions": true,
+      "no_synthetic_firefox_owner_acceptance": true,
+      "dovlin_collection_and_menu_freeze_unchanged": true,
+      "review_reason": "Two protected Admin-only runtime modules (one private queue D1 API, one click-only client) plus bounded existing Admin markup and Storefront module mapping. Explicit 35KB (~0.175%) source ceiling increase, 2-file cap; still subject to full independent System Gate measurement and all existing source, privacy, quality and Cloudflare production checks."
+    },
     {
       "build": "748",
       "date": "2026-11-22",
