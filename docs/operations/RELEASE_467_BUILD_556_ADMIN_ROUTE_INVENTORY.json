@@ -478,7 +478,7 @@
       "source": "admin/customer-journey-recovery/index.html",
       "decision": "REVIEW",
       "reference_screen": "Unassigned / contextual module",
-      "reason": "Build 748 minimal protected recovery route; owner Firefox/device visual acceptance pending. Do not treat as a customer-facing page.",
+      "reason": "Not individually approved for a revamp; inspect actual signed-in UI and owner acceptance before changing.",
       "evidence": {
         "byte_length": 2094,
         "stylesheets": 0,
