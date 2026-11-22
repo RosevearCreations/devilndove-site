@@ -19,6 +19,7 @@ on:
       - 'collages/**'
       - 'sw.js'
       - 'manifest.webmanifest'
+      - '_routes.json'
       - 'wrangler.toml'
       - 'development-release.json'
       - 'current-development-authority.json'
