@@ -522,7 +522,8 @@ export async function onRequest(context) {
   // Builds 744/746: even a member with incidental Storefront or Creator-module visibility must
   // never receive the Dovlin private owner evidence workbench. The API has
   // its own verifiedAdminFromModule check as a second enforcement boundary.
-  if (['/admin/dovlin-readiness/','/admin/storefront-acceptance/'].includes(normalizedPagePath(pathname)) &&
+  if ((normalizedPagePath(pathname) === '/admin/dovlin-readiness/' ||
+       normalizedPagePath(pathname) === '/admin/storefront-acceptance/') &&
     (!access.user || String(access.user.role || '').toLowerCase() !== 'admin' ||
      Number(access.user.is_active || 0) !== 1)) {
     return finish(new Response('<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="robots" content="noindex,nofollow"><title>Admin access required</title></head><body><main><h1>Admin access required</h1><p>This private Admin workspace is available only to verified Devil n Dove administrators.</p><p><a href="/login/">Sign in</a></p></main></body></html>', {
