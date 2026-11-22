@@ -102,7 +102,7 @@ assert.equal(result.status,403,'No self-approved care closure');
 result=await call('POST',item('review_closure',3,{subject_id:proposalId}),admin2);
 assert.equal(result.status,200,JSON.stringify(result.body));
 assert.equal(result.body.receipt.external_provider_verified,false);
-assert.equal(result.body.refund_executed,false);
+assert.equal(result.body.external_refund_executed,false);
 let closure=await call('GET',null,admin1,'https://devilndove.com',17);
 assert.equal(closure.body.closure.state,'INTERNAL_CARE_CLOSURE_REVIEWED');
 assert.equal(closure.body.closure.external_customer_reply_verified,false);
