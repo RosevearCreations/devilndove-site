@@ -1,0 +1,37 @@
+name: Build 753 Customer Care SLA Exceptions
+on:
+  pull_request:
+    branches: [dev, main]
+    paths:
+      - 'functions/api/admin/customer-care-retention-ops-752.js'
+      - 'public/js/admin-customer-care-sla-751.js'
+      - 'admin/storefront-acceptance/index.html'
+      - 'scripts/build753_source_contract.mjs'
+      - '.github/workflows/build753-care-sla-exceptions.yml'
+  push:
+    branches: [dev, main]
+    paths:
+      - 'functions/api/admin/customer-care-retention-ops-752.js'
+      - 'public/js/admin-customer-care-sla-751.js'
+      - 'admin/storefront-acceptance/index.html'
+      - 'scripts/build753_source_contract.mjs'
+      - '.github/workflows/build753-care-sla-exceptions.yml'
+permissions:
+  contents: read
+jobs:
+  source-acceptance:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: '24'
+      - name: Original source and deterministic SLA/retention exception tests
+        run: |
+          node --check functions/api/admin/customer-care-retention-ops-752.js
+          node --check public/js/admin-customer-care-sla-751.js
+          node --check scripts/build753_source_contract.mjs
+          node scripts/build753_source_contract.mjs
+          node scripts/build752_source_contract.mjs
+          node scripts/build751_source_contract.mjs
