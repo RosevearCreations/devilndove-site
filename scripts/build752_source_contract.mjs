@@ -4,6 +4,15 @@ import {readFileSync} from 'node:fs';
 import {moduleKeyForPath,MODULE_KEYS} from '../functions/api/_lib/appModuleRoutes.js';
 const read=p=>readFileSync(new URL('../'+p,import.meta.url),'utf8');
 const api=read('functions/api/admin/customer-care-retention-ops-752.js');
+const html=read('admin/storefront-acceptance/index.html');
+const browser=read('public/js/admin-customer-care-sla-751.js');
+for(const id of ['a752Workflow','a752Heading','a752Load','a752View','a752Status','a752Summary','a752Rows',
+ 'a752ReviewForm','a752Kind','a752Task','a752Plan','a752Subject','a752Note','a752Save'])
+ assert.ok(html.includes('id="'+id+'"'),id);
+assert.ok(html.includes('admin-customer-care-sla-751.js?v=751-752'));
+assert.ok(browser.includes('/api/admin/customer-care-retention-ops-752'));
+assert.ok(browser.includes("credentials:'same-origin'")&&browser.includes("cache:'no-store'"));
+assert.ok(!browser.includes('localStorage')&&!browser.includes('innerHTML'));
 const budget=JSON.parse(read('release465-performance-budget.json'));
 assert.equal(moduleKeyForPath('/api/admin/customer-care-retention-ops-752'),MODULE_KEYS.STOREFRONT);
 for(const phrase of [
