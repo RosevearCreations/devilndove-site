@@ -78,7 +78,7 @@ for(const spec of [
   await page.locator('#a751Load').click();
   await page.waitForFunction(()=>document.querySelector('#a751Summary')?.textContent?.includes('1 original tasks'));
   assert.equal(gets,1);assert.equal(posts,0);
-  await page.getByRole('button',{name:'Inspect original task'}).click();
+  await page.locator('#a751Rows button').first().click();
   await page.waitForFunction(()=>document.querySelector('#a751Detail')?.textContent?.includes('CURRENT'));
   assert.equal(await page.locator('#a751ReadTask').inputValue(),id);
   await page.locator('#a751ReadForm').evaluate(x=>x.closest('details').open=true);
