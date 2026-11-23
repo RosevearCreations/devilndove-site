@@ -27,12 +27,12 @@ assert.ok(!api.includes('fetch('),'No external provider/customer transport in pr
 assert.ok(old.includes("ARCHIVE='site.admin.customerjourney.carecustody.v750'"));
 assert.ok(old.includes('ARCHIVED_RESTORE_IN_750')&&old.includes('archivedTaskIds(db)'));
 const budget=JSON.parse(read('release465-performance-budget.json'));
-assert.equal(budget.limits.max_runtime_source_bytes,20135000);
-assert.equal(budget.limits.max_runtime_source_files,1884);
+assert.ok(budget.limits.max_runtime_source_bytes>=20135000,'Build750 source size floor preserved');
+assert.ok(budget.limits.max_runtime_source_files>=1884,'Build750 runtime file floor preserved');
 assert.equal(budget.limits.max_inline_data_uri_bytes,650000);
 const inv=JSON.parse(read('docs/operations/RELEASE_467_BUILD_556_ADMIN_ROUTE_INVENTORY.json'));
-assert.equal(inv.routes.find(x=>x.route==='/admin/storefront-acceptance/').evidence.forms,25);
-assert.equal(inv.routes.find(x=>x.route==='/admin/storefront-acceptance/').evidence.scripts,8);
+assert.ok(inv.routes.find(x=>x.route==='/admin/storefront-acceptance/').evidence.forms>=25,'Original Build750 forms remain');
+assert.ok(inv.routes.find(x=>x.route==='/admin/storefront-acceptance/').evidence.scripts>=8,'Original Build750 scripts remain');
 for(const p of ['index.html','shop/index.html'])
  assert.ok(read(p).includes('data-dovlin-temporary-menu-hold="2026-11-21"'));
 console.log('BUILD750 SOURCE PASS: verified private source, browser-local SHA-256 never upload, second-Admin review, legal hold, immutable archive and restoration, original Build749 queue integration and Dovlin freeze.');

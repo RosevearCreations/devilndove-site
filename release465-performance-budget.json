@@ -16,8 +16,8 @@
     "max_js_bytes": 600000,
     "max_css_bytes": 500000,
     "max_html_bytes": 500000,
-    "max_runtime_source_bytes": 20135000,
-    "max_runtime_source_files": 1884,
+    "max_runtime_source_bytes": 20195000,
+    "max_runtime_source_files": 1886,
     "max_inline_data_uri_bytes": 650000
   },
   "baseline_observed": {
@@ -33,6 +33,27 @@
     "production_mutation": false
   },
   "budget_reviews": [
+    {
+      "build": "751",
+      "date": "2026-11-22",
+      "scope": "Genuine read-only Resend received/sent email provider Message-ID thread readback from original Order, canonical customer email and notification_outbox, configured care inbox, DMARC and independent second Admin native reread; human-reviewed internal care 48/72-hour SLA; source-aware manual retention review scheduling and due receipt. No automatic email, provider write, customer identity claim, retention purge, D1 migration or Dovlin publication.",
+      "measured_source_baseline": "Build750 protected main source 20,090,008 runtime bytes and 1,884 runtime files",
+      "prior_limit_bytes": 20135000,
+      "new_limit_bytes": 20195000,
+      "delta_bytes": 60000,
+      "prior_file_limit": 1884,
+      "new_file_limit": 1886,
+      "delta_files": 2,
+      "existing_js_css_html_inline_caps_unchanged": true,
+      "no_d1_migration": true,
+      "exact_live_provider_authority_requires_existing_RESEND_API_KEY_and_CARE_INBOUND_EMAIL_751": true,
+      "no_raw_email_contents_or_secrets_stored": true,
+      "no_provider_send": true,
+      "no_invented_external_confirmation": true,
+      "no_auto_reminders_purge_or_deletion": true,
+      "dovlin_character_and_temporary_menu_hold_preserved": true,
+      "review_reason": "Two new protected Admin-only runtime modules plus bounded Storefront Admin UI, old route registry/inventory/test floors updated. Reviewed +60KB/2 runtime files (~0.3%) subject to independent actual System Gate measurement and protected release checks."
+    },
     {
       "build": "750",
       "date": "2026-11-22",
