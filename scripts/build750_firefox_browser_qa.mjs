@@ -141,7 +141,7 @@ for(const spec of tests){
   assert.equal(privatePosts,4);
   await page.locator('#a750View').selectOption('archived');
   await page.locator('#a750Load').click();
-  await page.waitForFunction(()=>document.querySelector('#a750Summary')?.textContent?.includes('1 archived'));
+  await page.waitForFunction(()=>document.querySelectorAll('#a750Rows button').length===1);
   assert.equal(await page.getByRole('button',{name:'Inspect case source'}).count(),1);
   await page.getByRole('button',{name:'Inspect case source'}).click();
   await page.waitForFunction(()=>document.querySelector('#a750Task')?.textContent?.includes('ARCHIVED_IMMUTABLE_RECEIPTS'));
