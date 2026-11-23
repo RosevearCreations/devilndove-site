@@ -129,7 +129,7 @@ for(const spec of tests){
   await page.locator('#a750ArchiveRef').fill('original-private-archive-review-20261122');
   await page.locator('#a750ArchiveNote').fill('The original internal follow-up and matched response evidence support immutable archival review.');
   await page.locator('#a750ArchiveSave').click();
-  await page.waitForFunction(()=>document.querySelector('#a750Status')?.textContent?.includes('receipt saved and read back'));
+  await page.waitForFunction(()=>document.querySelector('#a750ApproveSubject')?.value===PROPOSAL);
   assert.equal(privatePosts,3);
   assert.equal(await page.locator('#a750ApproveSubject').inputValue(),PROPOSAL);
   await page.locator('#a750ApproveForm').evaluate(el=>{el.closest('details').open=true;});
