@@ -203,6 +203,7 @@ export function projectCareExceptions753(s,receipts,clock=Date.now()){
    exceptions:actions,exception_count:codes.length};
  }).sort((a,b)=>b.exception_count-a.exception_count||(b.age_hours??0)-(a.age_hours??0));
 }
+const exceptionRows=projectCareExceptions753;
 async function exceptionGet(ctx,db){
  const view=new URL(ctx.request.url).searchParams.get('view753')||'all';
  if(!['all','open','reviewed','retention'].includes(view))
