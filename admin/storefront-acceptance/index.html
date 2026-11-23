@@ -429,11 +429,28 @@ body{background:#151727;color:#faf0ff}.a660{max-width:1100px;width:94%;margin:2r
 <button type="submit" id="a752Save">Save private due-review operations receipt</button>
 </form></details>
 <p class="hold">A legal hold, escalation, or missing original provider evidence remains visible as HOLD. Confirmations require a different genuine Storefront Admin. No scheduled cron, external email, provider write, calendar invitation, automatic purge, or owner signoff is inferred.</p>
+</section><section id="a753Workflow" aria-labelledby="a753Heading" data-build753="1">
+<h2 id="a753Heading">13. Customer-care SLA exception dashboard &amp; independent escalation</h2>
+<p>Build 753. Load the original Build 749–752 private evidence on request to inspect 48-hour reply and 72-hour internal closure exceptions, overdue retention reviews, legal holds and independent Admin escalation. An original Resend mailbox thread is not independent proof of the human sender.</p>
+<div class="grid"><div><label>Exception view<select id="a753View"><option value="all">All original cases</option><option value="open">Open and unverified exceptions</option><option value="retention">Retention and legal hold</option><option value="reviewed">Independently reviewed</option></select></label></div>
+<div><button type="button" id="a753Load">Load private SLA exceptions</button></div></div>
+<p id="a753Status" role="status" aria-live="polite">Not loaded. Production acceptance is HOLD until an independent live witness verifies the deployed source and actual evidence.</p>
+<p id="a753Summary">No source-derived exception metrics yet.</p><ol id="a753Rows"></ol>
+<details><summary><strong>Record manual exception or independent second-Admin review</strong></summary>
+<p id="a753Selected">Select an original exception above before recording a review. Do not enter customer names or emails.</p>
+<label>Original Build 749 task UUID<input id="a753Task" readonly maxlength="80"></label>
+<label>Exception code<input id="a753Code" readonly maxlength="80"></label>
+<label>Original Build 753 raise receipt UUID (second-Admin review)<input id="a753Subject" readonly maxlength="80"></label>
+<label>Decision for independent review<select id="a753Decision"><option value="pass">Reviewed original exception evidence</option><option value="hold">Hold: evidence insufficient</option></select></label>
+<label>Factual internal note, no personal data<textarea id="a753Note" rows="3" minlength="20" maxlength="350"></textarea></label>
+<div class="grid"><button type="button" id="a753Raise">Record private escalation</button><button type="button" id="a753Review">Independent Admin review</button></div>
+</details><details><summary>Original immutable exception receipts</summary><ol id="a753History"></ol></details>
+<p class="hold">The dashboard and internal receipts cannot certify live production by themselves. No automatic escalation email, customer notification, Resend write, retention purge, or business transaction. A different verified Admin must review a recorded exception.</p>
 </section></main><script defer src="/public/js/auth.js?v=467"></script><script defer src="/public/js/admin-storefront-acceptance-660.js?v=660"></script>
 <script defer src="/public/js/admin-after-sale-746.js?v=746"></script>
 <script defer src="/public/js/admin-customer-journey-747.js?v=747"></script>
 <script defer src="/public/js/admin-journey-recovery-748.js?v=748"></script>
 <script defer src="/public/js/admin-customer-care-queue-749.js?v=749"></script>
 <script defer src="/public/js/admin-customer-care-custody-750.js?v=750"></script>
-<script defer src="/public/js/admin-customer-care-sla-751.js?v=751-752"></script>
+<script defer src="/public/js/admin-customer-care-sla-751.js?v=751-752-753"></script>
 <script type="module" src="/public/js/admin-shell-467.js?v=467b467"></script></body></html>
