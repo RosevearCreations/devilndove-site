@@ -31,7 +31,7 @@ const reply=(obj,status=200)=>jsonResponse({ok:status<400,build:750,...obj},stat
  'Cache-Control':'private, no-store, max-age=0','X-Content-Type-Options':'nosniff',
  'X-Robots-Tag':'noindex,nofollow,noarchive','Vary':'Cookie'
 });
-const deny=(code,error,status=409)=>({response:reply({code,error},status)});
+const deny=(code,error,status=409)=>({error:reply({code,error},status)});
 function auth(ctx){
  const admin=verifiedAdminFromModule(ctx),db=getDb(ctx.env);
  if(!admin)return deny('VERIFIED_ADMIN_REQUIRED','Active Storefront Admin session required.',403);
