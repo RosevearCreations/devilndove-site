@@ -12,7 +12,7 @@ body{background:#151727;color:#faf0ff}.a660{max-width:1100px;width:94%;margin:2r
 .a660 :is(a,button,input):focus-visible{outline:3px solid #ffdf97;outline-offset:3px}.a660 table{border-collapse:collapse;width:100%}.a660 th,.a660 td{border-bottom:1px solid #706989;text-align:left;padding:.7rem .5rem;vertical-align:top}
 .a660 .scroll{overflow-x:auto}
 </style></head><body data-admin-module="storefront" data-admin-page="storefront-acceptance-660">
-<main class="a660"><nav class="links" aria-label="Admin navigation"><a href="/admin/">Admin</a><a href="/admin/storefront/">Storefront Workspace</a><a href="/admin/module-acceptance/">Owner Device Evidence</a><a href="/admin/orders/">Orders</a><a href="/admin/customer-journey-recovery/">Journey Recovery</a><a href="#a749WorkQueue">Care Work Queue</a></nav>
+<main class="a660"><nav class="links" aria-label="Admin navigation"><a href="/admin/">Admin</a><a href="/admin/storefront/">Storefront Workspace</a><a href="/admin/module-acceptance/">Owner Device Evidence</a><a href="/admin/orders/">Orders</a><a href="/admin/customer-journey-recovery/">Journey Recovery</a><a href="#a749WorkQueue">Care Work Queue</a><a href="#a750Custody">Response &amp; Evidence Archive</a></nav>
 <h1>Customer Storefront, Checkout, Shipping &amp; Returns Acceptance</h1>
 <p>Build 660 · Customer desktop, tablet and mobile evidence. On request only, inspect original orders, payments, refunds and owner device receipts. No test purchase, charge, shipping action or refund is created. Unverified outcomes remain HOLD.</p>
 <section><h2>1. Walk through actual customer journeys</h2><div class="grid">
@@ -249,9 +249,168 @@ body{background:#151727;color:#faf0ff}.a660{max-width:1100px;width:94%;margin:2r
 <button id="a749ReopenSave" type="submit">Reopen internal follow-up</button></form>
 <p class="hold">Overdue and due-soon status are calculated on each manual queue read from UTC calendar dates. No background job, outbound message, staff assignment notification or automatic customer-facing action is enabled. Internal review receipts can become HOLD if the original Order or case source changes; inspect the individual task before relying on its status.</p>
 </section>
-</main><script defer src="/public/js/auth.js?v=467"></script><script defer src="/public/js/admin-storefront-acceptance-660.js?v=660"></script>
+<section id="a750Custody" aria-labelledby="a750Heading" data-build750="1">
+<h2 id="a750Heading">10. Original response evidence, escalation, retention and audited archival</h2>
+<p>Build 750 · This private Admin workspace reads only after a click. A locally selected original customer-response artifact is SHA-256 hashed in this browser; <strong>the file never uploads</strong>. Independent matching means a second Admin supplied an artifact with the same hash—not that an email provider, buyer, carrier or payment service independently confirmed the event. No customer notification, refund, inventory, shipment or automatic deletion is executed.</p>
+<div class="grid">
+<div><label>Display queue<select id="a750View"><option value="active">Active</option><option value="archived">Reviewed archive</option><option value="all">All original tasks</option></select></label><button id="a750Load" type="button">Load private custody queue</button></div>
+<div><label>Original task UUID<input id="a750TaskId" maxlength="80" autocomplete="off" placeholder="Existing Build 749 work UUID"></label>
+<button id="a750Lookup" type="button">Inspect original task source</button></div>
+</div>
+<p id="a750Status" role="status" aria-live="polite">Original custody not loaded. No private data has been requested.</p>
+<p id="a750Summary" role="status">No original source checked.</p>
+<ol id="a750Rows" aria-label="Active and archived customer-care custody tasks"></ol>
+<p id="a750Task" role="status" aria-live="polite">Inspect an original task before recording custody evidence.</p>
+<button id="a750Export" type="button">Export currently loaded redacted custody JSON (no uploaded files)</button>
+<details><summary>Private immutable receipt IDs and audit references</summary><ol id="a750Receipts"></ol></details>
+<details><summary><strong>Record an original customer-response artifact (manual evidence only)</strong></summary>
+<form id="a750ResponseForm">
+<p>Only the current recorded Admin assignee may attest to this source. The digest and reference are recorded; original file bytes, customer identity and message contents stay off this API.</p>
+<label>Original Build 749 task receipt UUID<input id="a750ResponseTask" maxlength="80" required autocomplete="off"></label>
+<input type="hidden" id="a750ResponseDecision" value="record">
+
+<label>Originating channel (operator-observed only)<select id="a750ResponseChannel">
+<option value="email">Email artifact</option><option value="storefront">Storefront artifact</option>
+<option value="postal">Postal artifact</option><option value="phone">Phone transcript/record artifact</option>
+<option value="other">Other source artifact</option></select></label>
+<label>Original local response artifact (max 8 MB, never uploaded)
+<input id="a750ResponseFile" type="file"></label>
+<button id="a750HashResponse" type="button">SHA-256 hash selected original local artifact</button>
+<label>Local artifact SHA-256<input id="a750ResponseSha" maxlength="64" readonly required autocomplete="off" placeholder="Calculated only in this browser"></label>
+
+<label>Nonpersonal original source reference<input id="a750ResponseRef" maxlength="160" autocomplete="off" required></label>
+<label>Factual private evidence note (20–450 characters)<textarea id="a750ResponseNote" minlength="20" maxlength="450" rows="3" required></textarea></label>
+<button id="a750ResponseSave" type="submit">Record response custody receipt</button>
+</form>
+</details>
+<details><summary><strong>Independent second-Admin local artifact hash match</strong></summary>
+<form id="a750ReviewForm">
+<p>Different Admin must hash the same unmodified original file. Passing this review does NOT certify provider delivery or the sender's identity.</p>
+<label>Original Build 749 task receipt UUID<input id="a750ReviewTask" maxlength="80" required autocomplete="off"></label>
+<label>Independent decision<select id="a750ReviewDecision"><option value="hold">HOLD — artifact/evidence cannot be matched</option><option value="pass">PASS — same original local file SHA-256 independently matched</option></select></label>
+
+<label>Original response receipt UUID<input id="a750ReviewSubject" maxlength="80" autocomplete="off" required></label>
+<label>Separate Admin's original local artifact (never uploaded)<input id="a750ReviewFile" type="file"></label>
+<button id="a750HashReview" type="button">Independently hash the local response artifact</button>
+<label>Independently calculated SHA-256<input id="a750ReviewSha" maxlength="64" readonly autocomplete="off" placeholder="Reviewer-calculated digest"></label>
+
+<label>Nonpersonal original source reference<input id="a750ReviewRef" maxlength="160" autocomplete="off" required></label>
+<label>Factual private evidence note (20–450 characters)<textarea id="a750ReviewNote" minlength="20" maxlength="450" rows="3" required></textarea></label>
+<button id="a750ReviewSave" type="submit">Record review custody receipt</button>
+</form>
+</details>
+<details><summary><strong>Escalate an overdue, blocked, unanswered or changed-source case</strong></summary>
+<form id="a750EscForm">
+<p>Escalation is an internal receipt; it does not send an alert, email or message to customers or staff. Only one unresolved escalation per task.</p>
+<label>Original Build 749 task receipt UUID<input id="a750EscTask" maxlength="80" required autocomplete="off"></label>
+<input type="hidden" id="a750EscDecision" value="raise">
+
+<label>Grounded escalation reason<select id="a750EscReason">
+<option value="overdue">Genuine overdue UTC date</option>
+<option value="blocked">Operator blocked / unresolved evidence</option>
+<option value="no_response">No independently reviewed response</option>
+<option value="source_drift">Original Order/case source changed</option>
+<option value="other">Other documented material issue</option></select></label>
+<label>Existing active Admin escalation owner user ID<input id="a750EscOwner" type="number" min="1" step="1" required></label>
+
+<label>Nonpersonal original source reference<input id="a750EscRef" maxlength="160" autocomplete="off" required></label>
+<label>Factual private evidence note (20–450 characters)<textarea id="a750EscNote" minlength="20" maxlength="450" rows="3" required></textarea></label>
+<button id="a750EscSave" type="submit">Record esc custody receipt</button>
+</form>
+</details>
+<details><summary><strong>Assigned escalation Admin acknowledgment</strong></summary>
+<form id="a750AckForm">
+<p>Only the Admin named as owner on the original escalation may acknowledge it.</p>
+<label>Original Build 749 task receipt UUID<input id="a750AckTask" maxlength="80" required autocomplete="off"></label>
+<input type="hidden" id="a750AckDecision" value="acknowledge">
+
+<label>Original active escalation UUID<input id="a750AckSubject" maxlength="80" required autocomplete="off"></label>
+
+<label>Nonpersonal original source reference<input id="a750AckRef" maxlength="160" autocomplete="off" required></label>
+<label>Factual private evidence note (20–450 characters)<textarea id="a750AckNote" minlength="20" maxlength="450" rows="3" required></textarea></label>
+<button id="a750AckSave" type="submit">Record ack custody receipt</button>
+</form>
+</details>
+<details><summary><strong>Independent escalation resolution</strong></summary>
+<form id="a750ClearForm">
+<p>A different Admin from both the escalation author and the escalation owner must review internal resolution. Customer outcome remains unverified.</p>
+<label>Original Build 749 task receipt UUID<input id="a750ClearTask" maxlength="80" required autocomplete="off"></label>
+<input type="hidden" id="a750ClearDecision" value="resolved">
+
+<label>Original acknowledged escalation UUID<input id="a750ClearSubject" maxlength="80" required autocomplete="off"></label>
+
+<label>Nonpersonal original source reference<input id="a750ClearRef" maxlength="160" autocomplete="off" required></label>
+<label>Factual private evidence note (20–450 characters)<textarea id="a750ClearNote" minlength="20" maxlength="450" rows="3" required></textarea></label>
+<button id="a750ClearSave" type="submit">Record clear custody receipt</button>
+</form>
+</details>
+<details><summary><strong>Apply an evidence retention/legal hold</strong></summary>
+<form id="a750HoldForm">
+<p>Apply an append-only privacy/legal hold to prevent archive approval, including any ordinary retention review. No file or original record is deleted.</p>
+<label>Original Build 749 task receipt UUID<input id="a750HoldTask" maxlength="80" required autocomplete="off"></label>
+<input type="hidden" id="a750HoldDecision" value="hold">
+
+<label>Nonpersonal original source reference<input id="a750HoldRef" maxlength="160" autocomplete="off" required></label>
+<label>Factual private evidence note (20–450 characters)<textarea id="a750HoldNote" minlength="20" maxlength="450" rows="3" required></textarea></label>
+<button id="a750HoldSave" type="submit">Record hold custody receipt</button>
+</form>
+</details>
+<details><summary><strong>Release a retention hold with independent review</strong></summary>
+<form id="a750ReleaseForm">
+<p>Only a different Admin may release an original retention hold; never self-approve.</p>
+<label>Original Build 749 task receipt UUID<input id="a750ReleaseTask" maxlength="80" required autocomplete="off"></label>
+<input type="hidden" id="a750ReleaseDecision" value="release">
+
+<label>Original active hold UUID<input id="a750ReleaseSubject" maxlength="80" required autocomplete="off"></label>
+
+<label>Nonpersonal original source reference<input id="a750ReleaseRef" maxlength="160" autocomplete="off" required></label>
+<label>Factual private evidence note (20–450 characters)<textarea id="a750ReleaseNote" minlength="20" maxlength="450" rows="3" required></textarea></label>
+<button id="a750ReleaseSave" type="submit">Record release custody receipt</button>
+</form>
+</details>
+<details><summary><strong>Propose immutable archival with a scheduled retention review</strong></summary>
+<form id="a750ArchiveForm">
+<p>No archival until the original Build 749 internal follow-up has an independent PASS, a locally hashed original response has an independent matching PASS, no unresolved escalation, and no active retention hold. Archival retains immutable receipts, not an automatic deletion.</p>
+<label>Original Build 749 task receipt UUID<input id="a750ArchiveTask" maxlength="80" required autocomplete="off"></label>
+<input type="hidden" id="a750ArchiveDecision" value="propose">
+
+<label>Future review date for retaining original audit evidence (UTC)
+<input id="a750ArchiveDate" type="date" required></label>
+
+<label>Nonpersonal original source reference<input id="a750ArchiveRef" maxlength="160" autocomplete="off" required></label>
+<label>Factual private evidence note (20–450 characters)<textarea id="a750ArchiveNote" minlength="20" maxlength="450" rows="3" required></textarea></label>
+<button id="a750ArchiveSave" type="submit">Record archive custody receipt</button>
+</form>
+</details>
+<details><summary><strong>Independent two-Admin archival approval or HOLD</strong></summary>
+<form id="a750ApproveForm">
+<p>The proposer cannot approve their own archive. Every source must remain unchanged and an independent response artifact match must still exist.</p>
+<label>Original Build 749 task receipt UUID<input id="a750ApproveTask" maxlength="80" required autocomplete="off"></label>
+<label>Second-Admin archival decision<select id="a750ApproveDecision"><option value="hold">HOLD — sources or retention conditions insufficient</option><option value="approve">APPROVE — archive immutable receipts after source recheck</option></select></label>
+
+<label>Original unreviewed archive proposal UUID<input id="a750ApproveSubject" maxlength="80" required autocomplete="off"></label>
+
+<label>Nonpersonal original source reference<input id="a750ApproveRef" maxlength="160" autocomplete="off" required></label>
+<label>Factual private evidence note (20–450 characters)<textarea id="a750ApproveNote" minlength="20" maxlength="450" rows="3" required></textarea></label>
+<button id="a750ApproveSave" type="submit">Record approve custody receipt</button>
+</form>
+</details>
+<details><summary><strong>Restore an archived task to the active work queue</strong></summary>
+<form id="a750RestoreForm">
+<p>Restores a previously reviewed archived task to the active work queue without deleting any original case, receipt or record.</p>
+<label>Original Build 749 task receipt UUID<input id="a750RestoreTask" maxlength="80" required autocomplete="off"></label>
+<input type="hidden" id="a750RestoreDecision" value="restore">
+
+<label>Nonpersonal original source reference<input id="a750RestoreRef" maxlength="160" autocomplete="off" required></label>
+<label>Factual private evidence note (20–450 characters)<textarea id="a750RestoreNote" minlength="20" maxlength="450" rows="3" required></textarea></label>
+<button id="a750RestoreSave" type="submit">Record restore custody receipt</button>
+</form>
+</details>
+<p class="hold">Retention review dates are operator-managed planning dates—not statutory retention determinations. Nothing auto-purges or notifies anyone. The live customer-provider receipt and external outcomes remain HOLD until a trusted provider source is independently integrated and genuinely witnessed.</p>
+</section></main><script defer src="/public/js/auth.js?v=467"></script><script defer src="/public/js/admin-storefront-acceptance-660.js?v=660"></script>
 <script defer src="/public/js/admin-after-sale-746.js?v=746"></script>
 <script defer src="/public/js/admin-customer-journey-747.js?v=747"></script>
 <script defer src="/public/js/admin-journey-recovery-748.js?v=748"></script>
 <script defer src="/public/js/admin-customer-care-queue-749.js?v=749"></script>
+<script defer src="/public/js/admin-customer-care-custody-750.js?v=750"></script>
 <script type="module" src="/public/js/admin-shell-467.js?v=467b467"></script></body></html>
