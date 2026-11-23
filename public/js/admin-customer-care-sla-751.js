@@ -51,7 +51,7 @@ function render(){
    ' · Internal closure SLA: '+x.close_sla+
    ' · retention '+(x.retention_review_on||'not scheduled')+
    (x.retention_due?' (DUE)':'')+
-   '. Resend confirms mailbox records/thread metadata, NOT a person's independent identity.');
+   '. Resend confirms mailbox records/thread metadata, not independent proof of the human sender.');
   for(const id of ['a751ReadTask','a751ReviewTask','a751CloseTask','a751ReopenTask',
     'a751PlanTask','a751ApproveTask','a751CheckTask'])$(id).value=x.task_id;
   if(x.provider_receipt_id)$('a751ReviewSubject').value=x.provider_receipt_id;
