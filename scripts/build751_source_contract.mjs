@@ -28,7 +28,9 @@ assert.ok(server.includes('refund_executed:false')&&server.includes('record_dele
 assert.ok(!server.includes("method:'POST'")&&!server.includes('DELETE FROM'),'No provider send or delete');
 const budget=JSON.parse(read('release465-performance-budget.json'));
 assert.equal(budget.limits.max_runtime_source_bytes,20195000);
-assert.equal(budget.limits.max_runtime_source_files,1886);
+assert.equal(budget.budget_reviews.find(x=>x.build==='751')?.new_file_limit,1886);
+assert.equal(budget.limits.max_runtime_source_files,1887);
+assert.equal(budget.budget_reviews.find(x=>x.build==='752')?.delta_files,1);
 assert.equal(budget.limits.max_inline_data_uri_bytes,650000);
 const inventory=JSON.parse(read('docs/operations/RELEASE_467_BUILD_556_ADMIN_ROUTE_INVENTORY.json'));
 assert.equal(inventory.routes.find(x=>x.route==='/admin/storefront-acceptance/').evidence.forms,32);
