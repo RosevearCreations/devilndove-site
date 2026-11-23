@@ -1,0 +1,73 @@
+name: Build 751 Provider-Linked Customer Reply and Retention SLA
+on:
+  pull_request:
+    branches: [dev, main]
+    paths:
+      - 'functions/api/admin/customer-care-sla-751.js'
+      - 'public/js/admin-customer-care-sla-751.js'
+      - 'functions/api/_lib/appModuleRoutes.js'
+      - 'admin/storefront-acceptance/index.html'
+      - 'docs/operations/RELEASE_467_BUILD_556_ADMIN_ROUTE_INVENTORY.json'
+      - 'release465-performance-budget.json'
+      - 'scripts/build750_source_contract.mjs'
+      - 'scripts/build751_*'
+      - '.github/workflows/build751-provider-readback-sla.yml'
+  push:
+    branches: [dev, main]
+    paths:
+      - 'functions/api/admin/customer-care-sla-751.js'
+      - 'public/js/admin-customer-care-sla-751.js'
+      - 'functions/api/_lib/appModuleRoutes.js'
+      - 'admin/storefront-acceptance/index.html'
+      - 'docs/operations/RELEASE_467_BUILD_556_ADMIN_ROUTE_INVENTORY.json'
+      - 'release465-performance-budget.json'
+      - 'scripts/build750_source_contract.mjs'
+      - 'scripts/build751_*'
+      - '.github/workflows/build751-provider-readback-sla.yml'
+permissions:
+  contents: read
+jobs:
+  original-provider-readonly-security:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: '24'
+      - name: Syntax and original protected Admin contract
+        run: |
+          node --check functions/api/admin/customer-care-sla-751.js
+          node --check public/js/admin-customer-care-sla-751.js
+          node --check scripts/build751_api_contract.mjs
+          node --check scripts/build751_firefox_browser_qa.mjs
+          node scripts/build751_source_contract.mjs
+          node scripts/build750_source_contract.mjs
+      - name: Mock-only original Resend inbox and sent-ID, D1 and human custody
+        run: node scripts/build751_api_contract.mjs
+  original-readonly-provider-browser:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: '24'
+      - name: Install actual Firefox and Chromium
+        run: |
+          npm init -y >/dev/null
+          npm install --no-save --package-lock=false playwright@1.56.1
+          npx playwright install --with-deps firefox chromium
+      - name: Serve original Admin source without any provider credentials or customer backend
+        run: |
+          python3 -m http.server 18751 --bind 127.0.0.1 >/tmp/build751-http.log 2>&1 &
+          for i in 1 2 3 4 5; do
+            if curl -fsS http://127.0.0.1:18751/admin/storefront-acceptance/ >/dev/null; then exit 0; fi
+            sleep 1
+          done
+          cat /tmp/build751-http.log
+          exit 1
+      - name: Firefox desktop/mobile and Chromium manual-only original source and SLA
+        env:
+          DD_ORIGIN: http://127.0.0.1:18751
+        run: node scripts/build751_firefox_browser_qa.mjs
