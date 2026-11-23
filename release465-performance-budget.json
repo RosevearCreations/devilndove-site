@@ -17,7 +17,7 @@
     "max_css_bytes": 500000,
     "max_html_bytes": 500000,
     "max_runtime_source_bytes": 20195000,
-    "max_runtime_source_files": 1886,
+    "max_runtime_source_files": 1887,
     "max_inline_data_uri_bytes": 650000
   },
   "baseline_observed": {
@@ -33,6 +33,21 @@
     "production_mutation": false
   },
   "budget_reviews": [
+    {
+      "build": "752",
+      "date": "2026-11-23",
+      "scope": "One private original-source retention operations API: verified Admin open-only due review queue, original Build749/750/751 custody source, provider enrollment triage and separate Admin acknowledgement/independent confirmation. No automatic cron, external customer email, provider write, retention purge, raw email or public storefront change.",
+      "measured_pr_source_gate_run": 45189060334,
+      "measured_runtime_source_files": 1887,
+      "measured_runtime_source_bytes": 20138506,
+      "prior_file_limit": 1886,
+      "new_file_limit": 1887,
+      "delta_files": 1,
+      "runtime_source_byte_limit_unchanged": true,
+      "per_file_limits_unchanged": true,
+      "inline_data_uri_limit_unchanged": true,
+      "review_reason": "System Gate found exactly one new guarded private API route over the original 1,886-file limit, with runtime source bytes 20,138,506 remaining below unchanged 20,195,000-byte cap; explicitly authorize exactly one private source file, do not waive any other test or provider proof."
+    },
     {
       "build": "751",
       "date": "2026-11-22",

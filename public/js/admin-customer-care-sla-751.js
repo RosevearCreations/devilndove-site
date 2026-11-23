@@ -121,3 +121,152 @@ for(const [kind,id,subject]of forms){
  });
 }
 })();
+
+/* Build 752 — original-source retention operations. Independent of Build751 state; manual only. */
+(()=>{'use strict';
+const $=id=>document.getElementById(id),API='/api/admin/customer-care-retention-ops-752';
+if(!$('a752Load'))return;
+let doc=null,busy=false;
+const say=(id,text)=>{const e=$(id);if(e)e.textContent=String(text??'');};
+const error=e=>String(e?.message||'Original private source unavailable').slice(0,210);
+function lock(on){busy=on;for(const b of document.querySelectorAll('#a752Workflow button'))b.disabled=on;}
+async function call(method,body=null){
+ const abort=new AbortController(),timer=setTimeout(()=>abort.abort(),12000);
+ try{
+  const url=new URL(API,location.origin);
+  if(method==='GET')url.searchParams.set('view',$('a752View').value);
+  const options={method,credentials:'same-origin',cache:'no-store',signal:abort.signal,
+   headers:{Accept:'application/json'}};
+  if(method==='POST'){options.headers['Content-Type']='application/json';options.body=JSON.stringify(body);}
+  const response=await fetch(url.pathname+url.search,options);
+  const result=await response.json().catch(()=>({code:'BAD_RESPONSE'}));
+  if(!response.ok||!result.ok)throw Error((result.code||'ORIGINAL_SOURCE_HOLD')+' '+(result.error||response.status));
+  return result;
+ }finally{clearTimeout(timer);}
+}
+function render(){
+ if(!doc)return;
+ const s=doc.summary;
+ say('a752Summary',s.visible+' original tasks · '+s.due+' due reviews · '+s.legal_holds+
+  ' legal holds · '+s.independent_provider_readbacks+' independent provider thread reviews · '+
+  s.waiting_provider+' provider enrollment holds · '+s.independently_confirmed_operations+
+  ' confirmed internal operations. Evaluated on click '+doc.scheduled_queue_evaluated_at+'.');
+ const list=$('a752Rows');list.replaceChildren();
+ for(const item of doc.rows){
+  const li=document.createElement('li'),description=document.createElement('span');
+  description.textContent='Order '+item.order_id+' · '+item.retention_status+
+   ' · '+item.provider_enrollment_status+' · scheduled '+(item.review_on||'not approved')+
+   (item.legal_hold?' · LEGAL HOLD':'')+
+   (item.escalated?' · ESCALATED':'')+' · '+item.task_id+' ';
+  const select=document.createElement('button');select.type='button';select.textContent='Select original due review';
+  select.addEventListener('click',()=>{
+   $('a752Task').value=item.task_id;$('a752Plan').value=item.plan_id||'';
+   $('a752Subject').value=item.operator_ack_id||'';
+   say('a752Status',item.due?'Selected genuine due-date source. Review holds and original evidence before recording.':
+    'Source selected, but no due/approved retention review available for an operations receipt.');
+  });
+  li.append(description,select);list.append(li);
+ }
+ if(!doc.rows.length){const li=document.createElement('li');
+  li.textContent='No matching original-source tasks. No customer or provider reply has been inferred.';list.append(li);}
+}
+async function load(){
+ if(busy)return;lock(true);
+ say('a752Status','Reading original private D1 receipt sources; no provider fetch or external customer notification.');
+ try{doc=await call('GET');render();say('a752Status','Original source loaded. Actions require an explicit owner/Admin submission.');}
+ catch(e){doc=null;say('a752Status','HOLD: '+error(e));}
+ finally{lock(false);}
+}
+$('a752Load').addEventListener('click',()=>void load());
+$('a752ReviewForm').addEventListener('submit',e=>{e.preventDefault();void (async()=>{
+ if(!doc||busy){say('a752Status','HOLD: Load original retention worklist first.');return;}
+ const payload={kind:$('a752Kind').value,task_id:$('a752Task').value.trim(),
+  plan_id:$('a752Plan').value.trim(),subject_id:$('a752Subject').value.trim(),
+  note:$('a752Note').value.trim(),expected_version:doc.version,request_key:crypto.randomUUID()};
+ lock(true);say('a752Status','Saving only private original due-review custody. No outgoing messages or purge.');
+ try{const saved=await call('POST',payload);doc=await call('GET');render();
+  say('a752Status','Original Build752 receipt '+saved.receipt_id+' saved and independently read back. No customer contact or deletion.');
+ }catch(err){say('a752Status','HOLD: '+error(err)+'. Check fresh private receipts before attempting a new request.');}
+ finally{lock(false);}
+ })();});
+})();
+
+
+/* Build 753 — original private SLA exception dashboard. No background fetch or external mutation. */
+(()=>{'use strict';
+const $=id=>document.getElementById(id),API='/api/admin/customer-care-retention-ops-752';
+if(!$('a753Load'))return;
+let doc=null,busy=false,selected=null;
+const say=(id,value)=>{if($(id))$(id).textContent=String(value??'');};
+const fail=e=>String(e?.message||'Original source unavailable').slice(0,210);
+function lock(on){busy=on;for(const button of document.querySelectorAll('#a753Workflow button'))button.disabled=on;}
+async function call(method,body=null){
+ const ctrl=new AbortController(),timer=setTimeout(()=>ctrl.abort(),12000);
+ try{
+  const url=new URL(API,location.origin);url.searchParams.set('dashboard753','1');
+  if(method==='GET')url.searchParams.set('view753',$('a753View').value);
+  const opts={method,credentials:'same-origin',cache:'no-store',signal:ctrl.signal,headers:{Accept:'application/json'}};
+  if(method==='POST'){opts.headers['Content-Type']='application/json';opts.body=JSON.stringify(body);}
+  const res=await fetch(url.pathname+url.search,opts);
+  const data=await res.json().catch(()=>({code:'INVALID_RESPONSE'}));
+  if(!res.ok||!data.ok)throw Error((data.code||'SOURCE_HOLD')+' '+(data.error||res.status));
+  return data;
+ }finally{clearTimeout(timer);}
+}
+function select(item,exception){
+ selected={task_id:item.task_id,code:exception.code,subject_id:exception.raise_receipt_id||''};
+ $('a753Task').value=selected.task_id;$('a753Code').value=selected.code;
+ $('a753Subject').value=selected.subject_id;
+ say('a753Selected','Order '+item.order_id+' · '+exception.code+' · '+exception.status+
+  '. A second verified Admin must review any original raise receipt.');
+}
+function render(){
+ if(!doc)return;const s=doc.summary;
+ say('a753Summary',s.tasks_scanned+' original cases · '+s.tasks_with_exceptions+
+  ' cases needing review · '+s.reply_sla_exceptions+' reply SLA exceptions · '+
+  s.closure_sla_exceptions+' closure SLA exceptions · '+s.retention_escalations+
+  ' due retention escalations · '+s.independent_reviewed+' independent original reviews.');
+ const list=$('a753Rows');list.replaceChildren();
+ for(const item of doc.rows){
+  const li=document.createElement('li');
+  const title=document.createElement('span');
+  title.textContent='Order '+item.order_id+' · '+(item.age_hours??'?')+' hours since original case · '+
+   (item.provider_thread_independently_reviewed?'Provider thread reviewed':'Provider evidence HOLD')+
+   ' · '+(item.closed_internal?'Internally closed':'Internal care open')+' · '+item.task_id;
+  li.append(title);
+  for(const e of item.exceptions){
+   const button=document.createElement('button');button.type='button';
+   button.textContent=e.code+' — '+e.status+' — select';
+   button.addEventListener('click',()=>select(item,e));li.append(button);
+  }
+  list.append(li);
+ }
+ if(!doc.rows.length){const item=document.createElement('li');item.textContent='No original cases match this view.';list.append(item);}
+ const history=$('a753History');history.replaceChildren();
+ for(const r of doc.receipts){const li=document.createElement('li');
+  li.textContent=r.recorded_at+' · '+r.kind+' · '+r.exception_code+
+   ' · '+r.decision+' · Admin #'+r.actor_user_id+' · '+r.id;history.append(li);}
+ if(!doc.receipts.length){const li=document.createElement('li');li.textContent='No recorded Build 753 exception receipt.';history.append(li);}
+}
+async function load(){
+ if(busy)return;lock(true);say('a753Status','Reading original private journal sources only; no provider call.');
+ try{doc=await call('GET');selected=null;render();
+  say('a753Status','Original source loaded. Independent live production acceptance remains separately required.');}
+ catch(e){doc=null;selected=null;say('a753Status','HOLD: '+fail(e));}
+ finally{lock(false);}
+}
+async function save(kind){
+ if(busy||!doc||!selected){say('a753Status','HOLD: Load and select an original exception first.');return;}
+ const payload={kind,task_id:selected.task_id,exception_code:selected.code,
+  subject_id:selected.subject_id,decision:kind==='exception_review'?$('a753Decision').value:'raise',
+  note:$('a753Note').value.trim(),request_key:crypto.randomUUID(),expected_version:doc.version};
+ lock(true);say('a753Status','Saving private human-reviewed exception. No external messages or deletion.');
+ try{const r=await call('POST',payload);doc=await call('GET');selected=null;render();
+  say('a753Status','Original '+kind+' receipt '+r.receipt_id+' saved and read back. Production witness remains separate.');}
+ catch(e){say('a753Status','HOLD: '+fail(e)+'. Reload the original journal before retrying an uncertain write.');}
+ finally{lock(false);}
+}
+$('a753Load').addEventListener('click',()=>void load());
+$('a753Raise').addEventListener('click',()=>void save('exception_raise'));
+$('a753Review').addEventListener('click',()=>void save('exception_review'));
+})();
