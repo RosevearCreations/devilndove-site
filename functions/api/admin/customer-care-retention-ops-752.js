@@ -167,7 +167,7 @@ const hours=48*3600000,closeHours=72*3600000;
 const isIso=x=>typeof x==='string'&&Number.isFinite(Date.parse(x));
 const exceptionDoc=async db=>{const original=await raw(db,EXCEPTIONS_KEY);
  return {original,doc:unpack(original,753,120)};};
-function exceptionRows(s,receipts,clock=Date.now()){
+export function projectCareExceptions753(s,receipts,clock=Date.now()){
  const dueByTask=new Map(queue(s).map(x=>[x.task_id,x]));
  return s.work.receipts.filter(r=>r.kind==='task_open').slice(0,60).map(t=>{
   const opened=isIso(t.recorded_at)?Date.parse(t.recorded_at):NaN;
