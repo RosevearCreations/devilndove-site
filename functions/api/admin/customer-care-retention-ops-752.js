@@ -118,8 +118,20 @@ export async function onRequestPost(ctx){
    return response({code:'INDEPENDENT_CONFIRM_REQUIRED'},409);
   if(kind==='review_ack'&&admin.user_id===approval.actor_user_id)
    return response({code:'DISTINCT_REVIEWER_REQUIRED'},403);
-  const currentOrder=await db.prepare('SELECT order_id FROM orders WHERE order_id=? LIMIT 1').bind(item.order_id).first();
-  if(!currentOrder)return response({code:'ORIGINAL_ORDER_MISSING'},409);
+  // Revalidate the original Order and Build 746 case revision before accepting custody.
+  const task=s.work.receipts.find(r=>r.kind==='task_open'&&r.id===taskId);
+  const currentOrder=await db.prepare('SELECT order_id,updated_at FROM orders WHERE order_id=? LIMIT 1').bind(item.order_id).first();
+  if(!task||!currentOrder||currentOrder.updated_at!==task.source_order_updated_at)
+   return response({code:'ORIGINAL_ORDER_CHANGED'},409);
+  const caseDoc=unpack(await raw(db,'site.admin.aftersale.v746.'+item.order_id),746,30);
+  if(caseDoc.version!==task.source_case_version||
+   !caseDoc.receipts.some(r=>r.receipt_id===task.case_id&&r.source_order_id===item.order_id&&r.case_type===task.case_type))
+   return response({code:'ORIGINAL_CASE_CHANGED'},409);
+  // Fail closed if any underlying source journal changed during manual review.
+  const snapshot=await sources(db);
+  if(snapshot.work.version!==s.work.version||snapshot.custody.version!==s.custody.version||
+   snapshot.sla.version!==s.sla.version)
+   return response({code:'ORIGINAL_SOURCE_CHANGED'},409);
   const receipt={id:crypto.randomUUID(),kind,task_id:taskId,plan_id:planId,
    subject_id:kind==='review_confirm'?ack.id:null,actor_user_id:admin.user_id,
    request_key:requestId,note:p.note,recorded_at:new Date().toISOString(),
