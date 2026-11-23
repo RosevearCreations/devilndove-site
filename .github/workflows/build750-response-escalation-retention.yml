@@ -1,0 +1,76 @@
+name: Build 750 Original Customer Reply Evidence and Auditable Archival
+on:
+  pull_request:
+    branches: [dev, main]
+    paths:
+      - 'functions/api/admin/customer-care-custody-750.js'
+      - 'functions/api/admin/customer-care-queue-749.js'
+      - 'functions/api/_lib/appModuleRoutes.js'
+      - 'public/js/admin-customer-care-custody-750.js'
+      - 'admin/storefront-acceptance/index.html'
+      - 'docs/operations/RELEASE_467_BUILD_556_ADMIN_ROUTE_INVENTORY.json'
+      - 'release465-performance-budget.json'
+      - 'scripts/build749_source_contract.mjs'
+      - 'scripts/build750_*'
+      - '.github/workflows/build750-response-escalation-retention.yml'
+  push:
+    branches: [dev, main]
+    paths:
+      - 'functions/api/admin/customer-care-custody-750.js'
+      - 'functions/api/admin/customer-care-queue-749.js'
+      - 'functions/api/_lib/appModuleRoutes.js'
+      - 'public/js/admin-customer-care-custody-750.js'
+      - 'admin/storefront-acceptance/index.html'
+      - 'docs/operations/RELEASE_467_BUILD_556_ADMIN_ROUTE_INVENTORY.json'
+      - 'release465-performance-budget.json'
+      - 'scripts/build749_source_contract.mjs'
+      - 'scripts/build750_*'
+      - '.github/workflows/build750-response-escalation-retention.yml'
+permissions:
+  contents: read
+jobs:
+  original-response-source-security:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: '24'
+      - name: Parse original protected source and verify no live customer execution
+        run: |
+          node --check functions/api/admin/customer-care-custody-750.js
+          node --check functions/api/admin/customer-care-queue-749.js
+          node --check public/js/admin-customer-care-custody-750.js
+          node --check scripts/build750_api_contract.mjs
+          node --check scripts/build750_firefox_browser_qa.mjs
+          node scripts/build750_source_contract.mjs
+          node scripts/build749_source_contract.mjs
+      - name: Exact original fake D1 receipt, legal hold and two-party archive gates
+        run: node scripts/build750_api_contract.mjs
+  original-customer-reply-local-sha-browser:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: '24'
+      - name: Install actual Firefox and Chromium
+        run: |
+          npm init -y >/dev/null
+          npm install --no-save --package-lock=false playwright@1.56.1
+          npx playwright install --with-deps firefox chromium
+      - name: Serve source Admin HTML without real customer or provider backends
+        run: |
+          python3 -m http.server 18750 --bind 127.0.0.1 >/tmp/build750-http.log 2>&1 &
+          for i in 1 2 3 4 5; do
+            if curl -fsS http://127.0.0.1:18750/admin/storefront-acceptance/ >/dev/null; then exit 0; fi
+            sleep 1
+          done
+          cat /tmp/build750-http.log
+          exit 1
+      - name: Genuine Firefox desktop/mobile, Chromium and local SHA-256 without file upload
+        env:
+          DD_ORIGIN: http://127.0.0.1:18750
+        run: node scripts/build750_firefox_browser_qa.mjs

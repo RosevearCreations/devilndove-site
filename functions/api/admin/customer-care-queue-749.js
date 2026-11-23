@@ -4,6 +4,7 @@
 import {getDb,jsonResponse,auditAdminAction} from '../_lib/adminAudit.js';
 import {verifiedAdminFromModule} from '../_lib/verifiedAdmin398.mjs';
 const KEY='site.admin.customerjourney.workqueue.v749';
+const ARCHIVE='site.admin.customerjourney.carecustody.v750';
 const FIREFOX='site.admin.customerjourney.v748';
 const CASE=id=>'site.admin.aftersale.v746.'+id;
 const UUID=/^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
@@ -51,6 +52,19 @@ function parse(r,schema,cap){
 }
 async function work(db){
  const r=await getRow(db,KEY);return{r,doc:parse(r,749,120)};
+}
+async function archivedTaskIds(db){
+ const r=await getRow(db,ARCHIVE),doc=parse(r,750,120);
+ const seen=new Set(),archived=new Set();
+ for(const receipt of doc.receipts){
+  if((receipt.kind==='archive_review'&&receipt.decision==='approve')||
+     receipt.kind==='archive_restore'){
+   if(seen.has(receipt.task_id))continue;
+   seen.add(receipt.task_id);
+   if(receipt.kind==='archive_review')archived.add(receipt.task_id);
+  }
+ }
+ return archived;
 }
 async function firefox(db){
  const row=await getRow(db,FIREFOX),doc=parse(row,748,100);
@@ -170,8 +184,16 @@ export async function onRequestGet(ctx){
  if(orderRaw!==null&&!id)return respond({code:'INVALID_ORDER',error:'Original numeric Order ID required.'},400);
  if(taskId&&!UUID.test(taskId))return respond({code:'INVALID_TASK_ID',error:'Original receipt UUID required.'},400);
  try{
-  const {doc}=await work(db),src=await firefox(db),view=queue(doc,id);
+  const {doc}=await work(db),src=await firefox(db),view=queue(doc,id),
+   archived=await archivedTaskIds(db);
+  view.tasks=view.tasks.filter(x=>!archived.has(x.task_id));
+  view.total=view.tasks.length;
+  view.overdue=view.tasks.filter(x=>x.overdue).length;
+  view.due_soon=view.tasks.filter(x=>x.due_soon).length;
+  view.held=view.tasks.filter(x=>x.state.startsWith('HOLD')).length;
+  view.archived_hidden=archived.size;
   const selected=taskId?await details(db,doc,taskId):null;
+  if(selected?.task&&archived.has(taskId))selected.task.state='ARCHIVED_IMMUTABLE_RECEIPTS';
   if(selected?.code)return respond({code:selected.code,error:selected.error},selected.status);
   return respond({queue:view,firefox:firefoxStatus(doc,src),
    viewer_admin_user_id:admin.user_id,
@@ -206,7 +228,7 @@ export async function onRequestPost(ctx){
   return respond({code:'INVALID_EVIDENCE',error:'Current version, request UUID, factual nonpersonal note/reference and valid task action required.'},400);
  const fingerprint=JSON.stringify({...input,owner_clicked_confirmation:payload.owner_clicked_confirmation===true});
  try{
-  const {r,doc}=await work(db);
+  const {r,doc}=await work(db),archived=await archivedTaskIds(db);
   const prior=doc.receipts.find(x=>x.request_key===key);
   if(prior)return prior.actor_user_id===admin.user_id&&prior.input_fingerprint===fingerprint?
    respond({replayed:true,receipt:safeReceipt(prior),current_version:doc.version}):
@@ -233,7 +255,7 @@ export async function onRequestPost(ctx){
    if(!input.order_id||!UUID.test(input.case_id)||!input.assignee_user_id||
     !['normal','urgent'].includes(input.priority)||!validDue(input.due_date))
     return respond({code:'TASK_INPUT_REQUIRED',error:'Original Order/case, Admin assignee, due date within -30/+365 days, and priority required.'},400);
-   const count=doc.receipts.filter(x=>x.kind==='task_open').length;
+   const count=doc.receipts.filter(x=>x.kind==='task_open'&&!archived.has(x.id)).length;
    if(count>=35)return respond({code:'ACTIVE_QUEUE_CAP',error:'Work queue capacity reached; archive or reconcile first.'},409);
    if(!await validAssignee(db,input.assignee_user_id))
     return respond({code:'REAL_ADMIN_ASSIGNEE_REQUIRED',error:'Selected assignee must be an existing active Admin user.'},409);
@@ -247,6 +269,8 @@ export async function onRequestPost(ctx){
     source_case_version:snapshot.case_version,external_contact:false});
   }else{
    if(!UUID.test(input.subject_id))return respond({code:'TASK_ID_REQUIRED',error:'Original work task UUID required.'},400);
+   if(archived.has(input.subject_id))
+    return respond({code:'ARCHIVED_RESTORE_IN_750',error:'Immutable archived task must be restored in Build 750 custody before operational queue edits.'},409);
    const opening=taskOpen(doc,input.subject_id);
    if(!opening)return respond({code:'ORIGINAL_TASK_REQUIRED',error:'Original private case work item not found.'},404);
    const d=taskDetails(doc,opening),existing=taskEvents(doc,opening.id);

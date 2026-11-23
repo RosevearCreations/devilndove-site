@@ -16,8 +16,8 @@
     "max_js_bytes": 600000,
     "max_css_bytes": 500000,
     "max_html_bytes": 500000,
-    "max_runtime_source_bytes": 20075000,
-    "max_runtime_source_files": 1882,
+    "max_runtime_source_bytes": 20135000,
+    "max_runtime_source_files": 1884,
     "max_inline_data_uri_bytes": 650000
   },
   "baseline_observed": {
@@ -33,6 +33,27 @@
     "production_mutation": false
   },
   "budget_reviews": [
+    {
+      "build": "750",
+      "date": "2026-11-22",
+      "scope": "Verified-source customer response custody by local SHA-256 digest and different-Admin file-hash match (never provider delivery confirmation), internal escalation with assigned Admin ACK and independent clearance, original case legal/retention hold and distinct release, original Build749 independently approved followup and independently matched response gated two-Admin archival approval with immutable receipts/restore, UTC retention review due, click-only redacted export. No customer or external provider data transport, no automated deletion/notification.",
+      "measured_source_baseline": "Build749 protected main; measured runtime 1,882 files / 20,042,673 bytes, Build749 system gate and production proof GREEN.",
+      "prior_limit_bytes": 20075000,
+      "new_limit_bytes": 20135000,
+      "delta_bytes": 60000,
+      "prior_file_limit": 1882,
+      "new_file_limit": 1884,
+      "delta_files": 2,
+      "per_file_limits_unchanged": true,
+      "inline_data_uri_limit_unchanged": true,
+      "no_customer_facing_runtime_change": true,
+      "no_schema_migration": true,
+      "no_payment_or_customer_action": true,
+      "no_auto_purge": true,
+      "no_provider_claims": true,
+      "dovlin_collection_menu_hold_preserved": true,
+      "review_reason": "Two Admin-only runtime modules (~24KB protected original D1 API, ~9KB browser local hash/client) and bounded existing Admin acceptance markup, plus protected route mapping and inventory. Source cap +60KB (~0.30%) and runtime file cap +2, all existing per-file/PWA/media/SEO/quality/production gates still enforce. No auto storage mutation beyond explicit verified Admin receipts."
+    },
     {
       "build": "749",
       "date": "2026-11-22",
