@@ -1,0 +1,156 @@
+/** Build 752 — private scheduled retention-operations worklist and independent operator acknowledgements.
+ * Read-only customer/provider custody: no outbound mail, purge, billing, or unattended cron.
+ * Source-of-truth: original Build 749/750/751 immutable private journals.
+ */
+import {getDb,jsonResponse,auditAdminAction} from '../_lib/adminAudit.js';
+import {verifiedAdminFromModule} from '../_lib/verifiedAdmin398.mjs';
+const KEY='site.admin.customerjourney.retention-ops.v752';
+const WORK='site.admin.customerjourney.workqueue.v749';
+const CUSTODY='site.admin.customerjourney.carecustody.v750';
+const SLA='site.admin.customerjourney.provider-sla.v751';
+const UUID=/^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+const response=(payload,status=200)=>jsonResponse({ok:status<400,build:752,...payload},status,{
+ 'Cache-Control':'private, no-store, max-age=0','X-Robots-Tag':'noindex,nofollow,noarchive',
+ 'X-Content-Type-Options':'nosniff','Referrer-Policy':'no-referrer','Vary':'Cookie'});
+const latest=(doc,kind,id)=>doc.receipts.find(r=>r.kind===kind&&r.task_id===id);
+function auth(ctx){
+ const admin=verifiedAdminFromModule(ctx),db=getDb(ctx.env);
+ if(!admin)return {error:response({code:'ADMIN_REQUIRED'},403)};
+ if(!db)return {error:response({code:'D1_UNAVAILABLE'},503)};
+ return {admin,db};
+}
+async function raw(db,key){
+ const r=await db.prepare('SELECT setting_value,is_public FROM app_settings WHERE setting_key=? LIMIT 1').bind(key).first();
+ if(!r)return null;
+ if(Number(r.is_public)!==0)throw Error('private visibility mismatch');
+ return r.setting_value;
+}
+function unpack(value,schema,cap){
+ if(!value)return {schema,version:0,receipts:[]};
+ const doc=JSON.parse(value);
+ if(doc?.schema!==schema||!Number.isSafeInteger(doc.version)||doc.version<0||
+ !Array.isArray(doc.receipts)||doc.receipts.length>cap)throw Error('invalid private journal');
+ return doc;
+}
+async function sources(db){
+ const raws=await Promise.all([raw(db,WORK),raw(db,CUSTODY),raw(db,SLA),raw(db,KEY)]);
+ return {work:unpack(raws[0],749,120),custody:unpack(raws[1],750,120),
+  sla:unpack(raws[2],751,110),ops:unpack(raws[3],752,160),opsRaw:raws[3]};
+}
+function state(custody,id){
+ const hold=latest(custody,'retention_hold',id),released=hold&&custody.receipts.some(r=>r.kind==='retention_release'&&r.subject_id===hold.id);
+ const escalation=latest(custody,'escalation_raise',id),cleared=escalation&&custody.receipts.some(r=>r.kind==='escalation_clear'&&r.subject_id===escalation.id);
+ const archive=custody.receipts.find(r=>r.task_id===id&&(r.kind==='archive_restore'||r.kind==='archive_review'&&r.decision==='approve'));
+ return {hold:!!hold&&!released,escalation:!!escalation&&!cleared,archived:archive?.kind==='archive_review'};
+}
+function queue(s){
+ const today=new Date().toISOString().slice(0,10);
+ return s.work.receipts.filter(r=>r.kind==='task_open').map(task=>{
+  const id=task.id,c=state(s.custody,id);
+  const plan=latest(s.sla,'retention_plan',id);
+  const review=plan&&s.sla.receipts.find(r=>r.kind==='retention_review'&&r.subject_id===plan.id);
+  const active=review?.decision==='approve'&&c.archived;
+  const completed=active&&s.sla.receipts.some(r=>r.kind==='retention_check'&&r.subject_id===plan.id&&r.decision==='reviewed');
+  const date=active?plan.review_on:null;
+  const due=!!date&&date<=today&&!completed;
+  const proof=latest(s.sla,'provider_readback',id);
+  const witness=proof&&s.sla.receipts.find(r=>r.kind==='provider_review'&&r.subject_id===proof.id);
+  const verified=!!(witness?.decision==='pass'&&witness.metadata_sha256===proof.metadata_sha256&&witness.actor_user_id!==proof.actor_user_id);
+  const ack=s.ops.receipts.find(r=>r.kind==='review_ack'&&r.task_id===id&&r.plan_id===plan?.id);
+  const confirm=ack&&s.ops.receipts.find(r=>r.kind==='review_confirm'&&r.subject_id===ack.id);
+  return {task_id:id,order_id:task.order_id,plan_id:active?plan.id:null,
+   review_on:date,due,legal_hold:c.hold,escalated:c.escalation,
+   provider_original_verified:verified,provider_enrollment_status:proof?verified?'INDEPENDENT_READBACK_RECORDED':'SECOND_ADMIN_REQUIRED':'ORIGINAL_PROVIDER_REPLY_REQUIRED',
+   retention_status:!active?'NO_APPROVED_SCHEDULE':completed?'ORIGINAL_REVIEW_COMPLETED':due?c.hold?'DUE_LEGAL_HOLD':'DUE_OWNER_ACTION':'SCHEDULED',
+   operator_ack_id:ack?.id||null,independent_confirmation:!!(confirm&&confirm.actor_user_id!==ack.actor_user_id),
+   no_automatic_customer_contact:true,no_auto_delete:true};
+ }).filter(x=>x.plan_id||x.provider_enrollment_status!=='INDEPENDENT_READBACK_RECORDED')
+ .sort((a,b)=>Number(b.due)-Number(a.due)||Number(b.legal_hold)-Number(a.legal_hold)||
+  String(a.review_on||'9999').localeCompare(String(b.review_on||'9999'))).slice(0,60);
+}
+const note=x=>typeof x==='string'&&x.length>=20&&x.length<=350&&!/@|https?:|[<>]/i.test(x);
+export async function onRequestGet(ctx){
+ const {db,error}=auth(ctx);if(error)return error;
+ try{
+  const s=await sources(db),all=queue(s);
+  const view=new URL(ctx.request.url).searchParams.get('view')||'all';
+  if(!['all','due','hold','enrollment'].includes(view))return response({code:'INVALID_VIEW'},400);
+  const rows=all.filter(x=>view==='all'||view==='due'&&x.due||
+   view==='hold'&&(x.legal_hold||x.escalated)||
+   view==='enrollment'&&x.provider_enrollment_status!=='INDEPENDENT_READBACK_RECORDED');
+  return response({version:s.ops.version,source_versions:{work:s.work.version,custody:s.custody.version,sla:s.sla.version},
+   summary:{visible:all.length,due:all.filter(x=>x.due).length,legal_holds:all.filter(x=>x.legal_hold).length,
+    independent_provider_readbacks:all.filter(x=>x.provider_original_verified).length,
+    waiting_provider:all.filter(x=>x.provider_enrollment_status!=='INDEPENDENT_READBACK_RECORDED').length,
+    independently_confirmed_operations:all.filter(x=>x.independent_confirmation).length},
+   rows,receipts:s.ops.receipts.slice(0,50).map(r=>({id:r.id,task_id:r.task_id,plan_id:r.plan_id,
+    kind:r.kind,subject_id:r.subject_id||null,recorded_at:r.recorded_at,actor_user_id:r.actor_user_id})),
+   scheduled_queue_evaluated_at:new Date().toISOString(),scheduler_type:'OWNER_OPENED_PRIVATE_QUEUE',
+   unattended_cron:false,notification_sent:false,provider_write:false,purge:false});
+ }catch{return response({code:'PRIVATE_SOURCE_HOLD',error:'Original custody source unavailable.'},503);}
+}
+export async function onRequestPost(ctx){
+ const {db,admin,error}=auth(ctx);if(error)return error;
+ if(ctx.request.headers.get('Origin')!==new URL(ctx.request.url).origin)
+  return response({code:'SAME_ORIGIN_REQUIRED'},403);
+ if(!/application\/json/i.test(ctx.request.headers.get('Content-Type')||''))
+  return response({code:'JSON_REQUIRED'},415);
+ let p;
+ try{const body=await ctx.request.text();if(body.length>2000)throw Error();p=JSON.parse(body);}catch{return response({code:'BAD_JSON'},400);}
+ const kind=p?.kind,taskId=p?.task_id,planId=p?.plan_id,subjectId=p?.subject_id,requestId=p?.request_key;
+ if(!['review_ack','review_confirm'].includes(kind)||!UUID.test(taskId||'')||
+ !UUID.test(planId||'')||!UUID.test(requestId||'')||!note(p.note)||
+ !Number.isSafeInteger(p.expected_version)||p.expected_version<0)
+  return response({code:'INVALID_EVIDENCE'},400);
+ try{
+  const s=await sources(db),old=s.ops.receipts.find(r=>r.request_key===requestId);
+  if(old)return response({code:'REQUEST_ALREADY_USED',receipt_id:old.id},409);
+  if(s.ops.version!==p.expected_version)return response({code:'STALE_VERSION'},409);
+  if(s.ops.receipts.length>=160)return response({code:'JOURNAL_FULL'},409);
+  const item=queue(s).find(x=>x.task_id===taskId&&x.plan_id===planId);
+  if(!item||!item.due)return response({code:'ORIGINAL_DUE_SCHEDULE_REQUIRED'},409);
+  const approval=s.sla.receipts.find(r=>r.kind==='retention_review'&&r.subject_id===planId&&r.decision==='approve');
+  if(!approval)return response({code:'INDEPENDENT_APPROVAL_REQUIRED'},409);
+  const ack=s.ops.receipts.find(r=>r.kind==='review_ack'&&r.task_id===taskId&&r.plan_id===planId);
+  if(kind==='review_ack'&&ack)return response({code:'ACK_ALREADY_RECORDED'},409);
+  if(kind==='review_confirm'&&(!ack||subjectId!==ack.id||ack.actor_user_id===admin.user_id||
+   s.ops.receipts.some(r=>r.kind==='review_confirm'&&r.subject_id===ack.id)))
+   return response({code:'INDEPENDENT_CONFIRM_REQUIRED'},409);
+  if(kind==='review_ack'&&admin.user_id===approval.actor_user_id)
+   return response({code:'DISTINCT_REVIEWER_REQUIRED'},403);
+  // Revalidate the original Order and Build 746 case revision before accepting custody.
+  const task=s.work.receipts.find(r=>r.kind==='task_open'&&r.id===taskId);
+  const currentOrder=await db.prepare('SELECT order_id,updated_at FROM orders WHERE order_id=? LIMIT 1').bind(item.order_id).first();
+  if(!task||!currentOrder||currentOrder.updated_at!==task.source_order_updated_at)
+   return response({code:'ORIGINAL_ORDER_CHANGED'},409);
+  const caseDoc=unpack(await raw(db,'site.admin.aftersale.v746.'+item.order_id),746,30);
+  if(caseDoc.version!==task.source_case_version||
+   !caseDoc.receipts.some(r=>r.receipt_id===task.case_id&&r.source_order_id===item.order_id&&r.case_type===task.case_type))
+   return response({code:'ORIGINAL_CASE_CHANGED'},409);
+  // Fail closed if any underlying source journal changed during manual review.
+  const snapshot=await sources(db);
+  if(snapshot.work.version!==s.work.version||snapshot.custody.version!==s.custody.version||
+   snapshot.sla.version!==s.sla.version)
+   return response({code:'ORIGINAL_SOURCE_CHANGED'},409);
+  const receipt={id:crypto.randomUUID(),kind,task_id:taskId,plan_id:planId,
+   subject_id:kind==='review_confirm'?ack.id:null,actor_user_id:admin.user_id,
+   request_key:requestId,note:p.note,recorded_at:new Date().toISOString(),
+   source_versions:{work:s.work.version,custody:s.custody.version,sla:s.sla.version},
+   legal_hold_at_review:item.legal_hold,escalation_at_review:item.escalated,
+   operation_only:true,no_customer_message:true,no_purge:true};
+  const next=JSON.stringify({schema:752,version:s.ops.version+1,receipts:[receipt,...s.ops.receipts]});
+  if(next.length>110000)return response({code:'BYTES_CAP'},413);
+  const result=s.opsRaw?
+   await db.prepare("UPDATE app_settings SET setting_value=?,is_public=0,updated_by_user_id=?,updated_at=CURRENT_TIMESTAMP WHERE setting_key=? AND is_public=0 AND setting_value=?")
+    .bind(next,admin.user_id,KEY,s.opsRaw).run():
+   await db.prepare("INSERT INTO app_settings(setting_key,setting_value,is_public,updated_by_user_id,updated_at) VALUES(?,?,0,?,CURRENT_TIMESTAMP) ON CONFLICT(setting_key) DO NOTHING")
+    .bind(KEY,next,admin.user_id).run();
+  if(Number(result?.meta?.changes)!==1)return response({code:'CONCURRENT_CHANGE'},409);
+  const readback=unpack(await raw(db,KEY),752,160);
+  if(readback.receipts[0]?.id!==receipt.id)return response({code:'UNCERTAIN_WRITE'},503);
+  await auditAdminAction(ctx.env,ctx.request,admin,{action_type:'retention_operations_752',
+   target_type:'order',target_id:item.order_id,details:{kind,receipt_id:receipt.id}}).catch(()=>null);
+  return response({saved:true,version:readback.version,receipt_id:receipt.id,
+   no_external_send:true,no_purge:true,source_driven_due_review:true});
+ }catch{return response({code:'PRIVATE_SOURCE_HOLD'},503);}
+}
