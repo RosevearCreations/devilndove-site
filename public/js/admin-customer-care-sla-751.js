@@ -270,3 +270,98 @@ $('a753Load').addEventListener('click',()=>void load());
 $('a753Raise').addEventListener('click',()=>void save('exception_raise'));
 $('a753Review').addEventListener('click',()=>void save('exception_review'));
 })();
+
+
+/* Build 754 — manual genuine production-origin witness. Never poll or auto-accept. */
+(()=>{'use strict';
+const $=id=>document.getElementById(id),API='/api/admin/customer-care-retention-ops-752';
+if(!$('a754Load'))return;
+let doc=null,busy=false,selected=null;
+const say=(id,value)=>{if($(id))$(id).textContent=String(value??'');};
+const err=e=>String(e?.message||'Original production witness unavailable').slice(0,210);
+function lock(on){busy=on;for(const b of document.querySelectorAll('#a754Workflow button'))b.disabled=on;}
+async function call(method,body=null){
+ const ctrl=new AbortController(),timer=setTimeout(()=>ctrl.abort(),12000);
+ try{
+  const url=new URL(API,location.origin);
+  if(method==='GET')url.searchParams.set('witness754','1');
+  const options={method,credentials:'same-origin',cache:'no-store',signal:ctrl.signal,
+   headers:{Accept:'application/json'}};
+  if(method==='POST'){options.headers['Content-Type']='application/json';options.body=JSON.stringify(body);}
+  const res=await fetch(url.pathname+url.search,options);
+  const json=await res.json().catch(()=>({code:'INVALID_ORIGINAL_RESPONSE'}));
+  if(!res.ok||!json.ok)throw Error((json.code||'ORIGINAL_SOURCE_HOLD')+' '+(json.error||res.status));
+  return json;
+ }finally{clearTimeout(timer);}
+}
+function choose(row){
+ selected=row;
+ $('a754Task').value=row.task_id;$('a754Code').value=row.exception_code;
+ $('a754Subject').value=row.second_witness_receipt_id||row.first_witness_receipt_id||'';
+ say('a754Selected','Original Order '+row.order_id+' · '+row.exception_code+
+  ' · second-Admin certificate '+(row.two_admin_live_certified?'RECORDED':'HOLD')+
+  ' · internal retention closure '+(row.retention_review_closure_ready?'READY':'HOLD'));
+}
+function render(){
+ if(!doc)return;
+ const s=doc.summary,m=doc.production_marker;
+ say('a754Sha',m?.ok?m.source_sha:'');
+ say('a754Summary',s.source_exceptions+' original exceptions · '+s.independent_original_reviews+
+  ' independent Build 753 source reviews · '+s.two_admin_field_certificates+' two-Admin live certificates · '+
+  s.retention_closure_ready+' independently verified retention reviews ready · '+
+  s.original_internal_retention_closed+' completed internal retention-review closures. '+
+  'Production asset proof: '+(m?.ok?'SOURCE-BOUND':'HOLD')+'.');
+ const list=$('a754Rows');list.replaceChildren();
+ for(const row of doc.rows){
+  const li=document.createElement('li'),label=document.createElement('span');
+  label.textContent='Order '+row.order_id+' · '+row.exception_code+' · '+
+   (row.original_independent_review_id?'Original escalation independently reviewed':'Original review HOLD')+
+   ' · '+(row.two_admin_live_certified?'TWO-ADMIN CERTIFIED':'WITNESS HOLD')+
+   ' · '+(row.original_internal_retention_closure_id?'INTERNAL REVIEW CLOSED':
+    row.retention_review_closure_ready?'INTERNAL CLOSURE ELIGIBLE':'INTERNAL CLOSURE HOLD')+' ';
+  const button=document.createElement('button');button.type='button';
+  button.textContent='Select original source';button.addEventListener('click',()=>choose(row));
+  li.append(label,button);list.append(li);
+ }
+ if(!doc.rows.length){const li=document.createElement('li');
+  li.textContent='No genuine original Build 753 escalation to certify. No evidence has been invented.';list.append(li);}
+ const hist=$('a754History');hist.replaceChildren();
+ for(const r of doc.receipts){
+  const li=document.createElement('li');
+  li.textContent=r.recorded_at+' · '+r.kind+' · '+r.exception_code+
+   ' · verified Admin #'+r.actor_user_id+' · '+r.source_sha+' · '+r.id;
+  hist.append(li);
+ }
+ if(!doc.receipts.length){const li=document.createElement('li');
+  li.textContent='No original Build 754 production witness receipts.';hist.append(li);}
+}
+async function load(){
+ if(busy)return;lock(true);
+ say('a754Status','Reading original private D1 source and production release asset. No outbound provider request.');
+ try{doc=await call('GET');selected=null;render();
+  say('a754Status',doc.production_marker?.ok?
+   'Original source is production-bound. Actual Admin certification remains controlled by the original receipts.':
+   'HOLD: '+(doc.production_marker?.code||'Original deployment marker unavailable')+'. No false live certificate.');}
+ catch(e){doc=null;selected=null;say('a754Status','HOLD: '+err(e));}
+ finally{lock(false);}
+}
+async function save(kind){
+ if(busy||!doc||!selected){say('a754Status','HOLD: Load and select genuine original source first.');return;}
+ if(!doc.production_marker?.ok){say('a754Status','HOLD: Not an original, source-bound production deployment.');return;}
+ const subjectId=kind==='witness_confirm'?selected.first_witness_receipt_id:
+  kind==='retention_closure'?selected.second_witness_receipt_id:'';
+ const payload={kind,task_id:selected.task_id,exception_code:selected.exception_code,
+  subject_id:subjectId,note:$('a754Note').value.trim(),
+  request_key:crypto.randomUUID(),expected_version:doc.version};
+ lock(true);say('a754Status','Recording one original private Admin witness. No automatic or external mutation.');
+ try{const result=await call('POST',payload);doc=await call('GET');selected=null;render();
+  say('a754Status','Private original '+kind+' receipt '+result.receipt_id+
+   ' saved and read back. No customer contact, provider write, statutory closure or purge.');}
+ catch(e){say('a754Status','HOLD: '+err(e)+'. Reload original receipts before retrying an uncertain write.');}
+ finally{lock(false);}
+}
+$('a754Load').addEventListener('click',()=>void load());
+$('a754Open').addEventListener('click',()=>void save('witness_open'));
+$('a754Confirm').addEventListener('click',()=>void save('witness_confirm'));
+$('a754Close').addEventListener('click',()=>void save('retention_closure'));
+})();
