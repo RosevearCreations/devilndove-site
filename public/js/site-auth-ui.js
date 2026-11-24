@@ -148,7 +148,9 @@ document.addEventListener('DOMContentLoaded', () => {
       document.dispatchEvent(new CustomEvent('dd:auth-verified', { detail: { ok: true, logged_in: Boolean(user), user, session: data?.session || null } }));
     } catch (error) {
       const status = Number(error?.httpStatus || 0);
-      if (status === 401 || status === 403 || !window.DDAuth.isLoggedIn()) {
+      // A network failure is not proof that an HttpOnly-only session is invalid.
+      // Only the server's explicit 401/403 may clear the browser session.
+      if (status === 401 || status === 403) {
         window.DDAuth.clearAuth();
         window.DDAuthUiState = { phase: 'rejected', user: null, verified: false, degraded: false, last_error: error };
         applyUi(null);
