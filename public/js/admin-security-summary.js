@@ -220,6 +220,5 @@ document.addEventListener("DOMContentLoaded", () => {
     await loadSummary();
   });
 
-  renderUi();
-  loadSummary();
+  if (window.DDAuth.isLoggedIn()) { renderUi(); loadSummary(); }
 });
