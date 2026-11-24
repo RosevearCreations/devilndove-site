@@ -1,0 +1,39 @@
+name: Build 757 Verified Admin and Original Witness
+on:
+  pull_request:
+    branches: [dev, main]
+    paths:
+      - 'public/js/site-auth-ui.js'
+      - 'public/js/admin-users.js'
+      - 'scripts/build757_verified_session_witness.mjs'
+      - '.github/workflows/build757-verified-session-witness.yml'
+  push:
+    branches: [dev, main]
+    paths:
+      - 'public/js/site-auth-ui.js'
+      - 'public/js/admin-users.js'
+      - 'scripts/build757_verified_session_witness.mjs'
+      - '.github/workflows/build757-verified-session-witness.yml'
+permissions:
+  contents: read
+jobs:
+  verified-admin-and-witness:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - name: Verified session, genuine two-Admin witness and prior release regressions
+        run: |
+          node --check public/js/site-auth-ui.js
+          node --check public/js/admin-users.js
+          node --check scripts/build757_verified_session_witness.mjs
+          node scripts/build757_verified_session_witness.mjs
+          node scripts/build756_source_contract.mjs
+          node scripts/build755_source_contract.mjs
+          node scripts/build754_source_contract.mjs
+          node scripts/build753_source_contract.mjs
+          node scripts/build752_source_contract.mjs
+          node scripts/build751_source_contract.mjs
