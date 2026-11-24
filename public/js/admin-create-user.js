@@ -2,7 +2,7 @@
 
 document.addEventListener("DOMContentLoaded", () => {
   const mountEl = document.getElementById("usersAdminMount");
-  if (!mountEl || !window.DDAuth || !window.DDAuth.isLoggedIn()) return;
+  if (!mountEl || !window.DDAuth) return;
   let hasRendered = false;
 
   function setMessage(message, isError = false) {
