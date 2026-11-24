@@ -16,7 +16,7 @@
     "max_js_bytes": 600000,
     "max_css_bytes": 500000,
     "max_html_bytes": 500000,
-    "max_runtime_source_bytes": 20195000,
+    "max_runtime_source_bytes": 20210000,
     "max_runtime_source_files": 1887,
     "max_inline_data_uri_bytes": 650000
   },
@@ -33,6 +33,25 @@
     "production_mutation": false
   },
   "budget_reviews": [
+    {
+      "build": "755",
+      "date": "2026-11-23",
+      "scope": "Original source-bound two-Admin field audit receipt revalidation, deterministic SHA-256 private export and bounded Admin UI composed within the existing Build 752 private API/client (zero new runtime files). No original customer/provider action, automatic email, legal retention approval or deletion.",
+      "measured_source_gate_run": 45305585539,
+      "measured_runtime_source_bytes": 20206598,
+      "prior_limit_bytes": 20195000,
+      "new_limit_bytes": 20210000,
+      "delta_bytes": 15000,
+      "delta_percent": 0.0743,
+      "measured_overage_bytes": 11598,
+      "measured_runtime_source_files": 1887,
+      "runtime_file_limit_unchanged": 1887,
+      "per_file_limits_unchanged": true,
+      "inline_data_uri_limit_unchanged": true,
+      "no_new_schema_migration": true,
+      "no_customer_provider_automatic_actions": true,
+      "review_reason": "Exact failed PR #1025 System Gate measured 20,206,598 runtime source bytes against 20,195,000. +15,000 bytes (0.0743%) covers only the documented new guarded original private audit functionality with 3,402-byte headroom. Preserves 1,887 runtime-file ceiling, all per-file/inline source caps, source security, independent acceptance and Cloudflare deployment checks; no external human signoff inferred."
+    },
     {
       "build": "752",
       "date": "2026-11-23",
