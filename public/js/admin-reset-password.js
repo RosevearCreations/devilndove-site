@@ -194,5 +194,5 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 
   document.addEventListener("dd:admin-ready", (event) => { if (event?.detail?.ok) renderUi(); });
-  renderUi();
+  if (window.DDAuth.isLoggedIn()) renderUi();
 });
