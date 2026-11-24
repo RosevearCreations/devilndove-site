@@ -1,0 +1,39 @@
+name: Build 754 Production SLA Original Witness
+on:
+  pull_request:
+    branches: [dev, main]
+    paths:
+      - 'functions/api/admin/customer-care-retention-ops-752.js'
+      - 'public/js/admin-customer-care-sla-751.js'
+      - 'admin/storefront-acceptance/index.html'
+      - 'docs/operations/RELEASE_467_BUILD_556_ADMIN_ROUTE_INVENTORY.json'
+      - 'scripts/build754_source_contract.mjs'
+      - '.github/workflows/build754-care-production-witness.yml'
+  push:
+    branches: [dev, main]
+    paths:
+      - 'functions/api/admin/customer-care-retention-ops-752.js'
+      - 'public/js/admin-customer-care-sla-751.js'
+      - 'admin/storefront-acceptance/index.html'
+      - 'scripts/build754_source_contract.mjs'
+      - '.github/workflows/build754-care-production-witness.yml'
+permissions:
+  contents: read
+jobs:
+  original-production-source-contract:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: '24'
+      - name: Original Admin source, security, syntax and deterministic witness refusals
+        run: |
+          node --check functions/api/admin/customer-care-retention-ops-752.js
+          node --check public/js/admin-customer-care-sla-751.js
+          node --check scripts/build754_source_contract.mjs
+          node scripts/build754_source_contract.mjs
+          node scripts/build753_source_contract.mjs
+          node scripts/build752_source_contract.mjs
+          node scripts/build751_source_contract.mjs

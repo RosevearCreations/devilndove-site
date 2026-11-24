@@ -446,11 +446,28 @@ body{background:#151727;color:#faf0ff}.a660{max-width:1100px;width:94%;margin:2r
 <div class="grid"><button type="button" id="a753Raise">Record private escalation</button><button type="button" id="a753Review">Independent Admin review</button></div>
 </details><details><summary>Original immutable exception receipts</summary><ol id="a753History"></ol></details>
 <p class="hold">The dashboard and internal receipts cannot certify live production by themselves. No automatic escalation email, customer notification, Resend write, retention purge, or business transaction. A different verified Admin must review a recorded exception.</p>
+</section><section id="a754Workflow" aria-labelledby="a754Heading" data-build754="1">
+<h2 id="a754Heading">14. Original production witness, two-Admin escalation &amp; internal retention closure</h2>
+<p>Build 754. On demand, read the original private D1 receipt history and the production deployment's server-bound release marker. Only genuine Build 753 independently reviewed exceptions qualify. An original first Admin may open a production witness; a <strong>different signed-in Admin</strong> must inspect the same source and confirm. No mock Admins, test transactions or guessed production state qualify.</p>
+<div class="grid"><button type="button" id="a754Load">Inspect original production certification</button><label>Current original deployment SHA<input id="a754Sha" readonly aria-label="Verified production deployment commit"></label></div>
+<p id="a754Status" role="status" aria-live="polite">Not loaded. Production origin, live evidence and two distinct verified Admin actions remain HOLD until witnessed.</p>
+<p id="a754Summary">No original production certification metrics loaded.</p><ol id="a754Rows"></ol>
+<details><summary><strong>Manual two-Admin witness or original retention-review closure</strong></summary>
+<p id="a754Selected" role="status">Select a source-backed exception from the list. Only an original authenticated Admin session may submit.</p>
+<label>Original Build 749 task UUID<input id="a754Task" maxlength="80" readonly></label>
+<label>Original Build 753 exception code<input id="a754Code" maxlength="80" readonly></label>
+<label>Original first/second witness receipt UUID<input id="a754Subject" maxlength="80" readonly></label>
+<label>Factual witness note, no customer personal information<textarea id="a754Note" rows="3" minlength="20" maxlength="350"></textarea></label>
+<div class="grid"><button type="button" id="a754Open">First Admin: record original production source</button>
+<button type="button" id="a754Confirm">Second Admin: independently certify</button>
+<button type="button" id="a754Close">Record completed internal retention review</button></div>
+</details><details><summary>Private original witness and closure receipts</summary><ol id="a754History"></ol></details>
+<p class="hold">Internal retention review closure requires the original approved schedule, original reviewed check, independent due-review confirmation, source-fresh two-Admin production certificate and no active legal hold or custody escalation. This is not statutory compliance certification, deletion authority, a genuine customer-response assertion or automatic provider notification. Production release GREEN is separate from field-certificate status.</p>
 </section></main><script defer src="/public/js/auth.js?v=467"></script><script defer src="/public/js/admin-storefront-acceptance-660.js?v=660"></script>
 <script defer src="/public/js/admin-after-sale-746.js?v=746"></script>
 <script defer src="/public/js/admin-customer-journey-747.js?v=747"></script>
 <script defer src="/public/js/admin-journey-recovery-748.js?v=748"></script>
 <script defer src="/public/js/admin-customer-care-queue-749.js?v=749"></script>
 <script defer src="/public/js/admin-customer-care-custody-750.js?v=750"></script>
-<script defer src="/public/js/admin-customer-care-sla-751.js?v=751-752-753"></script>
+<script defer src="/public/js/admin-customer-care-sla-751.js?v=751-752-753-754"></script>
 <script type="module" src="/public/js/admin-shell-467.js?v=467b467"></script></body></html>
