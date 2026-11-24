@@ -461,7 +461,7 @@ async function witnessPost754(ctx,db,admin,p){
 const AUDIT755='site.admin.customerjourney.acceptance-audit.v755';
 const auditDoc755=async db=>{const original=await raw(db,AUDIT755);
  return {original,doc:unpack(original,755,90)};};
-const sha755=async value=>Array.from(new Uint8Array(
+export const sha755=async value=>Array.from(new Uint8Array(
  await crypto.subtle.digest('SHA-256',new TextEncoder().encode(JSON.stringify(value))),
  b=>b.toString(16).padStart(2,'0')).join('');
 export function revalidateSla755(s,e,w,marker,taskId,code,order,caseDoc){
@@ -530,7 +530,7 @@ async function originalAudit755(ctx,db,taskId,code,marker,s,e,w){
  const pack=revalidateSla755(s,e,w,marker,taskId,code,order,caseDoc);
  return {pack,sha256:await sha755(pack)};
 }
-function acceptance755(report,digest,receipts,sourceSha){
+export function acceptance755(report,digest,receipts,sourceSha){
  const first=receipts.find(r=>r.kind==='audit_open'&&r.task_id===report.original.task_id&&
   r.exception_code===report.original.exception_code);
  const second=first&&receipts.find(r=>r.kind==='audit_certify'&&r.subject_id===first.id);
