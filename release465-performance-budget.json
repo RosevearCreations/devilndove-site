@@ -16,7 +16,7 @@
     "max_js_bytes": 600000,
     "max_css_bytes": 500000,
     "max_html_bytes": 500000,
-    "max_runtime_source_bytes": 20210000,
+    "max_runtime_source_bytes": 20235000,
     "max_runtime_source_files": 1887,
     "max_inline_data_uri_bytes": 650000
   },
@@ -33,6 +33,27 @@
     "production_mutation": false
   },
   "budget_reviews": [
+    {
+      "build": "756",
+      "date": "2026-11-24",
+      "scope": "Original source-bound cross-release two-Admin audit certificate renewal with private D1 CAS receipts and no automatic approval, plus screenshot-driven Users & Security HttpOnly-session recovery, bounded 12-second user-list retry, visible sign-in guidance and static Admin acceptance section. Adds no new Pages runtime files, D1 schema or provider mutations.",
+      "measured_pr_source_gate_run": 45404071454,
+      "measured_runtime_source_files": 1887,
+      "measured_runtime_source_bytes": 20228932,
+      "prior_limit_bytes": 20210000,
+      "new_limit_bytes": 20235000,
+      "delta_bytes": 25000,
+      "measured_overage_bytes": 18932,
+      "source_headroom_bytes": 6068,
+      "delta_percent": 0.1237,
+      "runtime_file_limit_unchanged": 1887,
+      "per_file_limits_unchanged": true,
+      "inline_data_uri_limit_unchanged": true,
+      "no_new_d1_schema_migration": true,
+      "no_automatic_customer_provider_actions": true,
+      "no_simulated_human_signoffs": true,
+      "review_reason": "Exact protected Build756 PR #1027 System Gate measured 20,228,932 runtime bytes against 20,210,000; an explicitly reviewed +25,000-byte (0.124%) bounded allowance covers the 18,932-byte measured overage and leaves 6,068 bytes headroom, retaining original 1,887-runtime-file cap and all independent source, privacy, browser, quality, I.T. and Cloudflare production proof gates."
+    },
     {
       "build": "755",
       "date": "2026-11-23",

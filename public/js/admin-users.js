@@ -3,7 +3,7 @@
 
 document.addEventListener("DOMContentLoaded", () => {
   const mountEl = document.getElementById("usersAdminMount");
-  if (!mountEl || !window.DDAuth || !window.DDAuth.isLoggedIn()) return;
+  if (!mountEl || !window.DDAuth) return;
 
   let hasRendered = false;
   let isLoading = false;
@@ -100,6 +100,7 @@ document.addEventListener("DOMContentLoaded", () => {
   function renderUi() {
     if (hasRendered) return;
     hasRendered = true;
+    const recovery=document.getElementById("usersRecoveryStatus");if(recovery)recovery.hidden=true;
     mountEl.innerHTML = `
       <div style="display:flex;justify-content:space-between;gap:12px;align-items:flex-start;flex-wrap:wrap"><div><h3 style="margin:0">User Directory</h3><p class="small" style="margin:8px 0 0 0">Review users, profile state, verification flags, tiers, sessions, and select an account for an administrator password reset.</p></div><button class="btn" type="button" id="refreshAdminUsersButton">Refresh Users</button></div>
       <div class="grid cols-3" style="gap:12px;margin-top:14px"><div><label class="small" for="adminUsersRoleFilter">Role</label><select id="adminUsersRoleFilter"><option value="">All</option><option value="member">Member</option><option value="admin">Admin</option></select></div><div><label class="small" for="adminUsersActiveFilter">Status</label><select id="adminUsersActiveFilter"><option value="">All</option><option value="active">Active</option><option value="inactive">Inactive</option></select></div><div><label class="small" for="adminUsersSearchInput">Search</label><input id="adminUsersSearchInput" type="text" placeholder="User ID, name, email, phone, tier..." autocomplete="off" /></div></div>
@@ -111,10 +112,17 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   async function fetchUsers() {
-    const response = await window.DDAuth.apiFetch("/api/admin/users", { method: "GET" });
-    const data = await response.json();
-    if (!response.ok || !data?.ok) throw new Error(data?.error || "Failed to load users.");
-    return Array.isArray(data.users) ? data.users : [];
+    const ctrl = new AbortController();
+    const timer = setTimeout(() => ctrl.abort(), 12000);
+    try {
+      const response = await window.DDAuth.apiFetch("/api/admin/users", { method: "GET", signal: ctrl.signal, cache: "no-store" });
+      const data = await response.json().catch(() => ({ error: "The user directory returned an invalid response." }));
+      if (!response.ok || !data?.ok) throw new Error(data?.error || "Unable to load the user directory.");
+      return Array.isArray(data.users) ? data.users : [];
+    } catch (error) {
+      if (error?.name === "AbortError") throw new Error("The user directory timed out after 12 seconds. Use Refresh Users to retry; no user data changed.");
+      throw error;
+    } finally { clearTimeout(timer); }
   }
 
   async function loadUsers() {
@@ -140,6 +148,5 @@ document.addEventListener("DOMContentLoaded", () => {
 
   document.addEventListener("dd:admin-ready", async (event) => { if (!event?.detail?.ok) return; renderUi(); await loadUsers(); });
   document.addEventListener("dd:user-updated", loadUsers);
-  renderUi();
-  loadUsers();
+  if (window.DDAuth.isLoggedIn()) { renderUi(); loadUsers(); }
 });

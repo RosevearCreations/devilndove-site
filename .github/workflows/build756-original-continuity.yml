@@ -1,0 +1,47 @@
+name: Build 756 Production Witness Continuity and Users Recovery
+on:
+  pull_request:
+    branches: [dev, main]
+    paths:
+      - 'functions/api/admin/customer-care-retention-ops-752.js'
+      - 'public/js/admin-customer-care-sla-751.js'
+      - 'public/js/site-auth-ui.js'
+      - 'public/js/admin-users.js'
+      - 'admin/users/index.html'
+      - 'admin/storefront-acceptance/index.html'
+      - 'scripts/build756_source_contract.mjs'
+      - '.github/workflows/build756-original-continuity.yml'
+  push:
+    branches: [dev, main]
+    paths:
+      - 'functions/api/admin/customer-care-retention-ops-752.js'
+      - 'public/js/admin-customer-care-sla-751.js'
+      - 'public/js/site-auth-ui.js'
+      - 'public/js/admin-users.js'
+      - 'admin/users/index.html'
+      - 'scripts/build756_source_contract.mjs'
+      - '.github/workflows/build756-original-continuity.yml'
+permissions:
+  contents: read
+jobs:
+  original-source-users-continuity:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: '24'
+      - name: Genuine original D1 source refusal, Users session recovery and bounded UI
+        run: |
+          node --check functions/api/admin/customer-care-retention-ops-752.js
+          node --check public/js/site-auth-ui.js
+          node --check public/js/admin-users.js
+          node --check public/js/admin-customer-care-sla-751.js
+          node --check scripts/build756_source_contract.mjs
+          node scripts/build756_source_contract.mjs
+          node scripts/build755_source_contract.mjs
+          node scripts/build754_source_contract.mjs
+          node scripts/build753_source_contract.mjs
+          node scripts/build752_source_contract.mjs
+          node scripts/build751_source_contract.mjs

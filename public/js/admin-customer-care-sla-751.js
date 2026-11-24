@@ -481,3 +481,100 @@ $('a755Download').addEventListener('click',download);
 $('a755Open').addEventListener('click',()=>void submit('audit_open'));
 $('a755Certify').addEventListener('click',()=>void submit('audit_certify'));
 })();
+
+
+/* Build 756 — manual cross-release original source continuity, no automatic approval. */
+(()=>{'use strict';
+const $=id=>document.getElementById(id),API='/api/admin/customer-care-retention-ops-752';
+if(!$('a756Load'))return;
+let list=null,detail=null,selected=null,busy=false;
+const say=(id,value)=>{if($(id))$(id).textContent=String(value??'');};
+function lock(state){busy=state;for(const b of document.querySelectorAll('#a756Workflow button'))b.disabled=state;}
+async function request(method,payload=null,choice=null){
+ const ctrl=new AbortController(),timer=setTimeout(()=>ctrl.abort(),12000);
+ try{
+  const url=new URL(API,location.origin);
+  if(method==='GET'){url.searchParams.set('continuity756','1');
+   if(choice){url.searchParams.set('task_id',choice.task_id);
+    url.searchParams.set('exception_code',choice.exception_code);}}
+  const opt={method,credentials:'same-origin',cache:'no-store',signal:ctrl.signal,
+   headers:{Accept:'application/json'}};
+  if(method==='POST'){opt.headers['Content-Type']='application/json';opt.body=JSON.stringify(payload);}
+  const response=await fetch(url.pathname+url.search,opt);
+  const j=await response.json().catch(()=>({code:'INVALID_ORIGINAL_SOURCE'}));
+  if(!response.ok||!j.ok)throw Error((j.code||'ORIGINAL_SOURCE_HOLD')+' '+(j.error||response.status));
+  return j;
+ }finally{clearTimeout(timer);}
+}
+function render(){
+ if(!list)return;
+ const s=list.summary;
+ say('a756Summary',s.original_755_cases+' original Build 755 source candidates · '+
+  s.renewal_first_receipts+' first-Admin renewal receipts · '+s.renewal_second_receipts+
+  ' independent second-Admin receipts. Current production source: '+
+  (list.production_marker?.ok?'BOUND TO MAIN':'HOLD')+'.');
+ const rows=$('a756Rows');rows.replaceChildren();
+ for(const r of list.rows){
+  const item=document.createElement('li'),label=document.createElement('span'),button=document.createElement('button');
+  label.textContent='Original '+r.task_id+' · '+r.exception_code+' · prior SHA '+r.previous_main_sha+
+   ' · '+(r.has_independent_original_receipt?'Original 755 second receipt recorded':'Original independent review HOLD')+' ';
+  button.type='button';button.textContent='Select original certificate';
+  button.addEventListener('click',()=>{selected=r;detail=null;
+   $('a756Task').value=r.task_id;$('a756Code').value=r.exception_code;
+   $('a756Previous').value=r.previous_main_sha||'';$('a756Current').value='';
+   $('a756Digest').value='';$('a756Subject').value='';
+   say('a756Selected','Selected original source. Click Revalidate before recording current-release acceptance.');});
+  item.append(label,button);rows.append(item);
+ }
+ if(!list.rows.length){const item=document.createElement('li');item.textContent=
+  'No real two-Admin Build 755 source certificate. Current-release renewal remains HOLD.';rows.append(item);}
+}
+async function load(){
+ if(busy)return;lock(true);say('a756Status','Reading private original audit metadata only.');
+ try{list=await request('GET');detail=null;selected=null;render();
+  say('a756Status','Original history loaded. Select a genuine certificate to independently revalidate.');}
+ catch(e){list=null;detail=null;selected=null;say('a756Status','HOLD: '+String(e?.message||e).slice(0,210));}
+ finally{lock(false);}
+}
+async function inspect(){
+ if(busy||!selected){say('a756Status','HOLD: Select original Build 755 certificate first.');return;}
+ lock(true);say('a756Status','Revalidating previous fingerprint against original Order, case, SLA, retention and historical two-Admin receipt chain.');
+ try{detail=await request('GET',null,selected);
+  const st=detail.status;
+  $('a756Previous').value=st.previous_sha||'';
+  $('a756Current').value=st.current_main_sha||'';
+  $('a756Digest').value=detail.source_renewal_sha256||'';
+  $('a756Subject').value=st.new_first_renewal_id||'';
+  say('a756Selected',st.status+' · original 755 fingerprint '+
+   (st.verified_original_source?'MATCH':'HOLD')+' · current SHA '+(st.current_main_sha||'?')+
+   '. Previous approval is not an automatic approval of this release.');
+  say('a756Status',st.status+'. All acceptance requires real separate Admin actions; no customer/provider changes.');}
+ catch(e){detail=null;say('a756Status','HOLD: '+String(e?.message||e).slice(0,210));}
+ finally{lock(false);}
+}
+async function sign(kind){
+ if(busy||!detail||!selected){say('a756Status','HOLD: Revalidate original evidence before signing.');return;}
+ if(!detail.source_verified||!detail.production_marker?.ok){
+  say('a756Status','HOLD: Historical certificate fingerprint or current main source is not verified.');return;}
+ const payload={kind,task_id:selected.task_id,exception_code:selected.exception_code,
+  subject_id:kind==='continuity_confirm'?detail.status.new_first_renewal_id||'':'',
+  snapshot_sha256:detail.source_renewal_sha256,
+  request_key:crypto.randomUUID(),expected_version:detail.version,
+  note:$('a756Note').value.trim()};
+ lock(true);say('a756Status','Writing only the authenticated private current-release human review receipt.');
+ try{const result=await request('POST',payload);detail=await request('GET',null,selected);
+  const st=detail.status;
+  $('a756Digest').value=detail.source_renewal_sha256||'';
+  $('a756Subject').value=st.new_first_renewal_id||'';
+  say('a756Selected',st.status+' · old SHA '+(st.previous_sha||'?')+' · current SHA '+(st.current_main_sha||'?'));
+  say('a756Status','Original '+kind+' receipt '+result.receipt_id+' saved and reread. '+st.status+
+   '. No external messages or deletion.');}
+ catch(e){detail=null;say('a756Status','HOLD: '+String(e?.message||e).slice(0,210)+
+  '. Reload the original journal before retrying an uncertain write.');}
+ finally{lock(false);}
+}
+$('a756Load').addEventListener('click',()=>void load());
+$('a756Inspect').addEventListener('click',()=>void inspect());
+$('a756Open').addEventListener('click',()=>void sign('continuity_open'));
+$('a756Confirm').addEventListener('click',()=>void sign('continuity_confirm'));
+})();

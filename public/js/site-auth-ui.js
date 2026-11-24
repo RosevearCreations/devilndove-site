@@ -127,7 +127,10 @@ document.addEventListener('DOMContentLoaded', () => {
     applyUi(cachedUser);
     queueMicrotask(() => emitAuthEvents(cachedUser, null, { force: true, verified: false }));
 
-    if (!window.DDAuth.isLoggedIn()) {
+    // Build 756: a valid HttpOnly admin cookie may exist with no browser identity cache.
+    // On Users & Security only, verify /api/auth/me before calling the page signed out.
+    const usersCookieRecovery = /^\/admin\/users(?:\/|\/index\.html)?$/.test(window.location.pathname);
+    if (!window.DDAuth.isLoggedIn() && !usersCookieRecovery) {
       if (!cachedUser) {
         window.DDAuthUiState = { phase: 'signed_out', user: null, verified: false, degraded: false, last_error: null };
         applyUi(null);
