@@ -179,5 +179,5 @@ document.addEventListener("DOMContentLoaded", () => {
     renderUi();
   });
 
-  renderUi();
+  if (window.DDAuth.isLoggedIn()) renderUi();
 });
