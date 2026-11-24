@@ -6,7 +6,7 @@ document.addEventListener("DOMContentLoaded", () => {
     document.getElementById("usersAdminMount")
   ].filter(Boolean);
 
-  if (!mountTargets.length || !window.DDAuth || !window.DDAuth.isLoggedIn()) return;
+  if (!mountTargets.length || !window.DDAuth) return;
 
   let hasRendered = false;
   let isLoading = false;
