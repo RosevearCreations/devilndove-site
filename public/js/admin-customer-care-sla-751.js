@@ -365,3 +365,119 @@ $('a754Open').addEventListener('click',()=>void save('witness_open'));
 $('a754Confirm').addEventListener('click',()=>void save('witness_confirm'));
 $('a754Close').addEventListener('click',()=>void save('retention_closure'));
 })();
+
+
+/* Build 755 — explicit, read-only original audit export and source-matched human review. */
+(()=>{'use strict';
+const $=id=>document.getElementById(id),API='/api/admin/customer-care-retention-ops-752';
+if(!$('a755Load'))return;
+let data=null,detail=null,choice=null,busy=false;
+const say=(id,value)=>{if($(id))$(id).textContent=String(value??'');};
+const fail=e=>String(e?.message||'Original private evidence unavailable').slice(0,230);
+function lock(on){busy=on;for(const b of document.querySelectorAll('#a755Workflow button'))b.disabled=on;}
+async function readOrWrite(method,body=null,selection=null){
+ const ctrl=new AbortController(),timer=setTimeout(()=>ctrl.abort(),12000);
+ try{
+  const url=new URL(API,location.origin);
+  if(method==='GET'){url.searchParams.set('audit755','1');
+   if(selection){url.searchParams.set('task_id',selection.task_id);
+    url.searchParams.set('exception_code',selection.exception_code);}}
+  const opt={method,credentials:'same-origin',cache:'no-store',signal:ctrl.signal,headers:{Accept:'application/json'}};
+  if(method==='POST'){opt.headers['Content-Type']='application/json';opt.body=JSON.stringify(body);}
+  const response=await fetch(url.pathname+url.search,opt);
+  const item=await response.json().catch(()=>({code:'INVALID_PRIVATE_RESPONSE'}));
+  if(!response.ok||!item.ok)throw Error((item.code||'ORIGINAL_SOURCE_HOLD')+' '+(item.error||response.status));
+  return item;
+ }finally{clearTimeout(timer);}
+}
+function render(){
+ if(!data)return;
+ const s=data.summary;
+ say('a755Summary',s.original_exceptions+' original exception sources · '+
+  s.first_audit_receipts+' first-Admin audit receipts · '+
+  s.independent_audit_receipts+' second-Admin audit receipts · production source '+
+  (data.production_marker?.ok?'AVAILABLE':'HOLD')+'. Only current, genuinely witnessed cases can be accepted.');
+ const list=$('a755Rows');list.replaceChildren();
+ for(const item of data.rows){
+  const li=document.createElement('li'),span=document.createElement('span'),button=document.createElement('button');
+  span.textContent='Order '+item.order_id+' · '+item.exception_code+' · '+
+   (item.two_admin_754_source_certified?'Build 754 source-certified':'Build 754 HOLD')+
+   ' · '+(item.original_retention_closed?'Internal retention review closed':'No original retention review closure')+' ';
+  button.type='button';button.textContent='Select original evidence';button.addEventListener('click',()=>{
+   choice=item;detail=null;$('a755Task').value=item.task_id;$('a755Code').value=item.exception_code;
+   $('a755Subject').value=item.first_audit_review_id||'';$('a755Hash').value='';
+   say('a755Selected','Selected '+item.task_id+'. Press Revalidate selected original case to read current evidence.');
+  });
+  li.append(span,button);list.append(li);
+ }
+ if(!data.rows.length){const li=document.createElement('li');
+  li.textContent='No original Build 754 exception source. No fictional record was generated.';list.append(li);}
+}
+async function load(){
+ if(busy)return;lock(true);
+ say('a755Status','Reading original D1 private journal metadata only; no provider transaction.');
+ try{data=await readOrWrite('GET');detail=null;choice=null;render();
+  say('a755Status','Original source list loaded. Select and revalidate one case for the private export.');}
+ catch(e){data=null;detail=null;choice=null;say('a755Status','HOLD: '+fail(e));}
+ finally{lock(false);}
+}
+async function inspect(){
+ if(busy||!choice){say('a755Status','HOLD: Load and select an original case first.');return;}
+ lock(true);say('a755Status','Revalidating original Order, case, SLA, retention, two-Admin receipts and production release SHA.');
+ try{detail=await readOrWrite('GET',null,choice);
+  const a=detail.selected_acceptance,source=detail.selected_audit;
+  $('a755Hash').value=detail.selected_sha256||'';
+  $('a755Subject').value=a?.first_audit_review_id||'';
+  say('a755Selected',(a?.status||'ORIGINAL_HOLD')+' · original field: '+
+   (source?.original?.production_field_source_accepted?'VERIFIED':'HOLD')+
+   ' · provider thread: '+(source?.sla?.provider_thread_revalidated?'INDEPENDENT':'HOLD')+
+   ' · retention: '+(source?.retention?.independent_review_closure_verified?'INTERNAL REVIEW CLOSED':'NOT PROVEN')+
+   '. Original source is not a human identity or legal retention certificate.');
+  say('a755Status','Private report revalidated. SHA-256 '+detail.selected_sha256+
+   '. Export is manual and not sent to any provider.');}
+ catch(e){detail=null;say('a755Status','HOLD: '+fail(e));}
+ finally{lock(false);}
+}
+function download(){
+ if(!detail?.selected_audit||!detail.selected_sha256||!choice){say('a755Status','HOLD: Revalidate and select original evidence before export.');return;}
+ const report={...detail.selected_audit,evidence_sha256:detail.selected_sha256,
+  selected_acceptance:detail.selected_acceptance,
+  checked_on_server_at:detail.server_clock,
+  digest_scope:'selected_audit only, UTF-8 JSON serialization; audit metadata outside digest',
+  no_customer_email_or_message_body:true,private_owner_export:true};
+ const blob=new Blob([JSON.stringify(report,null,2)+'\n'],{type:'application/json'});
+ const href=URL.createObjectURL(blob),link=document.createElement('a');
+ link.href=href;link.download='devilndove-build755-private-audit-'+choice.task_id+'.json';
+ link.style.display='none';document.body.append(link);link.click();link.remove();
+ setTimeout(()=>URL.revokeObjectURL(href),1500);
+ say('a755Status','Private audit JSON download requested. Treat the file as private business evidence; do not publish it.');
+}
+async function submit(kind){
+ if(busy||!detail||!choice){say('a755Status','HOLD: Revalidate one source before recording an audit.');return;}
+ const p=detail.selected_audit;
+ if(!p?.original?.production_field_source_accepted||!p.source?.production_source_verified){
+  say('a755Status','HOLD: Original Build 754 two-Admin field acceptance and live main source are required.');return;}
+ const payload={kind,task_id:choice.task_id,exception_code:choice.exception_code,
+  subject_id:detail.selected_acceptance?.first_audit_review_id||'',
+  snapshot_sha256:detail.selected_sha256,expected_version:detail.version,
+  request_key:crypto.randomUUID(),note:$('a755Note').value.trim()};
+ lock(true);say('a755Status','Saving one authenticated private original audit receipt, no external send.');
+ try{const receipt=await readOrWrite('POST',payload);
+  data=await readOrWrite('GET');render();
+  choice=data.rows.find(x=>x.task_id===payload.task_id&&x.exception_code===payload.exception_code)||choice;
+  detail=await readOrWrite('GET',null,choice);
+  $('a755Task').value=choice.task_id;$('a755Code').value=choice.exception_code;
+  $('a755Hash').value=detail.selected_sha256||'';
+  $('a755Subject').value=detail.selected_acceptance?.first_audit_review_id||'';
+  say('a755Selected',detail.selected_acceptance?.status||'HOLD');
+  say('a755Status','Original '+kind+' receipt '+receipt.receipt_id+
+   ' saved and read back. No provider write, customer email or retention purge.');}
+ catch(e){detail=null;say('a755Status','HOLD: '+fail(e)+'. Reload original receipts before retrying an uncertain save.');}
+ finally{lock(false);}
+}
+$('a755Load').addEventListener('click',()=>void load());
+$('a755Inspect').addEventListener('click',()=>void inspect());
+$('a755Download').addEventListener('click',download);
+$('a755Open').addEventListener('click',()=>void submit('audit_open'));
+$('a755Certify').addEventListener('click',()=>void submit('audit_certify'));
+})();

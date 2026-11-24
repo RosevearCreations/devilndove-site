@@ -73,6 +73,7 @@ export async function onRequestGet(ctx){
  const {db,error}=auth(ctx);if(error)return error;
  if(new URL(ctx.request.url).searchParams.has('dashboard753'))return exceptionGet(ctx,db);
  if(new URL(ctx.request.url).searchParams.has('witness754'))return witnessGet754(ctx,db);
+ if(new URL(ctx.request.url).searchParams.has('audit755'))return auditGet755(ctx,db);
  try{
   const s=await sources(db),all=queue(s);
   const view=new URL(ctx.request.url).searchParams.get('view')||'all';
@@ -101,6 +102,7 @@ export async function onRequestPost(ctx){
  try{const body=await ctx.request.text();if(body.length>2000)throw Error();p=JSON.parse(body);}catch{return response({code:'BAD_JSON'},400);}
  if(['exception_raise','exception_review'].includes(p?.kind))return exceptionPost(ctx,db,admin,p);
  if(['witness_open','witness_confirm','retention_closure'].includes(p?.kind))return witnessPost754(ctx,db,admin,p);
+ if(['audit_open','audit_certify'].includes(p?.kind))return auditPost755(ctx,db,admin,p);
  const kind=p?.kind,taskId=p?.task_id,planId=p?.plan_id,subjectId=p?.subject_id,requestId=p?.request_key;
  if(!['review_ack','review_confirm'].includes(kind)||!UUID.test(taskId||'')||
  !UUID.test(planId||'')||!UUID.test(requestId||'')||!note(p.note)||
@@ -449,4 +451,192 @@ async function witnessPost754(ctx,db,admin,p){
    live_source_sha:marker.source_sha,no_customer_contact:true,no_provider_write:true,no_purge:true,
    legal_retention_determination:false});
  }catch{return response({build:754,code:'ORIGINAL_SOURCE_HOLD'},503);}
+}
+
+
+/** Build 755 — original two-Admin production audit revalidation and private export.
+ * This is a source-only Admin workflow. No provider API call, customer contact, deletion,
+ * public export, background approval, inferred human identity, or legal retention decision.
+ */
+const AUDIT755='site.admin.customerjourney.acceptance-audit.v755';
+const auditDoc755=async db=>{const original=await raw(db,AUDIT755);
+ return {original,doc:unpack(original,755,90)};};
+export const sha755=async value=>Array.from(
+ new Uint8Array(await crypto.subtle.digest('SHA-256',new TextEncoder().encode(JSON.stringify(value)))),
+ b=>b.toString(16).padStart(2,'0')).join('');
+export function revalidateSla755(s,e,w,marker,taskId,code,order,caseDoc){
+ const status=assessCareWitness754(s,e,w,taskId,code,marker);
+ const task=s.work.receipts.find(r=>r.kind==='task_open'&&r.id===taskId);
+ const caseValid=!!(task&&order&&Number(order.order_id)===Number(task.order_id)&&
+  order.updated_at===task.source_order_updated_at&&
+  caseDoc?.schema===746&&caseDoc.version===task.source_case_version&&
+  caseDoc.receipts.some(r=>r.receipt_id===task.case_id&&
+   r.source_order_id===task.order_id&&r.case_type===task.case_type));
+ const proof=latest(s.sla,'provider_readback',taskId);
+ const reviewed=proof&&s.sla.receipts.find(r=>r.kind==='provider_review'&&r.subject_id===proof.id);
+ const providerIndependent=!!(proof&&reviewed&&reviewed.decision==='pass'&&
+  reviewed.metadata_sha256===proof.metadata_sha256&&
+  reviewed.actor_user_id!==proof.actor_user_id);
+ const close=s.sla.receipts.find(r=>r.kind==='sla_close'&&r.task_id===taskId);
+ const reopen=close&&s.sla.receipts.find(r=>r.kind==='sla_reopen'&&r.subject_id===close.id);
+ const internallyClosed=!!close&&!reopen;
+ const original=s.work.receipts.find(r=>r.kind==='task_open'&&r.id===taskId);
+ const first=latest(e,'exception_raise',taskId);
+ const firstCode=e.receipts.find(r=>r.kind==='exception_raise'&&r.task_id===taskId&&r.exception_code===code);
+ const firstReview=firstCode&&e.receipts.find(r=>r.kind==='exception_review'&&r.subject_id===firstCode.id&&
+  r.actor_user_id!==firstCode.actor_user_id&&r.decision==='pass');
+ const witnessFirst=w.receipts.find(r=>r.kind==='witness_open'&&r.task_id===taskId&&r.exception_code===code);
+ const witnessSecond=witnessFirst&&w.receipts.find(r=>r.kind==='witness_confirm'&&
+  r.subject_id===witnessFirst.id&&r.actor_user_id!==witnessFirst.actor_user_id);
+ const accepted=!!(marker?.ok&&caseValid&&status.two_admin_live_certified&&
+  firstReview&&witnessFirst&&witnessSecond);
+ return {
+  format:'devilndove-private-field-audit-755',schema:755,
+  source:{production_main_sha:marker?.ok?marker.source_sha:null,
+   deployment_workflow_run_id:marker?.ok?marker.workflow_run_id:null,
+   original_versions:{...versions754(s,e),witnesses:w.version},
+   production_source_verified:!!marker?.ok,cloudflare_control_plane_verified_by_this_route:false},
+  original:{task_id:taskId,order_id:original?.order_id||null,exception_code:code,
+   order_case_revision_current:caseValid,original_exception_raise_id:firstCode?.id||null,
+   independent_753_review_id:firstReview?.id||null,
+   first_754_witness_id:witnessFirst?.id||null,second_754_witness_id:witnessSecond?.id||null,
+   two_distinct_754_admins:!!(witnessFirst&&witnessSecond&&
+    witnessFirst.actor_user_id!==witnessSecond.actor_user_id),
+   original_witness_source_fresh:status.source_current,production_field_source_accepted:accepted},
+  sla:{original_provider_readback_receipt_id:proof?.id||null,
+   independent_provider_review_receipt_id:providerIndependent?reviewed.id:null,
+   provider_thread_revalidated:providerIndependent,
+   claimed_human_sender_identified:false,original_close_receipt_id:close?.id||null,
+   original_reopen_receipt_id:reopen?.id||null,internal_care_closed:internallyClosed},
+  retention:{original_plan_id:status.retention_plan_id,
+   original_review_check_id:status.original_retention_check_id,
+   original_due_ack_id:status.original_retention_ack_id,
+   original_independent_due_confirm_id:status.original_retention_confirmation_id,
+   legal_hold_active:status.legal_hold,custody_escalation_active:status.custody_escalation,
+   original_internal_review_closure_id:status.original_internal_retention_closure_id,
+   independent_review_closure_verified:!!status.original_internal_retention_closure_id,
+   statutory_retention_not_certified:true,no_purge_authority:true},
+  acceptance:{result:accepted?'ORIGINAL_PRODUCTION_FIELD_SOURCE_VERIFIED':'HOLD_ORIGINAL_EVIDENCE',
+   source_revalidated:caseValid,independent_human_field_actions_required:true,
+   customer_not_contacted:true,provider_not_modified:true,records_not_deleted:true}
+ };
+}
+async function originalAudit755(ctx,db,taskId,code,marker,s,e,w){
+ const t=s.work.receipts.find(r=>r.kind==='task_open'&&r.id===taskId);
+ if(!t)return null;
+ const order=await db.prepare('SELECT order_id,updated_at FROM orders WHERE order_id=? LIMIT 1')
+  .bind(t.order_id).first();
+ const caseDoc=unpack(await raw(db,'site.admin.aftersale.v746.'+t.order_id),746,30);
+ const pack=revalidateSla755(s,e,w,marker,taskId,code,order,caseDoc);
+ return {pack,sha256:await sha755(pack)};
+}
+export function acceptance755(report,digest,receipts,sourceSha){
+ const first=receipts.find(r=>r.kind==='audit_open'&&r.task_id===report.original.task_id&&
+  r.exception_code===report.original.exception_code);
+ const second=first&&receipts.find(r=>r.kind==='audit_certify'&&r.subject_id===first.id);
+ const current=!!(report.acceptance.source_revalidated&&
+  report.original.production_field_source_accepted&&
+  report.source.production_source_verified);
+ const certified=!!(current&&first&&second&&first.actor_user_id!==second.actor_user_id&&
+  first.snapshot_sha256===digest&&second.snapshot_sha256===digest&&
+  first.source_sha===sourceSha&&second.source_sha===sourceSha);
+ return {first_audit_review_id:first?.id||null,independent_audit_review_id:second?.id||null,
+  two_admin_audit_accepted:certified,status:certified?'TWO_ADMIN_SOURCE_AUDIT_ACCEPTED':
+  !current?'HOLD_ORIGINAL_FIELD_SOURCE':!first?'AWAITING_FIRST_AUDITOR':
+  !second?'AWAITING_INDEPENDENT_ADMIN':'HOLD_STALE_OR_NONINDEPENDENT_RECEIPTS'};
+}
+async function auditGet755(ctx,db){
+ const url=new URL(ctx.request.url),taskId=url.searchParams.get('task_id'),
+ code=url.searchParams.get('exception_code');
+ if((taskId&&!UUID.test(taskId))||(code&&!WITNESS_CODES.has(code))||
+  (!!taskId!==!!code))return response({build:755,code:'INVALID_ORIGINAL_SELECTION'},400);
+ try{
+  const marker=await productionMarker754(ctx);
+  const [s,{doc:e},{doc:w},{doc:a}]=await Promise.all([
+   sources(db),exceptionDoc(db),receiptDoc754(db),auditDoc755(db)]);
+  const items=candidates754(s,e,w,marker).map(item=>{
+   const first=a.receipts.find(r=>r.kind==='audit_open'&&r.task_id===item.task_id&&
+    r.exception_code===item.exception_code);
+   const second=first&&a.receipts.find(r=>r.kind==='audit_certify'&&r.subject_id===first.id);
+   return {task_id:item.task_id,order_id:item.order_id,exception_code:item.exception_code,
+    two_admin_754_source_certified:item.two_admin_live_certified,
+    original_retention_closed:!!item.original_internal_retention_closure_id,
+    first_audit_review_id:first?.id||null,second_audit_review_id:second?.id||null};
+  });
+  let exportPack=null,exportDigest=null,auditStatus=null;
+  if(taskId){
+   if(!items.some(x=>x.task_id===taskId&&x.exception_code===code))
+    return response({build:755,code:'ORIGINAL_EXCEPTION_NOT_FOUND'},404);
+   const selected=await originalAudit755(ctx,db,taskId,code,marker,s,e,w);
+   if(!selected)return response({build:755,code:'ORIGINAL_TASK_NOT_FOUND'},404);
+   exportPack=selected.pack;exportDigest=selected.sha256;
+   auditStatus=acceptance755(selected.pack,selected.sha256,a.receipts,marker.source_sha);
+  }
+  return response({build:755,version:a.version,production_marker:marker,
+   summary:{original_exceptions:items.length,first_audit_receipts:a.receipts.filter(r=>r.kind==='audit_open').length,
+    independent_audit_receipts:a.receipts.filter(r=>r.kind==='audit_certify').length},
+   rows:items,selected_audit:exportPack,selected_sha256:exportDigest,
+   selected_acceptance:auditStatus,
+   export_format:'BOUNDED_PRIVATE_JSON_ON_EXPLICIT_ADMIN_CLICK',
+   hash_format:'SHA-256_OF_CANONICAL_JSON_SELECTED_AUDIT',
+   server_clock:new Date().toISOString(),not_public:true,no_automatic_export:true,
+   no_provider_write:true,no_purge:true});
+ }catch{return response({build:755,code:'ORIGINAL_SOURCE_HOLD'},503);}
+}
+async function auditPost755(ctx,db,admin,p){
+ const taskId=p.task_id,code=p.exception_code,kind=p.kind,key=p.request_key;
+ if(!UUID.test(taskId||'')||!WITNESS_CODES.has(code)||!UUID.test(key||'')||
+  !note(p.note)||!Number.isSafeInteger(p.expected_version)||p.expected_version<0||
+  !/^[0-9a-f]{64}$/.test(String(p.snapshot_sha256||''))||
+  (kind==='audit_certify'&&!UUID.test(p.subject_id||'')))
+  return response({build:755,code:'INVALID_AUDIT_INPUT'},400);
+ const marker=await productionMarker754(ctx);
+ if(!marker.ok)return response({build:755,code:marker.code},409);
+ try{
+  const s=await sources(db),{doc:e}=await exceptionDoc(db),{doc:w}=await receiptDoc754(db),
+  {doc:a,original}=await auditDoc755(db);
+  if(a.receipts.some(r=>r.request_key===key))return response({build:755,code:'REQUEST_ALREADY_USED'},409);
+  if(a.version!==p.expected_version)return response({build:755,code:'STALE_AUDIT_VERSION'},409);
+  if(a.receipts.length>=90)return response({build:755,code:'AUDIT_JOURNAL_FULL'},409);
+  const snap=await originalAudit755(ctx,db,taskId,code,marker,s,e,w);
+  if(!snap||!snap.pack.original.production_field_source_accepted)
+   return response({build:755,code:'ORIGINAL_TWO_ADMIN_FIELD_WITNESS_REQUIRED'},409);
+  if(snap.sha256!==p.snapshot_sha256)return response({build:755,code:'AUDIT_SOURCE_DIGEST_CHANGED'},409);
+  const before=acceptance755(snap.pack,snap.sha256,a.receipts,marker.source_sha);
+  const first=a.receipts.find(r=>r.kind==='audit_open'&&r.task_id===taskId&&r.exception_code===code);
+  if(kind==='audit_open'&&first)return response({build:755,code:'FIRST_AUDIT_ALREADY_RECORDED'},409);
+  if(kind==='audit_certify'&&(!first||p.subject_id!==first.id||
+   first.actor_user_id===admin.user_id||first.snapshot_sha256!==snap.sha256||
+   first.source_sha!==marker.source_sha||before.independent_audit_review_id))
+   return response({build:755,code:'DISTINCT_ADMIN_AND_SAME_SOURCE_REQUIRED'},409);
+  const freshed=await sources(db),e2=await exceptionDoc(db),w2=await receiptDoc754(db),
+   a2=await auditDoc755(db),m2=await productionMarker754(ctx);
+  if(!m2.ok||m2.source_sha!==marker.source_sha||
+   !sameVersions754(versions754(s,e),versions754(freshed,e2.doc))||
+   w2.doc.version!==w.version||a2.doc.version!==a.version)
+   return response({build:755,code:'ORIGINAL_AUDIT_SOURCE_DRIFT'},409);
+  const receipt={id:crypto.randomUUID(),kind,task_id:taskId,exception_code:code,
+   subject_id:kind==='audit_certify'?first.id:null,
+   actor_user_id:admin.user_id,request_key:key,note:p.note,
+   snapshot_sha256:snap.sha256,source_sha:marker.source_sha,recorded_at:new Date().toISOString(),
+   source_versions:{...versions754(s,e),witnesses:w.version},
+   original_first_754_id:snap.pack.original.first_754_witness_id,
+   original_second_754_id:snap.pack.original.second_754_witness_id,
+   human_witness_only:true,customer_contact:false,provider_write:false,retention_purge:false};
+  const next=JSON.stringify({schema:755,version:a.version+1,receipts:[receipt,...a.receipts]});
+  if(next.length>105000)return response({build:755,code:'AUDIT_BYTES_CAP'},413);
+  const result=original?
+   await db.prepare('UPDATE app_settings SET setting_value=?,is_public=0,updated_by_user_id=?,updated_at=CURRENT_TIMESTAMP WHERE setting_key=? AND is_public=0 AND setting_value=?')
+    .bind(next,admin.user_id,AUDIT755,original).run():
+   await db.prepare('INSERT INTO app_settings(setting_key,setting_value,is_public,updated_by_user_id,updated_at) VALUES(?,?,0,?,CURRENT_TIMESTAMP) ON CONFLICT(setting_key) DO NOTHING')
+    .bind(AUDIT755,next,admin.user_id).run();
+  if(Number(result?.meta?.changes)!==1)return response({build:755,code:'CONCURRENT_AUDIT_WRITE'},409);
+  const saved=await auditDoc755(db);
+  if(saved.doc.receipts[0]?.id!==receipt.id)return response({build:755,code:'UNCERTAIN_AUDIT_WRITE'},503);
+  await auditAdminAction(ctx.env,ctx.request,admin,{action_type:'customer_care_field_audit_755',
+   target_type:'order',target_id:snap.pack.original.order_id,
+   details:{kind,receipt_id:receipt.id,source_sha:marker.source_sha,snapshot_sha256:snap.sha256}}).catch(()=>null);
+  return response({build:755,saved:true,version:saved.doc.version,receipt_id:receipt.id,
+   snapshot_sha256:snap.sha256,no_external_send:true,no_purge:true});
+ }catch{return response({build:755,code:'ORIGINAL_SOURCE_HOLD'},503);}
 }
