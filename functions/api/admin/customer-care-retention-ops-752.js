@@ -306,7 +306,7 @@ const versions754=(s,e)=>({work:s.work.version,custody:s.custody.version,
  sla:s.sla.version,retention_ops:s.ops.version,exceptions:e.version});
 const sameVersions754=(a,b)=>!!a&&!!b&&Object.keys(a).length===Object.keys(b).length&&
  Object.keys(a).every(k=>Number.isSafeInteger(a[k])&&a[k]===b[k]);
-async function productionMarker754(ctx){
+export async function productionMarker754(ctx){
  if(ctx?.env?.DND_ENVIRONMENT!=='production'||typeof ctx?.env?.ASSETS?.fetch!=='function')
   return {ok:false,code:'ORIGINAL_PRODUCTION_BINDING_REQUIRED'};
  try{
