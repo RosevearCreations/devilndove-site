@@ -463,11 +463,30 @@ body{background:#151727;color:#faf0ff}.a660{max-width:1100px;width:94%;margin:2r
 <button type="button" id="a754Close">Record completed internal retention review</button></div>
 </details><details><summary>Private original witness and closure receipts</summary><ol id="a754History"></ol></details>
 <p class="hold">Internal retention review closure requires the original approved schedule, original reviewed check, independent due-review confirmation, source-fresh two-Admin production certificate and no active legal hold or custody escalation. This is not statutory compliance certification, deletion authority, a genuine customer-response assertion or automatic provider notification. Production release GREEN is separate from field-certificate status.</p>
+</section><section id="a755Workflow" aria-labelledby="a755Heading" data-build755="1">
+<h2 id="a755Heading">15. Independent production field acceptance and private evidence audit export</h2>
+<p>Build 755. Independently recheck original Build 749–754 source, genuine two-Admin field witness receipts, original SLA provider evidence, retention-review provenance, and the live <code>main</code> release marker. The report only contains bounded source IDs, version numbers, statuses and a SHA-256 fingerprint; no customer email addresses or message bodies.</p>
+<div class="grid"><button type="button" id="a755Load">Read original private acceptance evidence</button>
+<button type="button" id="a755Inspect">Revalidate selected original case</button>
+<button type="button" id="a755Download">Export selected private SHA-256 JSON audit</button></div>
+<p id="a755Status" role="status" aria-live="polite">No original evidence loaded. No background reads, emails or automatic export.</p>
+<p id="a755Summary">Original acceptance status has not been checked.</p>
+<ol id="a755Rows"></ol>
+<details><summary><strong>Original two-Admin audit acceptance</strong></summary>
+<p id="a755Selected">Select an original case above, then independently inspect the same current production source before any Admin action.</p>
+<label>Original task UUID<input id="a755Task" readonly maxlength="80"></label>
+<label>Original SLA exception code<input id="a755Code" readonly maxlength="80"></label>
+<label>Original first-auditor receipt<input id="a755Subject" readonly maxlength="80"></label>
+<label>Original SHA-256 evidence digest<input id="a755Hash" readonly maxlength="64"></label>
+<label>Factual review note, no customer details<textarea id="a755Note" minlength="20" maxlength="350" rows="3"></textarea></label>
+<div class="grid"><button type="button" id="a755Open">First Admin: record independent audit</button>
+<button type="button" id="a755Certify">Second Admin: accept identical original evidence</button></div></details>
+<p class="hold">This operation cannot invent a human witness, authenticate a customer's identity, close an absent retention review, or grant statutory deletion authority. Both audit actions require different verified Storefront Admin accounts, a source-current original Build 754 two-Admin field certificate, the same original SHA-256 evidence and no source revision drift. The audit JSON stays in the authenticated owner's browser unless they explicitly download and share it.</p>
 </section></main><script defer src="/public/js/auth.js?v=467"></script><script defer src="/public/js/admin-storefront-acceptance-660.js?v=660"></script>
 <script defer src="/public/js/admin-after-sale-746.js?v=746"></script>
 <script defer src="/public/js/admin-customer-journey-747.js?v=747"></script>
 <script defer src="/public/js/admin-journey-recovery-748.js?v=748"></script>
 <script defer src="/public/js/admin-customer-care-queue-749.js?v=749"></script>
 <script defer src="/public/js/admin-customer-care-custody-750.js?v=750"></script>
-<script defer src="/public/js/admin-customer-care-sla-751.js?v=751-752-753-754"></script>
+<script defer src="/public/js/admin-customer-care-sla-751.js?v=751-752-753-754-755"></script>
 <script type="module" src="/public/js/admin-shell-467.js?v=467b467"></script></body></html>

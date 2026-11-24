@@ -27,7 +27,9 @@ assert.ok(server.includes('NO_SELF_REVIEW')&&server.includes('NO_SELF_RETENTION_
 assert.ok(server.includes('refund_executed:false')&&server.includes('record_deleted:false'));
 assert.ok(!server.includes("method:'POST'")&&!server.includes('DELETE FROM'),'No provider send or delete');
 const budget=JSON.parse(read('release465-performance-budget.json'));
-assert.equal(budget.limits.max_runtime_source_bytes,20195000);
+assert.equal(budget.budget_reviews.find(x=>x.build==='751')?.new_limit_bytes,20195000);
+assert.equal(budget.limits.max_runtime_source_bytes,20210000);
+assert.equal(budget.budget_reviews.find(x=>x.build==='755')?.delta_bytes,15000);
 assert.equal(budget.budget_reviews.find(x=>x.build==='751')?.new_file_limit,1886);
 assert.equal(budget.limits.max_runtime_source_files,1887);
 assert.equal(budget.budget_reviews.find(x=>x.build==='752')?.delta_files,1);
