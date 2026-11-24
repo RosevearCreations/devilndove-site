@@ -3,7 +3,7 @@
 // contact details, verification flags, preferences, address fields, and employee info.
 
 document.addEventListener("DOMContentLoaded", () => {
-  if (!window.DDAuth || !window.DDAuth.isLoggedIn()) return;
+  if (!window.DDAuth) return;
 
   let modalEl = null;
   let currentUserId = null;

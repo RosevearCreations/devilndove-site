@@ -74,6 +74,7 @@ export async function onRequestGet(ctx){
  if(new URL(ctx.request.url).searchParams.has('dashboard753'))return exceptionGet(ctx,db);
  if(new URL(ctx.request.url).searchParams.has('witness754'))return witnessGet754(ctx,db);
  if(new URL(ctx.request.url).searchParams.has('audit755'))return auditGet755(ctx,db);
+ if(new URL(ctx.request.url).searchParams.has('continuity756'))return continuityGet756(ctx,db);
  try{
   const s=await sources(db),all=queue(s);
   const view=new URL(ctx.request.url).searchParams.get('view')||'all';
@@ -103,6 +104,7 @@ export async function onRequestPost(ctx){
  if(['exception_raise','exception_review'].includes(p?.kind))return exceptionPost(ctx,db,admin,p);
  if(['witness_open','witness_confirm','retention_closure'].includes(p?.kind))return witnessPost754(ctx,db,admin,p);
  if(['audit_open','audit_certify'].includes(p?.kind))return auditPost755(ctx,db,admin,p);
+ if(['continuity_open','continuity_confirm'].includes(p?.kind))return continuityPost756(ctx,db,admin,p);
  const kind=p?.kind,taskId=p?.task_id,planId=p?.plan_id,subjectId=p?.subject_id,requestId=p?.request_key;
  if(!['review_ack','review_confirm'].includes(kind)||!UUID.test(taskId||'')||
  !UUID.test(planId||'')||!UUID.test(requestId||'')||!note(p.note)||
@@ -639,4 +641,187 @@ async function auditPost755(ctx,db,admin,p){
   return response({build:755,saved:true,version:saved.doc.version,receipt_id:receipt.id,
    snapshot_sha256:snap.sha256,no_external_send:true,no_purge:true});
  }catch{return response({build:755,code:'ORIGINAL_SOURCE_HOLD'},503);}
+}
+
+
+/** Build 756 — independent cross-release original evidence continuity.
+ * An older 755 certificate is only prior evidence; a new production main SHA needs
+ * two NEW authenticated human Admin receipts. No rollover approval or external writes.
+ */
+const CONTINUITY756='site.admin.customerjourney.audit-continuity.v756';
+async function continuityDoc756(db){const original=await raw(db,CONTINUITY756);
+ return {original,doc:unpack(original,756,90)};}
+const originalAuditPair756=(a,taskId,code)=>{
+ const first=a.receipts.find(r=>r.kind==='audit_open'&&r.task_id===taskId&&r.exception_code===code);
+ const second=first&&a.receipts.find(r=>r.kind==='audit_certify'&&r.subject_id===first.id);
+ return {first,second};
+};
+export function inspectContinuity756(report,previousDigest,prior,liveMarker,c,taskId,code){
+ const first=prior.first,second=prior.second;
+ const priorValid=!!(report&&first&&second&&
+  report.acceptance.result==='ORIGINAL_PRODUCTION_FIELD_SOURCE_VERIFIED'&&
+  report.original.production_field_source_accepted&&
+  report.original.order_case_revision_current&&
+  report.original.task_id===taskId&&report.original.exception_code===code&&
+  first.actor_user_id!==second.actor_user_id&&
+  first.source_sha===second.source_sha&&first.source_sha===report.source.production_main_sha&&
+  first.snapshot_sha256===previousDigest&&second.snapshot_sha256===previousDigest);
+ const oldSha=first?.source_sha||null,currentSha=liveMarker?.ok?liveMarker.source_sha:null;
+ const sourcesCurrent=!!(priorValid&&liveMarker?.ok&&oldSha!==currentSha);
+ const opened=c.receipts.find(r=>r.kind==='continuity_open'&&r.task_id===taskId&&
+  r.exception_code===code&&r.source_sha===currentSha&&r.previous_sha===oldSha);
+ const confirmed=opened&&c.receipts.find(r=>r.kind==='continuity_confirm'&&r.subject_id===opened.id);
+ return {prior_valid:priorValid,source_current:sourcesCurrent,previous_sha:oldSha,
+  current_main_sha:currentSha,previous_audit_hash:previousDigest,
+  previous_first_auditor_id:first?.id||null,previous_independent_auditor_id:second?.id||null,
+  new_first_renewal_id:opened?.id||null,new_independent_renewal_id:confirmed?.id||null,
+  first:opened||null,second:confirmed||null,
+  status:!priorValid?'HOLD_ORIGINAL_755_CERTIFICATE':
+   !liveMarker?.ok?'HOLD_LIVE_PRODUCTION_SOURCE':
+   oldSha===currentSha?'NO_NEW_PRODUCTION_RELEASE':
+   !opened?'AWAITING_FIRST_RENEWAL_ADMIN':
+   !confirmed?'AWAITING_SECOND_RENEWAL_ADMIN':'AWAITING_REVALIDATED_DIGEST'};
+}
+async function verifyContinuity756(db,s,e,w,a,marker,taskId,code){
+ const pair=originalAuditPair756(a,taskId,code);
+ const witness=w.receipts.find(r=>r.kind==='witness_open'&&r.task_id===taskId&&r.exception_code===code);
+ const oldSha=pair.first?.source_sha;
+ const priorMarker=oldSha&&witness?.source_sha===oldSha&&witness.workflow_run_id?
+  {ok:true,source_sha:oldSha,workflow_run_id:witness.workflow_run_id}:null;
+ let priorSnapshot=null;
+ if(priorMarker)priorSnapshot=await originalAudit755(null,db,taskId,code,priorMarker,s,e,w);
+ const priorStatus=priorSnapshot&&acceptance755(priorSnapshot.pack,
+  priorSnapshot.sha256,a.receipts,oldSha);
+ const digestValid=!!(priorSnapshot&&priorStatus?.two_admin_audit_accepted&&
+  priorSnapshot.sha256===pair.first?.snapshot_sha256&&
+  priorSnapshot.sha256===pair.second?.snapshot_sha256);
+ const report=digestValid?priorSnapshot.pack:null;
+ const base={report,priorDigest:priorSnapshot?.sha256||null,pair,digestValid,
+  previous_source_versions:pair.first?.source_versions||null};
+ const sourceVersions={...versions754(s,e),witnesses:w.version,audits:a.version};
+ const versionMatch=!!(pair.first?.source_versions&&
+  sameVersions754(pair.first.source_versions,{
+   ...versions754(s,e),witnesses:w.version
+  }));
+ const accepted=!!(digestValid&&versionMatch&&
+  report?.original?.order_case_revision_current&&marker?.ok&&oldSha!==marker.source_sha);
+ const evidence={format:'devilndove-audit-continuity-756',schema:756,
+  original_task_id:taskId,original_exception_code:code,
+  original_755_first_id:pair.first?.id||null,original_755_second_id:pair.second?.id||null,
+  previous_main_sha:oldSha||null,current_main_sha:marker?.ok?marker.source_sha:null,
+  previous_audit_sha256:priorSnapshot?.sha256||null,original_verified:digestValid,
+  source_versions:sourceVersions,
+  original_retention_review_closed:!!report?.retention?.independent_review_closure_verified,
+  legal_hold_active:!!report?.retention?.legal_hold_active,
+  original_human_sender_not_identified:true,no_statutory_purge_authority:true,
+  human_production_renewal_required:true};
+ const digest=await sha755(evidence);
+ return {...base,evidence,digest,accepted,sourceVersions};
+}
+export function renewalStatus756(checked,c,taskId,code,marker){
+ const base=inspectContinuity756(checked.report,checked.priorDigest,
+  checked.pair,marker,c,taskId,code);
+ const first=base.first,second=base.second;
+ const renewed=!!(checked.accepted&&first&&second&&
+  first.actor_user_id!==second.actor_user_id&&
+  first.source_sha===marker?.source_sha&&second.source_sha===marker?.source_sha&&
+  first.previous_sha===checked.pair.first?.source_sha&&
+  second.previous_sha===checked.pair.first?.source_sha&&
+  first.snapshot_sha256===checked.digest&&second.snapshot_sha256===checked.digest&&
+  sameVersions754(first.source_versions,checked.sourceVersions)&&
+  sameVersions754(second.source_versions,checked.sourceVersions));
+ return {...base,verified_original_source:checked.accepted,
+  current_source_versions:checked.sourceVersions,
+  continuity_sha256:checked.digest,
+  certificate_renewed:renewed,
+  status:!checked.accepted?'HOLD_PREVIOUS_OR_CHANGED_SOURCE':
+   renewed?'CURRENT_RELEASE_CERTIFICATE_RENEWED':
+   !first?'AWAITING_FIRST_RENEWAL_ADMIN':
+   !second?'AWAITING_SECOND_RENEWAL_ADMIN':'HOLD_CHANGED_DIGEST_OR_ADMIN'};
+}
+async function continuityGet756(ctx,db){
+ const url=new URL(ctx.request.url),taskId=url.searchParams.get('task_id'),
+  code=url.searchParams.get('exception_code');
+ if((taskId&&!UUID.test(taskId))||(code&&!WITNESS_CODES.has(code))||
+  Boolean(taskId)!==Boolean(code))return response({build:756,code:'INVALID_CONTINUITY_SELECTION'},400);
+ try{
+  const marker=await productionMarker754(ctx);
+  const [s,{doc:e},{doc:w},{doc:a},{doc:c}]=await Promise.all([
+   sources(db),exceptionDoc(db),receiptDoc754(db),auditDoc755(db),continuityDoc756(db)]);
+  const candidates=a.receipts.filter(r=>r.kind==='audit_open').slice(0,60)
+   .map(r=>({task_id:r.task_id,exception_code:r.exception_code,previous_main_sha:r.source_sha,
+    original_audit_id:r.id,has_independent_original_receipt:a.receipts.some(x=>
+     x.kind==='audit_certify'&&x.subject_id===r.id)}));
+  if(!taskId)return response({build:756,version:c.version,production_marker:marker,
+   summary:{original_755_cases:candidates.length,renewal_first_receipts:c.receipts.filter(x=>x.kind==='continuity_open').length,
+    renewal_second_receipts:c.receipts.filter(x=>x.kind==='continuity_confirm').length},
+   rows:candidates,private_d1_only:true,automatic_renewal:false,provider_write:false,retention_purge:false});
+  if(!candidates.some(x=>x.task_id===taskId&&x.exception_code===code))
+   return response({build:756,code:'ORIGINAL_755_CERTIFICATE_NOT_FOUND'},404);
+  const checked=await verifyContinuity756(db,s,e,w,a,marker,taskId,code);
+  const status=renewalStatus756(checked,c,taskId,code,marker);
+  return response({build:756,version:c.version,production_marker:marker,
+   status:{...status,first:undefined,second:undefined},
+   snapshot:checked.evidence,previous_audit_hash:checked.priorDigest,
+   source_renewal_sha256:checked.digest,source_verified:checked.accepted,
+   private_d1_only:true,original_source_fresh:checked.accepted,
+   human_sender_identity_verified:false,automatic_renewal:false,no_purge:true});
+ }catch{return response({build:756,code:'ORIGINAL_SOURCE_HOLD'},503);}
+}
+async function continuityPost756(ctx,db,admin,p){
+ const kind=p.kind,taskId=p.task_id,code=p.exception_code,key=p.request_key;
+ if(!UUID.test(taskId||'')||!WITNESS_CODES.has(code)||!UUID.test(key||'')||
+  !note(p.note)||!Number.isSafeInteger(p.expected_version)||p.expected_version<0||
+  !/^[a-f0-9]{64}$/.test(String(p.snapshot_sha256||''))||
+  (kind==='continuity_confirm'&&!UUID.test(p.subject_id||'')))
+  return response({build:756,code:'INVALID_CONTINUITY_RECEIPT'},400);
+ const marker=await productionMarker754(ctx);
+ if(!marker.ok)return response({build:756,code:marker.code},409);
+ try{
+  const s=await sources(db),{doc:e}=await exceptionDoc(db),{doc:w}=await receiptDoc754(db),
+   {doc:a}=await auditDoc755(db),{doc:c,original}=await continuityDoc756(db);
+  if(c.version!==p.expected_version)return response({build:756,code:'STALE_CONTINUITY_VERSION'},409);
+  if(c.receipts.some(r=>r.request_key===key))return response({build:756,code:'REQUEST_ALREADY_USED'},409);
+  if(c.receipts.length>=90)return response({build:756,code:'CONTINUITY_JOURNAL_FULL'},409);
+  const checked=await verifyContinuity756(db,s,e,w,a,marker,taskId,code);
+  if(!checked.accepted)return response({build:756,code:'ORIGINAL_CROSS_RELEASE_SOURCE_HOLD'},409);
+  if(checked.digest!==p.snapshot_sha256)
+   return response({build:756,code:'CONTINUITY_DIGEST_CHANGED'},409);
+  const status=renewalStatus756(checked,c,taskId,code,marker);
+  const first=status.first,second=status.second;
+  if(kind==='continuity_open'&&first)return response({build:756,code:'RENEWAL_ALREADY_OPENED'},409);
+  if(kind==='continuity_confirm'&&(!first||second||p.subject_id!==first.id||
+   first.actor_user_id===admin.user_id||first.snapshot_sha256!==checked.digest||
+   first.source_sha!==marker.source_sha||
+   !sameVersions754(first.source_versions,checked.sourceVersions)))
+   return response({build:756,code:'INDEPENDENT_CURRENT_ADMIN_REQUIRED'},409);
+  const ss=await sources(db),ee=await exceptionDoc(db),ww=await receiptDoc754(db),
+   aa=await auditDoc755(db),cc=await continuityDoc756(db),mm=await productionMarker754(ctx);
+  if(!mm.ok||mm.source_sha!==marker.source_sha||
+   !sameVersions754(versions754(ss,ee.doc),versions754(s,e))||
+   ww.doc.version!==w.version||aa.doc.version!==a.version||cc.doc.version!==c.version)
+   return response({build:756,code:'CURRENT_RELEASE_SOURCE_DRIFT'},409);
+  const receipt={id:crypto.randomUUID(),kind,task_id:taskId,exception_code:code,
+   subject_id:kind==='continuity_confirm'?first.id:null,actor_user_id:admin.user_id,
+   request_key:key,note:p.note,recorded_at:new Date().toISOString(),
+   source_sha:marker.source_sha,previous_sha:checked.pair.first.source_sha,
+   snapshot_sha256:checked.digest,previous_audit_sha256:checked.priorDigest,
+   previous_audit_receipt_id:checked.pair.second.id,source_versions:checked.sourceVersions,
+   private_original_only:true,no_customer_message:true,no_provider_write:true,no_purge:true};
+  const next=JSON.stringify({schema:756,version:c.version+1,receipts:[receipt,...c.receipts]});
+  if(next.length>100000)return response({build:756,code:'CONTINUITY_BYTES_CAP'},413);
+  const result=original?
+   await db.prepare('UPDATE app_settings SET setting_value=?,is_public=0,updated_by_user_id=?,updated_at=CURRENT_TIMESTAMP WHERE setting_key=? AND is_public=0 AND setting_value=?')
+    .bind(next,admin.user_id,CONTINUITY756,original).run():
+   await db.prepare('INSERT INTO app_settings(setting_key,setting_value,is_public,updated_by_user_id,updated_at) VALUES(?,?,0,?,CURRENT_TIMESTAMP) ON CONFLICT(setting_key) DO NOTHING')
+    .bind(CONTINUITY756,next,admin.user_id).run();
+  if(Number(result?.meta?.changes)!==1)return response({build:756,code:'CONCURRENT_CONTINUITY_WRITE'},409);
+  const saved=await continuityDoc756(db);
+  if(saved.doc.receipts[0]?.id!==receipt.id)return response({build:756,code:'UNCERTAIN_CONTINUITY_WRITE'},503);
+  await auditAdminAction(ctx.env,ctx.request,admin,{action_type:'customer_care_cross_release_renewal_756',
+   target_type:'order',target_id:checked.report.original.order_id,
+   details:{kind,receipt_id:receipt.id,current_sha:marker.source_sha,previous_sha:receipt.previous_sha}}).catch(()=>null);
+  return response({build:756,saved:true,version:saved.doc.version,receipt_id:receipt.id,
+   no_external_send:true,no_retention_purge:true,independent_admin_required:true});
+ }catch{return response({build:756,code:'ORIGINAL_SOURCE_HOLD'},503);}
 }

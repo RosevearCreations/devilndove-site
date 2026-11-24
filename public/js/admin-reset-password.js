@@ -3,7 +3,7 @@
 
 document.addEventListener("DOMContentLoaded", () => {
   const mountEl = document.getElementById("usersAdminMount");
-  if (!mountEl || !window.DDAuth || !window.DDAuth.isLoggedIn()) return;
+  if (!mountEl || !window.DDAuth) return;
 
   let hasRendered = false;
   let selectedUser = null;
@@ -194,5 +194,5 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 
   document.addEventListener("dd:admin-ready", (event) => { if (event?.detail?.ok) renderUi(); });
-  renderUi();
+  if (window.DDAuth.isLoggedIn()) renderUi();
 });
