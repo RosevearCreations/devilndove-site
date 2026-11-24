@@ -461,8 +461,8 @@ async function witnessPost754(ctx,db,admin,p){
 const AUDIT755='site.admin.customerjourney.acceptance-audit.v755';
 const auditDoc755=async db=>{const original=await raw(db,AUDIT755);
  return {original,doc:unpack(original,755,90)};};
-export const sha755=async value=>Array.from(new Uint8Array(
- await crypto.subtle.digest('SHA-256',new TextEncoder().encode(JSON.stringify(value))),
+export const sha755=async value=>Array.from(
+ new Uint8Array(await crypto.subtle.digest('SHA-256',new TextEncoder().encode(JSON.stringify(value)))),
  b=>b.toString(16).padStart(2,'0')).join('');
 export function revalidateSla755(s,e,w,marker,taskId,code,order,caseDoc){
  const status=assessCareWitness754(s,e,w,taskId,code,marker);
