@@ -146,7 +146,18 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   }
 
-  document.addEventListener("dd:admin-ready", async (event) => { if (!event?.detail?.ok) return; renderUi(); await loadUsers(); });
+  // Build 757: cached identity is provisional, not permission to read the user directory.
+  document.addEventListener("dd:admin-ready", async (event) => {
+    if (!event?.detail?.ok || event.detail.verified !== true || event.detail.degraded === true) return;
+    renderUi();
+    await loadUsers();
+  });
   document.addEventListener("dd:user-updated", loadUsers);
-  if (window.DDAuth.isLoggedIn()) { renderUi(); loadUsers(); }
+  // Avoid a speculative first request before /api/auth/me confirms an Admin.
+  const initialState = window.DDAuthUiState;
+  if (initialState?.verified === true &&
+      String(initialState.user?.role || "").toLowerCase() === "admin") {
+    renderUi();
+    loadUsers();
+  }
 });
