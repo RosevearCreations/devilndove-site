@@ -578,3 +578,65 @@ $('a756Inspect').addEventListener('click',()=>void inspect());
 $('a756Open').addEventListener('click',()=>void sign('continuity_open'));
 $('a756Confirm').addEventListener('click',()=>void sign('continuity_confirm'));
 })();
+
+/* Build 758: two explicit GET-only live source / original D1 certificate readbacks. */
+(()=>{'use strict';
+const $=id=>document.getElementById(id),a=$('a758Verify'),b=$('a758Read');
+if(!a||!b)return;
+const SHA=/^[a-f0-9]{40}$/i,HASH=/^[a-f0-9]{64}$/i;
+let marker=null,busy=false;
+const say=s=>{$('a758Status').textContent=s;};
+const clear=()=>{for(const id of ['a758Sha','a758Digest','a758Prior'])$(id).value='';};
+function lock(v){busy=v;a.disabled=v;b.disabled=v;}
+async function get(url){
+ const c=new AbortController(),t=setTimeout(()=>c.abort(),12000);
+ try{
+  const u=new URL(url,location.origin);
+  if(u.origin!==location.origin)throw Error('CROSS_ORIGIN_HOLD');
+  const r=await fetch(u.pathname+u.search,{method:'GET',credentials:'same-origin',
+   cache:'no-store',redirect:'error',headers:{Accept:'application/json'},signal:c.signal});
+  if(!r.ok)throw Error('HTTP_'+r.status);
+  const v=await r.json();if(!v||typeof v!=='object')throw Error('INVALID_JSON');
+  return v;
+ }finally{clearTimeout(t);}
+}
+a.addEventListener('click',async()=>{
+ if(busy)return;lock(true);marker=null;clear();say('Checking current public release marker.');
+ try{
+  const v=await get('/release-version.json');
+  if(v.branch!=='main'||!SHA.test(String(v.source_sha||''))||
+    !/^\d+$/.test(String(v.workflow_run_id||'')))throw Error('INVALID_MAIN_MARKER');
+  marker=v;$('a758Sha').value=v.source_sha.toLowerCase();
+  say('Original main source marker loaded. Select genuine prior evidence in section 16, then explicitly read the private certificate.');
+ }catch(e){say('HOLD: '+String(e?.message||e).slice(0,90));}
+ finally{lock(false);}
+});
+b.addEventListener('click',async()=>{
+ if(busy)return;
+ if(!marker){say('HOLD: Verify live main source first.');return;}
+ const task=String($('a756Task')?.value||''),code=String($('a756Code')?.value||'');
+ if(!/^[a-f0-9-]{36}$/i.test(task)||!/^[A-Z_]{3,80}$/.test(code)){
+  say('HOLD: Select original Build 755 source in section 16 first.');return;
+ }
+ lock(true);$('a758Digest').value='';$('a758Prior').value='';
+ say('Reading original private D1 source without a write or automatic certification.');
+ try{
+  const q=new URLSearchParams({continuity756:'1',task_id:task,exception_code:code});
+  const v=await get('/api/admin/customer-care-retention-ops-752?'+q.toString());
+  const st=v.status||{},current=String(marker.source_sha).toLowerCase(),
+   prior=String(st.previous_sha||'').toLowerCase(),digest=String(v.source_renewal_sha256||'').toLowerCase();
+  if($('a756Task')?.value!==task||$('a756Code')?.value!==code)throw Error('SELECTION_CHANGED');
+  if(v.ok!==true||v.build!==756||v.private_d1_only!==true||
+     v.production_marker?.ok!==true||String(v.production_marker.source_sha||'').toLowerCase()!==current||
+     String(st.current_main_sha||'').toLowerCase()!==current)throw Error('PRODUCTION_SOURCE_DRIFT');
+  if(v.source_verified!==true||v.original_source_fresh!==true||st.verified_original_source!==true||
+     v.automatic_renewal!==false||v.no_purge!==true)throw Error('ORIGINAL_SOURCE_HOLD');
+  if(!SHA.test(prior)||prior===current||!HASH.test(digest))throw Error('HISTORICAL_DIGEST_HOLD');
+  if(st.certificate_renewed!==true||st.status!=='CURRENT_RELEASE_CERTIFICATE_RENEWED')
+   throw Error('TWO_DISTINCT_ADMIN_RECEIPTS_REQUIRED');
+  $('a758Prior').value=prior;$('a758Digest').value=digest;
+  say('PRIVATE D1 CONTINUITY RECORDED for current main SHA. Physical-human field certification requires separate original evidence.');
+ }catch(e){say('HOLD: '+String(e?.message||e).slice(0,100)+'. No certificate was created or renewed.');}
+ finally{lock(false);}
+});
+})();
