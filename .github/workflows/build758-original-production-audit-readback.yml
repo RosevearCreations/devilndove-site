@@ -1,0 +1,36 @@
+name: Build 758 Original Production Browser Audit Readback
+on:
+  pull_request:
+    branches: [dev, main]
+    paths:
+      - 'admin/storefront-acceptance/index.html'
+      - 'public/js/admin-customer-care-sla-751.js'
+      - 'scripts/build758_readback_contract.mjs'
+      - '.github/workflows/build758-original-production-audit-readback.yml'
+  push:
+    branches: [dev, main]
+    paths:
+      - 'admin/storefront-acceptance/index.html'
+      - 'public/js/admin-customer-care-sla-751.js'
+      - 'scripts/build758_readback_contract.mjs'
+      - '.github/workflows/build758-original-production-audit-readback.yml'
+permissions:
+  contents: read
+jobs:
+  verified-original-browser-readback:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - name: Verify browser read-only source and independent private receipt gates
+        run: |
+          node --check public/js/admin-customer-care-sla-751.js
+          node --check scripts/build758_readback_contract.mjs
+          node scripts/build758_readback_contract.mjs
+          node scripts/build757_verified_session_witness.mjs
+          node scripts/build756_source_contract.mjs
+          node scripts/build755_source_contract.mjs
+          node scripts/build754_source_contract.mjs
