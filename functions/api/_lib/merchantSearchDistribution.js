@@ -12,7 +12,7 @@ export function merchantConfiguration(env={}){
   // Build 760: absent env is NOT zero/free shipping. Checkout currently charges $15 CAD.
   // Reject a conflicting owner-supplied rate rather than advertise an untrue fee.
   const rawFlat=clean(env.MERCHANT_CA_SHIPPING_PRICE_CAD);
-  const flatValid=rawFlat!==''&&/^(?:0|[1-9]\\d*)(?:\\.\\d{1,2})?$/.test(rawFlat);
+  const flatValid=rawFlat!==''&&/^(?:0|[1-9]\d*)(?:\.\d{1,2})?$/.test(rawFlat);
   const flat=flatValid?Number(rawFlat):null;
   const shippingConfirmed=(rawFlat===''||(flatValid&&flat===15));
   const returnLabel=clean(env.MERCHANT_RETURN_POLICY_LABEL,100);
@@ -44,11 +44,11 @@ export function merchantConfiguration(env={}){
 // Never submit decorative workshop placeholders as original offer photographs.
 export function merchantProductImage(value){
  const absolute=absolutePublicUrl(value);
- if(!absolute||!/\\.(?:jpe?g|png|webp|avif)(?:[?#]|$)/i.test(absolute))return '';
+ if(!absolute)return ''; // Original uploaded R2 images may use extensionless URLs.
  try{
   const url=new URL(absolute);
   if(url.protocol!=='https:')return '';
-  if(/\\/(?:assets\\/placeholders|assets\\/images\\/brand-v3|assets\\/images\\/site)\\//i.test(url.pathname)||
+  if(/\/(?:assets\/placeholders|assets\/images\/brand-v3|assets\/images\/site)\//i.test(url.pathname)||
     /(?:placeholder|no-image|coming-soon|stock-photo|logo)/i.test(url.pathname))return '';
   return absolute;
  }catch{return '';}
