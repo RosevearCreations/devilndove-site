@@ -501,6 +501,17 @@ body{background:#151727;color:#faf0ff}.a660{max-width:1100px;width:94%;margin:2r
 <div class="grid"><button id="a756Open" type="button">First Admin: open current-release renewal</button><button id="a756Confirm" type="button">Second Admin: independently renew certificate</button></div>
 </details>
 <p class="hold">Changing production SHA never silently renews a certificate. A real, independently accepted earlier Build 755 audit must be revalidated against the unchanged original private journals. A second distinct authenticated Admin must sign a fresh, matching current-release digest. An absent original customer reply, active legal hold, stale source or missing second person stays HOLD. No external email, provider write, record purge or statutory compliance certification.</p>
+</section><section id="a758Workflow" aria-labelledby="a758Heading" data-build758="1">
+<h2 id="a758Heading">17. Build 758 — live release and private audit readback</h2>
+<p>Two separate explicit checks: verify the original live main source, then independently read a selected Build 756 private D1 certificate. A browser readback cannot replace genuine independent Admin sign-off or physical human field evidence.</p>
+<div class="grid"><button type="button" id="a758Verify">Verify live production source</button><button type="button" id="a758Read">Read selected original private certificate</button></div>
+<p id="a758Status" role="status" aria-live="polite">Not checked. No automatic network reads or private writes. First verify the live release; then select original evidence in section 16.</p>
+<div class="grid">
+<label>Original live main release SHA<input id="a758Sha" readonly maxlength="40" aria-label="Original live production main SHA"></label>
+<label>Previously accepted original release SHA<input id="a758Prior" readonly maxlength="40" aria-label="Prior original source SHA"></label>
+<label>Current SHA-256 private evidence digest<input id="a758Digest" readonly maxlength="64" aria-label="Current private evidence digest"></label>
+</div>
+<p class="hold">HOLD remains mandatory if the live SHA differs from the private receipt, original source has drifted, or either distinct authenticated Admin renewal receipt is missing. This is no substitute for real independent human certification. GET-only, no downloads, no customer/provider writes, no retention purge.</p>
 </section></main><script defer src="/public/js/auth.js?v=467"></script><script defer src="/public/js/admin-storefront-acceptance-660.js?v=660"></script>
 <script defer src="/public/js/admin-after-sale-746.js?v=746"></script>
 <script defer src="/public/js/admin-customer-journey-747.js?v=747"></script>
@@ -508,4 +519,5 @@ body{background:#151727;color:#faf0ff}.a660{max-width:1100px;width:94%;margin:2r
 <script defer src="/public/js/admin-customer-care-queue-749.js?v=749"></script>
 <script defer src="/public/js/admin-customer-care-custody-750.js?v=750"></script>
 <script defer src="/public/js/admin-customer-care-sla-751.js?v=751-752-753-754-755-756"></script>
+<script type="module" src="/public/js/admin-production-audit-readback-758.mjs?v=758"></script>
 <script type="module" src="/public/js/admin-shell-467.js?v=467b467"></script></body></html>
