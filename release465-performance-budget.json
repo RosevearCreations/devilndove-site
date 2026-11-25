@@ -16,7 +16,7 @@
     "max_js_bytes": 600000,
     "max_css_bytes": 500000,
     "max_html_bytes": 500000,
-    "max_runtime_source_bytes": 20235000,
+    "max_runtime_source_bytes": 20245000,
     "max_runtime_source_files": 1887,
     "max_inline_data_uri_bytes": 650000
   },
@@ -33,6 +33,26 @@
     "production_mutation": false
   },
   "budget_reviews": [
+    {
+      "build": "759",
+      "date": "2026-11-25",
+      "scope": "Existing authenticated Storefront Admin page/client: explicitly clicked exact main-before/private original distinct-Admin receipt/main-after source verification, plus navigational Google Merchant policy guidance. No new runtime files, D1 schemas, Google account writes, provider calls or simulated human certification.",
+      "measured_build758_source_gate_run": 45523398507,
+      "measured_build758_runtime_files": 1887,
+      "measured_build758_runtime_bytes": 20234628,
+      "prior_limit_bytes": 20235000,
+      "prior_headroom_bytes": 372,
+      "new_limit_bytes": 20245000,
+      "delta_bytes": 10000,
+      "delta_percent": 0.04942,
+      "runtime_file_limit_unchanged": 1887,
+      "per_file_limits_unchanged": true,
+      "inline_data_uri_limit_unchanged": true,
+      "independent_ci_measurement_required": true,
+      "no_automatic_field_certification": true,
+      "review_reason": "Exact Build 758 source-gate measured 20,234,628 bytes against the strict 20,235,000 cap, with only 372 bytes remaining. A bounded 10 KB (0.0494%) allowance for new original Admin-only, stable-main and two-reviewer readback preserves existing file-count/individual size, privacy, branch, independent CI and Cloudflare production proof gates. If actual source exceeds 20,245,000, release remains blocked.",
+      "previous_limit_bytes": 20235000
+    },
     {
       "build": "756",
       "date": "2026-11-24",

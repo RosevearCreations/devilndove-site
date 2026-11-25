@@ -27,7 +27,10 @@ assert.ok(!api.includes('setInterval(')&&!api.includes('scheduled('),'never crea
 assert.equal(budget.limits.max_runtime_source_files,1887);
 assert.equal(budget.budget_reviews.find(x=>x.build==='751')?.new_limit_bytes,20195000);
 assert.equal(budget.budget_reviews.find(x=>x.build==='755')?.new_limit_bytes,20210000);
-assert.equal(budget.limits.max_runtime_source_bytes,20235000);
+assert.equal(budget.limits.max_runtime_source_bytes,20245000);
+assert.equal(budget.budget_reviews.find(x=>x.build==='759')?.previous_limit_bytes,20235000);
+assert.equal(budget.budget_reviews.find(x=>x.build==='759')?.new_limit_bytes,20245000);
+assert.equal(budget.budget_reviews.find(x=>x.build==='759')?.runtime_file_limit_unchanged,1887);
 assert.equal(budget.budget_reviews.find(x=>x.build==='756')?.delta_bytes,25000);
 assert.equal(budget.budget_reviews.find(x=>x.build==='755')?.delta_bytes,15000);
 assert.equal(budget.budget_reviews.find(x=>x.build==='752')?.delta_files,1);

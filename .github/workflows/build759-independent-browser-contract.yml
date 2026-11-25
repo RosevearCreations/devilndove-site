@@ -1,0 +1,34 @@
+name: Build 759 Independent Original Browser and Two-Reviewer Closure
+on:
+  pull_request:
+    branches: [dev, main]
+    paths:
+      - 'admin/storefront-acceptance/index.html'
+      - 'public/js/admin-customer-care-sla-751.js'
+      - 'scripts/build759_independent_browser_contract.mjs'
+      - '.github/workflows/build759-independent-browser-contract.yml'
+  push:
+    branches: [dev, main]
+    paths:
+      - 'admin/storefront-acceptance/index.html'
+      - 'public/js/admin-customer-care-sla-751.js'
+      - 'scripts/build759_independent_browser_contract.mjs'
+      - '.github/workflows/build759-independent-browser-contract.yml'
+permissions:
+  contents: read
+jobs:
+  original-browser-two-reviewer-closure:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - name: Verify live-main drift, independent D1 receipts and zero automatic signing
+        run: |
+          node --check public/js/admin-customer-care-sla-751.js
+          node scripts/build759_independent_browser_contract.mjs
+          node scripts/build758_readback_contract.mjs
+          node scripts/build756_source_contract.mjs
+          node scripts/build755_source_contract.mjs
