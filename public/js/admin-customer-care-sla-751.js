@@ -640,3 +640,54 @@ b.addEventListener('click',async()=>{
  finally{lock(false);}
 });
 })();
+
+/* Build 759: explicit live-before/private/live-after read-only independent Admin check. */
+(()=>{
+const $=id=>document.getElementById(id),button=$('a759Check');if(!button)return;
+const SHA=/^[a-f0-9]{40}$/i,HASH=/^[a-f0-9]{64}$/i;
+const say=s=>{$('a759Status').textContent=s;};
+const get=async path=>{
+ const c=new AbortController,t=setTimeout(()=>c.abort(),12000);
+ try{
+  const u=new URL(path,location.origin);
+  if(u.origin!==location.origin)throw Error('CROSS_ORIGIN');
+  const r=await fetch(u.pathname+u.search,{method:'GET',credentials:'same-origin',
+   cache:'no-store',redirect:'error',headers:{Accept:'application/json'},signal:c.signal});
+  if(!r.ok)throw Error('HTTP_'+r.status);
+  const v=await r.json();if(!v||typeof v!=='object')throw Error('INVALID_SOURCE');return v;
+ }finally{clearTimeout(t);}
+};
+let busy=false;
+button.addEventListener('click',async()=>{
+ if(busy)return;
+ busy=true;button.disabled=true;
+ for(const id of ['a759Current','a759Previous','a759Hash'])$(id).value='';
+ say('HOLD — original source verification in progress.');
+ try{
+  const task=String($('a756Task')?.value||''),code=String($('a756Code')?.value||'');
+  if(!/^[a-f0-9-]{36}$/i.test(task)||!/^[A-Z_]{3,80}$/.test(code))throw Error('SELECT_SECTION_16_ORIGINAL_CERTIFICATE');
+  const first=await get('/release-version.json');
+  if(first.branch!=='main'||!SHA.test(String(first.source_sha||''))||
+     !/^\d+$/.test(String(first.workflow_run_id||'')))throw Error('INVALID_MAIN_MARKER');
+  const q=new URLSearchParams({continuity756:'1',task_id:task,exception_code:code});
+  const data=await get('/api/admin/customer-care-retention-ops-752?'+q.toString());
+  const last=await get('/release-version.json'),s=data.status||{},sha=first.source_sha.toLowerCase(),
+   prior=String(s.previous_sha||'').toLowerCase(),digest=String(data.source_renewal_sha256||'').toLowerCase();
+  if($('a756Task')?.value!==task||$('a756Code')?.value!==code)throw Error('CHANGED_SELECTION');
+  if(last.branch!=='main'||last.source_sha!==first.source_sha||
+   last.workflow_run_id!==first.workflow_run_id)throw Error('LIVE_SOURCE_DRIFT');
+  if(data.ok!==true||data.build!==756||data.private_d1_only!==true||
+   data.production_marker?.ok!==true||data.production_marker.source_sha!==sha||
+   s.current_main_sha!==sha||s.prior_valid!==true||s.source_current!==true||
+   s.verified_original_source!==true||data.source_verified!==true||
+   data.original_source_fresh!==true||!SHA.test(prior)||prior===sha||
+   !HASH.test(digest)||!s.new_first_renewal_id||!s.new_independent_renewal_id||
+   s.certificate_renewed!==true||s.status!=='CURRENT_RELEASE_CERTIFICATE_RENEWED'||
+   data.automatic_renewal!==false||data.no_purge!==true)
+   throw Error('ORIGINAL_TWO_ADMIN_RECEIPTS_REQUIRED');
+  $('a759Current').value=sha;$('a759Previous').value=prior;$('a759Hash').value=digest;
+  say('PRIVATE TWO-ADMIN SOURCE CONTINUITY VERIFIED for live main; physical human field attendance remains separately unverified.');
+ }catch(e){say('HOLD: '+String(e?.message||e).slice(0,90)+'. No evidence was signed or created.');}
+ finally{busy=false;button.disabled=false;}
+});
+})();
