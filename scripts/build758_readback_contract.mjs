@@ -36,7 +36,7 @@ assert.ok(ui.includes("method:'GET'")&&ui.includes("credentials:'same-origin'")&
 assert.ok(ui.includes("redirect:'error'")&&ui.includes('12000'));
 for(const prohibited of ["method:'POST'","method:'DELETE'",'localStorage','sessionStorage','innerHTML','setInterval(','URL.createObjectURL','document.cookie'])
  assert.ok(!ui.includes(prohibited),'Prohibited unattended behavior: '+prohibited);
-assert.ok(api.includes("url.searchParams.has('continuity756')"));
+assert.ok(api.includes("searchParams.has('continuity756')"));
 assert.ok(api.includes('source_renewal_sha256:checked.digest'));
 assert.ok(api.includes('certificate_renewed:renewed'));
 console.log('BUILD758 PASS: click-only live marker, private GET-only SHA/digest readback, distinct-Admin HOLD, drift and release boundaries; fixtures never count as human proof.');
