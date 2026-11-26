@@ -147,6 +147,69 @@ async function readMerchantResource(path,token,requestFetch=fetch){
  }catch{return {ok:false,reason:'GOOGLE_READ_TIMEOUT_OR_NETWORK'};}
  finally{clearTimeout(t);}
 }
+// Build 762: exact-account, read-only production Stripe enrollment.
+export function assessStripeAccount762(account,expectedId,webhookConfigured){
+ const id=plain(expectedId);
+ if(!/^acct_[A-Za-z0-9]{10,40}$/.test(id))return hold('OWNER_APPROVED_STRIPE_ACCOUNT_ID_REQUIRED');
+ if(!account||plain(account.id)!==id)return hold('STRIPE_ACCOUNT_ID_MISMATCH');
+ const proof={account_id_matched:true,provider_country:plain(account.country).slice(0,3),
+  charges_enabled:account.charges_enabled===true,payouts_enabled:account.payouts_enabled===true,
+  details_submitted:account.details_submitted===true,webhook_secret_configured:!!webhookConfigured};
+ const good=proof.provider_country==='CA'&&proof.charges_enabled&&proof.payouts_enabled&&
+   proof.details_submitted&&proof.webhook_secret_configured;
+ return good?{status:'ACCOUNT_CONFIGURATION_READ',proof,original_guest_payment_verified:false}
+   :hold('STRIPE_LIVE_ACCOUNT_SETUP_INCOMPLETE',{proof});
+}
+async function originalStripeEnrollment762(env,requestFetch=fetch){
+ const secret=plain(env.STRIPE_SECRET_KEY),expected=plain(env.DND_STRIPE_EXPECTED_ACCOUNT_ID);
+ const webhook=plain(env.STRIPE_WEBHOOK_SECRET||env.STRIPE_WEBHOOK_SIGNING_SECRET).startsWith('whsec_');
+ if(!secret.startsWith('sk_live_')||!/^acct_[A-Za-z0-9]{10,40}$/.test(expected))
+  return hold('DEVIL_N_DOVE_LIVE_STRIPE_ACCOUNT_NOT_ENROLLED',{
+   live_key_configured:secret.startsWith('sk_live_'),
+   expected_account_id_configured:/^acct_[A-Za-z0-9]{10,40}$/.test(expected),
+   webhook_secret_configured:webhook,provider_api_read_performed:false});
+ const abort=new AbortController(),timer=setTimeout(()=>abort.abort(),6500);
+ try{
+  const result=await requestFetch('https://api.stripe.com/v1/account',{
+   method:'GET',cache:'no-store',redirect:'error',
+   headers:{Authorization:'Bearer '+secret,Accept:'application/json'},signal:abort.signal});
+  if(!result.ok)return hold('STRIPE_ACCOUNT_READ_HTTP_'+result.status,{provider_api_read_performed:true});
+  const account=await result.json().catch(()=>null);
+  return {...assessStripeAccount762(account,expected,webhook),
+   source:'ORIGINAL_LIVE_STRIPE_API_GET',provider_api_read_performed:true,
+   no_provider_write:true,no_charge_created:true,no_wallet_certification:true};
+ }catch{return hold('STRIPE_ACCOUNT_READ_UNAVAILABLE',{provider_api_read_performed:true});}
+ finally{clearTimeout(timer);}
+}
+export function originalGuestPaymentEvidence762(row){
+ if(!row||row.provider!=='stripe'||row.verification_status!=='verified'||
+  !['processed','duplicate'].includes(row.process_status))return hold('PROVIDER_WEBHOOK_NOT_ORIGINALLY_VERIFIED');
+ let payload;try{payload=JSON.parse(row.payload_json||'{}');}catch{return hold('PROVIDER_WEBHOOK_PAYLOAD_UNREADABLE');}
+ const live=payload.livemode===true;
+ const event=['checkout.session.completed','payment_intent.succeeded'].includes(row.event_type);
+ const ids=Number(row.related_payment_id)>0&&Number(row.related_order_id)>0;
+ const settled=plain(row.payment_status).toLowerCase()==='paid'&&
+   plain(row.order_payment_status).toLowerCase()==='paid'&&plain(row.currency)==='CAD'&&
+   Number(row.amount_cents)>0&&Number(row.amount_cents)===Number(row.total_cents)&&
+   plain(row.provider_order_id).length>6;
+ return live&&event&&ids&&settled?{status:'ORIGINAL_LIVE_GUEST_PAYMENT_LEDGER_MATCH',
+   provider:'stripe',payment_order_reconciled:true,webhook_verified:true,live_event:true,
+   source:'PRODUCTION_D1_ORIGINAL_WEBHOOK_AND_SETTLED_ORDER',test_payment_created:false}
+   :hold('LIVE_GUEST_WEBHOOK_OR_LEDGER_RECONCILIATION_MISSING');
+}
+async function guestWitness762(db){
+ const sql="SELECT w.provider,w.event_type,w.verification_status,w.process_status,w.payload_json,w.related_order_id,w.related_payment_id,p.payment_status,p.provider_order_id,p.amount_cents,o.payment_status AS order_payment_status,o.total_cents,o.currency FROM webhook_events w JOIN payments p ON p.payment_id=w.related_payment_id AND p.order_id=w.related_order_id JOIN orders o ON o.order_id=w.related_order_id WHERE w.provider='stripe' AND w.verification_status='verified' AND w.process_status IN ('processed','duplicate') ORDER BY w.webhook_event_id DESC LIMIT 12";
+ const r=await db.prepare(sql).all().catch(()=>({results:[]}));
+ const sample=(r.results||[]).map(originalGuestPaymentEvidence762);
+ const passes=sample.filter(x=>x.status==='ORIGINAL_LIVE_GUEST_PAYMENT_LEDGER_MATCH').length;
+ return passes?{status:'ORIGINAL_LIVE_GUEST_WITNESS_FOUND',verified_sample_count:passes,
+   samples_examined:sample.length,source:'PRODUCTION_D1_SAME_ORDER_SIGNED_WEBHOOK',
+   externally_independent_provider_readback:false,merchant_e_wallet_scorecard_verified:false}
+   :hold('NO_ORIGINAL_LIVE_GUEST_PAYMENT_WITNESS',{
+    verified_sample_count:0,samples_examined:sample.length,
+    no_test_payment_submitted:true,provider_writes_performed:false});
+}
+
 async function originalGoogleAccount(env){
  const id=plain(env.GOOGLE_MERCHANT_ACCOUNT_ID),token=plain(env.GOOGLE_MERCHANT_ACCESS_TOKEN);
  if(!/^[0-9]{5,20}$/.test(id)||token.length<20)
@@ -187,11 +250,22 @@ export async function onRequestGet(context){
  const allImagesVerified=media.length>0&&media.every(p=>p.high_resolution_verified);
  const imageStatus=allImagesVerified?'SAMPLED_IMAGES_DIMENSIONS_VERIFIED':'HOLD';
  const payment=assessWallet('https://devilndove.com/checkout/',context.env);
+ const [stripeEnrollment,originalGuestWitness]=await Promise.all([
+  originalStripeEnrollment762(context.env),guestWitness762(db)
+ ]);
+ const providerEnrollment={
+  status:stripeEnrollment.status==='ACCOUNT_CONFIGURATION_READ'&&
+    originalGuestWitness.status==='ORIGINAL_LIVE_GUEST_WITNESS_FOUND'?'ORIGINAL_ACCOUNT_AND_LEDGER_EVIDENCE_AVAILABLE':'HOLD',
+  stripe:stripeEnrollment,guest_witness:originalGuestWitness,
+  payment_execution_policy_unchanged:true,automatic_live_activation:false,
+  live_guest_checkout_witness_performed_in_this_request:false,
+  google_e_wallet_scorecard_verified:false};
  return jsonResponse({ok:true,build:761,mode:'ADMIN_CLICK_ONLY_ORIGINAL_EVIDENCE',generated_at:new Date().toISOString(),
    account,media:{status:imageStatus,checked_product_count:media.length,feed_eligible_count:coverage.eligible.length,
     feed_blocked_count:coverage.blocked.length,products:media,all_catalog_items_certified:false,
     actual_visual_photo_quality_certified:false,google_image_crawl_certified:false},
-   payment,release_status:'SOURCE_DIAGNOSTIC_ONLY_NOT_MERCHANT_CERTIFICATION',
+   payment,provider_enrollment_762:providerEnrollment,
+   release_status:'SOURCE_DIAGNOSTIC_ONLY_NOT_MERCHANT_CERTIFICATION',
    original_external_account_policy_proof:account.status==='LIVE_ACCOUNT_POLICIES_MATCH',
    google_store_quality_verified:false,provider_mutations:0,d1_mutations:0,
    no_automatic_account_submission:true},200,{'Cache-Control':'no-store'});
