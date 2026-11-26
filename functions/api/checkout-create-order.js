@@ -1,4 +1,5 @@
 import { getBundleDetails, resolveUnitPrice } from './_lib/productOffers.js';
+import { paymentExecutionStatus } from './_lib/paymentExecution.js';
 import { requireGiftCardSchema } from './_lib/giftCardSchemaReadiness.js';
 import { validateCommerceEnvelope } from '../../public/js/commerce-policy-core.js';
 
@@ -202,6 +203,22 @@ export async function onRequestPost(context) {
     const prior = await existingOrderPayload(db, order_number, customer_email);
     if (prior?.conflict) return json({ ok: false, code: 'checkout_request_key_conflict', error: 'This checkout request key is already associated with another customer.', local_order_mutation_performed: false }, 409);
     if (prior?.order) return json(successPayload({ order: prior.order, items: prior.items, gift: prior.gift, idempotentReplay: true }));
+  }
+
+  // Build 762: the real production entry point must enforce the same provider
+  // authority as the browser and prepare-payment API BEFORE any order mutation.
+  // Development fixture hosts continue using the existing guarded sandbox rules.
+  const checkoutHost = new URL(request.url).hostname.toLowerCase();
+  const publicProduction = ['devilndove.com','www.devilndove.com','devilndove-site.pages.dev'].includes(checkoutHost);
+  if (publicProduction && ['paypal','stripe','square'].includes(payment_method)) {
+    const providerStatus = paymentExecutionStatus(request.url, env, payment_method);
+    if (!providerStatus.execution_authorized) return json({
+      ok: false, code: 'checkout_payment_provider_unavailable',
+      provider: payment_method, provider_reason: providerStatus.code,
+      error: 'This online payment method is not available. Choose Manual / Invoice to request an unpaid order, or contact Devil n Dove. No payment was captured.',
+      local_order_mutation_performed: false, provider_network_call_performed: false,
+      checkout_payment_gate: 'ORIGINAL_SERVER_VERIFIED_BEFORE_ORDER'
+    }, 423);
   }
 
   const gift_card_code = normalizeText(body.gift_card_code).toUpperCase();
