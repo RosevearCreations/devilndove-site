@@ -16,7 +16,7 @@ document.addEventListener('DOMContentLoaded',()=>{
       <p class="small">IndexNow key: ${idx.key_configured?'configured':'missing'} • key location: ${idx.key_location_configured?'configured':'missing'} • automatic submission: OFF.</p>
       <details><summary>Merchant blockers</summary><ul class="small">${blockers(m.blocked_preview)}</ul></details>
       <section class="card" aria-labelledby="merchant761Title" style="margin-top:14px">
-       <h3 id="merchant761Title">Build 761 — Original Google policy, image pixels &amp; eWallet verification</h3>
+       <h3 id="merchant761Title">Build 762 — Original provider enrollment, guest payment witness &amp; Google scorecard</h3>
        <p class="small">Explicit Admin-only live read. Reads Google Merchant API v1 only if original OAuth and account are configured. Probes a bounded sample of actual public product-image bytes, and checks production provider execution authority. No login, payment, refund, data write or fabricated Google score.</p>
        <button class="btn" id="merchant761Run" type="button">Verify original Merchant, images &amp; checkout now</button>
        <pre id="merchant761Status" role="status" aria-live="polite" style="white-space:pre-wrap;overflow-wrap:anywhere;margin-top:12px">HOLD — no original live verification run yet.</pre>
@@ -41,6 +41,12 @@ document.addEventListener('DOMContentLoaded',()=>{
               (p.images||[]).map(im=>String(im.position||'')+' '+String(im.status||'HOLD')+
                 (im.width?' '+Number(im.width)+'x'+Number(im.height):'')).join('; '))),
             'PayPal wallet: '+String(payment.status||'HOLD')+' — '+String(payment.reason||''),
+            'Devil n Dove live Stripe enrollment: '+String(d.provider_enrollment_762?.stripe?.status||'HOLD')+
+              ' — '+String(d.provider_enrollment_762?.stripe?.reason||''),
+            'Original guest signed-webhook + settled-order witness: '+String(d.provider_enrollment_762?.guest_witness?.status||'HOLD')+
+              ' — '+String(d.provider_enrollment_762?.guest_witness?.reason||''),
+            'Production live-payment activation: OFF until account owner and genuine provider evidence',
+            'Google Store Quality / guest eWallet scorecard: NOT independently accepted',
             'Wallet labels are NOT real payment proof; Google scorecard verification: NO',
             'Source review only. No Merchant account or payment write was performed.'
           ];
