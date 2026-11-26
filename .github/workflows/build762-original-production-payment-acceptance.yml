@@ -39,7 +39,7 @@ jobs:
           node scripts/build762_provider_enrollment_contract.mjs
           node scripts/build761_merchant_original_evidence_contract.mjs
           node scripts/build760_merchant_readiness_contract.mjs
-          python3 scripts/release460_payment_execution_gate.py
+          node scripts/release460_payment_execution_proof.mjs
   guest-mobile-tablet-desktop-762:
     runs-on: ubuntu-24.04
     timeout-minutes: 22
