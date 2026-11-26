@@ -20,7 +20,7 @@ try{
   await page.route('**/api/checkout-create-order',r=>{orderSubmits++;return r.fulfill({status:423,body:'blocked'});});
   await page.route('**/api/checkout-prepare-payment',r=>{paymentSubmits++;return r.fulfill({status:423,body:'blocked'});});
   await page.goto(origin+'/checkout/',{waitUntil:'domcontentloaded'});
-  await page.waitForFunction(()=>document.getElementById('checkoutWallet761')?.textContent?.includes('unavailable'),{timeout:18000});
+  await page.waitForFunction(()=>document.getElementById('checkoutWallet761')?.textContent?.includes('unavailable'),null,{timeout:18000});
   const source=await page.locator('#checkoutWallet761').textContent();
   assert.match(source,/PayPal, card and Square live handoffs are currently unavailable/);
   const choice=await page.locator('#payment_method').evaluate(el=>({
