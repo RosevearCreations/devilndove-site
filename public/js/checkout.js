@@ -12,6 +12,8 @@ document.addEventListener("DOMContentLoaded", () => {
   const summaryTaxEl = document.getElementById("checkoutSummaryTax");
   const summaryTotalEl = document.getElementById("checkoutSummaryTotal");
   const paymentProviderStatusEl = document.getElementById("paymentProviderStatus");
+  const wallet761Status = document.getElementById("checkoutWallet761");
+  const checkout761RemoteReady = new Set();
   const giftCardInputEl = document.getElementById("gift_card_code");
   const giftCardButtonEl = document.getElementById("applyGiftCardButton");
   const giftCardMessageEl = document.getElementById("giftCardMessage");
@@ -270,6 +272,11 @@ document.addEventListener("DOMContentLoaded", () => {
     if (!cartItems.length && !giftCardPurchase) { setMessage("Your cart is empty.", true); return; }
 
     const formData = readFormData();
+    if (['paypal','stripe','square'].includes(String(formData.payment_method||'')) &&
+        !checkout761RemoteReady.has(String(formData.payment_method))) {
+      setMessage('This payment provider has not been independently enabled for production checkout. Choose Manual / Invoice or contact us; no payment has been captured.',true);
+      return;
+    }
     saveCheckoutForm(formData);
     if (!formData.customer_name) { setMessage("Customer name is required.", true); return; }
     if (!formData.customer_email || !isValidEmail(formData.customer_email)) { setMessage("A valid email is required.", true); return; }
@@ -342,7 +349,33 @@ document.addEventListener("DOMContentLoaded", () => {
     saveFields.forEach((field) => { field.addEventListener("input", schedule); field.addEventListener("change", schedule); field.addEventListener("blur", schedule); });
   }
 
+  async function verifyWalletAvailability761(){
+    const select=document.getElementById('payment_method');
+    const setStatus=(message)=>{if(wallet761Status)wallet761Status.textContent=message;};
+    if(!select)return;
+    for(const option of select.options)if(['paypal','stripe','square'].includes(option.value))option.disabled=true;
+    if(['paypal','stripe','square'].includes(select.value))select.value='manual';
+    setStatus('Remote eWallet/card handoff is not verified. Manual / Invoice is an unpaid order request, not a completed online payment.');
+    try{
+      const r=await fetch('/api/payment-providers',{method:'GET',cache:'no-store',credentials:'same-origin',redirect:'error',headers:{Accept:'application/json'}});
+      if(!r.ok)throw Error('Payment readiness source unavailable');
+      const data=await r.json();
+      if(data?.ok!==true||!Array.isArray(data.providers))throw Error('Invalid payment source');
+      for(const provider of data.providers){
+        if(!['paypal','stripe','square'].includes(String(provider.code)))continue;
+        const ready=provider.execution_authorized===true&&provider.ready===true;
+        const option=[...select.options].find(x=>x.value===provider.code);
+        if(ready){checkout761RemoteReady.add(provider.code);if(option)option.disabled=false;}
+      }
+      if(!checkout761RemoteReady.size)setStatus('PayPal, card and Square live handoffs are currently unavailable. Choose Manual / Invoice (unpaid order) or contact us. No digital wallet is certified.');
+      else setStatus('Available remote methods: '+[...checkout761RemoteReady].join(', ')+'. A real payment provider receipt is still required before an order is paid.');
+    }catch{
+      setStatus('HOLD — payment provider readiness could not be verified. Only Manual / Invoice (unpaid order) is available.');
+    }
+    // No automatic provider order, charge, wallet discovery or Merchant account claim.
+  }
   fillFormFromSavedData();
+  void verifyWalletAvailability761();
   renderSummary();
   const resumed = readAttempt();
   if (Number(resumed?.order_id || 0) > 0 && resumed.signature === cartSignature()) setRecoveryStatus(`An earlier checkout created order ${resumed.order_number || `#${resumed.order_id}`}. Submitting again will resume payment, not create a duplicate.`);
