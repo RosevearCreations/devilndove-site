@@ -55,6 +55,7 @@
 <div class="card">
 <h3 style="margin-top:0">Payment and Notes</h3>
 <div><label class="small" for="payment_method">Payment Method</label><select id="payment_method" name="payment_method"><option selected="" value="paypal">PayPal</option><option value="stripe">Card / Stripe</option><option value="square">Square</option><option value="manual">Manual / Invoice</option><option value="other">Other</option></select></div>
+<p class="small" id="checkoutWallet761" role="status" aria-live="polite">Checking live payment availability. A displayed PayPal or card option is not proof that remote payment is enabled.</p>
 <div class="card" id="checkoutGiftCardPurchaseMount" style="margin-top:12px"></div>
 <div style="margin-top:12px"><label class="small" for="gift_card_code">Gift Card</label><div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center"><input id="gift_card_code" name="gift_card_code" placeholder="Enter gift card code" type="text"/><button class="btn" id="applyGiftCardButton" type="button">Apply Gift Card</button></div><div class="small" id="giftCardMessage" style="display:none;margin-top:8px"></div></div>
 <div style="margin-top:12px"><label class="small" for="notes">Order Notes</label><input id="notes" name="notes" placeholder="Optional notes for this order" type="text"/></div>
@@ -72,7 +73,7 @@
 </div>
 <script src="/js/main.js?v=279"></script><script src="/public/js/seo-page-overrides.js"></script>
 <script src="/public/js/auth.js?v=279"></script><script src="/public/js/site-auth-ui.js"></script><script src="/public/js/site-analytics.js?v=279"></script><script src="/public/js/gift-card-storefront.js?v=467b151"></script>
-<script src="/public/js/checkout-gifting-build151.js?v=467b151"></script><script src="/public/js/checkout-reliability-core.js?v=78"></script><script src="/public/js/checkout.js?v=467b78"></script><script src="/public/js/checkout-resilience-build146.js?v=467b146"></script>
+<script src="/public/js/checkout-gifting-build151.js?v=467b151"></script><script src="/public/js/checkout-reliability-core.js?v=78"></script><script src="/public/js/checkout.js?v=467b78-761"></script><script src="/public/js/checkout-resilience-build146.js?v=467b146"></script>
 <script defer src="/public/js/brand-v3-flow-banners-256-265.js?v=1"></script>
 </body>
 </html>
