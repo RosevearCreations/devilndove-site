@@ -16,8 +16,8 @@
     "max_js_bytes": 600000,
     "max_css_bytes": 500000,
     "max_html_bytes": 500000,
-    "max_runtime_source_bytes": 20245000,
-    "max_runtime_source_files": 1887,
+    "max_runtime_source_bytes": 20270000,
+    "max_runtime_source_files": 1888,
     "max_inline_data_uri_bytes": 650000
   },
   "baseline_observed": {
@@ -33,6 +33,31 @@
     "production_mutation": false
   },
   "budget_reviews": [
+    {
+      "build": "761",
+      "date": "2026-11-25",
+      "scope": "One new GET-only, Admin-authenticated original Merchant API v1 policy and first-party image-byte header probe endpoint, bounded merchant Admin panel and original checkout provider execution-state display. No scheduled provider calls, Google write, payment execution, original media overwrite or D1 mutation.",
+      "previous_limit_bytes": 20245000,
+      "new_limit_bytes": 20270000,
+      "delta_bytes": 25000,
+      "delta_percent": 0.12349,
+      "previous_runtime_file_limit": 1887,
+      "new_file_limit": 1888,
+      "delta_files": 1,
+      "measured_build760_source_bytes": 20242271,
+      "measured_build760_runtime_files": 1887,
+      "per_file_limits_unchanged": true,
+      "inline_data_uri_limit_unchanged": true,
+      "original_google_provider_credentials_optional": true,
+      "signed_in_admin_get_only": true,
+      "source_no_merchant_account_claim_without_google_read": true,
+      "original_photo_pixels_from_live_binary": true,
+      "original_visual_photo_authenticity_human_hold": true,
+      "no_payment_provider_execution": true,
+      "production_wallet_unavailable_flagged": true,
+      "independent_ci_measurement_required": true,
+      "review_reason": "Exact Build 760 source measured 20,242,271 bytes with 1,887 runtime files. One read-only authenticated Merchant v1 shipping/returns GET and bounded original image pixel evidence endpoint plus real checkout guest wallet truth and Admin UX add approximately 18 KB. A narrowly reviewed +25 KB (~0.1235%) and +1 runtime endpoint allow all existing individual JS/HTML, SEO, security, source, live Cloudflare and branch gates to remain strict. No false Google account certification."
+    },
     {
       "build": "759",
       "date": "2026-11-25",

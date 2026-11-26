@@ -1,0 +1,41 @@
+name: Build 761 Independent Google Merchant and Original Checkout Proof
+on:
+  pull_request:
+    branches: [dev, main]
+    paths:
+      - 'functions/api/admin/merchant-original-evidence-761.js'
+      - 'public/js/admin-merchant-search-distribution.js'
+      - 'public/js/checkout.js'
+      - 'checkout/index.html'
+      - 'admin/local-seo-review/index.html'
+      - 'scripts/build761_merchant_original_evidence_contract.mjs'
+      - '.github/workflows/build761-original-merchant-evidence.yml'
+  push:
+    branches: [dev, main]
+    paths:
+      - 'functions/api/admin/merchant-original-evidence-761.js'
+      - 'public/js/admin-merchant-search-distribution.js'
+      - 'public/js/checkout.js'
+      - 'checkout/index.html'
+      - 'admin/local-seo-review/index.html'
+      - 'scripts/build761_merchant_original_evidence_contract.mjs'
+      - '.github/workflows/build761-original-merchant-evidence.yml'
+permissions:
+  contents: read
+jobs:
+  original-google-payment-and-image-761:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - name: Protected original Merchant, image bytes and wallet source contract
+        run: |
+          node --check functions/api/admin/merchant-original-evidence-761.js
+          node --check public/js/admin-merchant-search-distribution.js
+          node --check public/js/checkout.js
+          node scripts/build761_merchant_original_evidence_contract.mjs
+          node scripts/build760_merchant_readiness_contract.mjs
+          node scripts/build759_independent_browser_contract.mjs
