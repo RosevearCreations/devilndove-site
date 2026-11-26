@@ -1,0 +1,67 @@
+name: Build 762 Original Provider Enrollment & Guest Checkout
+on:
+  pull_request:
+    branches: [dev, main]
+    paths:
+      - 'functions/api/checkout-create-order.js'
+      - 'functions/api/admin/merchant-original-evidence-761.js'
+      - 'public/js/admin-merchant-search-distribution.js'
+      - 'scripts/build762_*'
+      - 'docs/operations/BUILD762_*'
+      - '.github/workflows/build762-original-production-payment-acceptance.yml'
+  push:
+    branches: [dev, main]
+    paths:
+      - 'functions/api/checkout-create-order.js'
+      - 'functions/api/admin/merchant-original-evidence-761.js'
+      - 'public/js/admin-merchant-search-distribution.js'
+      - 'scripts/build762_*'
+      - 'docs/operations/BUILD762_*'
+      - '.github/workflows/build762-original-production-payment-acceptance.yml'
+permissions:
+  contents: read
+jobs:
+  original-payment-source-762:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - name: Original provider, no-order-before-payment and Python Source of Truth contracts
+        run: |
+          node --check functions/api/checkout-create-order.js
+          node --check functions/api/admin/merchant-original-evidence-761.js
+          node --check public/js/admin-merchant-search-distribution.js
+          node --check scripts/build762_provider_enrollment_contract.mjs
+          python3 scripts/build762_checkout_authority_gate.py
+          node scripts/build762_provider_enrollment_contract.mjs
+          node scripts/build761_merchant_original_evidence_contract.mjs
+          node scripts/build760_merchant_readiness_contract.mjs
+          python3 scripts/release460_payment_execution_gate.py
+  guest-mobile-tablet-desktop-762:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 22
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - name: Install original Chromium browser driver
+        run: |
+          npm install --no-save --package-lock=false playwright@1.56.1
+          npx playwright install --with-deps chromium
+      - name: Serve actual checkout page and test private fixture availability
+        run: |
+          python3 -m http.server 18762 --bind 127.0.0.1 >/tmp/build762-http.log 2>&1 &
+          for i in 1 2 3 4 5; do
+            if curl -fsS http://127.0.0.1:18762/checkout/ >/dev/null; then exit 0; fi
+            sleep 1
+          done
+          cat /tmp/build762-http.log
+          exit 1
+      - name: Real Chromium guest desktop, tablet and phone journeys, no payment or order mutation
+        env:
+          DD_ORIGIN: http://127.0.0.1:18762
+        run: node scripts/build762_guest_checkout_browser.mjs
