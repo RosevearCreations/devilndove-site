@@ -1,0 +1,18 @@
+name: Build 764 Passport Foundation
+on:
+  pull_request:
+    branches: [dev, main]
+  push:
+    branches: [dev, main]
+permissions:
+  contents: read
+jobs:
+  passport-contract:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - run: node scripts/build764_passport_contract.mjs
