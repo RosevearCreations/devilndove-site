@@ -1,0 +1,12 @@
+import assert from 'node:assert/strict';
+import {makeCareTransferToken,hashCareTransferToken,publicPassport,transferEligible} from '../functions/api/_lib/creationPassport764.mjs';
+const fixture={published:true,quality_decision:'approved_for_sale',physical_verified:true,serial_code:'TEST-764-001',public_title:'Test pendant',public_edition:'One of one',public_finish:'Silver',public_care:'Polish gently',email:'private@example.invalid',invoice_id:12,address:'Private',commission_notes:'Private'};
+assert.deepEqual(Object.keys(publicPassport(fixture)).sort(),['care','edition','finish','serial_code','title']);
+for(const patch of [{published:false},{physical_verified:false},{quality_decision:'hold'},{serial_code:''}])assert.equal(publicPassport({...fixture,...patch}),null);
+const a=makeCareTransferToken(),b=makeCareTransferToken();
+assert.match(a,/^[a-f0-9]{64}$/);assert.notEqual(a,b);
+const h=await hashCareTransferToken(a);assert.match(h,/^[a-f0-9]{64}$/);assert.notEqual(h,a);assert.equal(await hashCareTransferToken(a),h);await assert.rejects(hashCareTransferToken('invalid'));
+const eligible={revoked:false,consumed:false,expires_ms:2000,owner_version:1};
+assert.equal(transferEligible(eligible,1000),true);
+for(const patch of [{revoked:true},{consumed:true},{expires_ms:1000},{owner_version:0}])assert.equal(transferEligible({...eligible,...patch},1000),false);
+console.log('Build 764 foundation contract PASS; no persistent transfer, QR, UI or live repair certification.');
