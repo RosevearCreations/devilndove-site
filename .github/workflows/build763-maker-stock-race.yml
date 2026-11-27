@@ -1,0 +1,16 @@
+name: Build 763 Maker Stock Race
+on:
+  pull_request:
+    branches: [dev, main]
+  push:
+    branches: [dev, main]
+permissions:
+  contents: read
+jobs:
+  canonical-stock-race:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - run: python3 scripts/release467_build450_finished_pieces_sql_regression.py
+      - run: python3 scripts/build763_unique_stock_race.py
