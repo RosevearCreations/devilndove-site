@@ -17,6 +17,7 @@
     busy: false,
     cameraStream: null,
     cameraFrame: 0,
+    identityEpoch: 0,
   };
 
   const esc = (value) => String(value ?? '')
@@ -203,8 +204,20 @@
     document.getElementById('inventoryReceiveDate').value = today;
   }
 
+  function invalidateIdentity() {
+    state.identityEpoch++;
+    state.selected = state.context = null;
+    state.identifierKnown = false;
+    document.getElementById('inventoryReceivePost').disabled = true;
+    for (const id of ['inventoryReceiveSupplier','inventoryReceiveSupplierSku','inventoryReceiveSourceUrl','inventoryReceiveUnitCost','inventoryReceiveLotCode']) document.getElementById(id).value = '';
+    renderSelected();
+  }
   async function loadItem(itemId) {
+    if(state.busy) return;
+    invalidateIdentity();
+    const epoch = state.identityEpoch;
     const data = await window.DDAuth.apiJson(`/api/admin/inventory-receiving?site_item_inventory_id=${encodeURIComponent(itemId)}`, { method: 'GET' }, { fallbackMessage: 'Inventory receiving detail could not load.', cacheTtlMs: 0, staleOnError: false });
+    if(epoch !== state.identityEpoch) return;
     state.context = data.detail || null;
     state.selected = state.context?.item || null;
     renderSelected();
@@ -214,11 +227,17 @@
   async function lookupCode() {
     const code = String(document.getElementById('inventoryReceiveCode')?.value || '').trim();
     if (!code) return setMessage('Enter or scan a code first.', true);
+    if(state.busy) return;
+    invalidateIdentity();
+    const epoch = state.identityEpoch;
     state.scannedCode = code;
-    state.identifierKnown = false;
+    state.identifierType = '';
+    state.candidates = [];
+    renderSearchResults();
     setMessage('Looking up Inventory identity…');
     try {
       const data = await window.DDAuth.apiJson(`/api/admin/inventory-receiving?code=${encodeURIComponent(code)}`, { method: 'GET' }, { fallbackMessage: 'Inventory code lookup failed.', cacheTtlMs: 0, staleOnError: false });
+      if(epoch !== state.identityEpoch) return;
       const resolution = data.resolution || {};
       state.identifierType = resolution.identifier_type || '';
       if (resolution.ambiguous) {
@@ -282,6 +301,7 @@
   async function postReceipt(event) {
     event.preventDefault();
     if (!state.selected || state.busy) return;
+    if(String(document.getElementById('inventoryReceiveCode').value).trim() !== state.scannedCode) return setMessage('Look up the changed code before receiving.', true);
     const quantity = Number(document.getElementById('inventoryReceiveQuantity')?.value || 0);
     if (!(quantity > 0)) return setMessage('Quantity received must be greater than zero.', true);
     state.busy = true;
@@ -337,6 +357,8 @@
   }
 
   function resetForm() {
+    if(state.busy) return;
+    state.identityEpoch++;
     stopCamera();
     state.selected = null;
     state.context = null;
@@ -428,6 +450,7 @@
 
   document.getElementById('inventoryReceivingLoadRecent')?.addEventListener('click', loadRecent);
   document.getElementById('inventoryReceiveLookup')?.addEventListener('click', lookupCode);
+  document.getElementById('inventoryReceiveCode')?.addEventListener('input', () => { if(!state.busy){invalidateIdentity();state.scannedCode='';state.identifierType='';state.candidates=[];renderSearchResults();} });
   document.getElementById('inventoryReceiveCode')?.addEventListener('keydown', (event) => { if (event.key === 'Enter') { event.preventDefault(); lookupCode(); } });
   document.getElementById('inventoryReceiveSearchButton')?.addEventListener('click', searchInventory);
   document.getElementById('inventoryReceiveSearch')?.addEventListener('keydown', (event) => { if (event.key === 'Enter') { event.preventDefault(); searchInventory(); } });
