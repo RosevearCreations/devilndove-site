@@ -15,4 +15,4 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '24'
-      - run: node --experimental-default-type=module --test scripts/build766_material_screen.test.mjs
+      - run: node --test scripts/build766_material_screen.test.mjs
