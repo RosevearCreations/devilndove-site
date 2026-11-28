@@ -1,0 +1,10 @@
+import assert from 'node:assert/strict';
+import {screenRepeatMaterials} from '../functions/api/admin/project-bom.js';
+const line={site_item_inventory_id:1,item_name:'Fixture resin',planned_usage_quantity:200,usage_units_per_stock_unit_snapshot:1000,usage_units_per_stock_unit:1000,on_hand_quantity:1,reserved_quantity:0.5,is_active:1,source_type:'supply',stock_unit_label:'bottle',stock_unit_label_snapshot:'bottle',usage_unit_label:'gram',usage_unit_label_snapshot:'gram'};
+assert.equal(screenRepeatMaterials([line,line]).state,'materials_available');
+assert.equal(screenRepeatMaterials([line,line,line]).state,'shortage');
+assert.ok(Math.abs(screenRepeatMaterials([line,line,line]).items[0].shortage-.1)<1e-8);
+for(const patch of [{on_hand_quantity:null},{reserved_quantity:null},{usage_units_per_stock_unit:500},{inventory_purchase_lot_id:8},{is_active:0},{source_type:'tool'},{stock_unit_label:'kg'}])assert.equal(screenRepeatMaterials([{...line,...patch}]).state,'unknown');
+assert.equal(screenRepeatMaterials([]).state,'unknown');
+assert.equal(screenRepeatMaterials(Array(151).fill(line)).state,'unknown');
+console.log('Build 766 material-only screening contract PASS; not equipment readiness or live inventory certification.');

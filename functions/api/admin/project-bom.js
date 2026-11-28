@@ -99,7 +99,40 @@ async function snapshot(db,projectId,q=''){
   reservations:holds,operations:rows(operationRows),inventory_search_results:inventory,supplier_lots:lots,
   safety,notes:'Plan in usable units. Inventory stock deductions and reversals happen ONLY in Creative Process. Link existing posted receipts to this BOM; a reversed receipt is shown as returned, never as active consumption. Scrap is a classification of an actual posted quantity, not an additional stock deduction.'};
 }
+
+// Build 766: read-only repeat-project material screening, not machine readiness.
+export function screenRepeatMaterials(lines){
+ if(!Array.isArray(lines)||!lines.length||lines.length>150)return {state:'unknown',items:[]};
+ const grouped=new Map();
+ for(const l of lines){
+  const n=v=>v===null||v===undefined||v===''?NaN:Number(v);
+  const q=n(l.planned_usage_quantity),per=n(l.usage_units_per_stock_unit_snapshot),current=n(l.usage_units_per_stock_unit),on=n(l.on_hand_quantity),reserved=n(l.reserved_quantity);
+  const key=Number(l.site_item_inventory_id);
+  const valid=Number.isSafeInteger(key)&&key>0&&q>0&&Number.isFinite(q)&&per>0&&Number.isFinite(per)&&per===current&&Number.isFinite(on)&&Number.isFinite(reserved)&&on>=0&&reserved>=0&&Number(l.is_active)===1&&l.source_type==='supply'&&!!l.stock_unit_label&&l.stock_unit_label===l.stock_unit_label_snapshot&&!!l.usage_unit_label&&l.usage_unit_label===l.usage_unit_label_snapshot&&!l.inventory_purchase_lot_id;
+  if(!valid)return {state:'unknown',items:[]};
+  const available=Math.max(0,on-reserved),required=q/per;
+  const old=grouped.get(key);
+  if(old&&old.available_stock!==available)return {state:'unknown',items:[]};
+  grouped.set(key,{item_id:key,item_name:l.item_name,stock_unit:l.stock_unit_label,available_stock:available,required_stock:(old?.required_stock||0)+required});
+ }
+ const items=[...grouped.values()].map(x=>({...x,shortage:Math.max(0,x.required_stock-x.available_stock)}));
+ return {state:items.some(x=>x.shortage>1e-9)?'shortage':'materials_available',items};
+}
+async function repeatDiscovery(db){
+ const projects=rows(await db.prepare(`SELECT p.creative_work_project_id,p.project_title FROM creative_work_projects p
+ WHERE COALESCE(p.project_status,'active')<>'archived' AND EXISTS (SELECT 1 FROM maker_project_bom_lines l WHERE l.creative_work_project_id=p.creative_work_project_id AND l.line_status='planned')
+ ORDER BY p.creative_work_project_id DESC LIMIT 21`).all());
+ const results=[];
+ for(const p of projects.slice(0,20)){
+  const lines=rows(await db.prepare(`SELECT l.*,i.item_name,i.on_hand_quantity,i.reserved_quantity,i.stock_unit_label,i.usage_unit_label,i.usage_units_per_stock_unit,i.is_active,i.source_type FROM maker_project_bom_lines l LEFT JOIN site_item_inventory i ON i.site_item_inventory_id=l.site_item_inventory_id WHERE l.creative_work_project_id=? AND l.line_status='planned' LIMIT 151`).bind(p.creative_work_project_id).all());
+  results.push({project_id:p.creative_work_project_id,title:p.project_title,...screenRepeatMaterials(lines),tool_readiness:'not_verified'});
+ }
+ const rank={materials_available:0,shortage:1,unknown:2};
+ return {ok:true,build:766,projects:results.sort((a,b)=>rank[a.state]-rank[b.state]),truncated:projects.length>20,read_only:true,note:'Repeat-project material estimate only. Lot-specific plans, unknown units and incomplete records require review. No reservation, purchase or machine authorization.'};
+}
+
 export async function onRequestGet(ctx){const a=await access(ctx);if(a.response)return a.response;
+ if(new URL(ctx.request.url).searchParams.get('discovery')==='repeat'){try{return answer(await repeatDiscovery(a.db));}catch{return answer({ok:false,error:'Material screening unavailable.'},503);}}
  const params=new URL(ctx.request.url).searchParams,projectId=id(params.get('project_id'));
  try{if(!projectId){const projects=rows(await a.db.prepare(`SELECT creative_work_project_id,project_title,project_key FROM creative_work_projects
   WHERE COALESCE(project_status,'active')<>'archived' ORDER BY creative_work_project_id DESC LIMIT 101`).all());return answer({ok:true,build:445,projects,safety});}
